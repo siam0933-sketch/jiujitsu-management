@@ -1,14 +1,23 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { login } from './actions'
 
 const initialState = {
     message: '',
+    success: false,
 }
 
 export default function LoginForm() {
     const [state, formAction, isPending] = useActionState(login, initialState)
+    const router = useRouter()
+
+    useEffect(() => {
+        if (state?.success) {
+            router.push('/dashboard')
+        }
+    }, [state?.success, router])
 
     return (
         <form
