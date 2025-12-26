@@ -8,6 +8,8 @@ export async function POST(request: Request) {
     const password = String(formData.get('password'))
     const supabase = await createClient()
 
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin
+
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -16,14 +18,14 @@ export async function POST(request: Request) {
     if (error) {
         console.log('Login Error Details:', error)
         return NextResponse.redirect(
-            `${requestUrl.origin}/login?message=Could not authenticate user`,
+            `${origin}/login?message=Could not authenticate user`,
             {
                 status: 301,
             }
         )
     }
 
-    return NextResponse.redirect(requestUrl.origin, {
+    return NextResponse.redirect(origin, {
         status: 301,
     })
 }
