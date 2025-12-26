@@ -8,7 +8,14 @@ export async function POST(request: Request) {
     const password = String(formData.get('password'))
     const supabase = await createClient()
 
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin
+    let origin = requestUrl.origin
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    if (siteUrl) {
+        // Ensure it has protocol
+        origin = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`
+        // Remove trailing slash
+        origin = origin.replace(/\/$/, '')
+    }
 
     const { error } = await supabase.auth.signInWithPassword({
         email,
