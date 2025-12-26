@@ -4,7 +4,7 @@ import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { login } from './actions'
 
-const initialState = {
+const initialState: { message: string, success: boolean } = {
     message: '',
     success: false,
 }
