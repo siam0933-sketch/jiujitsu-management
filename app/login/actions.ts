@@ -18,9 +18,9 @@ export async function login(prevState: any, formData: FormData) {
 
     if (error) {
         console.error('Login Error:', error.message)
-        return { message: error.message }
+        return { message: error.message, success: false }
     }
 
     revalidatePath('/', 'layout')
-    return { success: true }
+    return { message: '', success: true }
 }
