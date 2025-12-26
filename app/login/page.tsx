@@ -2,6 +2,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
+import { login } from './actions'
+
 export default async function LoginPage(props: {
     searchParams: Promise<{ message: string }>
 }) {
@@ -21,8 +23,7 @@ export default async function LoginPage(props: {
             <div className="flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
                 <form
                     className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
-                    action="/auth/login"
-                    method="post"
+                    action={login}
                 >
                     {searchParams?.message && (
                         <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
@@ -57,7 +58,6 @@ export default async function LoginPage(props: {
                             회원가입하기
                         </a>
                     </div>
-
                 </form>
             </div>
         </div>
