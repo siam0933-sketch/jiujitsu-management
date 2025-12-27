@@ -69,9 +69,9 @@ export default function LoginForm() {
             />
             <button
                 className="bg-green-700 rounded-md px-4 py-2 text-foreground mb-2 disabled:opacity-50"
-                disabled={isPending}
+                disabled={loading}
             >
-                {isPending ? 'Signing In...' : 'Sign In'}
+                {loading ? 'Signing In...' : 'Sign In'}
             </button>
             <div className="text-center text-sm mt-4">
                 <span className="text-gray-500">계정이 없으신가요? </span>
