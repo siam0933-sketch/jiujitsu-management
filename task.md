@@ -22,7 +22,8 @@
     - [x] 회원 상세 결제 계산 로직 구현 <!-- id: pricing-logic -->
 - [/] 배포 및 운영 <!-- id: deployment -->
     - [x] GitHub 연동 및 업로드 <!-- id: deploy-git -->
-    - [/] Cloudtype 배포 (진행 중) <!-- id: deploy-cloudtype -->
+    - [-] Cloudtype 배포 (중단 - 리소스 부족) <!-- id: deploy-cloudtype -->
+    - [x] Vercel 배포 (성공) <!-- id: deploy-vercel -->
 - [ ] 개발 4단계: 회원(수강생) 기능 <!-- id: 14 -->
     - [ ] 모바일 최적화 회원 포털 <!-- id: 15 -->
     - [ ] 출석 체크 시스템 (QR/버튼 등) <!-- id: 16 -->

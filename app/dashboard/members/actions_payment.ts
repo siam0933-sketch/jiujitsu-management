@@ -50,10 +50,16 @@ export async function createPayment(formData: FormData) {
     const durationMonths = Number(formData.get('duration_months') || 0)
     const sessionCount = Number(formData.get('session_count') || 0)
 
-    // Store snapshot of what was bought
+    // Store complete snapshot for re-use
     const planSnapshot = {
-        name: String(formData.get('plan_name')),
-        options: String(formData.get('options_summary') || '')
+        plan_id: planId,
+        plan_name: String(formData.get('plan_name')),
+        type: type,
+        amount: amount,
+        duration_months: durationMonths,
+        session_count: sessionCount,
+        option_ids: JSON.parse(String(formData.get('option_ids') || '[]')),
+        options_summary: String(formData.get('options_summary') || '')
     }
 
     try {
