@@ -288,7 +288,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         {/* 1. Status Part */}
                                         <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
                                             <div>
-                                                <p className="text-gray-500 text-xs mb-1 font-medium">현재 이용 상태</p>
+                                                <p className="text-gray-500 text-xs mb-1 font-medium">만료일</p>
                                                 <p className="text-xl font-bold text-gray-900">
                                                     {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
                                                     <span className="text-xs font-normal text-gray-400 ml-2">
