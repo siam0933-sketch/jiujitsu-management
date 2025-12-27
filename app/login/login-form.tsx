@@ -1,32 +1,51 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { login } from './actions'
-
-const initialState: { message: string, success: boolean } = {
-    message: '',
-    success: false,
-}
 
 export default function LoginForm() {
-    const [state, formAction, isPending] = useActionState(login, initialState)
     const router = useRouter()
+    const [message, setMessage] = useState('')
+    const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        if (state?.success) {
-            router.push('/dashboard')
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        setMessage('')
+
+        const formData = new FormData(e.currentTarget)
+        const email = formData.get('email')
+        const password = formData.get('password')
+
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            })
+            const data = await res.json()
+
+            if (data.success) {
+                router.refresh()
+                router.push('/dashboard')
+            } else {
+                setMessage(data.message)
+            }
+        } catch (err: any) {
+            setMessage('Network error: ' + err.message)
+        } finally {
+            setLoading(false)
         }
-    }, [state?.success, router])
+    }
 
     return (
         <form
             className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
-            action={formAction}
+            onSubmit={handleSubmit}
         >
-            {state?.message && (
+            {message && (
                 <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
-                    {state.message}
+                    {message}
                 </div>
             )}
             <label className="text-md" htmlFor="email">
