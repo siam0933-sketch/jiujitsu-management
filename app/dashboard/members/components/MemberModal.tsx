@@ -502,24 +502,24 @@ export default function MemberModal({ member }: { member: any }) {
                                             </div>
                                         </div>
                                     )}
-                                </section>
+                                </div>
+                            </div>
 
-                                {/* Section 3: Activity (Preserved) */}
-                                <section>
-                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">활동 기록</h4>
-                                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <p className="text-gray-400 text-xs mb-1">가입일</p>
-                                                <p className="font-medium text-gray-900 text-sm">{new Date(member.joined_at).toLocaleDateString()}</p>
-                                            </div>
-                                        </div>
-                                        <div className="relative h-16 rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
-                                            <p className="text-xs text-gray-400">최근 출석 기록이 없습니다.</p>
+                            {/* Section 3: Activity */}
+                            <section>
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">활동 기록</h4>
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div>
+                                            <p className="text-gray-400 text-xs mb-1">가입일</p>
+                                            <p className="font-medium text-gray-900 text-sm">{new Date(member.joined_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                </section>
-                            </div>
+                                    <div className="relative h-16 rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
+                                        <p className="text-xs text-gray-400">최근 출석 기록이 없습니다.</p>
+                                    </div>
+                                </div>
+                            </section>
 
                             <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-100">
                                 <button type="button" onClick={closeModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
