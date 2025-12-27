@@ -319,7 +319,17 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
                                                                 )}
                                                             </div>
-                                                            <p className="text-xs text-gray-500">{pay.note ? pay.note : (pay as any).plan_snapshot?.options_summary || '결제 완료'}</p>
+                                                            {/* Options Summary */}
+                                                            {(pay as any).plan_snapshot?.options_summary && (
+                                                                <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
+                                                            )}
+                                                            {/* Note */}
+                                                            {pay.note && (
+                                                                <p className="text-xs text-gray-400">📝 {pay.note}</p>
+                                                            )}
+                                                            {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
+                                                                <p className="text-xs text-gray-400">결제 완료</p>
+                                                            )}
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
