@@ -231,14 +231,10 @@ export default function MemberModal({ member }: { member: any }) {
 
                         <div className="bg-gray-50 px-4 py-6 sm:p-6 space-y-6 max-h-[80vh] overflow-y-auto">
 
-                            {/* Unified Info Card (Merged Sections) */}
-                            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-
-                                {/* 1. Basic Info Header */}
-                                <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
-                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">기본 정보</h4>
-                                </div>
-                                <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {/* Section 1: Basic Info */}
+                            <section>
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">기본 정보</h4>
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
                                     <div className="col-span-1">
                                         <p className="text-gray-400 text-xs mb-1">이름</p>
                                         <div className="flex items-center gap-2">
@@ -271,239 +267,237 @@ export default function MemberModal({ member }: { member: any }) {
                                         <p className="font-medium text-gray-900 text-sm">{member.address}</p>
                                     </div>
                                 </div>
+                            </section>
 
-                                {/* 2. Payment Status Divider */}
-                                <div className="px-5 py-3 bg-gray-50 border-y border-gray-200 flex justify-between items-center">
+                            {/* Section 2: Payment & Update */}
+                            <section>
+                                <div className="flex justify-between items-center mb-2">
                                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">이용권 및 결제</h4>
                                     {mode === 'view' && (
                                         <button
                                             onClick={() => { setMode('new'); setManualAmount(null); setPaymentDate(new Date().toISOString().split('T')[0]); }}
-                                            className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-500 font-bold shadow-sm"
+                                            className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-500 shadow-sm"
                                         >
                                             + 결제하기
                                         </button>
                                     )}
                                 </div>
 
-                                {/* Payment Content Area */}
-                                <div className="p-5">
-                                    {mode === 'view' ? (
-                                        <div className="space-y-6">
-                                            {/* Current Status */}
-                                            <div className="flex justify-between items-center bg-blue-50 p-4 rounded-lg">
-                                                <div>
-                                                    <p className="text-blue-500 text-xs mb-1 font-semibold">이용 기간 (만료일)</p>
-                                                    <p className="text-xl font-bold text-gray-900">
-                                                        {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
-                                                        <span className="text-xs font-normal text-gray-400 ml-2">
-                                                            {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                                {/* Only show remaining sessions if > 0 or positive */}
-                                                {(member.remaining_sessions > 0) && (
-                                                    <div className="text-right">
-                                                        <p className="text-blue-500 text-xs mb-1 font-semibold">잔여 횟수</p>
-                                                        <p className="text-xl font-bold text-blue-600">{member.remaining_sessions}회</p>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* History List */}
+                                {mode === 'view' ? (
+                                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                        {/* 1. Status Part */}
+                                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
                                             <div>
-                                                <h5 className="text-xs font-semibold text-gray-700 mb-3 ml-1">최근 결제 내역</h5>
-                                                <ul className="divide-y divide-gray-100 border rounded-lg overflow-hidden">
-                                                    {payments.map(pay => (
-                                                        <li key={pay.id} className="px-4 py-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                                                            <div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
-                                                                    {(pay as any).plan_snapshot?.plan_name && (
-                                                                        <span className="text-xs bg-gray-200 text-gray-600 px-1.5 rounded">{(pay as any).plan_snapshot.plan_name}</span>
-                                                                    )}
-                                                                </div>
-                                                                <p className="text-xs text-gray-500 mt-0.5">{pay.note ? pay.note : (pay as any).plan_snapshot?.options_summary || '결제 완료'}</p>
-                                                            </div>
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
-                                                                <div className="flex gap-1">
-                                                                    {/* Report Button (Reuse) */}
-                                                                    <button
-                                                                        onClick={() => handleRepeatPayment(pay)}
-                                                                        className="text-xs bg-white border border-gray-300 text-gray-600 px-2 py-1 rounded hover:bg-gray-50"
-                                                                        title="이 설정으로 다시 결제"
-                                                                    >
-                                                                        재결제
-                                                                    </button>
-                                                                    <button onClick={() => startEdit(pay)} className="text-xs text-gray-400 underline hover:text-blue-600 px-1">수정</button>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    ))}
-                                                    {payments.length === 0 && <li className="px-4 py-6 text-center text-xs text-gray-500">결제 내역이 없습니다.</li>}
-                                                </ul>
+                                                <p className="text-gray-500 text-xs mb-1 font-medium">현재 이용 상태</p>
+                                                <p className="text-xl font-bold text-gray-900">
+                                                    {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
+                                                    <span className="text-xs font-normal text-gray-400 ml-2">
+                                                        {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
+                                                    </span>
+                                                </p>
                                             </div>
-                                        </div>
-                                    ) : mode === 'new' ? (
-                                        // NEW PAYMENT FORM
-                                        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-5 ring-1 ring-blue-50">
-                                            <h5 className="font-bold text-sm text-gray-900 mb-4 border-b pb-2">새로운 결제 등록</h5>
-
-                                            <div className="space-y-4">
-                                                {/* Plan Select */}
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">이용권 선택</label>
-                                                    <select
-                                                        className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2"
-                                                        value={selectedPlanId}
-                                                        onChange={(e) => { setSelectedPlanId(e.target.value); setManualAmount(null); }}
-                                                    >
-                                                        <option value="">선택해주세요</option>
-                                                        {plans.map(p => (
-                                                            <option key={p.id} value={p.id}>
-                                                                {p.name} ({p.price.toLocaleString()}원)
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                            {(member.remaining_sessions > 0) && (
+                                                <div className="text-right">
+                                                    <p className="text-gray-500 text-xs mb-1 font-medium">잔여 횟수</p>
+                                                    <p className="text-xl font-bold text-blue-600">{member.remaining_sessions}회</p>
                                                 </div>
+                                            )}
+                                        </div>
 
-                                                {selectedPlan?.type === 'period' && (
-                                                    <>
-                                                        {/* Options */}
-                                                        <div className="bg-gray-50 p-3 rounded-md">
-                                                            <p className="text-xs font-semibold text-gray-700 mb-2">옵션 선택</p>
-                                                            <div className="space-y-2">
-                                                                {Object.entries(options.reduce((acc: any, opt) => {
-                                                                    (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
-                                                                    return acc;
-                                                                }, {})).map(([group, opts]: [string, any]) => (
-                                                                    <div key={group}>
-                                                                        <p className="text-[10px] text-gray-500 font-medium mb-1">{group}</p>
-                                                                        <div className="flex flex-wrap gap-2">
-                                                                            {opts.map((opt: any) => (
-                                                                                <label key={opt.id} className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs cursor-pointer select-none transition-colors ${selectedOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600'}`}>
-                                                                                    <input
-                                                                                        type="checkbox"
-                                                                                        className="hidden"
-                                                                                        checked={selectedOptionIds.has(opt.id)}
-                                                                                        onChange={() => handleToggleOption(opt.id)}
-                                                                                    />
-                                                                                    {selectedOptionIds.has(opt.id) && (
-                                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                                                                                    )}
-                                                                                    {opt.name} ({opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()})
-                                                                                </label>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Duration */}
+                                        {/* 2. History List Part */}
+                                        <div>
+                                            <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                                                <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
+                                            </div>
+                                            <ul className="divide-y divide-gray-100">
+                                                {payments.map(pay => (
+                                                    <li key={pay.id} className="px-5 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
                                                         <div>
-                                                            <label className="block text-xs font-medium text-gray-700 mb-1">기간 (개월)</label>
-                                                            <div className="flex items-center gap-2">
-                                                                <button onClick={() => setDurationMonths(Math.max(1, durationMonths - 1))} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">-</button>
-                                                                <span className="w-12 text-center text-sm font-medium">{durationMonths}개월</span>
-                                                                <button onClick={() => setDurationMonths(durationMonths + 1)} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">+</button>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
+                                                                {(pay as any).plan_snapshot?.plan_name && (
+                                                                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs text-gray-500">{pay.note ? pay.note : (pay as any).plan_snapshot?.options_summary || '결제 완료'}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={() => handleRepeatPayment(pay)}
+                                                                    className="text-xs border border-gray-200 bg-white text-gray-600 px-2 py-1 rounded hover:bg-gray-50 hover:border-gray-300 transition-all font-medium"
+                                                                    title="이 설정으로 다시 결제"
+                                                                >
+                                                                    재결제
+                                                                </button>
+                                                                <button onClick={() => startEdit(pay)} className="text-xs text-gray-400 underline hover:text-blue-600 px-1">수정</button>
                                                             </div>
                                                         </div>
-                                                    </>
-                                                )}
-
-                                                {selectedPlan?.type === 'session' && (
-                                                    <div className="bg-blue-50 p-3 rounded text-xs text-blue-700">
-                                                        ℹ️ {selectedPlan.name} 선택 시 <b>{selectedPlan.session_count}회</b>가 충전됩니다.
-                                                    </div>
-                                                )}
-
-                                                <hr className="border-gray-200" />
-
-                                                {/* Final Calc & Manual Override */}
-                                                <div className="flex items-end justify-between">
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">결제일</label>
-                                                        <input
-                                                            type="date"
-                                                            value={paymentDate}
-                                                            onChange={(e) => setPaymentDate(e.target.value)}
-                                                            className="text-xs border-gray-300 rounded px-2 py-1"
-                                                        />
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-gray-500 text-xs mb-1">최종 결제 금액</p>
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <input
-                                                                type="number"
-                                                                className="text-right w-32 border-b border-transparent hover:border-gray-300 focus:border-blue-500 bg-transparent text-xl font-bold text-blue-600 focus:outline-none p-0"
-                                                                value={finalAmount}
-                                                                onChange={(e) => setManualAmount(Number(e.target.value))}
-                                                            />
-                                                            <span className="text-sm font-bold text-gray-900">원</span>
-                                                        </div>
-                                                        {manualAmount !== null && manualAmount !== currentTotal && (
-                                                            <p className="text-[10px] text-red-500 cursor-pointer" onClick={() => setManualAmount(null)}>↺ 자동계산 복구 ({currentTotal.toLocaleString()})</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex gap-2 pt-2">
-                                                    <button onClick={handleSubmitPayment} disabled={isSubmitting} className="flex-1 bg-blue-600 text-white py-2.5 rounded-md text-sm font-bold shadow hover:bg-blue-500 disabled:opacity-50">
-                                                        {isSubmitting ? '처리 중...' : '결제 완료'}
-                                                    </button>
-                                                    <button onClick={() => setMode('view')} className="px-4 py-2.5 rounded-md text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">
-                                                        취소
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                    </li>
+                                                ))}
+                                                {payments.length === 0 && <li className="px-5 py-8 text-center text-xs text-gray-400">결제 내역이 없습니다.</li>}
+                                            </ul>
                                         </div>
-                                    ) : (
-                                        // Mode == 'edit'
-                                        <div className="bg-white rounded-xl border border-yellow-200 shadow-md p-5 ring-1 ring-yellow-100">
-                                            <h5 className="font-bold text-sm text-gray-900 mb-4">결제 내역 수정</h5>
-                                            <div className="space-y-4">
+                                    </div>
+                                ) : mode === 'new' ? (
+                                    <div className="bg-white rounded-xl border border-blue-200 shadow-md p-5 ring-1 ring-blue-100">
+                                        <h5 className="font-bold text-sm text-gray-900 mb-4 border-b pb-2">새로운 결제 등록</h5>
+
+                                        <div className="space-y-4">
+                                            {/* Plan Select */}
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">이용권 선택</label>
+                                                <select
+                                                    className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2"
+                                                    value={selectedPlanId}
+                                                    onChange={(e) => { setSelectedPlanId(e.target.value); setManualAmount(null); }}
+                                                >
+                                                    <option value="">선택해주세요</option>
+                                                    {plans.map(p => (
+                                                        <option key={p.id} value={p.id}>
+                                                            {p.name} ({p.price.toLocaleString()}원)
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {selectedPlan?.type === 'period' && (
+                                                <>
+                                                    {/* Options */}
+                                                    <div className="bg-gray-50 p-3 rounded-md">
+                                                        <p className="text-xs font-semibold text-gray-700 mb-2">옵션 선택</p>
+                                                        <div className="space-y-2">
+                                                            {Object.entries(options.reduce((acc: any, opt) => {
+                                                                (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
+                                                                return acc;
+                                                            }, {})).map(([group, opts]: [string, any]) => (
+                                                                <div key={group}>
+                                                                    <p className="text-[10px] text-gray-500 font-medium mb-1">{group}</p>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {opts.map((opt: any) => (
+                                                                            <label key={opt.id} className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs cursor-pointer select-none transition-colors ${selectedOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    className="hidden"
+                                                                                    checked={selectedOptionIds.has(opt.id)}
+                                                                                    onChange={() => handleToggleOption(opt.id)}
+                                                                                />
+                                                                                {selectedOptionIds.has(opt.id) && (
+                                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                                                                )}
+                                                                                {opt.name} ({opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()})
+                                                                            </label>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Duration */}
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700 mb-1">기간 (개월)</label>
+                                                        <div className="flex items-center gap-2">
+                                                            <button onClick={() => setDurationMonths(Math.max(1, durationMonths - 1))} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">-</button>
+                                                            <span className="w-12 text-center text-sm font-medium">{durationMonths}개월</span>
+                                                            <button onClick={() => setDurationMonths(durationMonths + 1)} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">+</button>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {selectedPlan?.type === 'session' && (
+                                                <div className="bg-blue-50 p-3 rounded text-xs text-blue-700">
+                                                    ℹ️ {selectedPlan.name} 선택 시 <b>{selectedPlan.session_count}회</b>가 충전됩니다.
+                                                </div>
+                                            )}
+
+                                            <hr className="border-gray-200" />
+
+                                            {/* Final Calc & Manual Override */}
+                                            <div className="flex items-end justify-between">
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700 mb-1">결제일</label>
                                                     <input
                                                         type="date"
                                                         value={paymentDate}
                                                         onChange={(e) => setPaymentDate(e.target.value)}
-                                                        className="w-full text-sm border-gray-300 rounded px-3 py-2"
+                                                        className="text-xs border-gray-300 rounded px-2 py-1"
                                                     />
                                                 </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">금액</label>
-                                                    <input
-                                                        type="number"
-                                                        value={manualAmount || 0}
-                                                        onChange={(e) => setManualAmount(Number(e.target.value))}
-                                                        className="w-full text-sm border-gray-300 rounded px-3 py-2"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">비고 (사유)</label>
-                                                    <input
-                                                        type="text"
-                                                        value={note}
-                                                        onChange={(e) => setNote(e.target.value)}
-                                                        placeholder="수정 사유 입력"
-                                                        className="w-full text-sm border-gray-300 rounded px-3 py-2"
-                                                    />
-                                                </div>
-                                                <div className="flex gap-2 pt-2">
-                                                    <button onClick={handleUpdatePayment} disabled={isSubmitting} className="flex-1 bg-yellow-500 text-white py-2.5 rounded-md text-sm font-bold shadow hover:bg-yellow-400 disabled:opacity-50">
-                                                        수정 저장
-                                                    </button>
-                                                    <button onClick={() => setMode('view')} className="px-4 py-2.5 rounded-md text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">
-                                                        취소
-                                                    </button>
+                                                <div className="text-right">
+                                                    <p className="text-gray-500 text-xs mb-1">최종 결제 금액</p>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <input
+                                                            type="number"
+                                                            className="text-right w-32 border-b border-transparent hover:border-gray-300 focus:border-blue-500 bg-transparent text-xl font-bold text-blue-600 focus:outline-none p-0"
+                                                            value={finalAmount}
+                                                            onChange={(e) => setManualAmount(Number(e.target.value))}
+                                                        />
+                                                        <span className="text-sm font-bold text-gray-900">원</span>
+                                                    </div>
+                                                    {manualAmount !== null && manualAmount !== currentTotal && (
+                                                        <p className="text-[10px] text-red-500 cursor-pointer" onClick={() => setManualAmount(null)}>↺ 자동계산 복구 ({currentTotal.toLocaleString()})</p>
+                                                    )}
                                                 </div>
                                             </div>
+
+                                            <div className="flex gap-2 pt-2">
+                                                <button onClick={handleSubmitPayment} disabled={isSubmitting} className="flex-1 bg-blue-600 text-white py-2.5 rounded-md text-sm font-bold shadow hover:bg-blue-500 disabled:opacity-50">
+                                                    {isSubmitting ? '처리 중...' : '결제 완료'}
+                                                </button>
+                                                <button onClick={() => setMode('view')} className="px-4 py-2.5 rounded-md text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">
+                                                    취소
+                                                </button>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            </div>
+                                    </div>
+                                ) : (
+                                    // Mode == 'edit'
+                                    <div className="bg-white rounded-xl border border-yellow-200 shadow-md p-5 ring-1 ring-yellow-100">
+                                        <h5 className="font-bold text-sm text-gray-900 mb-4">결제 내역 수정</h5>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">결제일</label>
+                                                <input
+                                                    type="date"
+                                                    value={paymentDate}
+                                                    onChange={(e) => setPaymentDate(e.target.value)}
+                                                    className="w-full text-sm border-gray-300 rounded px-3 py-2"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">금액</label>
+                                                <input
+                                                    type="number"
+                                                    value={manualAmount || 0}
+                                                    onChange={(e) => setManualAmount(Number(e.target.value))}
+                                                    className="w-full text-sm border-gray-300 rounded px-3 py-2"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">비고 (사유)</label>
+                                                <input
+                                                    type="text"
+                                                    value={note}
+                                                    onChange={(e) => setNote(e.target.value)}
+                                                    placeholder="수정 사유 입력"
+                                                    className="w-full text-sm border-gray-300 rounded px-3 py-2"
+                                                />
+                                            </div>
+                                            <div className="flex gap-2 pt-2">
+                                                <button onClick={handleUpdatePayment} disabled={isSubmitting} className="flex-1 bg-yellow-500 text-white py-2.5 rounded-md text-sm font-bold shadow hover:bg-yellow-400 disabled:opacity-50">
+                                                    수정 저장
+                                                </button>
+                                                <button onClick={() => setMode('view')} className="px-4 py-2.5 rounded-md text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </section>
 
                             {/* Section 3: Activity */}
                             <section>
@@ -530,5 +524,6 @@ export default function MemberModal({ member }: { member: any }) {
                     </div>
                 </div>
             </div>
-            )
+        </div>
+    )
 }
