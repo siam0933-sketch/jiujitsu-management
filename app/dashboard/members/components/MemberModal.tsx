@@ -336,16 +336,6 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
-                                                            <div className="flex gap-1">
-                                                                <button
-                                                                    onClick={() => handleRepeatPayment(pay)}
-                                                                    className="text-xs border border-gray-200 bg-white text-gray-600 px-2 py-1 rounded hover:bg-gray-50 hover:border-gray-300 transition-all font-medium"
-                                                                    title="이 설정으로 다시 결제"
-                                                                >
-                                                                    재결제
-                                                                </button>
-                                                                <button onClick={() => startEdit(pay)} className="text-xs text-gray-400 underline hover:text-blue-600 px-1">수정</button>
-                                                            </div>
                                                         </div>
                                                     </li>
                                                 ))}
