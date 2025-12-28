@@ -542,7 +542,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                             type="date"
                                                                             value={editDate}
                                                                             onChange={(e) => setEditDate(e.target.value)}
-                                                                            className="w-full text-xs border-gray-300 rounded px-2 py-1"
+                                                                            className="w-auto text-xs border-gray-300 rounded px-2 py-1"
                                                                         />
                                                                     </div>
                                                                     <div className="flex-1">
