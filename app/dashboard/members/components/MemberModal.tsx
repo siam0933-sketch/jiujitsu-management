@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
+import { updateMember } from '../actions'
 
 // Helper Types
 type Plan = {
@@ -324,16 +325,62 @@ export default function MemberModal({ member }: { member: any }) {
                                     <div className="flex justify-between items-start mb-4 px-1">
                                         <div>
                                             <p className="text-gray-500 text-xs mb-1 font-bold">만료일</p>
-                                            <p className="text-xl font-bold text-gray-900">
-                                                {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
-                                                <span className="text-xs font-normal text-gray-500 ml-2">
-                                                    {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
-                                                </span>
-                                            </p>
+                                            <div className="flex items-center gap-2 group">
+                                                <p className="text-xl font-bold text-gray-900">
+                                                    {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
+                                                    <span className="text-xs font-normal text-gray-500 ml-2">
+                                                        {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
+                                                    </span>
+                                                </p>
+                                                <div className="relative">
+                                                    <input
+                                                        type="date"
+                                                        className="absolute inset-0 opacity-0 w-8 h-8 cursor-pointer z-10"
+                                                        defaultValue={member.payment_end_date ? member.payment_end_date.split('T')[0] : ''}
+                                                        onChange={async (e) => {
+                                                            if (!confirm('만료일을 변경하시겠습니까?')) return
+                                                            const newDate = e.target.value
+                                                            if (!newDate) return
+                                                            await updateMember(member.id, { payment_end_date: newDate })
+                                                            router.refresh()
+                                                        }}
+                                                    />
+                                                    <button className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded hover:bg-white/50">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-gray-500 text-xs mb-1 font-bold">결제 기준일</p>
-                                            <p className="text-xl font-bold text-gray-900">매월 {member.payment_due_day || '1'}일</p>
+                                            <div className="flex items-center justify-end gap-1">
+                                                <span className="text-gray-900 font-bold text-xl">매월</span>
+                                                <input
+                                                    type="number"
+                                                    className="w-12 text-center text-xl font-bold text-gray-900 bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none p-0"
+                                                    defaultValue={member.payment_due_day || 1}
+                                                    min={1}
+                                                    max={31}
+                                                    onBlur={async (e) => {
+                                                        const newVal = parseInt(e.target.value)
+                                                        if (newVal === member.payment_due_day) return
+                                                        if (newVal < 1 || newVal > 31) return alert('1~31일 사이의 날짜를 입력해주세요.')
+
+                                                        if (confirm(`결제 기준일을 매월 ${newVal}일로 변경하시겠습니까?`)) {
+                                                            await updateMember(member.id, { payment_due_day: newVal })
+                                                            router.refresh()
+                                                        } else {
+                                                            e.target.value = String(member.payment_due_day || 1)
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') e.currentTarget.blur()
+                                                    }}
+                                                />
+                                                <span className="text-gray-900 font-bold text-xl">일</span>
+                                            </div>
                                         </div>
                                     </div>
 

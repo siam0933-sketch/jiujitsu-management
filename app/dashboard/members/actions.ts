@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function registerMember(prevState: any, formData: FormData) {
@@ -144,6 +145,32 @@ export async function deleteMembers(memberIds: string[]) {
             return { error: '회원 삭제 중 오류가 발생했습니다.' }
         }
 
+        return { success: true }
+    } catch (e: any) {
+        return { error: e.message }
+    }
+}
+
+export async function updateMember(memberId: string, data: any) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: '로그인이 필요합니다.' }
+    }
+
+    try {
+        const { error } = await supabase
+            .from('gym_members')
+            .update(data)
+            .eq('id', memberId)
+
+        if (error) {
+            console.error('Update error:', error)
+            return { error: '회원 정보 수정 중 오류가 발생했습니다.' }
+        }
+
+        revalidatePath('/dashboard/members')
         return { success: true }
     } catch (e: any) {
         return { error: e.message }
