@@ -95,9 +95,11 @@ export async function createPayment(formData: FormData) {
             const start = new Date(start_date)
 
             let baseDate = start
-            if (currentEnd && currentEnd > new Date()) {
-                baseDate = currentEnd
-            }
+            // User Request (2025-12-28): Do not add to previous period. 
+            // Calculate strictly from the new payment reference date.
+            // if (currentEnd && currentEnd > new Date()) {
+            //     baseDate = currentEnd
+            // }
 
             // Add Months
             const newEnd = new Date(baseDate)
