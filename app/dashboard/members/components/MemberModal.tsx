@@ -295,6 +295,9 @@ export default function MemberModal({ member }: { member: any }) {
                                                         {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
                                                     </span>
                                                 </p>
+                                                <p className="text-[10px] text-gray-400 mt-1">
+                                                    결제 기준일: <span className="font-medium text-gray-600">매월 {member.payment_due_day || '1'}일</span>
+                                                </p>
                                             </div>
                                             {(member.remaining_sessions > 0) && (
                                                 <div className="text-right">
