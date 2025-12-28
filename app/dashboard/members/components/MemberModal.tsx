@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
-import { createPayment, getPaymentHistory, updatePayment } from '../actions_payment'
+import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 
 // Helper Types
 type Plan = {
@@ -54,8 +54,76 @@ export default function MemberModal({ member }: { member: any }) {
     const [manualAmount, setManualAmount] = useState<number | null>(null) // If null, use auto-calc
     const [note, setNote] = useState('')
 
+    // Edit Mode State
+    const [editAmount, setEditAmount] = useState<number>(0)
+    const [editDate, setEditDate] = useState('')
+    const [editOptionIds, setEditOptionIds] = useState<Set<string>>(new Set())
+
     const closeModal = () => {
         router.push('/dashboard/members')
+    }
+
+    const startEditing = (payment: Payment) => {
+        setEditingPaymentId(payment.id)
+        setEditAmount(payment.amount)
+        setEditDate(payment.payment_date)
+        const snap = payment.plan_snapshot || {}
+        setEditOptionIds(new Set(snap.option_ids || []))
+    }
+
+    const cancelEditing = () => {
+        setEditingPaymentId(null)
+    }
+
+    const handleToggleEditOption = (id: string) => {
+        const next = new Set(editOptionIds)
+        if (next.has(id)) next.delete(id)
+        else next.add(id)
+        setEditOptionIds(next)
+    }
+
+    const handleUpdatePayment = async (payment: Payment) => {
+        if (!confirm('결제 내역을 수정하시겠습니까?')) return
+
+        const snap = payment.plan_snapshot || {}
+        // Recalculate options summary
+        const optionNames = Array.from(editOptionIds).map(id => options.find(o => o.id === id)?.name).filter(Boolean).join(', ')
+
+        const updatedSnapshot = {
+            ...snap,
+            option_ids: Array.from(editOptionIds),
+            options_summary: optionNames
+        }
+
+        const res = await updatePayment(payment.id, {
+            amount: editAmount,
+            payment_date: editDate,
+            plan_snapshot: updatedSnapshot
+        })
+
+        if (res.error) {
+            alert(res.error)
+        } else {
+            alert('수정되었습니다.')
+            setEditingPaymentId(null)
+            const history = await getPaymentHistory(member.id)
+            setPayments(history)
+            router.refresh()
+        }
+    }
+
+    const handleDeletePayment = async (paymentId: string) => {
+        if (!confirm('정말로 이 결제 내역을 삭제하시겠습니까? 복구할 수 없습니다.')) return
+
+        const res = await deletePayment(paymentId)
+        if (res.error) {
+            alert(res.error)
+        } else {
+            alert('삭제되었습니다.')
+            const history = await getPaymentHistory(member.id)
+            setPayments(history)
+            router.refresh()
+        }
     }
 
     // Load Data
@@ -236,7 +304,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         <p className="text-gray-400 text-xs mb-1">학교/학년</p>
                                         <p className="font-medium text-gray-900 text-sm">{member.school} {member.grade}</p>
                                     </div>
-                                    <div className="col-span-4 border-t pt-2 mt-2">
+                                    <div className="col-span-4">
                                         <p className="text-gray-400 text-xs mb-1">주소</p>
                                         <p className="font-medium text-gray-900 text-sm">{member.address}</p>
                                     </div>
@@ -413,30 +481,112 @@ export default function MemberModal({ member }: { member: any }) {
                                             <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
                                         </div>
                                         <ul className="divide-y divide-gray-100">
-                                            {payments.map(pay => (
-                                                <li key={pay.id} className="px-4 py-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
-                                                            {(pay as any).plan_snapshot?.plan_name && (
-                                                                <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
-                                                            )}
-                                                        </div>
-                                                        {(pay as any).plan_snapshot?.options_summary && (
-                                                            <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
+                                            {payments.map(pay => {
+                                                const isEditing = editingPaymentId === pay.id
+                                                return (
+                                                    <li key={pay.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                        {isEditing ? (
+                                                            // Edit Form
+                                                            <div className="space-y-3 bg-white p-2 rounded border border-blue-200">
+                                                                <div className="flex gap-2">
+                                                                    <div className="flex-1">
+                                                                        <label className="text-[10px] text-gray-400 block mb-1">결제일</label>
+                                                                        <input
+                                                                            type="date"
+                                                                            value={editDate}
+                                                                            onChange={(e) => setEditDate(e.target.value)}
+                                                                            className="w-full text-xs border-gray-300 rounded px-2 py-1"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <label className="text-[10px] text-gray-400 block mb-1">금액</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={editAmount}
+                                                                            onChange={(e) => setEditAmount(Number(e.target.value))}
+                                                                            className="w-full text-xs border-gray-300 rounded px-2 py-1"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Options (Only if period plan or generic options available) */}
+                                                                {(pay as any).plan_snapshot?.type === 'period' && (
+                                                                    <div>
+                                                                        <label className="text-[10px] text-gray-400 block mb-1">옵션 수정</label>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {options.map((opt) => (
+                                                                                <label key={opt.id} className={`flex items-center gap-1 px-2 py-1 rounded border text-[10px] cursor-pointer select-none ${editOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-500'}`}>
+                                                                                    <input
+                                                                                        type="checkbox"
+                                                                                        className="hidden"
+                                                                                        checked={editOptionIds.has(opt.id)}
+                                                                                        onChange={() => handleToggleEditOption(opt.id)}
+                                                                                    />
+                                                                                    {editOptionIds.has(opt.id) && <span>✓</span>}
+                                                                                    {opt.name}
+                                                                                </label>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="flex justify-between items-center pt-2">
+                                                                    <button
+                                                                        onClick={() => handleDeletePayment(pay.id)}
+                                                                        className="text-xs text-red-500 underline hover:text-red-700"
+                                                                    >
+                                                                        삭제
+                                                                    </button>
+                                                                    <div className="flex gap-2">
+                                                                        <button
+                                                                            onClick={cancelEditing}
+                                                                            className="text-xs px-2 py-1 text-gray-500 border border-gray-300 rounded hover:bg-gray-100"
+                                                                        >
+                                                                            취소
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleUpdatePayment(pay)}
+                                                                            className="text-xs px-2 py-1 text-white bg-blue-600 rounded hover:bg-blue-500"
+                                                                        >
+                                                                            저장
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            // View Mode
+                                                            <div className="flex justify-between items-center">
+                                                                <div>
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
+                                                                        {(pay as any).plan_snapshot?.plan_name && (
+                                                                            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    {(pay as any).plan_snapshot?.options_summary && (
+                                                                        <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
+                                                                    )}
+                                                                    {pay.note && (
+                                                                        <p className="text-xs text-gray-400">📝 {pay.note}</p>
+                                                                    )}
+                                                                    {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
+                                                                        <p className="text-xs text-gray-400">결제 완료</p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
+                                                                    <button
+                                                                        onClick={() => startEditing(pay)}
+                                                                        className="text-[10px] text-gray-400 hover:text-blue-600 border border-transparent hover:border-blue-100 hover:bg-blue-50 px-1.5 py-0.5 rounded transition-all"
+                                                                    >
+                                                                        수정
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         )}
-                                                        {pay.note && (
-                                                            <p className="text-xs text-gray-400">📝 {pay.note}</p>
-                                                        )}
-                                                        {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
-                                                            <p className="text-xs text-gray-400">결제 완료</p>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
-                                                    </div>
-                                                </li>
-                                            ))}
+                                                    </li>
+                                                )
+                                            })}
                                             {payments.length === 0 && <li className="px-4 py-6 text-center text-xs text-gray-400">결제 내역이 없습니다.</li>}
                                         </ul>
                                     </div>

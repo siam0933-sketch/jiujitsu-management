@@ -163,3 +163,21 @@ export async function updatePayment(paymentId: string, data: any) {
     revalidatePath('/dashboard/members')
     return { success: true }
 }
+
+/**
+ * Delete a payment record.
+ */
+export async function deletePayment(paymentId: string) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('gym_payments')
+        .delete()
+        .eq('id', paymentId)
+
+    if (error) return { error: error.message }
+    // As with update, we don't auto-revert member status logic for now due to complexity.
+    // Admin should manually adjust member expiration if needed.
+
+    revalidatePath('/dashboard/members')
+    return { success: true }
+}
