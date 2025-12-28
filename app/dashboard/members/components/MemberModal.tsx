@@ -243,186 +243,196 @@ export default function MemberModal({ member }: { member: any }) {
                                 </div>
                             </section>
 
-                            {/* Section 2: Payment & Update */}
+                            {/* Section 2: Payment & Update (New Layout) */}
                             <section>
                                 <div className="flex justify-between items-center mb-2">
                                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">이용권 및 결제</h4>
                                 </div>
 
-                                {/* Card 1: Payment Status & Form */}
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
-                                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-                                        <h5 className="text-xs font-bold text-gray-500 uppercase">이용권 정보</h5>
-                                    </div>
+                                {/* Main Gray Container */}
+                                <div className="bg-gray-100 rounded-xl p-5 shadow-inner">
 
-                                    {/* 1. Status Part (With Toggle Button) */}
-                                    <div className="p-5 flex justify-between items-center bg-gray-50/50">
+                                    {/* 1. Status Info (Direct on Gray) */}
+                                    <div className="flex justify-between items-start mb-4 px-1">
                                         <div>
-                                            <p className="text-gray-500 text-xs mb-1 font-medium">만료일</p>
+                                            <p className="text-gray-500 text-xs mb-1 font-bold">만료일</p>
                                             <p className="text-xl font-bold text-gray-900">
                                                 {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
-                                                <span className="text-xs font-normal text-gray-400 ml-2">
+                                                <span className="text-xs font-normal text-gray-500 ml-2">
                                                     {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
                                                 </span>
                                             </p>
-                                            <p className="text-[10px] text-gray-400 mt-1">
-                                                결제 기준일: <span className="font-medium text-gray-600">매월 {member.payment_due_day || '1'}일</span>
-                                            </p>
-                                            {/* Toggle Button Here */}
-                                            <div className="mt-2 text-[10px] select-none cursor-pointer inline-flex items-center gap-1 text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors" onClick={togglePaymentForm}>
-                                                {isPaymentFormOpen ? 'v 결제하기' : '> 결제하기'}
-                                            </div>
                                         </div>
-                                        {(member.remaining_sessions > 0) && (
-                                            <div className="text-right">
-                                                <p className="text-gray-500 text-xs mb-1 font-medium">잔여 횟수</p>
-                                                <p className="text-xl font-bold text-blue-600">{member.remaining_sessions}회</p>
+                                        <div className="text-right">
+                                            <p className="text-gray-500 text-xs mb-1 font-bold">결제 기준일</p>
+                                            <p className="text-xl font-bold text-gray-900">매월 {member.payment_due_day || '1'}일</p>
+                                        </div>
+                                    </div>
+
+                                    {/* (Optional) Remaining Sessions can go here too if needed, fitting the layout */}
+                                    {member.remaining_sessions > 0 && (
+                                        <div className="text-right mb-4 px-1">
+                                            <p className="text-gray-500 text-xs mb-1 font-bold">잔여 횟수</p>
+                                            <p className="text-xl font-bold text-blue-600">{member.remaining_sessions}회</p>
+                                        </div>
+                                    )}
+
+                                    {/* 2. Payment Action Box (White Card) */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-3">
+                                        {/* Toggle Header */}
+                                        <div
+                                            onClick={togglePaymentForm}
+                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2"
+                                        >
+                                            <h5 className="text-xs font-bold text-gray-800 uppercase">
+                                                {isPaymentFormOpen ? 'v 결제하기' : '> 결제하기'}
+                                            </h5>
+                                        </div>
+
+                                        {/* Accordion Content */}
+                                        {isPaymentFormOpen && (
+                                            <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+                                                <div className="space-y-4">
+                                                    {/* Plan Select */}
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700 mb-1">이용권 선택</label>
+                                                        <select
+                                                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2"
+                                                            value={selectedPlanId}
+                                                            onChange={(e) => { setSelectedPlanId(e.target.value); setManualAmount(null); }}
+                                                        >
+                                                            <option value="">선택해주세요</option>
+                                                            {plans.map(p => (
+                                                                <option key={p.id} value={p.id}>
+                                                                    {p.name} ({p.price.toLocaleString()}원)
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    {selectedPlan?.type === 'period' && (
+                                                        <>
+                                                            {/* Options */}
+                                                            <div className="bg-white border border-gray-200 p-3 rounded-md">
+                                                                <p className="text-xs font-semibold text-gray-700 mb-2">옵션 선택</p>
+                                                                <div className="space-y-2">
+                                                                    {Object.entries(options.reduce((acc: any, opt) => {
+                                                                        (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
+                                                                        return acc;
+                                                                    }, {})).map(([group, opts]: [string, any]) => (
+                                                                        <div key={group}>
+                                                                            <p className="text-[10px] text-gray-500 font-medium mb-1">{group}</p>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {opts.map((opt: any) => (
+                                                                                    <label key={opt.id} className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs cursor-pointer select-none transition-colors ${selectedOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            className="hidden"
+                                                                                            checked={selectedOptionIds.has(opt.id)}
+                                                                                            onChange={() => handleToggleOption(opt.id)}
+                                                                                        />
+                                                                                        {selectedOptionIds.has(opt.id) && (
+                                                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                                                                        )}
+                                                                                        {opt.name} ({opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()})
+                                                                                    </label>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Duration */}
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-700 mb-1">기간 (개월)</label>
+                                                                <div className="flex items-center gap-2">
+                                                                    <button onClick={() => setDurationMonths(Math.max(1, durationMonths - 1))} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">-</button>
+                                                                    <span className="w-12 text-center text-sm font-medium">{durationMonths}개월</span>
+                                                                    <button onClick={() => setDurationMonths(durationMonths + 1)} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">+</button>
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
+
+                                                    <hr className="border-gray-200" />
+
+                                                    {/* Final Calc & Action */}
+                                                    <div className="flex items-end justify-between">
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-700 mb-1">결제일</label>
+                                                            <input
+                                                                type="date"
+                                                                value={paymentDate}
+                                                                onChange={(e) => setPaymentDate(e.target.value)}
+                                                                className="text-xs border-gray-300 rounded px-2 py-1"
+                                                            />
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-gray-500 text-xs mb-1">최종 결제 금액</p>
+                                                            <div className="flex items-center gap-2 justify-end">
+                                                                <div className="flex items-center gap-1">
+                                                                    <input
+                                                                        type="number"
+                                                                        className="text-right w-24 border-b border-gray-300 focus:border-blue-500 bg-transparent text-xl font-bold text-blue-600 focus:outline-none p-0"
+                                                                        value={finalAmount}
+                                                                        onChange={(e) => setManualAmount(Number(e.target.value))}
+                                                                    />
+                                                                    <span className="text-sm font-bold text-gray-900 mr-2">원</span>
+                                                                </div>
+                                                                {/* Inline Submit Button */}
+                                                                <button
+                                                                    onClick={handleSubmitPayment}
+                                                                    disabled={isSubmitting}
+                                                                    className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold shadow hover:bg-blue-500 disabled:opacity-50 whitespace-nowrap"
+                                                                >
+                                                                    {isSubmitting ? '처리 중...' : '결제하기'}
+                                                                </button>
+                                                            </div>
+                                                            {manualAmount !== null && manualAmount !== currentTotal && (
+                                                                <p className="text-[10px] text-red-500 cursor-pointer mt-1" onClick={() => setManualAmount(null)}>↺ 자동계산 복구 ({currentTotal.toLocaleString()})</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* Accordion: New Payment Form (In Middle) */}
-                                    {isPaymentFormOpen && (
-                                        <div className="border-t border-blue-100 bg-blue-50/30 p-5 transition-all">
-                                            <div className="space-y-4">
-                                                {/* Plan Select */}
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">이용권 선택</label>
-                                                    <select
-                                                        className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2"
-                                                        value={selectedPlanId}
-                                                        onChange={(e) => { setSelectedPlanId(e.target.value); setManualAmount(null); }}
-                                                    >
-                                                        <option value="">선택해주세요</option>
-                                                        {plans.map(p => (
-                                                            <option key={p.id} value={p.id}>
-                                                                {p.name} ({p.price.toLocaleString()}원)
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-
-                                                {selectedPlan?.type === 'period' && (
-                                                    <>
-                                                        {/* Options */}
-                                                        <div className="bg-white border border-gray-200 p-3 rounded-md">
-                                                            <p className="text-xs font-semibold text-gray-700 mb-2">옵션 선택</p>
-                                                            <div className="space-y-2">
-                                                                {Object.entries(options.reduce((acc: any, opt) => {
-                                                                    (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
-                                                                    return acc;
-                                                                }, {})).map(([group, opts]: [string, any]) => (
-                                                                    <div key={group}>
-                                                                        <p className="text-[10px] text-gray-500 font-medium mb-1">{group}</p>
-                                                                        <div className="flex flex-wrap gap-2">
-                                                                            {opts.map((opt: any) => (
-                                                                                <label key={opt.id} className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs cursor-pointer select-none transition-colors ${selectedOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600'}`}>
-                                                                                    <input
-                                                                                        type="checkbox"
-                                                                                        className="hidden"
-                                                                                        checked={selectedOptionIds.has(opt.id)}
-                                                                                        onChange={() => handleToggleOption(opt.id)}
-                                                                                    />
-                                                                                    {selectedOptionIds.has(opt.id) && (
-                                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                                                                                    )}
-                                                                                    {opt.name} ({opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()})
-                                                                                </label>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Duration */}
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-700 mb-1">기간 (개월)</label>
-                                                            <div className="flex items-center gap-2">
-                                                                <button onClick={() => setDurationMonths(Math.max(1, durationMonths - 1))} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">-</button>
-                                                                <span className="w-12 text-center text-sm font-medium">{durationMonths}개월</span>
-                                                                <button onClick={() => setDurationMonths(durationMonths + 1)} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">+</button>
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
-
-                                                <hr className="border-blue-100" />
-
-                                                {/* Final Calc & Action */}
-                                                <div className="flex items-end justify-between">
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">결제일</label>
-                                                        <input
-                                                            type="date"
-                                                            value={paymentDate}
-                                                            onChange={(e) => setPaymentDate(e.target.value)}
-                                                            className="text-xs border-gray-300 rounded px-2 py-1"
-                                                        />
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-gray-500 text-xs mb-1">최종 결제 금액</p>
-                                                        <div className="flex items-center gap-2 justify-end">
-                                                            <div className="flex items-center gap-1">
-                                                                <input
-                                                                    type="number"
-                                                                    className="text-right w-24 border-b border-gray-300 focus:border-blue-500 bg-transparent text-xl font-bold text-blue-600 focus:outline-none p-0"
-                                                                    value={finalAmount}
-                                                                    onChange={(e) => setManualAmount(Number(e.target.value))}
-                                                                />
-                                                                <span className="text-sm font-bold text-gray-900 mr-2">원</span>
-                                                            </div>
-                                                            {/* Inline Submit Button */}
-                                                            <button
-                                                                onClick={handleSubmitPayment}
-                                                                disabled={isSubmitting}
-                                                                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold shadow hover:bg-blue-500 disabled:opacity-50 whitespace-nowrap"
-                                                            >
-                                                                {isSubmitting ? '처리 중...' : '결제하기'}
-                                                            </button>
-                                                        </div>
-                                                        {manualAmount !== null && manualAmount !== currentTotal && (
-                                                            <p className="text-[10px] text-red-500 cursor-pointer mt-1" onClick={() => setManualAmount(null)}>↺ 자동계산 복구 ({currentTotal.toLocaleString()})</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    {/* 3. Payment History Box (White Card) */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="px-4 py-3 bg-white border-b border-gray-100">
+                                            <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
                                         </div>
-                                    )}
-                                </div>
-
-                                {/* Card 2: History List Part (Separated) */}
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-                                        <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
-                                    </div>
-                                    <ul className="divide-y divide-gray-100">
-                                        {payments.map(pay => (
-                                            <li key={pay.id} className="px-5 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                                                <div>
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
-                                                        {(pay as any).plan_snapshot?.plan_name && (
-                                                            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
+                                        <ul className="divide-y divide-gray-100">
+                                            {payments.map(pay => (
+                                                <li key={pay.id} className="px-4 py-3 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
+                                                            {(pay as any).plan_snapshot?.plan_name && (
+                                                                <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
+                                                            )}
+                                                        </div>
+                                                        {(pay as any).plan_snapshot?.options_summary && (
+                                                            <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
+                                                        )}
+                                                        {pay.note && (
+                                                            <p className="text-xs text-gray-400">📝 {pay.note}</p>
+                                                        )}
+                                                        {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
+                                                            <p className="text-xs text-gray-400">결제 완료</p>
                                                         )}
                                                     </div>
-                                                    {(pay as any).plan_snapshot?.options_summary && (
-                                                        <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
-                                                    )}
-                                                    {pay.note && (
-                                                        <p className="text-xs text-gray-400">📝 {pay.note}</p>
-                                                    )}
-                                                    {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
-                                                        <p className="text-xs text-gray-400">결제 완료</p>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
-                                                </div>
-                                            </li>
-                                        ))}
-                                        {payments.length === 0 && <li className="px-5 py-8 text-center text-xs text-gray-400">결제 내역이 없습니다.</li>}
-                                    </ul>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                            {payments.length === 0 && <li className="px-4 py-6 text-center text-xs text-gray-400">결제 내역이 없습니다.</li>}
+                                        </ul>
+                                    </div>
+
                                 </div>
                             </section>
 
