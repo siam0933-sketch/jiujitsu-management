@@ -322,16 +322,16 @@ export default function MemberModal({ member }: { member: any }) {
                                                             {/* Options */}
                                                             <div className="bg-white border border-gray-200 p-3 rounded-md">
                                                                 <p className="text-xs font-semibold text-gray-700 mb-2">옵션 선택</p>
-                                                                <div className="space-y-2">
+                                                                <div className="space-y-3">
                                                                     {Object.entries(options.reduce((acc: any, opt) => {
                                                                         (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
                                                                         return acc;
                                                                     }, {})).map(([group, opts]: [string, any]) => (
-                                                                        <div key={group}>
-                                                                            <p className="text-[10px] text-gray-500 font-medium mb-1">{group}</p>
+                                                                        <div key={group} className="flex items-start gap-4">
+                                                                            <p className="text-[11px] text-gray-500 font-bold mt-1.5 w-16 shrink-0">{group}</p>
                                                                             <div className="flex flex-wrap gap-2">
                                                                                 {opts.map((opt: any) => (
-                                                                                    <label key={opt.id} className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs cursor-pointer select-none transition-colors ${selectedOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                                                    <label key={opt.id} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs cursor-pointer select-none transition-colors shadow-sm ${selectedOptionIds.has(opt.id) ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
                                                                                         <input
                                                                                             type="checkbox"
                                                                                             className="hidden"
@@ -339,9 +339,10 @@ export default function MemberModal({ member }: { member: any }) {
                                                                                             onChange={() => handleToggleOption(opt.id)}
                                                                                         />
                                                                                         {selectedOptionIds.has(opt.id) && (
-                                                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
                                                                                         )}
-                                                                                        {opt.name} ({opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()})
+                                                                                        <span>{opt.name}</span>
+                                                                                        {opt.price > 0 && <span className="text-[10px] text-gray-400 font-normal">+{opt.price.toLocaleString()}</span>}
                                                                                     </label>
                                                                                 ))}
                                                                             </div>
@@ -353,10 +354,10 @@ export default function MemberModal({ member }: { member: any }) {
                                                             {/* Duration */}
                                                             <div>
                                                                 <label className="block text-xs font-medium text-gray-700 mb-1">기간 (개월)</label>
-                                                                <div className="flex items-center gap-2">
-                                                                    <button onClick={() => setDurationMonths(Math.max(1, durationMonths - 1))} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">-</button>
-                                                                    <span className="w-12 text-center text-sm font-medium">{durationMonths}개월</span>
-                                                                    <button onClick={() => setDurationMonths(durationMonths + 1)} className="w-8 h-8 rounded border flex items-center justify-center bg-white hover:bg-gray-50">+</button>
+                                                                <div className="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white w-fit shadow-sm">
+                                                                    <button onClick={() => setDurationMonths(Math.max(1, durationMonths - 1))} className="px-3 py-1.5 hover:bg-gray-50 border-r border-gray-300 text-gray-500 hover:text-gray-700 transition-colors text-xs font-bold">-</button>
+                                                                    <span className="w-16 text-center text-sm font-bold text-gray-900 border-r border-gray-300 py-1">{durationMonths}개월</span>
+                                                                    <button onClick={() => setDurationMonths(durationMonths + 1)} className="px-3 py-1.5 hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors text-xs font-bold">+</button>
                                                                 </div>
                                                             </div>
                                                         </>
