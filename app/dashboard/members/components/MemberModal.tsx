@@ -251,6 +251,9 @@ export default function MemberModal({ member }: { member: any }) {
 
                                 {/* Card 1: Payment Status & Form */}
                                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
+                                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                                        <h5 className="text-xs font-bold text-gray-500 uppercase">이용권 정보</h5>
+                                    </div>
 
                                     {/* 1. Status Part (With Toggle Button) */}
                                     <div className="p-5 flex justify-between items-center bg-gray-50/50">
