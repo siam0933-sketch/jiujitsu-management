@@ -249,8 +249,8 @@ export default function MemberModal({ member }: { member: any }) {
                                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">이용권 및 결제</h4>
                                 </div>
 
-                                {/* Main Gray Container */}
-                                <div className="bg-gray-100 rounded-xl p-5 shadow-inner">
+                                {/* Main Container (Standard White Card) */}
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
 
                                     {/* 1. Status Info (Direct on Gray) */}
                                     <div className="flex justify-between items-start mb-4 px-1">
