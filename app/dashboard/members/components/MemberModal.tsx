@@ -284,7 +284,7 @@ export default function MemberModal({ member }: { member: any }) {
                                             onClick={togglePaymentForm}
                                             className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2"
                                         >
-                                            <h5 className="text-xs font-bold text-gray-800 uppercase">
+                                            <h5 className="text-xs font-bold text-gray-500 uppercase">
                                                 {isPaymentFormOpen ? 'v 결제하기' : '> 결제하기'}
                                             </h5>
                                         </div>
