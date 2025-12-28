@@ -1,5 +1,7 @@
-
 import { createClient } from '@/utils/supabase/server'
+import { getPromotionCandidates } from './attendance/actions_promotion'
+import { getTodayAttendanceLogs } from './attendance/actions'
+import PromotionWidget from './components/PromotionWidget'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -8,22 +10,32 @@ export default async function DashboardPage() {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // 1. Fetch Gym Info based on owner_id
+    // 1. Fetch Gym Info
     const { data: gym } = await supabase
         .from('gyms')
         .select('*')
         .eq('owner_id', user?.id)
         .single()
 
-    // 2. Fetch Member Count (Safe Handling)
+    // 2. Fetch Stats & Check Candidates
     let memberCount = 0
+    let candidates: any[] = []
+    let todayLogs: any[] = []
+
     if (gym?.id) {
+        // Member Count
         const { count } = await supabase
             .from('gym_members')
             .select('*', { count: 'exact', head: true })
             .eq('gym_id', gym.id)
-
+            .eq('status', 'active')
         memberCount = count || 0
+
+        // Promotion Candidates
+        candidates = await getPromotionCandidates()
+
+        // Today's Attendance
+        todayLogs = await getTodayAttendanceLogs()
     }
 
     return (
@@ -31,6 +43,9 @@ export default async function DashboardPage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
                 안녕하세요, {gym ? gym.name : '관장님'}! 👋
             </h2>
+
+            {/* Promotion Notification Widget */}
+            <PromotionWidget candidates={candidates} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Card 1: Total Members */}
@@ -65,7 +80,7 @@ export default async function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Card 2: Today's Attendance (Mock Data) */}
+                {/* Card 2: Today's Attendance */}
                 <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="p-5">
                         <div className="flex items-center">
@@ -81,7 +96,7 @@ export default async function DashboardPage() {
                                     </dt>
                                     <dd>
                                         <div className="text-lg font-medium text-gray-900">
-                                            Loading...
+                                            {todayLogs.length} 명
                                         </div>
                                     </dd>
                                 </dl>
