@@ -246,17 +246,38 @@ export default function MemberModal({ member }: { member: any }) {
                             {/* Section 2: Payment & Update */}
                             <section>
                                 <div className="flex justify-between items-center mb-2">
-                                    <div className="flex items-center gap-2 cursor-pointer select-none" onClick={togglePaymentForm}>
-                                        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">이용권 및 결제</h4>
-                                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded hover:bg-blue-100 transition-colors">
-                                            {isPaymentFormOpen ? 'v 결제하기' : '> 결제하기'}
-                                        </span>
-                                    </div>
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">이용권 및 결제</h4>
                                 </div>
 
                                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-                                    {/* Accordion: New Payment Form */}
+                                    {/* 1. Status Part (With Toggle Button) */}
+                                    <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                        <div>
+                                            <p className="text-gray-500 text-xs mb-1 font-medium">만료일</p>
+                                            <p className="text-xl font-bold text-gray-900">
+                                                {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
+                                                <span className="text-xs font-normal text-gray-400 ml-2">
+                                                    {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
+                                                </span>
+                                            </p>
+                                            <p className="text-[10px] text-gray-400 mt-1">
+                                                결제 기준일: <span className="font-medium text-gray-600">매월 {member.payment_due_day || '1'}일</span>
+                                            </p>
+                                            {/* Toggle Button Here */}
+                                            <div className="mt-2 text-[10px] select-none cursor-pointer inline-flex items-center gap-1 text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors" onClick={togglePaymentForm}>
+                                                {isPaymentFormOpen ? 'v 결제하기' : '> 결제하기'}
+                                            </div>
+                                        </div>
+                                        {(member.remaining_sessions > 0) && (
+                                            <div className="text-right">
+                                                <p className="text-gray-500 text-xs mb-1 font-medium">잔여 횟수</p>
+                                                <p className="text-xl font-bold text-blue-600">{member.remaining_sessions}회</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Accordion: New Payment Form (In Middle) */}
                                     {isPaymentFormOpen && (
                                         <div className="border-b border-blue-100 bg-blue-50/30 p-5 transition-all">
                                             <div className="space-y-4">
@@ -364,28 +385,6 @@ export default function MemberModal({ member }: { member: any }) {
                                             </div>
                                         </div>
                                     )}
-
-                                    {/* 1. Status Part */}
-                                    <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                                        <div>
-                                            <p className="text-gray-500 text-xs mb-1 font-medium">만료일</p>
-                                            <p className="text-xl font-bold text-gray-900">
-                                                {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}
-                                                <span className="text-xs font-normal text-gray-400 ml-2">
-                                                    {member.payment_end_date && new Date(member.payment_end_date) < new Date() ? '(만료됨)' : ''}
-                                                </span>
-                                            </p>
-                                            <p className="text-[10px] text-gray-400 mt-1">
-                                                결제 기준일: <span className="font-medium text-gray-600">매월 {member.payment_due_day || '1'}일</span>
-                                            </p>
-                                        </div>
-                                        {(member.remaining_sessions > 0) && (
-                                            <div className="text-right">
-                                                <p className="text-gray-500 text-xs mb-1 font-medium">잔여 횟수</p>
-                                                <p className="text-xl font-bold text-blue-600">{member.remaining_sessions}회</p>
-                                            </div>
-                                        )}
-                                    </div>
 
                                     {/* 2. History List Part */}
                                     <div>
