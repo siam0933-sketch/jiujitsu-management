@@ -249,10 +249,11 @@ export default function MemberModal({ member }: { member: any }) {
                                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">이용권 및 결제</h4>
                                 </div>
 
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                {/* Card 1: Payment Status & Form */}
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
 
                                     {/* 1. Status Part (With Toggle Button) */}
-                                    <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                    <div className="p-5 flex justify-between items-center bg-gray-50/50">
                                         <div>
                                             <p className="text-gray-500 text-xs mb-1 font-medium">만료일</p>
                                             <p className="text-xl font-bold text-gray-900">
@@ -279,7 +280,7 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     {/* Accordion: New Payment Form (In Middle) */}
                                     {isPaymentFormOpen && (
-                                        <div className="border-b border-blue-100 bg-blue-50/30 p-5 transition-all">
+                                        <div className="border-t border-blue-100 bg-blue-50/30 p-5 transition-all">
                                             <div className="space-y-4">
                                                 {/* Plan Select */}
                                                 <div>
@@ -385,40 +386,40 @@ export default function MemberModal({ member }: { member: any }) {
                                             </div>
                                         </div>
                                     )}
+                                </div>
 
-                                    {/* 2. History List Part */}
-                                    <div>
-                                        <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-                                            <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
-                                        </div>
-                                        <ul className="divide-y divide-gray-100">
-                                            {payments.map(pay => (
-                                                <li key={pay.id} className="px-5 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
-                                                            {(pay as any).plan_snapshot?.plan_name && (
-                                                                <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
-                                                            )}
-                                                        </div>
-                                                        {(pay as any).plan_snapshot?.options_summary && (
-                                                            <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
-                                                        )}
-                                                        {pay.note && (
-                                                            <p className="text-xs text-gray-400">📝 {pay.note}</p>
-                                                        )}
-                                                        {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
-                                                            <p className="text-xs text-gray-400">결제 완료</p>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                            {payments.length === 0 && <li className="px-5 py-8 text-center text-xs text-gray-400">결제 내역이 없습니다.</li>}
-                                        </ul>
+                                {/* Card 2: History List Part (Separated) */}
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                                        <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
                                     </div>
+                                    <ul className="divide-y divide-gray-100">
+                                        {payments.map(pay => (
+                                            <li key={pay.id} className="px-5 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <p className="text-sm font-bold text-gray-900">{pay.payment_date}</p>
+                                                        {(pay as any).plan_snapshot?.plan_name && (
+                                                            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{(pay as any).plan_snapshot.plan_name}</span>
+                                                        )}
+                                                    </div>
+                                                    {(pay as any).plan_snapshot?.options_summary && (
+                                                        <p className="text-xs text-gray-600 mb-0.5">➕ {(pay as any).plan_snapshot.options_summary}</p>
+                                                    )}
+                                                    {pay.note && (
+                                                        <p className="text-xs text-gray-400">📝 {pay.note}</p>
+                                                    )}
+                                                    {!pay.note && !(pay as any).plan_snapshot?.options_summary && (
+                                                        <p className="text-xs text-gray-400">결제 완료</p>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-sm font-bold text-gray-900">{pay.amount.toLocaleString()}원</span>
+                                                </div>
+                                            </li>
+                                        ))}
+                                        {payments.length === 0 && <li className="px-5 py-8 text-center text-xs text-gray-400">결제 내역이 없습니다.</li>}
+                                    </ul>
                                 </div>
                             </section>
 
