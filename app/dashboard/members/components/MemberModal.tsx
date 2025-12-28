@@ -279,13 +279,20 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     {/* 2. Payment Action Box (White Card) */}
                                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-3">
-                                        {/* Toggle Header */}
                                         <div
                                             onClick={togglePaymentForm}
-                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2"
+                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2 group"
                                         >
-                                            <h5 className="text-xs font-bold text-gray-500 uppercase">
-                                                {isPaymentFormOpen ? 'v 결제하기' : '> 결제하기'}
+                                            <svg
+                                                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isPaymentFormOpen ? 'rotate-90' : ''}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                            <h5 className="text-xs font-bold text-gray-500 uppercase group-hover:text-gray-700 transition-colors">
+                                                결제하기
                                             </h5>
                                         </div>
 
