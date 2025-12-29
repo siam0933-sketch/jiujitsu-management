@@ -1,11 +1,14 @@
-
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
+import MemberActions from './MemberActions'
+import PromotionHistory from './PromotionHistory'
+import { getPromotionLogs } from './actions'
 
 export default async function MemberDetailsPage({ params }: { params: { id: string } }) {
     const { id } = await params
     const supabase = await createClient()
 
+    // 1. Fetch Member
     const { data: member } = await supabase
         .from('gym_members')
         .select('*')
@@ -15,6 +18,19 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
     if (!member) {
         notFound()
     }
+
+    // 2. Fetch Pause Status
+    const { data: activePause } = await supabase
+        .from('gym_membership_pauses')
+        .select('id')
+        .eq('member_id', id)
+        .is('end_date', null)
+        .single()
+
+    const isPaused = !!activePause
+
+    // 3. Fetch Promotion Logs
+    const promotionLogs = await getPromotionLogs(id)
 
     const calculateAge = (birthDateString: string | null) => {
         if (!birthDateString) return '-'
@@ -46,62 +62,56 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                 </div>
             </div>
 
-            {/* Tabs (Visual Only for now) */}
-            <div className="mb-8">
-                <div className="border-b border-gray-200">
-                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                        <a href="#" className="border-blue-500 text-blue-600 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-                            기본 정보
-                        </a>
-                        <a href="#" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-                            결제 / 수납
-                        </a>
-                        <a href="#" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-                            활동 / 출석
-                        </a>
-                    </nav>
-                </div>
-            </div>
+            {/* Member Actions (New) */}
+            <MemberActions
+                memberId={id}
+                startDate={member.start_date}
+                joinedAt={member.joined_at}
+                isPaused={isPaused}
+            />
 
             {/* Content Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-base font-semibold leading-6 text-gray-900">신상 정보</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">개인 및 연락처 정보입니다.</p>
-                    </div>
-                    <div className="border-t border-gray-200">
-                        <dl>
-                            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">이름</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.name}</dd>
-                            </div>
-                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">생년월일 (나이)</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {member.birth_date} <span className="text-gray-400">({calculateAge(member.birth_date)})</span>
-                                </dd>
-                            </div>
-                            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">연락처</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.phone}</dd>
-                            </div>
-                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">성별</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                    {member.gender === 'male' ? '남성' : '여성'}
-                                </dd>
-                            </div>
-                            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">주소</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.address}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Info */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Promotion History (New) */}
+                    <PromotionHistory memberId={id} initialLogs={promotionLogs} />
 
-                <div className="space-y-8">
-                    {/* School & Guardian */}
+                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                        <div className="px-4 py-5 sm:px-6">
+                            <h3 className="text-base font-semibold leading-6 text-gray-900">신상 정보</h3>
+                            <p className="mt-1 max-w-2xl text-sm text-gray-500">개인 및 연락처 정보입니다.</p>
+                        </div>
+                        <div className="border-t border-gray-200">
+                            <dl>
+                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500">이름</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.name}</dd>
+                                </div>
+                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500">생년월일 (나이)</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                        {member.birth_date} <span className="text-gray-400">({calculateAge(member.birth_date)})</span>
+                                    </dd>
+                                </div>
+                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500">연락처</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.phone}</dd>
+                                </div>
+                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500">성별</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                        {member.gender === 'male' ? '남성' : '여성'}
+                                    </dd>
+                                </div>
+                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500">주소</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.address}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+
                     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                         <div className="px-4 py-5 sm:px-6">
                             <h3 className="text-base font-semibold leading-6 text-gray-900">학교 및 보호자</h3>
@@ -121,31 +131,31 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                             </dl>
                         </div>
                     </div>
+                </div>
 
-                    {/* System Info */}
+                {/* Right Column: System Info */}
+                <div className="space-y-8">
                     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                        <div className="px-4 py-5 sm:px-6">
+                        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50">
                             <h3 className="text-base font-semibold leading-6 text-gray-900">도장 관리 정보</h3>
                         </div>
                         <div className="border-t border-gray-200">
                             <dl>
-                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">출결/접속 코드(PIN)</dt>
-                                    <dd className="mt-1 text-sm font-mono font-bold text-blue-600 sm:col-span-2 sm:mt-0 tracking-wider">
+                                <div className="bg-white px-4 py-5">
+                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">출결/접속 코드(PIN)</dt>
+                                    <dd className="text-2xl font-mono font-bold text-blue-600 tracking-widest text-center py-2 bg-blue-50 rounded-lg border border-blue-100">
                                         {member.access_code}
                                     </dd>
                                 </div>
-                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">입관일(등록일)</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                        {new Date(member.joined_at).toLocaleDateString()}
-                                    </dd>
-                                </div>
-                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">수납 청구일</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                        매월 {member.payment_due_day ? `${member.payment_due_day}일` : '-'}
-                                    </dd>
+                                <div className="bg-gray-50 px-4 py-5 border-t border-gray-200">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <dt className="text-sm font-medium text-gray-500">입관일(등록일)</dt>
+                                        <dd className="text-sm font-bold text-gray-900">{new Date(member.joined_at).toLocaleDateString()}</dd>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <dt className="text-sm font-medium text-gray-500">수납 청구일</dt>
+                                        <dd className="text-sm font-bold text-gray-900">매월 {member.payment_due_day ? `${member.payment_due_day}일` : '-'}</dd>
+                                    </div>
                                 </div>
                             </dl>
                         </div>
