@@ -19,14 +19,14 @@
         - [x] DB 스키마 (승급 기준, 출석 로그, 멤버 필드 추가) <!-- id: 13-1 -->
         - [x] 승급 기준 설정 페이지 구현 <!-- id: 13-2 -->
         - [x] 승급 기준 시스템 개편 (V2) <!-- id: promotion-v2 -->
-        - [ ] 승급 이력(History) 관리 기능 <!-- id: promotion-history -->
-            - [ ] DB 스키마 (gym_promotion_logs) <!-- id: history-db -->
-            - [ ] 서버 액션 (로그 추가/수정, 통계 계산) <!-- id: history-actions -->
-            - [ ] UI 구현 (회원 상세 -> 승급 기록 탭/모달) <!-- id: history-ui -->
-        - [ ] 회원 관리 고도화 (입문일/휴관) <!-- id: member-advanced -->
-            - [ ] DB 스키마 (start_date, gym_membership_pauses) <!-- id: member-db -->
-            - [ ] 서버 액션 (휴관/복귀 처리, 결제일 연장 로직) <!-- id: member-actions -->
-            - [ ] UI 구현 (입문일 수정, 휴관 버튼, 타임라인 통합) <!-- id: member-ui -->
+        - [x] 승급 이력(History) 관리 기능 <!-- id: promotion-history -->
+            - [x] DB 스키마 (gym_promotion_logs) <!-- id: history-db -->
+            - [x] 서버 액션 (로그 추가/수정, 통계 계산) <!-- id: history-actions -->
+            - [x] UI 구현 (회원 상세 -> 승급 기록 탭/모달) <!-- id: history-ui -->
+        - [x] 회원 관리 고도화 (입문일/휴관) <!-- id: member-advanced -->
+            - [x] DB 스키마 (start_date, gym_membership_pauses) <!-- id: member-db -->
+            - [x] 서버 액션 (휴관/복귀 처리, 결제일 연장 로직) <!-- id: member-actions -->
+            - [x] UI 구현 (입문일 수정, 휴관 버튼, 타임라인 통합) <!-- id: member-ui -->
         - [x] 출석 체크 기능 (관리자 수동 체크) <!-- id: 13-3 -->
         - [x] 승급 알림 및 처리 로직 구현 <!-- id: 13-4 -->
 - [x] 개발 3단계: 가격 책정 및 결제 시스템 <!-- id: pricing -->
