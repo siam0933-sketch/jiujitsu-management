@@ -29,6 +29,7 @@ export async function getPricingData() {
         .select('*')
         .eq('gym_id', gym.id)
         .eq('is_active', true)
+        .order('group_order', { ascending: true })
         .order('group_name', { ascending: true })
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: true })
@@ -206,6 +207,80 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
     }
 
     console.log('[Reorder] Swap success')
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function reorderGroup(groupName: string, direction: 'up' | 'down') {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Unauthorized' }
+
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+
+    if (!gym) return { error: 'Gym not found' }
+
+    // 1. Get current group stats
+    const { data: targetGroup } = await supabase
+        .from('gym_price_options')
+        .select('group_order')
+        .eq('gym_id', gym.id)
+        .eq('group_name', groupName)
+        .limit(1)
+        .single()
+
+    if (!targetGroup) return { error: 'Group not found' }
+
+    const currentOrder = targetGroup.group_order
+
+    // 2. Find adjacent group
+    let adjacentQuery = supabase
+        .from('gym_price_options')
+        .select('group_name, group_order')
+        .eq('gym_id', gym.id)
+        .neq('group_name', groupName)
+
+    if (direction === 'up') {
+        adjacentQuery = adjacentQuery
+            .lt('group_order', currentOrder)
+            .order('group_order', { ascending: false })
+            .limit(1)
+    } else {
+        adjacentQuery = adjacentQuery
+            .gt('group_order', currentOrder)
+            .order('group_order', { ascending: true })
+            .limit(1)
+    }
+
+    const { data: adjacentGroup } = await adjacentQuery.maybeSingle()
+
+    if (!adjacentGroup) return { success: true } // Already at top/bottom
+
+    const adjacentOrder = adjacentGroup.group_order
+    const adjacentName = adjacentGroup.group_name
+
+    // 3. Swap group_order for ALL items in both groups
+    const { error: e1 } = await supabase
+        .from('gym_price_options')
+        .update({ group_order: adjacentOrder })
+        .eq('gym_id', gym.id)
+        .eq('group_name', groupName)
+
+    if (e1) return { error: e1.message }
+
+    const { error: e2 } = await supabase
+        .from('gym_price_options')
+        .update({ group_order: currentOrder })
+        .eq('gym_id', gym.id)
+        .eq('group_name', adjacentName)
+
+    if (e2) return { error: e2.message }
+
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }
 }

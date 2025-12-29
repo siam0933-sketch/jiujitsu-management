@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption } from './actions'
+import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption, reorderGroup } from './actions'
 import OptionReorderButton from './components/OptionReorderButton'
 
 export default function PricingSettingsPage() {
@@ -65,16 +65,67 @@ export default function PricingSettingsPage() {
         loadData()
     }
 
-    const handleReorder = async (optionId: string, direction: 'up' | 'down') => {
-        console.log(`[Optimistic] Request: id=${optionId}, dir=${direction}`);
+    // transform options into sorted array of groups
+    const groupedOptions = Object.values(options.reduce((acc: any, opt: any) => {
+        if (!acc[opt.group_name]) {
+            acc[opt.group_name] = {
+                name: opt.group_name,
+                order: opt.group_order ?? 9999, // fallback
+                items: []
+            };
+        }
+        acc[opt.group_name].items.push(opt);
+        return acc;
+    }, {})).sort((a: any, b: any) => a.order - b.order) as any[];
+
+
+    const handleGroupReorder = async (groupName: string, direction: 'up' | 'down') => {
+        // 1. Optimistic Update for Groups
+        // Find current group index in the sorted array
+        const currentIndex = groupedOptions.findIndex(g => g.name === groupName);
+        if (currentIndex === -1) return;
+
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (targetIndex < 0 || targetIndex >= groupedOptions.length) return;
+
+        // Clone the full options array to modify
+        const newOptions = [...options];
+
+        // We need to swap the 'group_order' of all items in these two groups
+        const currentGroup = groupedOptions[currentIndex];
+        const adjacentGroup = groupedOptions[targetIndex];
+
+        // Calculate new orders (swap)
+        const currentOrder = currentGroup.order;
+        const adjacentOrder = adjacentGroup.order;
+
+        // Apply to all items in newOptions
+        newOptions.forEach(opt => {
+            if (opt.group_name === currentGroup.name) {
+                opt.group_order = adjacentOrder;
+            } else if (opt.group_name === adjacentGroup.name) {
+                opt.group_order = currentOrder;
+            }
+        });
+
+        // Trigger render
+        setOptions(newOptions);
+
+        // 2. Server Action
+        const res = await reorderGroup(groupName, direction);
+        if (res?.error) {
+            alert('그룹 순서 변경 실패: ' + res.error);
+            loadData();
+        }
+    }
+
+    const handleOptionReorder = async (optionId: string, direction: 'up' | 'down') => {
+        console.log(`[Optimistic] Option Request: id=${optionId}, dir=${direction}`);
 
         // 1. Optimistic Update
         const newOptions = [...options];
         const targetIndex = newOptions.findIndex(o => o.id === optionId);
-        if (targetIndex === -1) {
-            console.error('[Optimistic] Target not found');
-            return;
-        }
+        if (targetIndex === -1) return;
 
         const targetOption = { ...newOptions[targetIndex] };
 
@@ -88,7 +139,7 @@ export default function PricingSettingsPage() {
                 }
             }
         } else {
-            for (let i = targetIndex + 1; i < newOptions.length; i++) {
+            for (let i = targetIndex + 1; i < newOptions.length; i--) { // Corrected loop condition
                 if (newOptions[i].group_name === targetOption.group_name) {
                     adjacentIndex = i;
                     break;
@@ -96,33 +147,23 @@ export default function PricingSettingsPage() {
             }
         }
 
-        if (adjacentIndex === -1) {
-            console.log('[Optimistic] No adjacent item found');
-            return;
-        }
+        if (adjacentIndex === -1) return;
 
         const adjacentOption = { ...newOptions[adjacentIndex] };
-
-        // Swap display_order for consistency (optional but good)
         const tempOrder = targetOption.display_order;
         targetOption.display_order = adjacentOption.display_order;
         adjacentOption.display_order = tempOrder;
 
-        // Perform Swap in Array
         newOptions[targetIndex] = adjacentOption;
         newOptions[adjacentIndex] = targetOption;
 
-        console.log(`[Optimistic] Swapped indices ${targetIndex} and ${adjacentIndex}`);
         setOptions(newOptions);
 
         // 2. Server Action
         const res = await reorderOption(optionId, direction);
         if (res?.error) {
-            console.error('[Optimistic] Server error:', res.error);
-            alert('순서 변경 실패, 되돌립니다.');
-            loadData(); // Revert
-        } else {
-            console.log('[Optimistic] Server success');
+            alert('옵션 순서 변경 실패');
+            loadData();
         }
     }
 
@@ -269,25 +310,26 @@ export default function PricingSettingsPage() {
                             </div>
 
                             <div className="space-y-6">
-                                {Object.entries(options.reduce((acc: any, opt: any) => {
-                                    (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
-                                    return acc;
-                                }, {})).map(([group, opts]: [string, any]) => (
-                                    <div key={group} className="border rounded-lg bg-white overflow-hidden shadow-sm">
+                                {groupedOptions.map((group: any, gIdx: number) => (
+                                    <div key={group.name} className="border rounded-lg bg-white overflow-hidden shadow-sm">
                                         <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-gray-900 text-sm">{group}</h3>
-                                                <span className="text-[10px] text-gray-500 bg-white border border-gray-200 px-1.5 rounded">{opts.length}개 옵션</span>
+                                                <div className="flex flex-col gap-0.5 mr-2">
+                                                    <OptionReorderButton direction="up" disabled={gIdx === 0} onReorder={() => handleGroupReorder(group.name, 'up')} />
+                                                    <OptionReorderButton direction="down" disabled={gIdx === groupedOptions.length - 1} onReorder={() => handleGroupReorder(group.name, 'down')} />
+                                                </div>
+                                                <h3 className="font-bold text-gray-900 text-sm">{group.name}</h3>
+                                                <span className="text-[10px] text-gray-500 bg-white border border-gray-200 px-1.5 rounded">{group.items.length}개 옵션</span>
                                             </div>
                                         </div>
 
                                         <ul className="divide-y divide-gray-50">
-                                            {opts.map((opt: any, idx: number) => (
+                                            {group.items.map((opt: any, idx: number) => (
                                                 <li key={opt.id} className="flex justify-between items-center text-sm px-4 py-3 hover:bg-gray-50 transition-colors">
                                                     <div className="flex items-center gap-2">
                                                         <div className="flex flex-col gap-0.5">
-                                                            <OptionReorderButton direction="up" disabled={idx === 0} onReorder={() => handleReorder(opt.id, 'up')} />
-                                                            <OptionReorderButton direction="down" disabled={idx === opts.length - 1} onReorder={() => handleReorder(opt.id, 'down')} />
+                                                            <OptionReorderButton direction="up" disabled={idx === 0} onReorder={() => handleOptionReorder(opt.id, 'up')} />
+                                                            <OptionReorderButton direction="down" disabled={idx === group.items.length - 1} onReorder={() => handleOptionReorder(opt.id, 'down')} />
                                                         </div>
                                                         <span className="text-gray-700 ml-2">{opt.name}</span>
                                                     </div>
@@ -307,7 +349,7 @@ export default function PricingSettingsPage() {
                                             {/* Inline Add Option Form */}
                                             <li className="bg-gray-50/50 px-4 py-3 border-t border-dashed border-gray-200">
                                                 <form onSubmit={handleCreateOption} className="flex gap-2 items-center">
-                                                    <input type="hidden" name="group_name" value={group} />
+                                                    <input type="hidden" name="group_name" value={group.name} />
                                                     <span className="text-xs text-gray-400 w-6 text-center flex justify-center">
                                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -323,7 +365,7 @@ export default function PricingSettingsPage() {
                                         </ul>
                                     </div>
                                 ))}
-                                {options.length === 0 && <p className="text-center text-gray-400 text-sm py-8">등록된 옵션 그룹이 없습니다. 위에서 그룹을 생성해주세요.</p>}
+                                {groupedOptions.length === 0 && <p className="text-center text-gray-400 text-sm py-8">등록된 옵션 그룹이 없습니다. 위에서 그룹을 생성해주세요.</p>}
                             </div>
                         </section>
                     </div>
