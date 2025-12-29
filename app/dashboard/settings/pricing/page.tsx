@@ -74,8 +74,8 @@ export default function PricingSettingsPage() {
                     <button
                         onClick={() => setActiveTab('period')}
                         className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'period'
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                     >
                         기간권 (옵션 포함)
@@ -83,8 +83,8 @@ export default function PricingSettingsPage() {
                     <button
                         onClick={() => setActiveTab('session')}
                         className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'session'
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                     >
                         횟수권 (쿠폰)
@@ -101,7 +101,10 @@ export default function PricingSettingsPage() {
                         {/* Period Plans Section */}
                         <section>
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                📅 기간권 관리
+                                <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                기간권 관리
                                 <span className="text-xs font-normal text-gray-500">(기본 1개월 단위)</span>
                             </h2>
                             <form onSubmit={handleCreatePlan} className="flex gap-4 items-end mb-6 bg-gray-50 p-4 rounded-md">
@@ -145,7 +148,10 @@ export default function PricingSettingsPage() {
                         {/* Options Section */}
                         <section>
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                ➕ 옵션 관리
+                                <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                옵션 관리
                                 <span className="text-xs font-normal text-gray-500">(기간권에만 적용)</span>
                             </h2>
                             <form onSubmit={handleCreateOption} className="flex gap-4 items-end mb-6 bg-gray-50 p-4 rounded-md">
