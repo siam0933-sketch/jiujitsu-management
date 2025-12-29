@@ -278,7 +278,7 @@ export default function PromotionSettingsPage() {
                                 onClick={applyBatchUpdate}
                                 className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm font-bold shadow-md transition-colors"
                             >
-                                아래 목록에 전체 제경
+                                일괄적용
                             </button>
                         </div>
                     </div>
