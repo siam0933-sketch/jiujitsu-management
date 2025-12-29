@@ -245,7 +245,11 @@ export default function PricingSettingsPage() {
                                             <li className="bg-gray-50/50 px-4 py-3 border-t border-dashed border-gray-200">
                                                 <form onSubmit={handleCreateOption} className="flex gap-2 items-center">
                                                     <input type="hidden" name="group_name" value={group} />
-                                                    <span className="text-xs text-gray-400 w-6 text-center">➕</span>
+                                                    <span className="text-xs text-gray-400 w-6 text-center flex justify-center">
+                                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </span>
                                                     <input name="name" required placeholder="옵션 추가..." className="flex-1 bg-transparent border-0 border-b border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 px-0 placeholder-gray-400" />
                                                     <input name="price" type="number" required placeholder="금액" className="w-20 bg-transparent border-0 border-b border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 px-0 text-right placeholder-gray-400" />
                                                     <button type="submit" disabled={isSubmitting} className="text-xs text-blue-600 font-bold hover:text-blue-800 px-2">
