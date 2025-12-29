@@ -30,6 +30,8 @@ export async function getPricingData() {
         .eq('gym_id', gym.id)
         .eq('is_active', true)
         .order('group_name', { ascending: true })
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: true })
 
     return { plans: plans || [], options: options || [] }
 }
@@ -99,6 +101,18 @@ export async function createOption(formData: FormData) {
     const name = String(formData.get('name'))
     const price = Number(formData.get('price'))
 
+    // Get max order for this group
+    const { data: maxOrder } = await supabase
+        .from('gym_price_options')
+        .select('display_order')
+        .eq('gym_id', gym.id)
+        .eq('group_name', group_name)
+        .order('display_order', { ascending: false })
+        .limit(1)
+        .single()
+
+    const nextOrder = (maxOrder?.display_order || 0) + 1
+
     const { error } = await supabase
         .from('gym_price_options')
         .insert({
@@ -106,6 +120,7 @@ export async function createOption(formData: FormData) {
             group_name,
             name,
             price,
+            display_order: nextOrder,
             is_active: true
         })
 
@@ -122,6 +137,58 @@ export async function deleteOption(optionId: string) {
         .eq('id', optionId)
 
     if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function reorderOption(optionId: string, direction: 'up' | 'down') {
+    const supabase = await createClient()
+
+    // 1. Get Target
+    const { data: target } = await supabase
+        .from('gym_price_options')
+        .select('*')
+        .eq('id', optionId)
+        .single()
+
+    if (!target) return { error: 'Option not found' }
+
+    // 2. Find Adjacent
+    let adjacentQuery = supabase
+        .from('gym_price_options')
+        .select('*')
+        .eq('gym_id', target.gym_id)
+        .eq('group_name', target.group_name)
+        .limit(1)
+
+    if (direction === 'up') {
+        adjacentQuery = adjacentQuery
+            .lt('display_order', target.display_order)
+            .order('display_order', { ascending: false })
+    } else {
+        adjacentQuery = adjacentQuery
+            .gt('display_order', target.display_order)
+            .order('display_order', { ascending: true })
+    }
+
+    const { data: adjacent } = await adjacentQuery.single()
+    if (!adjacent) return { success: true }
+
+    // 3. Swap
+    const { error: e1 } = await supabase
+        .from('gym_price_options')
+        .update({ display_order: adjacent.display_order })
+        .eq('id', target.id)
+
+    if (e1) return { error: e1.message }
+
+    const { error: e2 } = await supabase
+        .from('gym_price_options')
+        .update({ display_order: target.display_order })
+        .eq('id', adjacent.id)
+
+    if (e2) return { error: e2.message }
+
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }
 }

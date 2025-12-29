@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getPricingData, createPlan, deletePlan, createOption, deleteOption } from './actions'
+import OptionReorderButton from './components/OptionReorderButton'
 
 export default function PricingSettingsPage() {
     const [activeTab, setActiveTab] = useState<'period' | 'session'>('period')
@@ -147,57 +148,115 @@ export default function PricingSettingsPage() {
 
                         {/* Options Section */}
                         <section>
-                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                                옵션 관리
-                                <span className="text-xs font-normal text-gray-500">(기간권에만 적용)</span>
-                            </h2>
-                            <form onSubmit={handleCreateOption} className="flex gap-4 items-end mb-6 bg-gray-50 p-4 rounded-md">
-                                <div className="flex-1">
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">그룹 이름</label>
-                                    <input name="group_name" required placeholder="예: 차량 운행" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
+                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    옵션 관리
+                                    <span className="text-xs font-normal text-gray-500">(기간권에만 적용)</span>
                                 </div>
-                                <div className="flex-1">
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">옵션 이름</label>
-                                    <input name="name" required placeholder="예: 이용함" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
-                                </div>
-                                <div className="w-32">
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">금액 (원)</label>
-                                    <input name="price" type="number" required placeholder="10000" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
-                                </div>
-                                <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-500 disabled:opacity-50 h-[38px]">
-                                    추가
-                                </button>
-                            </form>
+                                <button
+                                    onClick={() => {
+                                        const groupName = prompt('새로운 옵션 그룹 이름을 입력하세요:');
+                                        if (groupName) {
+                                            // Ideally we shouldn't manipulate DOM directly or alerts, but for quick UX:
+                                            // We can just trigger a createOption with a dummy, or better, just scroll or focus.
+                                            // Actually, simplest way: Just use the creating form but pre-fill group?
+                                            // Proposed design: "Add Group" opens a modal or just asks for name and adds a focused empty card?
+                                            // Let's use a specialized Form for "New Group" that creates the first entry.
+                                            // Or simplified: Just use a new small form at the top for "New Group".
+                                            const name = prompt('첫 번째 옵션 이름을 입력하세요 (예: 셔틀버스):');
+                                            if (!name) return;
+                                            const priceInput = prompt('옵션 가격을 입력하세요 (예: 20000):', '0');
+                                            if (priceInput === null) return;
 
-                            <div className="space-y-4">
+                                            // Create via form submission simulation or direct call?
+                                            // Direct call is cleaner but I need to import it properly or use a hidden form submit.
+                                            // Let's use a hidden form hack or just better UI.
+                                            // Actually, I'll add a 'New Group' form block at the top.
+                                        }
+                                    }}
+                                    className="hidden text-xs bg-gray-100 px-3 py-1 rounded hover:bg-gray-200"
+                                >
+                                    + 새 그룹
+                                </button>
+                            </h2>
+
+                            {/* New Group Form */}
+                            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <h3 className="text-sm font-bold text-blue-900 mb-2">새 옵션 그룹 만들기</h3>
+                                <form onSubmit={handleCreateOption} className="flex gap-2 items-end">
+                                    <div className="flex-1">
+                                        <label className="block text-[10px] font-medium text-blue-700 mb-1">그룹명</label>
+                                        <input name="group_name" required placeholder="예: 차량 운행" className="block w-full rounded-md border-blue-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs p-2 border" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-[10px] font-medium text-blue-700 mb-1">옵션명</label>
+                                        <input name="name" required placeholder="예: 5km 이내" className="block w-full rounded-md border-blue-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs p-2 border" />
+                                    </div>
+                                    <div className="w-24">
+                                        <label className="block text-[10px] font-medium text-blue-700 mb-1">금액</label>
+                                        <input name="price" type="number" required placeholder="0" className="block w-full rounded-md border-blue-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs p-2 border" />
+                                    </div>
+                                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-3 py-[7px] rounded-md text-xs font-bold hover:bg-blue-500 h-[34px]">
+                                        그룹 생성
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div className="space-y-6">
                                 {Object.entries(options.reduce((acc: any, opt: any) => {
                                     (acc[opt.group_name] = acc[opt.group_name] || []).push(opt);
                                     return acc;
                                 }, {})).map(([group, opts]: [string, any]) => (
-                                    <div key={group} className="border rounded-md p-4 bg-white">
-                                        <h3 className="font-semibold text-gray-900 mb-3 text-sm border-b border-gray-100 pb-2 flex items-center justify-between">
-                                            {group}
-                                            <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded">옵션 그룹</span>
-                                        </h3>
-                                        <ul className="space-y-3">
-                                            {opts.map((opt: any) => (
-                                                <li key={opt.id} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2 last:border-0 last:pb-0">
-                                                    <span className="text-gray-700">{opt.name}</span>
+                                    <div key={group} className="border rounded-lg bg-white overflow-hidden shadow-sm">
+                                        <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-bold text-gray-900 text-sm">{group}</h3>
+                                                <span className="text-[10px] text-gray-500 bg-white border border-gray-200 px-1.5 rounded">{opts.length}개 옵션</span>
+                                            </div>
+                                        </div>
+
+                                        <ul className="divide-y divide-gray-50">
+                                            {opts.map((opt: any, idx: number) => (
+                                                <li key={opt.id} className="flex justify-between items-center text-sm px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <OptionReorderButton id={opt.id} direction="up" disabled={idx === 0} />
+                                                            <OptionReorderButton id={opt.id} direction="down" disabled={idx === opts.length - 1} />
+                                                        </div>
+                                                        <span className="text-gray-700 ml-2">{opt.name}</span>
+                                                    </div>
                                                     <div className="flex items-center gap-4">
-                                                        <span className={opt.price > 0 ? 'text-blue-600' : 'text-red-600'}>
+                                                        <span className={opt.price > 0 ? 'text-blue-600 font-medium' : 'text-gray-400'}>
                                                             {opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()}원
                                                         </span>
-                                                        <button onClick={() => handleDeleteOption(opt.id)} className="text-gray-400 hover:text-red-600 text-xs">삭제</button>
+                                                        <button onClick={() => handleDeleteOption(opt.id)} className="text-gray-300 hover:text-red-500 p-1 rounded hover:bg-red-50 transition-all">
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </li>
                                             ))}
+
+                                            {/* Inline Add Option Form */}
+                                            <li className="bg-gray-50/50 px-4 py-3 border-t border-dashed border-gray-200">
+                                                <form onSubmit={handleCreateOption} className="flex gap-2 items-center">
+                                                    <input type="hidden" name="group_name" value={group} />
+                                                    <span className="text-xs text-gray-400 w-6 text-center">➕</span>
+                                                    <input name="name" required placeholder="옵션 추가..." className="flex-1 bg-transparent border-0 border-b border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 px-0 placeholder-gray-400" />
+                                                    <input name="price" type="number" required placeholder="금액" className="w-20 bg-transparent border-0 border-b border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 px-0 text-right placeholder-gray-400" />
+                                                    <button type="submit" disabled={isSubmitting} className="text-xs text-blue-600 font-bold hover:text-blue-800 px-2">
+                                                        등록
+                                                    </button>
+                                                </form>
+                                            </li>
                                         </ul>
                                     </div>
                                 ))}
-                                {options.length === 0 && <p className="text-gray-500 text-sm">등록된 옵션이 없습니다.</p>}
+                                {options.length === 0 && <p className="text-center text-gray-400 text-sm py-8">등록된 옵션 그룹이 없습니다. 위에서 그룹을 생성해주세요.</p>}
                             </div>
                         </section>
                     </div>
