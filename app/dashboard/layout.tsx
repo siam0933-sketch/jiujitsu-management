@@ -8,24 +8,27 @@ export default async function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
-    const supabase = await createClient()
+    // Fetch additional info for Sidebar
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('name')
+        .eq('owner_id', user.id)
+        .single()
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-        return redirect('/login')
-    }
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
 
     return (
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar */}
-            <aside className="w-64 bg-white shadow-md">
+            <aside className="w-64 bg-white shadow-md flex flex-col">
                 <div className="p-6">
                     <h1 className="text-2xl font-bold text-gray-800">Gym Manager</h1>
                 </div>
-                <nav className="mt-6 px-4 space-y-2">
+                <nav className="mt-6 px-4 space-y-2 flex-1">
                     <Link
                         href="/dashboard"
                         className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
@@ -71,18 +74,33 @@ export default async function DashboardLayout({
                         </svg>
                         승급 기준 설정
                     </Link>
-
-                    <div className="pt-4 mt-4 border-t border-gray-200">
-                        <form action="/auth/sign-out" method="post">
-                            <button className="flex items-center gap-3 w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                로그아웃
-                            </button>
-                        </form>
-                    </div>
                 </nav>
+
+                <div className="p-4 border-t border-gray-200">
+                    {/* Gym & Admin Info */}
+                    <Link href="/dashboard/settings/gym" className="block mb-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="bg-white p-1.5 rounded-full border border-gray-200 text-gray-500 group-hover:text-blue-600 transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-gray-900 group-hover:text-blue-700">{gym?.name || '도장 이름 없음'}</p>
+                                <p className="text-xs text-gray-500 group-hover:text-gray-700">{profile?.full_name || '관리자'}</p>
+                            </div>
+                        </div>
+                    </Link>
+
+                    <form action="/auth/sign-out" method="post">
+                        <button className="flex items-center gap-3 w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors text-sm">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            로그아웃
+                        </button>
+                    </form>
+                </div>
             </aside >
 
             {/* Main Content */}
