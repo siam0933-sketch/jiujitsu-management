@@ -248,7 +248,7 @@ export default function PromotionSettingsPage() {
                         </h3>
                         <div className="flex gap-4 items-end">
                             <div className="flex-1">
-                                <label className="block text-[10px] text-gray-300 mb-1">기본 단계(그랄) 수</label>
+                                <label className="block text-sm text-gray-300 mb-1">기본 단계(그랄) 수</label>
                                 <input
                                     type="number"
                                     value={batchStripes}
@@ -257,7 +257,7 @@ export default function PromotionSettingsPage() {
                                 />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-[10px] text-gray-300 mb-1">한 단계당 필요 개월</label>
+                                <label className="block text-sm text-gray-300 mb-1">한 단계당 필요 개월</label>
                                 <input
                                     type="number"
                                     value={batchMonths}
@@ -266,7 +266,7 @@ export default function PromotionSettingsPage() {
                                 />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-[10px] text-gray-300 mb-1">한 단계당 필요 출석</label>
+                                <label className="block text-sm text-gray-300 mb-1">한 단계당 필요 출석</label>
                                 <input
                                     type="number"
                                     value={batchAttendance}
