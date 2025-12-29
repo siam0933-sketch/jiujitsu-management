@@ -29,8 +29,8 @@
     - [x] 회원 상세 결제 계산 로직 구현 <!-- id: pricing-logic -->
 - [/] 승급 기준 시스템 개편 (V2) <!-- id: promotion-v2 -->
     - [x] DB 스키마 설계 (성인/유소년 분리, 그랄, 순서) <!-- id: promotion-v2-db -->
-    - [/] UI 프로토타입 (Playground) 구현 <!-- id: promotion-v2-ui -->
-    - [ ] 실제 데이터 연동 (API/UI 연결) <!-- id: promotion-v2-integration -->
+    - [x] UI 프로토타입 (Playground) 구현 <!-- id: promotion-v2-ui -->
+    - [x] 실제 데이터 연동 (API/UI 연결) <!-- id: promotion-v2-integration -->
 - [/] 배포 및 운영 <!-- id: deployment -->
     - [x] GitHub 연동 및 업로드 <!-- id: deploy-git -->
     - [-] Cloudtype 배포 (중단 - 리소스 부족) <!-- id: deploy-cloudtype -->
