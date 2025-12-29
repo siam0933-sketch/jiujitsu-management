@@ -23,9 +23,14 @@
 - [x] 개발 3단계: 가격 책정 및 결제 시스템 <!-- id: pricing -->
     - [x] DB 스키마 추가 (가격표, 옵션, 결제내역) <!-- id: pricing-db -->
     - [x] 설정 페이지 구현 (가격/옵션 관리) <!-- id: pricing-settings -->
-        - [x] 옵션 그룹화 및 순서 변경 UI 개선 (Refinement)
-        - [x] DB 마이그레이션 (옵션 순서 컬럼 추가)
+        - [x] 옵션 그룹화 및 순서 변경 UI 개선 <!-- id: pricing-group-reorder -->
+            - [x] DB 마이그레이션 (옵션 순서 컬럼)
+            - [x] 그룹 순서 변경 기능 구현
     - [x] 회원 상세 결제 계산 로직 구현 <!-- id: pricing-logic -->
+- [/] 승급 기준 시스템 개편 (V2) <!-- id: promotion-v2 -->
+    - [x] DB 스키마 설계 (성인/유소년 분리, 그랄, 순서) <!-- id: promotion-v2-db -->
+    - [/] UI 프로토타입 (Playground) 구현 <!-- id: promotion-v2-ui -->
+    - [ ] 실제 데이터 연동 (API/UI 연결) <!-- id: promotion-v2-integration -->
 - [/] 배포 및 운영 <!-- id: deployment -->
     - [x] GitHub 연동 및 업로드 <!-- id: deploy-git -->
     - [-] Cloudtype 배포 (중단 - 리소스 부족) <!-- id: deploy-cloudtype -->
