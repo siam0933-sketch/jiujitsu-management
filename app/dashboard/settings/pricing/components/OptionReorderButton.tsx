@@ -1,16 +1,7 @@
-'use client'
-
-import { reorderOption } from '../actions'
-
-export default function OptionReorderButton({ id, direction, disabled }: { id: string, direction: 'up' | 'down', disabled: boolean }) {
-    const handleReorder = async () => {
-        if (disabled) return
-        await reorderOption(id, direction)
-    }
-
+export default function OptionReorderButton({ direction, disabled, onReorder }: { direction: 'up' | 'down', disabled: boolean, onReorder: () => void }) {
     return (
         <button
-            onClick={handleReorder}
+            onClick={onReorder}
             disabled={disabled}
             className={`p-0.5 rounded transition-colors ${disabled ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
         >

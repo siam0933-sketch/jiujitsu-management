@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getPricingData, createPlan, deletePlan, createOption, deleteOption } from './actions'
+import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption } from './actions'
 import OptionReorderButton from './components/OptionReorderButton'
 
 export default function PricingSettingsPage() {
@@ -18,8 +18,10 @@ export default function PricingSettingsPage() {
     }, [])
 
     const loadData = async () => {
+        console.log('[Page] loadData start')
         setIsLoading(true)
         const { plans, options } = await getPricingData()
+        console.log('[Page] loadData received:', options?.map((o: any) => `${o.name}:${o.display_order}`))
         setPlans(plans)
         setOptions(options)
         setIsLoading(false)
@@ -61,6 +63,67 @@ export default function PricingSettingsPage() {
         if (!confirm('정말 삭제하시겠습니까?')) return
         await deleteOption(id)
         loadData()
+    }
+
+    const handleReorder = async (optionId: string, direction: 'up' | 'down') => {
+        console.log(`[Optimistic] Request: id=${optionId}, dir=${direction}`);
+
+        // 1. Optimistic Update
+        const newOptions = [...options];
+        const targetIndex = newOptions.findIndex(o => o.id === optionId);
+        if (targetIndex === -1) {
+            console.error('[Optimistic] Target not found');
+            return;
+        }
+
+        const targetOption = { ...newOptions[targetIndex] };
+
+        // Find adjacent option in the same group
+        let adjacentIndex = -1;
+        if (direction === 'up') {
+            for (let i = targetIndex - 1; i >= 0; i--) {
+                if (newOptions[i].group_name === targetOption.group_name) {
+                    adjacentIndex = i;
+                    break;
+                }
+            }
+        } else {
+            for (let i = targetIndex + 1; i < newOptions.length; i++) {
+                if (newOptions[i].group_name === targetOption.group_name) {
+                    adjacentIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (adjacentIndex === -1) {
+            console.log('[Optimistic] No adjacent item found');
+            return;
+        }
+
+        const adjacentOption = { ...newOptions[adjacentIndex] };
+
+        // Swap display_order for consistency (optional but good)
+        const tempOrder = targetOption.display_order;
+        targetOption.display_order = adjacentOption.display_order;
+        adjacentOption.display_order = tempOrder;
+
+        // Perform Swap in Array
+        newOptions[targetIndex] = adjacentOption;
+        newOptions[adjacentIndex] = targetOption;
+
+        console.log(`[Optimistic] Swapped indices ${targetIndex} and ${adjacentIndex}`);
+        setOptions(newOptions);
+
+        // 2. Server Action
+        const res = await reorderOption(optionId, direction);
+        if (res?.error) {
+            console.error('[Optimistic] Server error:', res.error);
+            alert('순서 변경 실패, 되돌립니다.');
+            loadData(); // Revert
+        } else {
+            console.log('[Optimistic] Server success');
+        }
     }
 
     const filteredPlans = plans.filter(p => p.type === activeTab)
@@ -184,22 +247,22 @@ export default function PricingSettingsPage() {
                             </h2>
 
                             {/* New Group Form */}
-                            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                <h3 className="text-sm font-bold text-blue-900 mb-2">새 옵션 그룹 만들기</h3>
+                            <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 className="text-sm font-bold text-gray-900 mb-2">새 옵션 그룹 만들기</h3>
                                 <form onSubmit={handleCreateOption} className="flex gap-2 items-end">
                                     <div className="flex-1">
-                                        <label className="block text-[10px] font-medium text-blue-700 mb-1">그룹명</label>
-                                        <input name="group_name" required placeholder="예: 차량 운행" className="block w-full rounded-md border-blue-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs p-2 border" />
+                                        <label className="block text-[10px] font-medium text-gray-600 mb-1">그룹명</label>
+                                        <input name="group_name" required placeholder="예: 차량 운행" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-xs p-2 border" />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-[10px] font-medium text-blue-700 mb-1">옵션명</label>
-                                        <input name="name" required placeholder="예: 5km 이내" className="block w-full rounded-md border-blue-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs p-2 border" />
+                                        <label className="block text-[10px] font-medium text-gray-600 mb-1">옵션명</label>
+                                        <input name="name" required placeholder="예: 5km 이내" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-xs p-2 border" />
                                     </div>
                                     <div className="w-24">
-                                        <label className="block text-[10px] font-medium text-blue-700 mb-1">금액</label>
-                                        <input name="price" type="number" required placeholder="0" className="block w-full rounded-md border-blue-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs p-2 border" />
+                                        <label className="block text-[10px] font-medium text-gray-600 mb-1">금액</label>
+                                        <input name="price" type="number" required placeholder="0" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-xs p-2 border" />
                                     </div>
-                                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-3 py-[7px] rounded-md text-xs font-bold hover:bg-blue-500 h-[34px]">
+                                    <button type="submit" disabled={isSubmitting} className="bg-gray-900 text-white px-3 py-[7px] rounded-md text-xs font-bold hover:bg-gray-800 h-[34px]">
                                         그룹 생성
                                     </button>
                                 </form>
@@ -223,8 +286,8 @@ export default function PricingSettingsPage() {
                                                 <li key={opt.id} className="flex justify-between items-center text-sm px-4 py-3 hover:bg-gray-50 transition-colors">
                                                     <div className="flex items-center gap-2">
                                                         <div className="flex flex-col gap-0.5">
-                                                            <OptionReorderButton id={opt.id} direction="up" disabled={idx === 0} />
-                                                            <OptionReorderButton id={opt.id} direction="down" disabled={idx === opts.length - 1} />
+                                                            <OptionReorderButton direction="up" disabled={idx === 0} onReorder={() => handleReorder(opt.id, 'up')} />
+                                                            <OptionReorderButton direction="down" disabled={idx === opts.length - 1} onReorder={() => handleReorder(opt.id, 'down')} />
                                                         </div>
                                                         <span className="text-gray-700 ml-2">{opt.name}</span>
                                                     </div>

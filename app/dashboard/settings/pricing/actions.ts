@@ -143,6 +143,7 @@ export async function deleteOption(optionId: string) {
 
 export async function reorderOption(optionId: string, direction: 'up' | 'down') {
     const supabase = await createClient()
+    console.log(`[Reorder] Start: id=${optionId}, dir=${direction}`)
 
     // 1. Get Target
     const { data: target } = await supabase
@@ -151,7 +152,11 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
         .eq('id', optionId)
         .single()
 
-    if (!target) return { error: 'Option not found' }
+    if (!target) {
+        console.error('[Reorder] Target not found')
+        return { error: 'Option not found' }
+    }
+    console.log(`[Reorder] Target found: order=${target.display_order}, group=${target.group_name}`)
 
     // 2. Find Adjacent
     let adjacentQuery = supabase
@@ -172,7 +177,12 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
     }
 
     const { data: adjacent } = await adjacentQuery.single()
-    if (!adjacent) return { success: true }
+
+    if (!adjacent) {
+        console.log('[Reorder] No adjacent item found')
+        return { success: true } // Already at top/bottom
+    }
+    console.log(`[Reorder] Adjacent found: id=${adjacent.id}, order=${adjacent.display_order}`)
 
     // 3. Swap
     const { error: e1 } = await supabase
@@ -180,15 +190,22 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
         .update({ display_order: adjacent.display_order })
         .eq('id', target.id)
 
-    if (e1) return { error: e1.message }
+    if (e1) {
+        console.error('[Reorder] Swap 1 failed:', e1)
+        return { error: e1.message }
+    }
 
     const { error: e2 } = await supabase
         .from('gym_price_options')
         .update({ display_order: target.display_order })
         .eq('id', adjacent.id)
 
-    if (e2) return { error: e2.message }
+    if (e2) {
+        console.error('[Reorder] Swap 2 failed:', e2)
+        return { error: e2.message }
+    }
 
+    console.log('[Reorder] Swap success')
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }
 }

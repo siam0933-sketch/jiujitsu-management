@@ -23,6 +23,8 @@
 - [x] 개발 3단계: 가격 책정 및 결제 시스템 <!-- id: pricing -->
     - [x] DB 스키마 추가 (가격표, 옵션, 결제내역) <!-- id: pricing-db -->
     - [x] 설정 페이지 구현 (가격/옵션 관리) <!-- id: pricing-settings -->
+        - [x] 옵션 그룹화 및 순서 변경 UI 개선 (Refinement)
+        - [x] DB 마이그레이션 (옵션 순서 컬럼 추가)
     - [x] 회원 상세 결제 계산 로직 구현 <!-- id: pricing-logic -->
 - [/] 배포 및 운영 <!-- id: deployment -->
     - [x] GitHub 연동 및 업로드 <!-- id: deploy-git -->
