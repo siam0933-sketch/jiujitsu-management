@@ -13,19 +13,19 @@ const ADULT_BELTS = [
 ];
 
 const KIDS_BELTS = [
-    { name: 'White', color: 'bg-white border-gray-200' },
-    { name: 'Gray-White', color: 'bg-gray-100 border-gray-300' },
-    { name: 'Gray', color: 'bg-gray-400 text-white' },
-    { name: 'Gray-Black', color: 'bg-gray-600 text-white' },
-    { name: 'Yellow-White', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-    { name: 'Yellow', color: 'bg-yellow-400 text-yellow-900' },
-    { name: 'Yellow-Black', color: 'bg-yellow-600 text-yellow-900' },
-    { name: 'Orange-White', color: 'bg-orange-100 text-orange-800 border-orange-200' },
-    { name: 'Orange', color: 'bg-orange-500 text-white' },
-    { name: 'Orange-Black', color: 'bg-orange-700 text-white' },
-    { name: 'Green-White', color: 'bg-green-100 text-green-800 border-green-200' },
-    { name: 'Green', color: 'bg-green-600 text-white' },
-    { name: 'Green-Black', color: 'bg-green-800 text-white' },
+    { name: 'White', color: 'bg-white border border-gray-200' },
+    { name: 'Gray-White', color: 'border border-gray-300', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
+    { name: 'Gray', color: 'bg-gray-400 text-white border border-gray-400' },
+    { name: 'Gray-Black', color: 'border border-gray-400', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #1f2937 35%, #1f2937 65%, #9ca3af 65%)' } },
+    { name: 'Yellow-White', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #ffffff 35%, #ffffff 65%, #facc15 65%)' } },
+    { name: 'Yellow', color: 'bg-yellow-400 text-yellow-900 border border-yellow-400' },
+    { name: 'Yellow-Black', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #1f2937 35%, #1f2937 65%, #facc15 65%)' } },
+    { name: 'Orange-White', color: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #ffffff 35%, #ffffff 65%, #f97316 65%)' } },
+    { name: 'Orange', color: 'bg-orange-500 text-white border border-orange-500' },
+    { name: 'Orange-Black', color: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #1f2937 35%, #1f2937 65%, #f97316 65%)' } },
+    { name: 'Green-White', color: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #ffffff 35%, #ffffff 65%, #16a34a 65%)' } },
+    { name: 'Green', color: 'bg-green-600 text-white border border-green-600' },
+    { name: 'Green-Black', color: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #1f2937 35%, #1f2937 65%, #16a34a 65%)' } },
 ];
 
 export default function PromotionSettingsPage() {
@@ -296,7 +296,8 @@ export default function PromotionSettingsPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {kidsConfig.map((belt, idx) => {
-                                    const beltColorClass = KIDS_BELTS.find(b => b.name === belt.name)?.color || 'bg-gray-200';
+                                    const beltInfo = KIDS_BELTS.find(b => b.name === belt.name);
+                                    const beltColorClass = beltInfo?.color || 'bg-gray-200';
                                     const totalMonths = belt.totalStripes * belt.reqPerStripe.months;
                                     const totalAttendance = belt.totalStripes * belt.reqPerStripe.attendance;
 
@@ -304,7 +305,10 @@ export default function PromotionSettingsPage() {
                                         <tr key={belt.name} className="hover:bg-gray-50 transition-colors">
                                             <td className="py-3 px-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-6 h-6 rounded border shadow-sm ${beltColorClass}`}></div>
+                                                    <div
+                                                        className={`w-6 h-6 rounded shadow-sm ${beltInfo?.color || 'bg-gray-200'}`}
+                                                        style={(beltInfo as any)?.style}
+                                                    ></div>
                                                     <span className="font-medium text-gray-900">{belt.name}</span>
                                                 </div>
                                             </td>
