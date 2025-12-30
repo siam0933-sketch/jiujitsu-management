@@ -29,55 +29,131 @@ export default function ClassScheduleBoard({
     initialSchedules: Schedule[],
     activeMembers: Member[]
 }) {
+    const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily')
+    // Get current day index (0=Sun, 1=Mon...). Convert to our ID.
+    const todayIndex = new Date().getDay()
+    const initialDayId = todayIndex === 0 ? 'Sun' : DAYS[todayIndex - 1].id
+
+    const [selectedDay, setSelectedDay] = useState(initialDayId)
     const [isModalOpen, setIsModalOpen] = useState(false)
+
+    // Filter schedules based on View Mode
+    const displayedSchedules = initialSchedules.filter(s => {
+        if (viewMode === 'weekly') return true // Show all in grid
+        return s.day_of_week === selectedDay // Show only selected day
+    })
+
+    const handleCreateClassClick = () => {
+        setViewMode('weekly') // Switch to weekly view to see context
+        setIsModalOpen(true)
+    }
 
     return (
         <div className="h-full flex flex-col">
             {/* Header Actions */}
             <div className="mb-6 flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800">주간 출석부</h2>
-                    <p className="text-sm text-gray-500">수업 시간을 설정하고 출석을 관리하세요.</p>
+                    <h2 className="text-xl font-bold text-gray-800">
+                        {viewMode === 'daily' ? '오늘의 수업' : '주간 시간표 관리'}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                        {viewMode === 'daily'
+                            ? `${DAYS.find(d => d.id === selectedDay)?.label} 수업 내역입니다.`
+                            : '전체 시간표를 확인하고 새 수업을 등록하세요.'}
+                    </p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"
-                >
-                    + 클래스 만들기
-                </button>
+                <div className="flex gap-2">
+                    {viewMode === 'weekly' && (
+                        <button
+                            onClick={() => setViewMode('daily')}
+                            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition"
+                        >
+                            ← 오늘의 수업으로
+                        </button>
+                    )}
+                    <button
+                        onClick={handleCreateClassClick}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-2"
+                    >
+                        <span>+ 클래스 만들기</span>
+                    </button>
+                </div>
             </div>
 
-            {/* Weekly Grid */}
-            <div className="flex-1 overflow-auto bg-gray-50 rounded-xl border border-gray-200 p-4">
-                <div className="grid grid-cols-7 gap-4 min-k-full h-full">
+            {/* Daily View Tabs */}
+            {viewMode === 'daily' && (
+                <div className="flex border-b border-gray-200 mb-6 space-x-1 overflow-x-auto pb-1">
                     {DAYS.map(day => (
-                        <div key={day.id} className="flex flex-col h-full">
-                            <div className="text-center font-bold text-gray-700 mb-3 pb-2 border-b-2 border-gray-200">
-                                {day.label}
-                            </div>
-                            <div className="flex-1 bg-gray-100/50 rounded-lg p-2 overflow-y-auto custom-scrollbar">
-                                {initialSchedules
-                                    .filter(s => s.day_of_week === day.id)
-                                    .map(schedule => (
-                                        <AttendanceCheck
-                                            key={schedule.id}
-                                            schedule={schedule}
-                                            allMembers={activeMembers}
-                                        />
-                                    ))
-                                }
-                                {initialSchedules.filter(s => s.day_of_week === day.id).length === 0 && (
-                                    <div className="text-center py-10 text-xs text-gray-400">
-                                        수업 없음
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <button
+                            key={day.id}
+                            onClick={() => setSelectedDay(day.id)}
+                            className={`
+                                px-6 py-3 rounded-t-lg font-bold text-sm transition-all whitespace-nowrap
+                                ${selectedDay === day.id
+                                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}
+                            `}
+                        >
+                            {day.label}
+                        </button>
                     ))}
                 </div>
+            )}
+
+            {/* Content Area */}
+            <div className={`flex-1 overflow-visible ${viewMode === 'weekly' ? 'bg-gray-50 rounded-xl border border-gray-200 p-4' : ''}`}>
+
+                {/* DAILY VIEW LIST */}
+                {viewMode === 'daily' && (
+                    <div className="space-y-4 max-w-2xl">
+                        {displayedSchedules.length > 0 ? (
+                            displayedSchedules.map(schedule => (
+                                <AttendanceCheck
+                                    key={schedule.id}
+                                    schedule={schedule}
+                                    allMembers={activeMembers}
+                                    mode="daily"
+                                />
+                            ))
+                        ) : (
+                            <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                <p className="text-gray-400 mb-2">예정된 수업이 없습니다.</p>
+                                <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
+                                    + 첫 수업 만들기
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* WEEKLY VIEW GRID */}
+                {viewMode === 'weekly' && (
+                    <div className="grid grid-cols-7 gap-3 min-w-[800px] h-full">
+                        {DAYS.map(day => (
+                            <div key={day.id} className="flex flex-col h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                <div className={`text-center font-bold py-2 text-sm ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-50'} border-b border-gray-100`}>
+                                    {day.label}
+                                </div>
+                                <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50">
+                                    {initialSchedules
+                                        .filter(s => s.day_of_week === day.id)
+                                        .map(schedule => (
+                                            <AttendanceCheck
+                                                key={schedule.id}
+                                                schedule={schedule}
+                                                allMembers={activeMembers}
+                                                mode="weekly"
+                                            />
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            {isModalOpen && <CreateClassModal onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && <CreateClassModal onClose={() => { setIsModalOpen(false); /* Keep viewMode weekly to see result */ }} />}
         </div>
     )
 }

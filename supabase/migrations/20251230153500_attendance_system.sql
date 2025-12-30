@@ -32,4 +32,3 @@ create index if not exists idx_gym_schedules_day on gym_schedules(gym_id, day_of
 -- 2. Update gym_attendance_logs to support class names
 alter table gym_attendance_logs 
 add column if not exists class_name text;
-
