@@ -8,6 +8,7 @@ import { updateMember } from '../actions'
 import { MemberStatusBadge, MemberStartDate, MemberPauseButton } from './MemberComponents'
 import PromotionHistory from '../[id]/PromotionHistory'
 import { getPromotionLogs, type PromotionLog } from '../[id]/actions'
+import { getMemberEnrollments, type EnrolledClassInfo } from '../../attendance/actions_enrollment'
 import { createClient } from '@/utils/supabase/client'
 
 // Helper Types
@@ -47,6 +48,7 @@ export default function MemberModal({ member }: { member: any }) {
 
     // New Data State
     const [promotionLogs, setPromotionLogs] = useState<PromotionLog[]>([])
+    const [enrolledClasses, setEnrolledClasses] = useState<EnrolledClassInfo[]>([])
     const [isPaused, setIsPaused] = useState(false)
 
     // UI State
@@ -149,6 +151,10 @@ export default function MemberModal({ member }: { member: any }) {
             // Load Promotion Logs
             const logs = await getPromotionLogs(member.id)
             setPromotionLogs(logs)
+
+            // Load Enrolled Classes
+            const enrolled = await getMemberEnrollments(member.id)
+            setEnrolledClasses(enrolled)
 
             // Check Pause Status
             const { data: activePause } = await supabase
@@ -684,6 +690,28 @@ export default function MemberModal({ member }: { member: any }) {
                                             <p className="font-medium text-gray-900 text-sm">{new Date(member.joined_at).toLocaleDateString()}</p>
                                         </div>
                                         <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
+                                    </div>
+
+                                    <hr className="border-gray-100" />
+
+                                    {/* Enrolled Classes */}
+                                    <div>
+                                        <p className="text-gray-400 text-xs mb-2">수강 중인 수업</p>
+                                        <div className="bg-gray-50 rounded-lg p-3">
+                                            {enrolledClasses.length > 0 ? (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {enrolledClasses.map((cls, idx) => (
+                                                        <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-white border border-gray-200 text-gray-700 shadow-sm">
+                                                            {cls.class_name} <span className="text-blue-600 ml-1">({cls.day_of_week})</span>
+                                                            <span className="text-gray-300 mx-1 text-[10px]">•</span>
+                                                            <span className="text-gray-500 font-normal">{cls.start_time}</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-xs text-gray-400">등록된 수업이 없습니다.</p>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <hr className="border-gray-100" />
