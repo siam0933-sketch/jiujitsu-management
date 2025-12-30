@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 import { updateMember } from '../actions'
-import MemberActions from '../[id]/MemberActions'
+import { MemberStatusBadge, MemberStartDate, MemberPauseButton } from './MemberComponents'
 import PromotionHistory from '../[id]/PromotionHistory'
 import { getPromotionLogs, type PromotionLog } from '../[id]/actions'
 import { createClient } from '@/utils/supabase/client'
@@ -285,7 +285,10 @@ export default function MemberModal({ member }: { member: any }) {
                         {/* Header */}
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 flex justify-between items-start">
                             <div>
-                                <h3 className="text-xl font-semibold leading-6 text-gray-900">{member.name}</h3>
+                                <h3 className="text-xl font-semibold leading-6 text-gray-900 flex items-center gap-2">
+                                    {member.name}
+                                    <MemberStatusBadge isPaused={isPaused} />
+                                </h3>
                                 <p className="text-sm text-gray-500 mt-1">회원 상세 정보</p>
                             </div>
                             <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
@@ -323,6 +326,9 @@ export default function MemberModal({ member }: { member: any }) {
                                         <p className="text-gray-400 text-xs mb-1">보호자</p>
                                         <p className="font-medium text-gray-900 text-sm">{member.guardian_phone || '-'}</p>
                                     </div>
+                                    {/* Moved Start Date here from Activity? Or vice versa? User said Activity section. 
+                                        Let's keep Basic Info as is, and put Start Date in Activity section as requested.
+                                    */}
                                     <div className="col-span-2">
                                         <p className="text-gray-400 text-xs mb-1">학교/학년</p>
                                         <p className="font-medium text-gray-900 text-sm">{member.school} {member.grade}</p>
@@ -334,20 +340,7 @@ export default function MemberModal({ member }: { member: any }) {
                                 </div>
                             </section>
 
-                            {/* NEW SECTION: Member Actions */}
-                            <section>
-                                <MemberActions
-                                    memberId={member.id}
-                                    startDate={member.start_date}
-                                    joinedAt={member.joined_at}
-                                    isPaused={isPaused}
-                                />
-                            </section>
-
-                            {/* NEW SECTION: Promotion History */}
-                            <section>
-                                <PromotionHistory memberId={member.id} initialLogs={promotionLogs} />
-                            </section>
+                            {/* MemberActions and Promotions moved to other sections */}
 
                             {/* Section 2: Payment & Update (New Layout) */}
                             <section>
@@ -561,8 +554,9 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     {/* 3. Payment History Box (White Card) */}
                                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                        <div className="px-4 py-3 bg-white border-b border-gray-100">
+                                        <div className="px-4 py-3 bg-white border-b border-gray-100 flex justify-between items-center">
                                             <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
+                                            <MemberPauseButton memberId={member.id} isPaused={isPaused} />
                                         </div>
                                         <ul className="divide-y divide-gray-100">
                                             {payments.map(pay => {
@@ -679,17 +673,35 @@ export default function MemberModal({ member }: { member: any }) {
                             </section>
 
                             {/* Section 3: Activity */}
+                            {/* Section 3: Activity */}
                             <section>
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">활동 기록</h4>
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                                    <div className="flex items-center justify-between mb-4">
+                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-6">
+                                    {/* Row 1: Dates */}
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-gray-400 text-xs mb-1">가입일</p>
                                             <p className="font-medium text-gray-900 text-sm">{new Date(member.joined_at).toLocaleDateString()}</p>
                                         </div>
+                                        <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
                                     </div>
-                                    <div className="relative h-16 rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
-                                        <p className="text-xs text-gray-400">최근 출석 기록이 없습니다.</p>
+
+                                    <hr className="border-gray-100" />
+
+                                    {/* Row 2: Recent Attendance */}
+                                    <div>
+                                        <p className="text-gray-400 text-xs mb-2">최근 출석</p>
+                                        <div className="relative h-16 rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
+                                            <p className="text-xs text-gray-400">최근 출석 기록이 없습니다.</p>
+                                        </div>
+                                    </div>
+
+                                    <hr className="border-gray-100" />
+
+                                    {/* Moved Promotion History Here */}
+                                    <div>
+                                        <p className="text-gray-400 text-xs mb-2">승급 이력</p>
+                                        <PromotionHistory memberId={member.id} initialLogs={promotionLogs} />
                                     </div>
                                 </div>
                             </section>
