@@ -20,15 +20,20 @@ interface Member {
 interface Props {
     initialMembers: Member[]
     count: number
+    status: string
 }
 
-export default function MembersTable({ initialMembers, count }: Props) {
+export default function MembersTable({ initialMembers, count, status }: Props) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
     // URL Params for Sorting
     const sort = searchParams.get('sort') || 'joined_at'
     const order = searchParams.get('order') || 'desc'
+
+    // Status can come from Prop (server side default) or navigation? 
+    // Actually the page passes the resolved status.
+    const currentStatus = status
 
     // Modal State provided by URL, but we just check the param here? 
     // Actually the page handles the Modal rendering based on URL, 
@@ -147,6 +152,33 @@ export default function MembersTable({ initialMembers, count }: Props) {
                 </div>
             </div>
 
+
+            {/* Filter Tabs */}
+            <div className="mt-6 border-b border-gray-200">
+                <nav className="-mb-px flex space-x-6">
+                    {['active', 'paused', 'all'].map((tab) => {
+                        const label = tab === 'active' ? '수련 중 (Active)' : tab === 'paused' ? '휴관 중 (Paused)' : '전체 (All)'
+                        const isActive = currentStatus === tab
+
+                        return (
+                            <Link
+                                key={tab}
+                                href={`/dashboard/members?status=${tab}&sort=${sort}&order=${order}`}
+                                className={`
+                                    whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                                    ${isActive
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }
+                                `}
+                            >
+                                {label}
+                            </Link>
+                        )
+                    })}
+                </nav>
+            </div>
+
             {/* Table */}
             <div className="mt-8 flow-root">
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -230,6 +262,6 @@ export default function MembersTable({ initialMembers, count }: Props) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

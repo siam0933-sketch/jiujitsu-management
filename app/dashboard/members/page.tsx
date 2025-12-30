@@ -92,19 +92,11 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
             {/* Modal */}
             {selectedMember && <MemberModal member={selectedMember} />}
 
-            {/* Filter Tabs */}
-            <div className="mb-4 border-b border-gray-200">
-                <div className="flex -mb-px space-x-4">
-                    <TabLink value="active" label="수련 중 (Active)" />
-                    <TabLink value="paused" label="휴관 중 (Paused)" />
-                    <TabLink value="all" label="전체 (All)" />
-                </div>
-            </div>
-
             {/* Client Component for Interactive Table & Bulk Actions */}
             <MembersTable
                 initialMembers={members || []}
                 count={count || 0}
+                status={status}
             />
         </div>
     )
