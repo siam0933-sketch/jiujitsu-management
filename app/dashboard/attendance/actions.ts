@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function checkInMember(memberId: string) {
+export async function checkInMember(memberId: string, className?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
@@ -16,18 +16,34 @@ export async function checkInMember(memberId: string) {
         .single()
     if (!gym) return { error: 'Gym not found' }
 
-    // 1. Check if already checked in today
+    // 1. Check if already checked in today for this specific class?
+    // User requirement: "Separate delete possible... box... click to attend"
+    // Usually one check-in per day or per class?
+    // If className is provided, we should allow check-in if not checked in for THAT class.
+    // If no className (manual general checkin), check generally?
+    // Let's assume:
+    // If className provided: Check if (member, date, class_name) exists.
+    // If not provided: Check if (member, date) exists (legacy behavior).
+
     const today = new Date().toISOString().split('T')[0]
-    const { data: existing } = await supabase
+    let query = supabase
         .from('gym_attendance_logs')
         .select('id')
         .eq('gym_id', gym.id)
         .eq('member_id', memberId)
         .eq('date', today)
-        .single()
+
+    if (className) {
+        query = query.eq('class_name', className)
+    } else {
+        // Legacy: Check if any check-in exists? Or check if specific manual check-in exists?
+        // Let's prevent double check-in generally if no class specified.
+    }
+
+    const { data: existing } = await query.single()
 
     if (existing) {
-        return { error: '이미 오늘 출석 체크가 완료되었습니다.' }
+        return { error: '이미 해당 수업(또는 오늘)에 출석 체크가 완료되었습니다.' }
     }
 
     // 2. Log Attendance
@@ -35,7 +51,8 @@ export async function checkInMember(memberId: string) {
         gym_id: gym.id,
         member_id: memberId,
         date: today,
-        method: 'manual'
+        method: className ? 'class' : 'manual',
+        class_name: className || null
     })
 
     if (logError) return { error: logError.message }
