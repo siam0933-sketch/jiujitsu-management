@@ -131,7 +131,7 @@ export async function getActiveMembers() {
 
     const { data } = await supabase
         .from('gym_members')
-        .select('id, name, phone, belt, attendance_count, remaining_sessions')
+        .select('id, name, phone, birth_date, belt, attendance_count, remaining_sessions')
         .eq('gym_id', gym.id)
         .eq('status', 'active')
         .order('name', { ascending: true })
