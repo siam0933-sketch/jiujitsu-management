@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 import { updateMember } from '../actions'
+import MemberActions from '../[id]/MemberActions'
+import PromotionHistory from '../[id]/PromotionHistory'
+import { getPromotionLogs, type PromotionLog } from '../[id]/actions'
+import { createClient } from '@/utils/supabase/client'
 
 // Helper Types
 type Plan = {
@@ -34,11 +38,16 @@ type Payment = {
 
 export default function MemberModal({ member }: { member: any }) {
     const router = useRouter()
+    const supabase = createClient()
 
     // Data State
     const [plans, setPlans] = useState<Plan[]>([])
     const [options, setOptions] = useState<Option[]>([])
     const [payments, setPayments] = useState<Payment[]>([])
+
+    // New Data State
+    const [promotionLogs, setPromotionLogs] = useState<PromotionLog[]>([])
+    const [isPaused, setIsPaused] = useState(false)
 
     // UI State
     const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false) // Accordion Toggle
@@ -136,6 +145,19 @@ export default function MemberModal({ member }: { member: any }) {
 
             const history = await getPaymentHistory(member.id)
             setPayments(history)
+
+            // Load Promotion Logs
+            const logs = await getPromotionLogs(member.id)
+            setPromotionLogs(logs)
+
+            // Check Pause Status
+            const { data: activePause } = await supabase
+                .from('gym_membership_pauses')
+                .select('id')
+                .eq('member_id', member.id)
+                .is('end_date', null)
+                .single()
+            setIsPaused(!!activePause)
         }
         load()
 
@@ -310,6 +332,21 @@ export default function MemberModal({ member }: { member: any }) {
                                         <p className="font-medium text-gray-900 text-sm">{member.address}</p>
                                     </div>
                                 </div>
+                            </section>
+
+                            {/* NEW SECTION: Member Actions */}
+                            <section>
+                                <MemberActions
+                                    memberId={member.id}
+                                    startDate={member.start_date}
+                                    joinedAt={member.joined_at}
+                                    isPaused={isPaused}
+                                />
+                            </section>
+
+                            {/* NEW SECTION: Promotion History */}
+                            <section>
+                                <PromotionHistory memberId={member.id} initialLogs={promotionLogs} />
                             </section>
 
                             {/* Section 2: Payment & Update (New Layout) */}

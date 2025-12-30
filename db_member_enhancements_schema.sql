@@ -26,11 +26,13 @@ CREATE INDEX IF NOT EXISTS idx_membership_pauses_gym ON gym_membership_pauses(gy
 ALTER TABLE gym_membership_pauses ENABLE ROW LEVEL SECURITY;
 
 -- Gym Owners: Full Access
+DROP POLICY IF EXISTS "Gym owners can manage pauses" ON gym_membership_pauses;
 CREATE POLICY "Gym owners can manage pauses"
   ON gym_membership_pauses FOR ALL
   USING (auth.uid() IN (SELECT owner_id FROM gyms WHERE id = gym_membership_pauses.gym_id));
 
 -- Members: View Only
+DROP POLICY IF EXISTS "Members can view own pauses" ON gym_membership_pauses;
 CREATE POLICY "Members can view own pauses"
   ON gym_membership_pauses FOR SELECT
   USING (auth.uid() IN (SELECT user_id FROM gym_members WHERE id = gym_membership_pauses.member_id));
