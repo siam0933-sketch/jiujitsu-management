@@ -23,6 +23,84 @@ interface Props {
 export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
     // Mode States
     const [isMenuOpen, setIsMenuOpen] = useState(false) // Gear menu toggle
+    const [isManageModalOpen, setIsManageModalOpen] = useState(false) // Enrollment Modal
+
+    // Data States
+    const [enrolledMemberIds, setEnrolledMemberIds] = useState<Set<string>>(new Set())
+    const [checkedInMembers, setCheckedInMembers] = useState<Set<string>>(new Set())
+
+    // Modal Selection State
+    const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(new Set())
+
+    // Initial Load of Enrollments
+    useEffect(() => {
+        if (mode === 'daily') {
+            loadEnrollments()
+        }
+    }, [schedule.id, mode])
+
+    const loadEnrollments = async () => {
+        const ids = await getEnrollments(schedule.id)
+        setEnrolledMemberIds(new Set(ids))
+    }
+
+    const openManageModal = () => {
+        setTempSelectedIds(new Set(enrolledMemberIds))
+        setIsManageModalOpen(true)
+    }
+
+    const handleToggleSelect = (id: string) => {
+        const next = new Set(tempSelectedIds)
+        if (next.has(id)) next.delete(id)
+        else next.add(id)
+        setTempSelectedIds(next)
+    }
+
+    const handleSaveEnrollments = async () => {
+        if (!confirm('수강생 목록을 저장하시겠습니까?')) return
+
+        const ids = Array.from(tempSelectedIds)
+        const res = await updateEnrollments(schedule.id, ids)
+
+        if (res?.error) {
+            alert(res.error)
+        } else {
+            setEnrolledMemberIds(new Set(ids))
+            setIsManageModalOpen(false)
+            alert('저장되었습니다.')
+        }
+    }
+
+    const handleCheckIn = async (member: Member) => {
+        if (!confirm(`${member.name}님을 출석 처리하시겠습니까?`)) return
+
+        const res = await checkInMember(member.id, schedule.class_name)
+        if (res?.error) {
+            alert(res.error)
+        } else {
+            alert(`${member.name} 출석 완료!`)
+            setCheckedInMembers(prev => new Set(prev).add(member.id))
+        }
+    }
+
+    const handleDeleteClass = async () => {
+        if (!confirm('정말 이 수업을 삭제하시겠습니까?')) return
+        await deleteSchedule(schedule.id)
+    }
+
+    const calculateAge = (birthDate?: string) => {
+        if (!birthDate) return ''
+        const birth = new Date(birthDate)
+        if (isNaN(birth.getTime())) return '' // Validation
+        const today = new Date()
+        const age = today.getFullYear() - birth.getFullYear() + 1
+        return `${age}세`
+    }
+
+    // Filtered Members for Display (Only Enrolled)
+    // Safety check: ensure allMembers is an array
+    const paramsMembers = Array.isArray(allMembers) ? allMembers : []
+    const enrolledMembers = paramsMembers.filter(m => enrolledMemberIds.has(m.id))
 
     // Close menu when clicking outside (simple implementation)
     useEffect(() => {
@@ -33,7 +111,27 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
         return () => window.removeEventListener('click', handleClickOutside)
     }, [isMenuOpen])
 
-    // ... (rest of logic same until return)
+    // Weekly Mode: Simple View
+    if (mode === 'weekly') {
+        return (
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[60px] flex flex-col justify-center">
+                <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
+                <p className="text-xs text-blue-600 font-bold mt-1">{schedule.start_time}</p>
+                {/* Show enrollment count */}
+                <p className="text-[10px] text-gray-400 mt-1">수강생 {enrolledMemberIds.size}명</p>
+
+                <button
+                    onClick={handleDeleteClass}
+                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="수업 삭제"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        )
+    }
 
     // Daily Mode: Interactive View
     return (
@@ -138,7 +236,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                         </div>
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                            {allMembers.map(member => {
+                            {paramsMembers.map(member => {
                                 const isSelected = tempSelectedIds.has(member.id)
                                 return (
                                     <label
@@ -159,10 +257,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                                                 <span className={`font-bold text-sm ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>{member.name}</span>
                                                 <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{member.belt}</span>
                                             </div>
-                                            <div className="text-xs text-gray-400 flex gap-2">
+                                            {/* Simplified View as requested */}
+                                            {/* <div className="text-xs text-gray-400 flex gap-2">
                                                 <span>{member.phone || '연락처 없음'}</span>
                                                 {member.birth_date && <span>• {calculateAge(member.birth_date)}</span>}
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </label>
                                 )

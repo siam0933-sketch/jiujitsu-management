@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Schedule } from '../actions_schedule'
 import CreateClassModal from './CreateClassModal'
 import AttendanceCheck from './AttendanceCheck'
@@ -10,6 +10,8 @@ type Member = {
     name: string
     belt: string
     attendance_count: number
+    phone?: string
+    birth_date?: string
 }
 
 const DAYS = [
@@ -30,22 +32,36 @@ export default function ClassScheduleBoard({
     activeMembers: Member[]
 }) {
     const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily')
-    // Get current day index (0=Sun, 1=Mon...). Convert to our ID.
-    const todayIndex = new Date().getDay()
-    const initialDayId = todayIndex === 0 ? 'Sun' : DAYS[todayIndex - 1].id
+    const [selectedDay, setSelectedDay] = useState<string>('Mon') // Default to Mon safely
+    const [isMounted, setIsMounted] = useState(false)
 
-    const [selectedDay, setSelectedDay] = useState(initialDayId)
+    useEffect(() => {
+        setIsMounted(true)
+        const todayIndex = new Date().getDay()
+        const todayId = todayIndex === 0 ? 'Sun' : DAYS[todayIndex - 1].id
+        setSelectedDay(todayId)
+    }, [])
+
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     // Filter schedules based on View Mode
+    // Show nothing until mounted to prevent mismatch? Or show default 'Mon'?
+    // Better to show 'Mon' (server content) matches client default 'Mon'.
+    // Then useEffect updates it to real today.
+
     const displayedSchedules = initialSchedules.filter(s => {
-        if (viewMode === 'weekly') return true // Show all in grid
-        return s.day_of_week === selectedDay // Show only selected day
+        if (viewMode === 'weekly') return true
+        return s.day_of_week === selectedDay
     })
 
     const handleCreateClassClick = () => {
         setViewMode('weekly') // Switch to weekly view to see context
         setIsModalOpen(true)
+    }
+
+    // Prevent hydration mismatch for date-dependent content
+    if (!isMounted) {
+        return <div className="p-6">Loading schedule...</div>
     }
 
     return (
