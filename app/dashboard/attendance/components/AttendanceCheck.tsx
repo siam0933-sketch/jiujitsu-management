@@ -42,8 +42,8 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
     // Weekly Mode: Simple View
     if (mode === 'weekly') {
         return (
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors">
-                <h4 className="font-bold text-gray-800 text-sm truncate">{schedule.class_name}</h4>
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[60px] flex flex-col justify-center">
+                <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
                 <p className="text-xs text-blue-600 font-bold mt-1">{schedule.start_time}</p>
 
                 {/* Delete Button (Only visible on hover in Weekly mode for quick management) */}
