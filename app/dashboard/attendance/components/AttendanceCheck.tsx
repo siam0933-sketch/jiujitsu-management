@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Schedule, deleteSchedule } from '../actions_schedule'
 import { checkInMember } from '../actions'
 import { getEnrollments, updateEnrollments } from '../actions_enrollment'
@@ -145,13 +145,23 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
     const paramsMembers = Array.isArray(allMembers) ? allMembers : []
     const enrolledMembers = paramsMembers.filter(m => m && enrolledMemberIds.has(m.id))
 
-    // Close menu when clicking outside (simple implementation)
+    // Ref for menu container
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    // Close menu when clicking outside
     useEffect(() => {
-        const handleClickOutside = () => setIsMenuOpen(false)
-        if (isMenuOpen) {
-            window.addEventListener('click', handleClickOutside)
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false)
+            }
         }
-        return () => window.removeEventListener('click', handleClickOutside)
+
+        if (isMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
     }, [isMenuOpen])
 
     // Weekly Mode: Simple View
@@ -188,12 +198,9 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                         <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
                     </div>
 
-                    <div className="relative">
+                    <div className="relative" ref={menuRef}>
                         <button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                setIsMenuOpen(!isMenuOpen)
-                            }}
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,8 +213,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                         {isMenuOpen && (
                             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animation-fade-in">
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation()
+                                    onClick={() => {
                                         setIsMenuOpen(false)
                                         openManageModal()
                                     }}
@@ -219,8 +225,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                                     회원 추가/관리
                                 </button>
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation()
+                                    onClick={() => {
                                         setIsMenuOpen(false)
                                         handleDeleteClass()
                                     }}
