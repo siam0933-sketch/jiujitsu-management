@@ -85,8 +85,8 @@ export default function ClassScheduleBoard({
                     <button
                         onClick={() => setViewMode('daily')}
                         className={`px-4 py-2 rounded-lg font-bold transition border ${viewMode === 'daily'
-                                ? 'bg-blue-50 text-blue-600 border-blue-200'
-                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                            ? 'bg-blue-50 text-blue-600 border-blue-200'
+                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                             }`}
                     >
                         오늘 수업 보기
@@ -94,8 +94,8 @@ export default function ClassScheduleBoard({
                     <button
                         onClick={() => setViewMode('weekly')}
                         className={`px-4 py-2 rounded-lg font-bold transition border ${viewMode === 'weekly'
-                                ? 'bg-blue-50 text-blue-600 border-blue-200'
-                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                            ? 'bg-blue-50 text-blue-600 border-blue-200'
+                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                             }`}
                     >
                         전체 수업 보기
@@ -182,7 +182,7 @@ export default function ClassScheduleBoard({
                 )}
             </div>
 
-            {isModalOpen && <CreateClassModal onClose={() => { setIsModalOpen(false); /* Keep viewMode weekly to see result */ }} />}
+            {isModalOpen && <CreateClassModal onClose={() => { setIsModalOpen(false); }} allMembers={activeMembers} />}
         </div>
     )
 }

@@ -36,7 +36,7 @@ export async function getSchedules() {
     return (data as Schedule[]) || []
 }
 
-export async function createSchedule(data: { days: string[], time: string, name: string }) {
+export async function createSchedule(data: { days: string[], time: string, name: string, initialEnrollments?: string[] }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -58,13 +58,37 @@ export async function createSchedule(data: { days: string[], time: string, name:
         class_name: data.name
     }))
 
-    const { error } = await supabase
+    const { data: newSchedules, error } = await supabase
         .from('gym_schedules')
         .insert(inserts)
+        .select('id')
 
     if (error) {
         console.error(error)
         return { error: '수업 생성 실패: ' + error.message }
+    }
+
+    // Handle Initial Enrollments
+    if (data.initialEnrollments && data.initialEnrollments.length > 0 && newSchedules) {
+        const enrollmentInserts: any[] = []
+
+        newSchedules.forEach(schedule => {
+            data.initialEnrollments!.forEach(memberId => {
+                enrollmentInserts.push({
+                    gym_id: gym.id,
+                    schedule_id: schedule.id,
+                    member_id: memberId
+                })
+            })
+        })
+
+        if (enrollmentInserts.length > 0) {
+            const { error: enrollError } = await supabase
+                .from('gym_class_enrollments')
+                .insert(enrollmentInserts)
+
+            if (enrollError) console.error('Initial enrollment error:', enrollError)
+        }
     }
 
     revalidatePath('/dashboard/attendance')
