@@ -254,9 +254,6 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                             <SortLink column="name" label="이름" />
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            <SortLink column="birth_date" label="나이" />
-                                        </th>
-                                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                             <SortLink column="belt" label="등급" />
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -286,17 +283,17 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                                         )}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                                                        <Link
-                                                            href={`/dashboard/members?${new URLSearchParams({ ...Object.fromEntries(searchParams), id: member.id }).toString()}`}
-                                                            scroll={false}
-                                                            className="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer"
-                                                        >
-                                                            {member.name || '이름 없음'}
-                                                        </Link>
+                                                        <div className="flex items-center gap-2">
+                                                            <Link
+                                                                href={`/dashboard/members?${new URLSearchParams({ ...Object.fromEntries(searchParams), id: member.id }).toString()}`}
+                                                                scroll={false}
+                                                                className="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer"
+                                                            >
+                                                                {member.name || '이름 없음'}
+                                                            </Link>
+                                                            <span className="text-xs text-gray-500 font-normal" suppressHydrationWarning>({calculateYearAge(member.birth_date)})</span>
+                                                        </div>
                                                         <div className="text-xs text-gray-400 mt-0.5">{member.phone || '-'}</div>
-                                                    </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500" suppressHydrationWarning>
-                                                        {calculateYearAge(member.birth_date)}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                                         <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
