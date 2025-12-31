@@ -295,7 +295,7 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                                         </Link>
                                                         <div className="text-xs text-gray-400 mt-0.5">{member.phone || '-'}</div>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500" suppressHydrationWarning>
                                                         {calculateYearAge(member.birth_date)}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -303,7 +303,7 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                                             {member.belt}
                                                         </span>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm" suppressHydrationWarning>
                                                         {paymentInfo.status === 'unpaid' && (
                                                             <div className="flex flex-col items-start">
                                                                 <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 mb-1">
@@ -327,7 +327,7 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                                             <span className="text-gray-300">-</span>
                                                         )}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500" suppressHydrationWarning>
                                                         {new Date(member.joined_at).toLocaleDateString()}
                                                     </td>
                                                 </tr>
