@@ -65,8 +65,11 @@ export async function togglePauseStatus(memberId: string, currentStatus: 'active
 
         if (error) return { error: '휴관 처리 실패: ' + error.message }
 
-        // Update member status to 'paused' (optional, if you use status column)
+        // Update member status to 'paused'
         await supabase.from('gym_members').update({ status: 'paused' }).eq('id', memberId)
+
+        // Request: Remove member from class enrollments when paused
+        await supabase.from('gym_class_enrollments').delete().eq('member_id', memberId)
 
     } else {
         // ACTION: RESUME (End the current pause record)

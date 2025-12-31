@@ -135,6 +135,7 @@ export async function getActiveMembers() {
         .from('gym_members')
         .select('*')
         .eq('gym_id', gym.id)
+        .neq('status', 'paused') // Exclude paused members
         .order('name', { ascending: true })
 
     if (error) {
