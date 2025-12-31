@@ -82,14 +82,24 @@ export default function ClassScheduleBoard({
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    {viewMode === 'weekly' && (
-                        <button
-                            onClick={() => setViewMode('daily')}
-                            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition"
-                        >
-                            ← 오늘의 수업으로
-                        </button>
-                    )}
+                    <button
+                        onClick={() => setViewMode('daily')}
+                        className={`px-4 py-2 rounded-lg font-bold transition border ${viewMode === 'daily'
+                                ? 'bg-blue-50 text-blue-600 border-blue-200'
+                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                            }`}
+                    >
+                        오늘 수업 보기
+                    </button>
+                    <button
+                        onClick={() => setViewMode('weekly')}
+                        className={`px-4 py-2 rounded-lg font-bold transition border ${viewMode === 'weekly'
+                                ? 'bg-blue-50 text-blue-600 border-blue-200'
+                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                            }`}
+                    >
+                        전체 수업 보기
+                    </button>
                     <button
                         onClick={handleCreateClassClick}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-2"
