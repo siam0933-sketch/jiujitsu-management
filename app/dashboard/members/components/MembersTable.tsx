@@ -325,7 +325,10 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                                         )}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500" suppressHydrationWarning>
-                                                        {new Date(member.joined_at).toLocaleDateString()}
+                                                        {(() => {
+                                                            const d = new Date(member.joined_at)
+                                                            return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
+                                                        })()}
                                                     </td>
                                                 </tr>
                                             )
