@@ -113,7 +113,7 @@ export default function ClassScheduleBoard({
 
             {/* Daily View Tabs */}
             {viewMode === 'daily' && (
-                <div className="flex border-b border-gray-200 mb-6 space-x-1 overflow-x-auto pb-1">
+                <div className="flex-none w-full bg-white border-b border-gray-200 mb-6 space-x-1 overflow-x-auto pb-1 z-10 relative">
                     {DAYS.map(day => (
                         <button
                             key={day.id}
