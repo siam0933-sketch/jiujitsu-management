@@ -181,11 +181,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
         <>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative z-0">
                 {/* Header */}
-                <div className="p-4 flex justify-between items-start bg-gradient-to-r from-gray-50 to-white relative">
-                    <div>
+                <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm text-blue-600 font-bold">{schedule.start_time}</p>
                         <h4 className="font-bold text-gray-800 text-lg">{schedule.class_name}</h4>
-                        <p className="text-sm text-blue-600 font-bold mt-1">{schedule.start_time}</p>
-                        <p className="text-xs text-gray-500 mt-1">총 {enrolledMembers.length}명 등록 중</p>
+                        <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
                     </div>
 
                     <div className="relative">
