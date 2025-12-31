@@ -70,7 +70,9 @@ export default function ClassScheduleBoard({
             <div className="mb-6 flex justify-between items-center">
                 <div>
                     <h2 className="text-xl font-bold text-gray-800">
-                        {viewMode === 'daily' ? '오늘의 수업' : '주간 시간표 관리'}
+                        {viewMode === 'daily'
+                            ? `${DAYS.find(d => d.id === selectedDay)?.label} 수업`
+                            : '주간 시간표 관리'}
                     </h2>
                     <p className="text-sm text-gray-500">
                         {viewMode === 'daily'
