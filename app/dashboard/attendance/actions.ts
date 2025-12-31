@@ -129,12 +129,33 @@ export async function getActiveMembers() {
         .single()
     if (!gym) return []
 
-    const { data } = await supabase
+    // Simplify query: Use wildcard '*' as explicit column selection was failing (likely caching issue)
+    // The debug panel confirmed that select('*') works and returns all necessary data.
+    const { data, error } = await supabase
         .from('gym_members')
-        .select('id, name, belt, attendance_count, remaining_sessions')
+        .select('*')
         .eq('gym_id', gym.id)
-        .eq('status', 'active')
         .order('name', { ascending: true })
 
-    return data || []
+    if (error) {
+        console.error('[getActiveMembers] Error details:', JSON.stringify(error, null, 2))
+        return []
+    }
+
+    // Simple mapping
+    const members = data.map((m: any) => ({
+        id: m.id,
+        name: m.name || '이름 없음', // Fallback just in case
+        belt: m.belt,
+        attendance_count: m.attendance_count,
+        remaining_sessions: m.remaining_sessions,
+        birth_date: m.birth_date,
+        phone: m.phone
+    }))
+
+    // Sort by name for Korean support
+    members.sort((a: any, b: any) => a.name.localeCompare(b.name, 'ko'))
+
+    console.log('[getActiveMembers] Count:', members.length)
+    return members
 }

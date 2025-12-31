@@ -13,6 +13,10 @@ interface Member {
     gender: string
     joined_at: string
     gym_id: string
+    birth_date?: string
+    belt?: string
+    payment_due_day?: number
+    payment_end_date?: string
     // ... add other fields if used in the table directly
     [key: string]: any
 }
@@ -28,8 +32,8 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
     const searchParams = useSearchParams()
 
     // URL Params for Sorting
-    const sort = searchParams.get('sort') || 'joined_at'
-    const order = searchParams.get('order') || 'desc'
+    const sort = searchParams.get('sort') || 'name'
+    const order = searchParams.get('order') || 'asc'
 
     // Status can come from Prop (server side default) or navigation? 
     // Actually the page passes the resolved status.
@@ -43,6 +47,53 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
     const [isEditMode, setIsEditMode] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
+
+    // Helpers
+    const calculateYearAge = (birthDate?: string) => {
+        if (!birthDate) return '-'
+        const birthYear = new Date(birthDate).getFullYear()
+        const currentYear = new Date().getFullYear()
+        if (isNaN(birthYear)) return '-'
+        return `${currentYear - birthYear + 1}세`
+    }
+
+    const getPaymentStatus = (member: Member) => {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        let targetDate: Date | null = null
+
+        if (member.payment_end_date) {
+            targetDate = new Date(member.payment_end_date)
+        } else if (member.payment_due_day) {
+            // Assume current month
+            targetDate = new Date()
+            targetDate.setDate(member.payment_due_day)
+            // If the day is invalid (e.g. 30th Feb), JS handles it by rolling over, but roughly ok.
+
+            // Logic Check: 
+            // If today is 26th, due 25th. Target is 25th. Diff is -1 day.
+            // If today is 1st, due 25th. Target is 25th. Diff is +24 days.
+        }
+
+        if (!targetDate) return { status: 'none', label: '-', dateStr: '-' }
+
+        targetDate.setHours(0, 0, 0, 0)
+        const diffTime = targetDate.getTime() - today.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+        // Format Date
+        const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`
+
+        // Logic A: Unpaid if passed by 1 day or more (diffDays < -1? No, diffDays < 0 is passed. )
+        // "결제일이 1일 지나면" -> due 25. today 26 (diff -1). 1 day passed.
+        // "결제일이 5일 전인" -> due 25. today 20 (diff 5). 
+
+        if (diffDays < 0) return { status: 'unpaid', label: '미납', dateStr }
+        if (diffDays >= 0 && diffDays <= 5) return { status: 'due', label: '결제예정', dateStr }
+
+        return { status: 'normal', label: dateStr, dateStr }
+    }
 
     const toggleSelection = (id: string) => {
         const next = new Set(selectedIds)
@@ -203,10 +254,13 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                             <SortLink column="name" label="이름" />
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            연락처
+                                            <SortLink column="birth_date" label="나이" />
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            <SortLink column="gender" label="성별" />
+                                            <SortLink column="belt" label="등급" />
+                                        </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                            다음 결제일
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                             <SortLink column="joined_at" label="등록일" />
@@ -215,43 +269,73 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
                                     {initialMembers && initialMembers.length > 0 ? (
-                                        initialMembers.map((member, index) => (
-                                            <tr key={member.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                                                    {isEditMode ? (
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedIds.has(member.id)}
-                                                            onChange={() => toggleSelection(member.id)}
-                                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-                                                        />
-                                                    ) : (
-                                                        (count || 0) - index
-                                                    )}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                                                    <Link
-                                                        href={`/dashboard/members?${new URLSearchParams({ ...Object.fromEntries(searchParams), id: member.id }).toString()}`}
-                                                        scroll={false}
-                                                        className="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer"
-                                                    >
-                                                        {member.name || '이름 없음'}
-                                                    </Link>
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {member.phone || '-'}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {member.gender === 'male' ? '남' : member.gender === 'female' ? '여' : '-'}
-                                                </td>
-                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                    {new Date(member.joined_at).toLocaleDateString()}
-                                                </td>
-                                            </tr>
-                                        ))
+                                        initialMembers.map((member, index) => {
+                                            const paymentInfo = getPaymentStatus(member)
+                                            return (
+                                                <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
+                                                        {isEditMode ? (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedIds.has(member.id)}
+                                                                onChange={() => toggleSelection(member.id)}
+                                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                                                            />
+                                                        ) : (
+                                                            (count || 0) - index
+                                                        )}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                                                        <Link
+                                                            href={`/dashboard/members?${new URLSearchParams({ ...Object.fromEntries(searchParams), id: member.id }).toString()}`}
+                                                            scroll={false}
+                                                            className="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer"
+                                                        >
+                                                            {member.name || '이름 없음'}
+                                                        </Link>
+                                                        <div className="text-xs text-gray-400 mt-0.5">{member.phone || '-'}</div>
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                        {calculateYearAge(member.birth_date)}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                                            {member.belt}
+                                                        </span>
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
+                                                        {paymentInfo.status === 'unpaid' && (
+                                                            <div className="flex flex-col items-start">
+                                                                <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 mb-1">
+                                                                    미납
+                                                                </span>
+                                                                <span className="text-xs text-gray-500">{paymentInfo.dateStr}</span>
+                                                            </div>
+                                                        )}
+                                                        {paymentInfo.status === 'due' && (
+                                                            <div className="flex flex-col items-start">
+                                                                <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 mb-1">
+                                                                    결제예정
+                                                                </span>
+                                                                <span className="text-xs text-gray-500">{paymentInfo.dateStr}</span>
+                                                            </div>
+                                                        )}
+                                                        {paymentInfo.status === 'normal' && (
+                                                            <span className="text-gray-500">{paymentInfo.dateStr}</span>
+                                                        )}
+                                                        {paymentInfo.status === 'none' && (
+                                                            <span className="text-gray-300">-</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                        {new Date(member.joined_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })
                                     ) : (
                                         <tr>
-                                            <td colSpan={5} className="py-10 text-center text-sm text-gray-500">
+                                            <td colSpan={6} className="py-10 text-center text-sm text-gray-500">
                                                 등록된 회원이 없습니다. 신규 회원을 등록해주세요.
                                             </td>
                                         </tr>

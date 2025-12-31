@@ -138,6 +138,62 @@ export default function MemberModal({ member }: { member: any }) {
         }
     }
 
+    // --- Basic Info Edit State ---
+    const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false)
+    const [basicInfoForm, setBasicInfoForm] = useState({
+        name: '',
+        gender: '',
+        birth_date: '',
+        access_code: '',
+        phone: '',
+        guardian_phone: '',
+        school: '',
+        grade: '',
+        address: ''
+    })
+
+    const startEditingBasicInfo = () => {
+        setBasicInfoForm({
+            name: member.name || '',
+            gender: member.gender || 'male',
+            birth_date: member.birth_date || '',
+            access_code: member.access_code || '',
+            phone: member.phone || '',
+            guardian_phone: member.guardian_phone || '',
+            school: member.school || '',
+            grade: member.grade || '',
+            address: member.address || ''
+        })
+        setIsEditingBasicInfo(true)
+    }
+
+    const cancelEditingBasicInfo = () => {
+        setIsEditingBasicInfo(false)
+    }
+
+    const saveBasicInfo = async () => {
+        if (!confirm('회원 정보를 수정하시겠습니까?')) return
+
+        const payload = {
+            ...basicInfoForm,
+            birth_date: basicInfoForm.birth_date || null,
+            guardian_phone: basicInfoForm.guardian_phone || null,
+            school: basicInfoForm.school || null,
+            grade: basicInfoForm.grade || null,
+            address: basicInfoForm.address || null,
+            access_code: basicInfoForm.access_code || null,
+        }
+
+        const res = await updateMember(member.id, payload)
+        if (res.error) {
+            alert(res.error)
+        } else {
+            alert('수정되었습니다.')
+            setIsEditingBasicInfo(false)
+            router.refresh()
+        }
+    }
+
     // Load Data
     useEffect(() => {
         const load = async () => {
@@ -291,11 +347,12 @@ export default function MemberModal({ member }: { member: any }) {
                         {/* Header */}
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 flex justify-between items-start">
                             <div>
+                                <p className="text-sm text-gray-500 mb-1">회원 상세 정보</p>
                                 <h3 className="text-xl font-semibold leading-6 text-gray-900 flex items-center gap-2">
                                     {member.name}
                                     <MemberStatusBadge isPaused={isPaused} />
+                                    <MemberPauseButton memberId={member.id} isPaused={isPaused} />
                                 </h3>
-                                <p className="text-sm text-gray-500 mt-1">회원 상세 정보</p>
                             </div>
                             <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
                                 <span className="sr-only">Close</span>
@@ -307,43 +364,170 @@ export default function MemberModal({ member }: { member: any }) {
 
                             {/* Section 1: Basic Info */}
                             <section>
-                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">기본 정보</h4>
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    <div className="col-span-1">
-                                        <p className="text-gray-400 text-xs mb-1">이름</p>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium text-gray-900 text-sm">{member.name}</p>
-                                            <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${member.gender === 'male' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>{member.gender === 'male' ? '남' : '여'}</span>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">기본 정보</h4>
+                                    {!isEditingBasicInfo ? (
+                                        <button
+                                            onClick={startEditingBasicInfo}
+                                            className="text-xs text-gray-400 hover:text-blue-600 underline"
+                                        >
+                                            편집
+                                        </button>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={cancelEditingBasicInfo}
+                                                className="text-xs text-gray-400 hover:text-gray-600 underline"
+                                            >
+                                                취소
+                                            </button>
+                                            <button
+                                                onClick={saveBasicInfo}
+                                                className="text-xs text-blue-600 hover:text-blue-800 font-bold underline"
+                                            >
+                                                저장
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {isEditingBasicInfo ? (
+                                    // Edit Mode
+                                    <div className="bg-blue-50/50 rounded-xl border border-blue-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        {/* Name */}
+                                        <div className="col-span-1">
+                                            <p className="text-blue-400 text-xs mb-1">이름</p>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={basicInfoForm.name}
+                                                    onChange={e => setBasicInfoForm({ ...basicInfoForm, name: e.target.value })}
+                                                    className="w-full text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                                <select
+                                                    value={basicInfoForm.gender}
+                                                    onChange={e => setBasicInfoForm({ ...basicInfoForm, gender: e.target.value })}
+                                                    className="text-sm border-gray-300 rounded px-1 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                                >
+                                                    <option value="male">남</option>
+                                                    <option value="female">여</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {/* Birth Date */}
+                                        <div className="col-span-1">
+                                            <p className="text-blue-400 text-xs mb-1">생년월일</p>
+                                            <input
+                                                type="date"
+                                                value={basicInfoForm.birth_date}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, birth_date: e.target.value })}
+                                                className="w-full text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+
+                                        {/* Access Code */}
+                                        <div className="col-span-2">
+                                            <p className="text-blue-400 text-xs mb-1">접속 코드</p>
+                                            <input
+                                                type="text"
+                                                value={basicInfoForm.access_code}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, access_code: e.target.value })}
+                                                className="w-full text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+
+                                        {/* Phone */}
+                                        <div className="col-span-1">
+                                            <p className="text-blue-400 text-xs mb-1">연락처</p>
+                                            <input
+                                                type="text"
+                                                value={basicInfoForm.phone}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })}
+                                                className="w-full text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+
+                                        {/* Guardian Phone */}
+                                        <div className="col-span-1">
+                                            <p className="text-blue-400 text-xs mb-1">보호자</p>
+                                            <input
+                                                type="text"
+                                                value={basicInfoForm.guardian_phone}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })}
+                                                className="w-full text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="-"
+                                            />
+                                        </div>
+
+                                        {/* School / Grade */}
+                                        <div className="col-span-2">
+                                            <p className="text-blue-400 text-xs mb-1">학교/학년</p>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={basicInfoForm.school}
+                                                    onChange={e => setBasicInfoForm({ ...basicInfoForm, school: e.target.value })}
+                                                    className="w-2/3 text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder="학교"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={basicInfoForm.grade}
+                                                    onChange={e => setBasicInfoForm({ ...basicInfoForm, grade: e.target.value })}
+                                                    className="w-1/3 text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder="학년"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Address */}
+                                        <div className="col-span-4">
+                                            <p className="text-blue-400 text-xs mb-1">주소</p>
+                                            <input
+                                                type="text"
+                                                value={basicInfoForm.address}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })}
+                                                className="w-full text-sm border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
+                                            />
                                         </div>
                                     </div>
-                                    <div className="col-span-1">
-                                        <p className="text-gray-400 text-xs mb-1">생년월일</p>
-                                        <p className="font-medium text-gray-900 text-sm">{member.birth_date} ({calculateAge(member.birth_date)})</p>
+                                ) : (
+                                    // View Mode
+                                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        <div className="col-span-1">
+                                            <p className="text-gray-400 text-xs mb-1">이름</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-medium text-gray-900 text-sm">{member.name}</p>
+                                                <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${member.gender === 'male' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>{member.gender === 'male' ? '남' : '여'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="col-span-1">
+                                            <p className="text-gray-400 text-xs mb-1">생년월일</p>
+                                            <p className="font-medium text-gray-900 text-sm">{member.birth_date} ({calculateAge(member.birth_date)})</p>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <p className="text-gray-400 text-xs mb-1">접속 코드</p>
+                                            <p className="font-medium text-gray-900 text-sm">{member.access_code}</p>
+                                        </div>
+                                        <div className="col-span-1">
+                                            <p className="text-gray-400 text-xs mb-1">연락처</p>
+                                            <p className="font-medium text-gray-900 text-sm">{member.phone}</p>
+                                        </div>
+                                        <div className="col-span-1">
+                                            <p className="text-gray-400 text-xs mb-1">보호자</p>
+                                            <p className="font-medium text-gray-900 text-sm">{member.guardian_phone || '-'}</p>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <p className="text-gray-400 text-xs mb-1">학교/학년</p>
+                                            <p className="font-medium text-gray-900 text-sm">{member.school} {member.grade}</p>
+                                        </div>
+                                        <div className="col-span-4">
+                                            <p className="text-gray-400 text-xs mb-1">주소</p>
+                                            <p className="font-medium text-gray-900 text-sm">{member.address}</p>
+                                        </div>
                                     </div>
-                                    <div className="col-span-2">
-                                        <p className="text-gray-400 text-xs mb-1">접속 코드</p>
-                                        <p className="font-medium text-gray-900 text-sm">{member.access_code}</p>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <p className="text-gray-400 text-xs mb-1">연락처</p>
-                                        <p className="font-medium text-gray-900 text-sm">{member.phone}</p>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <p className="text-gray-400 text-xs mb-1">보호자</p>
-                                        <p className="font-medium text-gray-900 text-sm">{member.guardian_phone || '-'}</p>
-                                    </div>
-                                    {/* Moved Start Date here from Activity? Or vice versa? User said Activity section. 
-                                        Let's keep Basic Info as is, and put Start Date in Activity section as requested.
-                                    */}
-                                    <div className="col-span-2">
-                                        <p className="text-gray-400 text-xs mb-1">학교/학년</p>
-                                        <p className="font-medium text-gray-900 text-sm">{member.school} {member.grade}</p>
-                                    </div>
-                                    <div className="col-span-4">
-                                        <p className="text-gray-400 text-xs mb-1">주소</p>
-                                        <p className="font-medium text-gray-900 text-sm">{member.address}</p>
-                                    </div>
-                                </div>
+                                )}
                             </section>
 
                             {/* MemberActions and Promotions moved to other sections */}
@@ -562,7 +746,6 @@ export default function MemberModal({ member }: { member: any }) {
                                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                                         <div className="px-4 py-3 bg-white border-b border-gray-100 flex justify-between items-center">
                                             <h5 className="text-xs font-bold text-gray-500 uppercase">최근 결제 내역</h5>
-                                            <MemberPauseButton memberId={member.id} isPaused={isPaused} />
                                         </div>
                                         <ul className="divide-y divide-gray-100">
                                             {payments.map(pay => {

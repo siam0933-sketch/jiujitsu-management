@@ -19,8 +19,8 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
 
     const resolvedParams = await searchParams
     const selectedMemberId = resolvedParams?.id
-    const sort = resolvedParams?.sort || 'joined_at'
-    const order = resolvedParams?.order || 'desc'
+    const sort = resolvedParams?.sort || 'name'
+    const order = resolvedParams?.order || 'asc'
     const status = resolvedParams?.status || 'active' // Default to 'active'
 
     // 1. Get Gym ID

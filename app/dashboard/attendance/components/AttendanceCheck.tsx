@@ -25,6 +25,49 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
     const [isMenuOpen, setIsMenuOpen] = useState(false) // Gear menu toggle
     const [isManageModalOpen, setIsManageModalOpen] = useState(false) // Enrollment Modal
 
+    // Sorting State
+    const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'age' | 'belt', direction: 'asc' | 'desc' } | null>(null)
+
+    const handleSort = (key: 'name' | 'age' | 'belt') => {
+        let direction: 'asc' | 'desc' = 'asc'
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc'
+        }
+        setSortConfig({ key, direction })
+    }
+
+    // Sort Members
+    const sortedMembers = [...(Array.isArray(allMembers) ? allMembers : [])].sort((a, b) => {
+        if (!sortConfig) return 0
+
+        // Special handling for Age (calculated from birth_date)
+        if (sortConfig.key === 'age') {
+            const aValue = a.birth_date || ''
+            const bValue = b.birth_date || ''
+            // Invert direction for intuitive age sorting (Younger date = Older age)
+            if (aValue < bValue) return sortConfig.direction === 'asc' ? 1 : -1
+            if (aValue > bValue) return sortConfig.direction === 'asc' ? -1 : 1
+            return 0
+        }
+
+        // Standard string comparison for other keys
+        // Cast to any to avoid "Expression of type... can't be used to index type 'Member'"
+        // since we know valid keys are passed or handled above.
+        const key = sortConfig.key as keyof Member
+        const aValue = a[key] || ''
+        const bValue = b[key] || ''
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+        return 0
+    })
+
+    // Helper: Sort Icon
+    const SortIcon = ({ colKey }: { colKey: 'name' | 'age' | 'belt' }) => {
+        if (sortConfig?.key !== colKey) return <span className="text-gray-300 ml-1">↕</span>
+        return sortConfig.direction === 'asc' ? <span className="text-blue-600 ml-1">↑</span> : <span className="text-blue-600 ml-1">↓</span>
+    }
+
     // Data States
     const [enrolledMemberIds, setEnrolledMemberIds] = useState<Set<string>>(new Set())
     const [checkedInMembers, setCheckedInMembers] = useState<Set<string>>(new Set())
@@ -100,7 +143,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
     // Filtered Members for Display (Only Enrolled)
     // Safety check: ensure allMembers is an array
     const paramsMembers = Array.isArray(allMembers) ? allMembers : []
-    const enrolledMembers = paramsMembers.filter(m => enrolledMemberIds.has(m.id))
+    const enrolledMembers = paramsMembers.filter(m => m && enrolledMemberIds.has(m.id))
 
     // Close menu when clicking outside (simple implementation)
     useEffect(() => {
@@ -235,34 +278,40 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                             <p className="text-xs text-gray-500 px-2 mb-1">전체 회원 리스트</p>
                         </div>
 
+                        {/* Column Headers */}
+                        <div className="px-4 py-2 border-b border-gray-100 bg-white grid grid-cols-[auto_1fr_0.5fr_0.5fr] gap-2 text-xs font-bold text-gray-500">
+                            <div className="w-5">{/* Checkbox spacer */}</div>
+                            <button onClick={() => handleSort('name')} className="text-left flex items-center gap-1 hover:text-blue-600">
+                                이름 <SortIcon colKey="name" />
+                            </button>
+                            <button onClick={() => handleSort('age')} className="text-left flex items-center gap-1 hover:text-blue-600">
+                                나이 <SortIcon colKey="age" />
+                            </button>
+                            <button onClick={() => handleSort('belt')} className="text-left flex items-center gap-1 hover:text-blue-600">
+                                등급 <SortIcon colKey="belt" />
+                            </button>
+                        </div>
+
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                            {paramsMembers.map(member => {
+                            {sortedMembers.map(member => {
                                 const isSelected = tempSelectedIds.has(member.id)
                                 return (
                                     <label
                                         key={member.id}
                                         className={`
-                                            flex items-center p-3 rounded-lg border cursor-pointer transition-all
+                                            grid grid-cols-[auto_1fr_0.5fr_0.5fr] gap-2 items-center p-3 rounded-lg border cursor-pointer transition-all
                                             ${isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-gray-100 hover:bg-gray-50'}
                                         `}
                                     >
                                         <input
                                             type="checkbox"
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 mr-3"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
                                             checked={isSelected}
                                             onChange={() => handleToggleSelect(member.id)}
                                         />
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-center mb-0.5">
-                                                <span className={`font-bold text-sm ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>{member.name}</span>
-                                                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{member.belt}</span>
-                                            </div>
-                                            {/* Simplified View as requested */}
-                                            {/* <div className="text-xs text-gray-400 flex gap-2">
-                                                <span>{member.phone || '연락처 없음'}</span>
-                                                {member.birth_date && <span>• {calculateAge(member.birth_date)}</span>}
-                                            </div> */}
-                                        </div>
+                                        <span className={`font-bold text-sm ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>{member.name}</span>
+                                        <span className="text-xs text-gray-400">{calculateAge(member.birth_date)}</span>
+                                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded text-center">{member.belt}</span>
                                     </label>
                                 )
                             })}

@@ -1,6 +1,10 @@
+
 import { getSchedules } from './actions_schedule'
 import { getActiveMembers } from './actions'
 import ClassScheduleBoard from './components/ClassScheduleBoard'
+import { createClient } from '@/utils/supabase/server'
+
+export const dynamic = 'force-dynamic' // Ensure no caching
 
 export default async function AttendancePage() {
     const [schedules, members] = await Promise.all([
@@ -17,4 +21,3 @@ export default async function AttendancePage() {
         </div>
     )
 }
-

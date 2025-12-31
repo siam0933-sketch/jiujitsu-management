@@ -76,6 +76,9 @@ export default function ClassScheduleBoard({
                         {viewMode === 'daily'
                             ? `${DAYS.find(d => d.id === selectedDay)?.label} 수업 내역입니다.`
                             : '전체 시간표를 확인하고 새 수업을 등록하세요.'}
+                        <span className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-500">
+                            총 회원: {activeMembers.length}명
+                        </span>
                     </p>
                 </div>
                 <div className="flex gap-2">
