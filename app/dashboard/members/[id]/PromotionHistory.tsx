@@ -5,17 +5,103 @@ import { PromotionLog, logPromotion, calculatePromotionStats } from './actions'
 
 // Simple Belts Constant (Should ideally match DB or Global Config)
 // Simple Belts Constant (Should ideally match DB or Global Config)
-const BELT_OPTIONS = [
-    '화이트 (성인)', '화이트 (유소년)', '그레이-화이트', '그레이', '그레이-블랙',
-    '옐로우-화이트', '옐로우', '옐로우-블랙', '오렌지-화이트', '오렌지', '오렌지-블랙',
-    '그린-화이트', '그린', '그린-블랙', '블루', '퍼플', '브라운', '블랙'
-];
+// Belt Config with Colors (Copied/Adapted from settings/promotion/page.tsx)
+type BeltOption = {
+    name: string
+    // Using generic style object for flexibility (tailwind classes or inline styles)
+    colorClass?: string
+    style?: React.CSSProperties
+}
+
+// Ordered List: Adults -> Kids
+// "화이트 (성인)" is above "블루".
+const BELT_OPTIONS_DATA: BeltOption[] = [
+    // Adult Belts
+    { name: '화이트 (성인)', colorClass: 'bg-white border-gray-200' },
+    { name: '블루', colorClass: 'bg-blue-600 text-white' },
+    { name: '퍼플', colorClass: 'bg-purple-600 text-white' },
+    { name: '브라운', colorClass: 'bg-yellow-800 text-white' },
+    { name: '블랙', colorClass: 'bg-gray-900 text-white' },
+
+    // Kids Belts
+    { name: '화이트 (유소년)', colorClass: 'bg-white border border-gray-200' },
+    { name: '그레이-화이트', colorClass: 'border border-gray-300', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
+    { name: '그레이', colorClass: 'bg-gray-400 text-white border border-gray-400' },
+    { name: '그레이-블랙', colorClass: 'border border-gray-400', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #1f2937 35%, #1f2937 65%, #9ca3af 65%)' } },
+    { name: '옐로우-화이트', colorClass: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #ffffff 35%, #ffffff 65%, #facc15 65%)' } },
+    { name: '옐로우', colorClass: 'bg-yellow-400 text-yellow-900 border border-yellow-400' },
+    { name: '옐로우-블랙', colorClass: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #1f2937 35%, #1f2937 65%, #facc15 65%)' } },
+    { name: '오렌지-화이트', colorClass: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #ffffff 35%, #ffffff 65%, #f97316 65%)' } },
+    { name: '오렌지', colorClass: 'bg-orange-500 text-white border border-orange-500' },
+    { name: '오렌지-블랙', colorClass: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #1f2937 35%, #1f2937 65%, #f97316 65%)' } },
+    { name: '그린-화이트', colorClass: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #ffffff 35%, #ffffff 65%, #16a34a 65%)' } },
+    { name: '그린', colorClass: 'bg-green-600 text-white border border-green-600' },
+    { name: '그린-블랙', colorClass: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #1f2937 35%, #1f2937 65%, #16a34a 65%)' } },
+]
 
 // Helper to display legacy names correctly
 const displayBeltName = (name: string) => {
     if (name === 'White') return '화이트 (성인)' // Default legacy White to Adult White for display
     return name
 }
+
+// Custom Select Component for Belts
+const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const selectedOption = BELT_OPTIONS_DATA.find(b => b.name === value) || BELT_OPTIONS_DATA[0]
+
+    return (
+        <div className="relative">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6 h-[38px]"
+            >
+                <div className="flex items-center gap-2">
+                    <span
+                        className={`inline-block w-4 h-4 rounded-full border ${selectedOption.colorClass?.includes('border') ? '' : 'border-gray-200'} ${selectedOption.colorClass}`}
+                        style={selectedOption.style}
+                    />
+                    <span className="block truncate">{selectedOption.name}</span>
+                </div>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clipRule="evenodd" />
+                    </svg>
+                </span>
+            </button>
+
+            {isOpen && (
+                <>
+                    <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
+                    <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        {BELT_OPTIONS_DATA.map((belt) => (
+                            <li
+                                key={belt.name}
+                                className={`relative cursor-default select-none py-2 pl-3 pr-9 ${belt.name === value ? 'bg-indigo-600 text-white' : 'text-gray-900 hover:bg-indigo-50'}`}
+                                onClick={() => {
+                                    onChange(belt.name)
+                                    setIsOpen(false)
+                                }}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className={`inline-block w-4 h-4 rounded-full border ${belt.colorClass?.includes('border') ? '' : 'border-gray-200'} ${belt.colorClass}`}
+                                        style={belt.style}
+                                    />
+                                    <span className={`block truncate ${belt.name === value ? 'font-semibold' : 'font-normal'}`}>
+                                        {belt.name}
+                                    </span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+        </div>
+    )
+}
+
 
 type PromotionHistoryProps = {
     memberId: string
@@ -95,16 +181,29 @@ export default function PromotionHistory({ memberId, initialLogs }: PromotionHis
                     ) : (
                         logs.map((log) => {
                             const displayName = displayBeltName(log.belt_name)
+                            // Find color for display in list
+                            const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || { name: displayName, colorClass: 'bg-gray-100', style: undefined }
+
                             return (
                                 <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
                                     <div className="flex items-center justify-between">
                                         <div className="flex gap-4 items-center">
-                                            <div className="flex flex-col items-center justify-center bg-gray-900 text-white w-12 h-12 rounded-full font-bold text-xs shadow-sm border-2 border-white ring-2 ring-gray-100">
-                                                <span>{displayName.split(' ')[0]}</span>
-                                                {log.stripe_level > 0 && <span className="text-[10px] text-yellow-400">{log.stripe_level}그랄</span>}
+                                            {/* Belt Icon in History List - Using color from config */}
+                                            <div className="flex flex-col items-center justify-center bg-white w-12 h-12 rounded-full shadow-sm border ring-1 ring-gray-100 overflow-hidden relative">
+                                                <div
+                                                    className={`absolute inset-0 opacity-80 ${beltMeta.colorClass}`}
+                                                    style={beltMeta.style}
+                                                ></div>
+                                                <span className="relative z-10 text-xs font-bold text-gray-800 drop-shadow-md bg-white/50 px-1 rounded">
+                                                    {displayName.split(' ')[0]}
+                                                </span>
+                                                {log.stripe_level > 0 && <span className="relative z-10 text-[10px] bg-black/50 text-white px-1 rounded-full mt-0.5">{log.stripe_level}</span>}
                                             </div>
+
                                             <div>
-                                                <p className="text-sm font-bold text-gray-900">{displayName} {log.stripe_level}그랄</p>
+                                                <p className="text-sm font-bold text-gray-900 flex items-center gap-1">
+                                                    {displayName} {log.stripe_level}그랄
+                                                </p>
                                                 <p className="text-xs text-gray-500">수여자: {log.awarded_by}</p>
                                             </div>
                                         </div>
@@ -150,20 +249,14 @@ export default function PromotionHistory({ memberId, initialLogs }: PromotionHis
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">벨트</label>
-                                    <select
-                                        value={belt}
-                                        onChange={e => setBelt(e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                    >
-                                        {BELT_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
-                                    </select>
+                                    <BeltSelect value={belt} onChange={setBelt} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">그랄 (Stripe)</label>
                                     <select
                                         value={stripe}
                                         onChange={e => setStripe(e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm h-[38px]"
                                     >
                                         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => <option key={n} value={n}>{n}</option>)}
                                     </select>
