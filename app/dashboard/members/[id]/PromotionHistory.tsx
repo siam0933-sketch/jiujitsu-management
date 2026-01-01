@@ -4,7 +4,18 @@ import { useState, useEffect } from 'react'
 import { PromotionLog, logPromotion, calculatePromotionStats } from './actions'
 
 // Simple Belts Constant (Should ideally match DB or Global Config)
-const BELT_OPTIONS = ['White', 'Gray-White', 'Gray', 'Gray-Black', 'Yellow-White', 'Yellow', 'Yellow-Black', 'Orange-White', 'Orange', 'Orange-Black', 'Green-White', 'Green', 'Green-Black', 'Blue', 'Purple', 'Brown', 'Black'];
+// Simple Belts Constant (Should ideally match DB or Global Config)
+const BELT_OPTIONS = [
+    '화이트 (성인)', '화이트 (유소년)', '그레이-화이트', '그레이', '그레이-블랙',
+    '옐로우-화이트', '옐로우', '옐로우-블랙', '오렌지-화이트', '오렌지', '오렌지-블랙',
+    '그린-화이트', '그린', '그린-블랙', '블루', '퍼플', '브라운', '블랙'
+];
+
+// Helper to display legacy names correctly
+const displayBeltName = (name: string) => {
+    if (name === 'White') return '화이트 (성인)' // Default legacy White to Adult White for display
+    return name
+}
 
 type PromotionHistoryProps = {
     memberId: string
@@ -18,7 +29,7 @@ export default function PromotionHistory({ memberId, initialLogs }: PromotionHis
 
     // Form State
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-    const [belt, setBelt] = useState('White')
+    const [belt, setBelt] = useState('화이트 (성인)') // Default to new name
     const [stripe, setStripe] = useState('0')
     const [trainingDays, setTrainingDays] = useState(0)
     const [attendanceCount, setAttendanceCount] = useState(0)
@@ -82,33 +93,36 @@ export default function PromotionHistory({ memberId, initialLogs }: PromotionHis
                     {logs.length === 0 ? (
                         <li className="px-4 py-5 text-sm text-gray-500 text-center">기록이 없습니다.</li>
                     ) : (
-                        logs.map((log) => (
-                            <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex gap-4 items-center">
-                                        <div className="flex flex-col items-center justify-center bg-gray-900 text-white w-12 h-12 rounded-full font-bold text-xs shadow-sm border-2 border-white ring-2 ring-gray-100">
-                                            <span>{log.belt_name.split(' ')[0]}</span>
-                                            {log.stripe_level > 0 && <span className="text-[10px] text-yellow-400">{log.stripe_level}그랄</span>}
+                        logs.map((log) => {
+                            const displayName = displayBeltName(log.belt_name)
+                            return (
+                                <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex gap-4 items-center">
+                                            <div className="flex flex-col items-center justify-center bg-gray-900 text-white w-12 h-12 rounded-full font-bold text-xs shadow-sm border-2 border-white ring-2 ring-gray-100">
+                                                <span>{displayName.split(' ')[0]}</span>
+                                                {log.stripe_level > 0 && <span className="text-[10px] text-yellow-400">{log.stripe_level}그랄</span>}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-900">{displayName} {log.stripe_level}그랄</p>
+                                                <p className="text-xs text-gray-500">수여자: {log.awarded_by}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">{log.belt_name} {log.stripe_level}그랄</p>
-                                            <p className="text-xs text-gray-500">수여자: {log.awarded_by}</p>
+                                        <div className="text-right">
+                                            <p className="text-sm font-medium text-gray-900">{new Date(log.promoted_at).toLocaleDateString()}</p>
+                                            <p className="text-xs text-gray-500">
+                                                수련 {log.training_days}일 / 출석 {log.attendance_count}회
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-medium text-gray-900">{new Date(log.promoted_at).toLocaleDateString()}</p>
-                                        <p className="text-xs text-gray-500">
-                                            수련 {log.training_days}일 / 출석 {log.attendance_count}회
+                                    {log.memo && (
+                                        <p className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                                            Memo: {log.memo}
                                         </p>
-                                    </div>
-                                </div>
-                                {log.memo && (
-                                    <p className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                                        Memo: {log.memo}
-                                    </p>
-                                )}
-                            </li>
-                        ))
+                                    )}
+                                </li>
+                            )
+                        })
                     )}
                 </ul>
             </div>
