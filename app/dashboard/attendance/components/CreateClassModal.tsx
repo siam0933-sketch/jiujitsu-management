@@ -177,7 +177,19 @@ export default function CreateClassModal({ onClose, allMembers }: { onClose: () 
                                                 checked={selectedMemberIds.has(member.id)}
                                                 onChange={() => toggleMember(member.id)}
                                             />
-                                            <span className="font-medium truncate">{member.name}</span>
+                                            <span className="font-medium truncate">
+                                                {member.name}
+                                                {member.birth_date && (() => {
+                                                    const birth = new Date(member.birth_date)
+                                                    const today = new Date()
+                                                    let age = today.getFullYear() - birth.getFullYear()
+                                                    const m = today.getMonth() - birth.getMonth()
+                                                    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                                                        age--
+                                                    }
+                                                    return <span className="text-gray-500 font-normal ml-1">({age}세)</span>
+                                                })()}
+                                            </span>
                                             <span className="text-xs text-gray-400 shrink-0">{member.belt}</span>
                                         </label>
                                     ))}
