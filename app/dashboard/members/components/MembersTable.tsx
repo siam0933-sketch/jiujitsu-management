@@ -174,7 +174,7 @@ export default function MembersTable({ initialMembers, count, status }: Props) {
 
                 <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 items-end sm:items-center">
                     {/* Search Input */}
-                    <div className="relative">
+                    <div className="relative w-full sm:w-64">
                         <input
                             type="text"
                             placeholder="이름 또는 전화번호 검색"
