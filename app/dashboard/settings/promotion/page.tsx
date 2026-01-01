@@ -5,33 +5,33 @@ import { getPromotionCriteria, savePromotionCriteria, AdultBeltConfig, KidsBeltC
 
 // --- Constants & Types ---
 const ADULT_BELTS = [
-    { name: 'White', color: 'bg-white border-gray-200' },
-    { name: 'Blue', color: 'bg-blue-600 text-white' },
-    { name: 'Purple', color: 'bg-purple-600 text-white' },
-    { name: 'Brown', color: 'bg-yellow-800 text-white' },
-    { name: 'Black', color: 'bg-gray-900 text-white' }
+    { name: '화이트 (성인)', color: 'bg-white border-gray-200' },
+    { name: '블루', color: 'bg-blue-600 text-white' },
+    { name: '퍼플', color: 'bg-purple-600 text-white' },
+    { name: '브라운', color: 'bg-yellow-800 text-white' },
+    { name: '블랙', color: 'bg-gray-900 text-white' }
 ];
 
 const KIDS_BELTS = [
-    { name: 'White', color: 'bg-white border border-gray-200' },
-    { name: 'Gray-White', color: 'border border-gray-300', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
-    { name: 'Gray', color: 'bg-gray-400 text-white border border-gray-400' },
-    { name: 'Gray-Black', color: 'border border-gray-400', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #1f2937 35%, #1f2937 65%, #9ca3af 65%)' } },
-    { name: 'Yellow-White', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #ffffff 35%, #ffffff 65%, #facc15 65%)' } },
-    { name: 'Yellow', color: 'bg-yellow-400 text-yellow-900 border border-yellow-400' },
-    { name: 'Yellow-Black', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #1f2937 35%, #1f2937 65%, #facc15 65%)' } },
-    { name: 'Orange-White', color: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #ffffff 35%, #ffffff 65%, #f97316 65%)' } },
-    { name: 'Orange', color: 'bg-orange-500 text-white border border-orange-500' },
-    { name: 'Orange-Black', color: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #1f2937 35%, #1f2937 65%, #f97316 65%)' } },
-    { name: 'Green-White', color: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #ffffff 35%, #ffffff 65%, #16a34a 65%)' } },
-    { name: 'Green', color: 'bg-green-600 text-white border border-green-600' },
-    { name: 'Green-Black', color: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #1f2937 35%, #1f2937 65%, #16a34a 65%)' } },
+    { name: '화이트 (유소년)', color: 'bg-white border border-gray-200' },
+    { name: '그레이-화이트', color: 'border border-gray-300', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
+    { name: '그레이', color: 'bg-gray-400 text-white border border-gray-400' },
+    { name: '그레이-블랙', color: 'border border-gray-400', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #1f2937 35%, #1f2937 65%, #9ca3af 65%)' } },
+    { name: '옐로우-화이트', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #ffffff 35%, #ffffff 65%, #facc15 65%)' } },
+    { name: '옐로우', color: 'bg-yellow-400 text-yellow-900 border border-yellow-400' },
+    { name: '옐로우-블랙', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #1f2937 35%, #1f2937 65%, #facc15 65%)' } },
+    { name: '오렌지-화이트', color: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #ffffff 35%, #ffffff 65%, #f97316 65%)' } },
+    { name: '오렌지', color: 'bg-orange-500 text-white border border-orange-500' },
+    { name: '오렌지-블랙', color: 'border border-orange-500', style: { background: 'linear-gradient(180deg, #f97316 35%, #1f2937 35%, #1f2937 65%, #f97316 65%)' } },
+    { name: '그린-화이트', color: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #ffffff 35%, #ffffff 65%, #16a34a 65%)' } },
+    { name: '그린', color: 'bg-green-600 text-white border border-green-600' },
+    { name: '그린-블랙', color: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #1f2937 35%, #1f2937 65%, #16a34a 65%)' } },
 ];
 
 export default function PromotionSettingsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'adult' | 'kids'>('adult');
-    const [openAccordions, setOpenAccordions] = useState<string[]>(['White']);
+    const [openAccordions, setOpenAccordions] = useState<string[]>(['화이트 (성인)']);
     const [isSaving, setIsSaving] = useState(false);
 
     // --- State: Adult & Kids ---
