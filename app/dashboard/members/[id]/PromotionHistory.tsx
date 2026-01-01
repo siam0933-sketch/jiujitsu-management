@@ -103,12 +103,15 @@ const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string
 }
 
 
+
 type PromotionHistoryProps = {
     memberId: string
     initialLogs: PromotionLog[]
+    joinedAt: string
+    startDate?: string | null
 }
 
-export default function PromotionHistory({ memberId, initialLogs }: PromotionHistoryProps) {
+export default function PromotionHistory({ memberId, initialLogs, joinedAt, startDate }: PromotionHistoryProps) {
     const [logs, setLogs] = useState<PromotionLog[]>(initialLogs)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -231,6 +234,18 @@ export default function PromotionHistory({ memberId, initialLogs }: PromotionHis
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
                         <h2 className="text-lg font-bold mb-4 text-gray-900">승급 기록 추가</h2>
+
+                        {/* Info Header: Joined & Start Date */}
+                        <div className="mb-4 bg-gray-50 p-3 rounded-md flex justify-between text-xs text-gray-700">
+                            <div>
+                                <span className="text-gray-400 mr-1">등록일:</span>
+                                <span className="font-semibold">{new Date(joinedAt).toLocaleDateString()}</span>
+                            </div>
+                            <div>
+                                <span className="text-gray-400 mr-1">입문일:</span>
+                                <span className="font-semibold">{startDate ? new Date(startDate).toLocaleDateString() : '-'}</span>
+                            </div>
+                        </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Date */}

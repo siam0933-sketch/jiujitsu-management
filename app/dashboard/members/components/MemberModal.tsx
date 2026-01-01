@@ -909,7 +909,7 @@ export default function MemberModal({ member }: { member: any }) {
                                     {/* Moved Promotion History Here */}
                                     <div>
                                         <p className="text-gray-400 text-xs mb-2">승급 이력</p>
-                                        <PromotionHistory memberId={member.id} initialLogs={promotionLogs} />
+                                        <PromotionHistory memberId={member.id} initialLogs={promotionLogs} joinedAt={member.joined_at} startDate={member.start_date} />
                                     </div>
                                 </div>
                             </section>
