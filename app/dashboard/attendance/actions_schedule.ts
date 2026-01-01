@@ -75,7 +75,6 @@ export async function createSchedule(data: { days: string[], time: string, name:
         newSchedules.forEach(schedule => {
             data.initialEnrollments!.forEach(memberId => {
                 enrollmentInserts.push({
-                    gym_id: gym.id,
                     schedule_id: schedule.id,
                     member_id: memberId
                 })
