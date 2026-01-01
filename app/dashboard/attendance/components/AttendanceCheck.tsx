@@ -136,7 +136,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
         const birth = new Date(birthDate)
         if (isNaN(birth.getTime())) return '' // Validation
         const today = new Date()
-        const age = today.getFullYear() - birth.getFullYear() + 1
+        const age = today.getFullYear() - birth.getFullYear()
         return `${age}세`
     }
 
