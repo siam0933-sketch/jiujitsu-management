@@ -21,13 +21,37 @@ export type KidsBeltConfig = {
     reqPerStripe: StripeReq
 }
 
-const ADULT_BELTS = ['White', 'Blue', 'Purple', 'Brown', 'Black']
-const KIDS_BELTS = [
-    'White', 'Gray-White', 'Gray', 'Gray-Black',
-    'Yellow-White', 'Yellow', 'Yellow-Black',
-    'Orange-White', 'Orange', 'Orange-Black',
-    'Green-White', 'Green', 'Green-Black'
+const ADULT_BELTS = [
+    '화이트 (성인)', '블루', '퍼플', '브라운', '블랙'
 ]
+const KIDS_BELTS = [
+    '화이트 (유소년)', '그레이-화이트', '그레이', '그레이-블랙',
+    '옐로우-화이트', '옐로우', '옐로우-블랙',
+    '오렌지-화이트', '오렌지', '오렌지-블랙',
+    '그린-화이트', '그린', '그린-블랙'
+]
+
+// Legacy Mapping for smooth transition
+const LEGACY_MAP: Record<string, string> = {
+    '화이트 (성인)': 'White',
+    '블루': 'Blue',
+    '퍼플': 'Purple',
+    '브라운': 'Brown',
+    '블랙': 'Black',
+    '화이트 (유소년)': 'White',
+    '그레이-화이트': 'Gray-White',
+    '그레이': 'Gray',
+    '그레이-블랙': 'Gray-Black',
+    '옐로우-화이트': 'Yellow-White',
+    '옐로우': 'Yellow',
+    '옐로우-블랙': 'Yellow-Black',
+    '오렌지-화이트': 'Orange-White',
+    '오렌지': 'Orange',
+    '오렌지-블랙': 'Orange-Black',
+    '그린-화이트': 'Green-White',
+    '그린': 'Green',
+    '그린-블랙': 'Green-Black'
+}
 
 export async function getPromotionCriteria() {
     const supabase = await createClient()
@@ -53,7 +77,15 @@ export async function getPromotionCriteria() {
 
     // 3. Construct Adult Config
     const adultConfig: AdultBeltConfig[] = ADULT_BELTS.map((name, idx) => {
-        const beltRows = rows?.filter(r => r.type === 'ADULT' && r.belt_name === name) || []
+        // Try to find by new name first, then legacy name
+        let beltRows = rows?.filter(r => r.type === 'ADULT' && r.belt_name === name) || []
+        if (beltRows.length === 0) {
+            const legacyName = LEGACY_MAP[name]
+            if (legacyName) {
+                beltRows = rows?.filter(r => r.type === 'ADULT' && r.belt_name === legacyName) || []
+            }
+        }
+
         // Default 4 stripes if not found
         const stripes: StripeReq[] = Array(4).fill(0).map((_, i) => {
             const found = beltRows.find(r => r.stripe_level === i)
@@ -65,7 +97,15 @@ export async function getPromotionCriteria() {
 
     // 4. Construct Kids Config
     const kidsConfig: KidsBeltConfig[] = KIDS_BELTS.map((name, idx) => {
-        const beltRows = rows?.filter(r => r.type === 'KIDS' && r.belt_name === name) || []
+        // Try to find by new name first, then legacy name
+        let beltRows = rows?.filter(r => r.type === 'KIDS' && r.belt_name === name) || []
+        if (beltRows.length === 0) {
+            const legacyName = LEGACY_MAP[name]
+            if (legacyName) {
+                beltRows = rows?.filter(r => r.type === 'KIDS' && r.belt_name === legacyName) || []
+            }
+        }
+
         // Determine total stripes from DB or default to 4
         // Logic: look at the 'total_stripes_count' of the first row, or fallback
         const totalStripes = beltRows.length > 0 && beltRows[0].total_stripes_count ? beltRows[0].total_stripes_count : 4
