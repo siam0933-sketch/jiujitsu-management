@@ -10,6 +10,7 @@ export type Schedule = {
     start_time: string
     class_name: string
     created_at: string
+    enrollment_count?: number
 }
 
 export async function getSchedules() {
@@ -29,11 +30,19 @@ export async function getSchedules() {
 
     const { data } = await supabase
         .from('gym_schedules')
-        .select('*')
+        .select(`
+            *,
+            gym_class_enrollments (count)
+        `)
         .eq('gym_id', gym.id)
         .order('start_time', { ascending: true })
 
-    return (data as Schedule[]) || []
+    const schedules = (data || []).map((s: any) => ({
+        ...s,
+        enrollment_count: s.gym_class_enrollments?.[0]?.count || 0
+    }))
+
+    return schedules as Schedule[]
 }
 
 export async function createSchedule(data: { days: string[], time: string, name: string, initialEnrollments?: string[] }) {

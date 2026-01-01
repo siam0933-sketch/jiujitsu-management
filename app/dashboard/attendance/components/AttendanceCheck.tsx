@@ -171,7 +171,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                 <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
                 <p className="text-xs text-blue-600 font-bold mt-1">{schedule.start_time}</p>
                 {/* Show enrollment count */}
-                <p className="text-[10px] text-gray-400 mt-1">수강생 {enrolledMemberIds.size}명</p>
+                <p className="text-[10px] text-gray-400 mt-1">수강생 {schedule.enrollment_count ?? 0}명</p>
 
                 <button
                     onClick={handleDeleteClass}
@@ -257,7 +257,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode }: Props) {
                                             : 'hover:bg-blue-50 text-gray-700'}
                                     `}
                                 >
-                                    <span>{member.name} <span className="text-gray-400 text-xs ml-1">({member.belt})</span></span>
+                                    <span>
+                                        {member.name}
+                                        {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
+                                        <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
+                                    </span>
                                     {checkedInMembers.has(member.id) && <span>✓</span>}
                                 </button>
                             ))}
