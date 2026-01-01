@@ -36,6 +36,19 @@ export async function updateMemberStartDate(memberId: string, startDate: string)
     return { success: true }
 }
 
+export async function updateMemberJoinedDate(memberId: string, joinedAt: string) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('gym_members')
+        .update({ joined_at: joinedAt })
+        .eq('id', memberId)
+
+    if (error) return { error: '가입일 수정 실패: ' + error.message }
+
+    revalidatePath(`/dashboard/members/${memberId}`)
+    return { success: true }
+}
+
 // --- 2. Pause / Resume Logic ---
 
 export async function togglePauseStatus(memberId: string, currentStatus: 'active' | 'paused') {

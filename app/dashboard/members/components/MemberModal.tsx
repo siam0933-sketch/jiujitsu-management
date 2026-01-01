@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 import { updateMember } from '../actions'
-import { MemberStatusBadge, MemberStartDate, MemberPauseButton } from './MemberComponents'
+import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseButton } from './MemberComponents'
 import PromotionHistory from '../[id]/PromotionHistory'
 import { getPromotionLogs, type PromotionLog } from '../[id]/actions'
 import { getMemberEnrollments, type EnrolledClassInfo } from '../../attendance/actions_enrollment'
@@ -868,10 +868,7 @@ export default function MemberModal({ member }: { member: any }) {
                                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-6">
                                     {/* Row 1: Dates */}
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-gray-400 text-xs mb-1">가입일</p>
-                                            <p className="font-medium text-gray-900 text-sm">{new Date(member.joined_at).toLocaleDateString()}</p>
-                                        </div>
+                                        <MemberJoinedDate memberId={member.id} joinedAt={member.joined_at} />
                                         <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
                                     </div>
 
