@@ -308,10 +308,10 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                                 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
                                                                 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 ${!attendance
-                                                                    ? 'bg-blue-50 text-blue-700 ring-blue-600/20 hover:bg-blue-100' // Check In
+                                                                    ? 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200' // Default: Gray
                                                                     : !attendance.checkedOut
-                                                                        ? 'bg-green-50 text-green-700 ring-green-600/20 hover:bg-green-100' // Check Out
-                                                                        : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50' // Cancel
+                                                                        ? 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200' // Checked In: Green
+                                                                        : 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200' // Checked Out: Sand (Amber)
                                                                 }
                                                             `}
                                                         >
