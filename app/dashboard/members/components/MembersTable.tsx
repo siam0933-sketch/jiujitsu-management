@@ -367,14 +367,14 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                                 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
                                                                 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 ${!attendance
-                                                                    ? 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200' // Default: Gray
+                                                                    ? 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200' // Default: Wait (대기)
                                                                     : !attendance.checkedOut
-                                                                        ? 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200' // Checked In: Green
-                                                                        : 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200' // Checked Out: Sand (Amber)
+                                                                        ? 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200' // Checked In: Present (출석)
+                                                                        : 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200' // Checked Out: Left (하원)
                                                                 }
                                                             `}
                                                         >
-                                                            {isProcessing ? '...' : !attendance ? '출석' : !attendance.checkedOut ? '하원' : '취소'}
+                                                            {isProcessing ? '...' : !attendance ? '대기' : !attendance.checkedOut ? '출석' : '하원'}
                                                         </button>
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
