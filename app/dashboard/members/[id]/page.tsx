@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
-import MemberActions from './MemberActions'
+// import MemberActions from './MemberActions' // Deprecated
 import PromotionHistory from './PromotionHistory'
 import { getPromotionLogs } from './actions'
+import { MemberStartDate, MemberPauseController } from '../components/MemberComponents'
 
 export default async function MemberDetailsPage({ params }: { params: { id: string } }) {
     const { id } = await params
@@ -62,20 +63,14 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                 </div>
             </div>
 
-            {/* Member Actions (New) */}
-            <MemberActions
-                memberId={id}
-                startDate={member.start_date}
-                joinedAt={member.joined_at}
-                isPaused={isPaused}
-            />
+            {/* <MemberActions ... /> Removed as per user request (deprecated UI) */}
 
             {/* Content Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Info */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Promotion History (New) */}
-                    <PromotionHistory memberId={id} initialLogs={promotionLogs} />
+                    <PromotionHistory memberId={id} initialLogs={promotionLogs} joinedAt={member.joined_at} />
 
                     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                         <div className="px-4 py-5 sm:px-6">
@@ -136,25 +131,54 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                 {/* Right Column: System Info */}
                 <div className="space-y-8">
                     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50">
+                        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                             <h3 className="text-base font-semibold leading-6 text-gray-900">도장 관리 정보</h3>
+                            {/* Pause Controller in Header */}
                         </div>
                         <div className="border-t border-gray-200">
                             <dl>
+                                {/* Access Code */}
                                 <div className="bg-white px-4 py-5">
                                     <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">출결/접속 코드(PIN)</dt>
                                     <dd className="text-2xl font-mono font-bold text-blue-600 tracking-widest text-center py-2 bg-blue-50 rounded-lg border border-blue-100">
                                         {member.access_code}
                                     </dd>
                                 </div>
-                                <div className="bg-gray-50 px-4 py-5 border-t border-gray-200">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <dt className="text-sm font-medium text-gray-500">입관일(등록일)</dt>
-                                        <dd className="text-sm font-bold text-gray-900">{new Date(member.joined_at).toLocaleDateString()}</dd>
+
+                                {/* Status / Pause */}
+                                <div className="bg-gray-50 px-4 py-4 border-t border-gray-200">
+                                    <dt className="text-xs font-medium text-gray-500 mb-1">회원 상태</dt>
+                                    <dd>
+                                        <MemberPauseController
+                                            memberId={id}
+                                            isPaused={isPaused}
+                                            paymentEndDate={member.payment_end_date}
+                                        />
+                                    </dd>
+                                </div>
+
+                                {/* Start Date / Joined Date */}
+                                <div className="bg-white px-4 py-4 border-t border-gray-200">
+                                    <div className="mb-2">
+                                        <MemberStartDate memberId={id} startDate={member.start_date || member.joined_at} joinedAt={member.joined_at} />
                                     </div>
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between text-xs text-gray-400">
+                                        <span>가입일:</span>
+                                        <span>{new Date(member.joined_at).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+
+                                {/* Billing Info */}
+                                <div className="bg-gray-50 px-4 py-4 border-t border-gray-200">
+                                    <div className="flex justify-between items-center mb-2">
                                         <dt className="text-sm font-medium text-gray-500">수납 청구일</dt>
                                         <dd className="text-sm font-bold text-gray-900">매월 {member.payment_due_day ? `${member.payment_due_day}일` : '-'}</dd>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <dt className="text-sm font-medium text-gray-500">회원권 만료일</dt>
+                                        <dd className="text-sm font-bold text-red-600">
+                                            {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '-'}
+                                        </dd>
                                     </div>
                                 </div>
                             </dl>

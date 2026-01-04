@@ -23,31 +23,7 @@ export type PauseRecord = {
 
 // --- 1. Member Basic Updates ---
 
-export async function updateMemberStartDate(memberId: string, startDate: string) {
-    const supabase = await createClient()
-    const { error } = await supabase
-        .from('gym_members')
-        .update({ start_date: startDate })
-        .eq('id', memberId)
 
-    if (error) return { error: '입문일 수정 실패: ' + error.message }
-
-    revalidatePath(`/dashboard/members/${memberId}`)
-    return { success: true }
-}
-
-export async function updateMemberJoinedDate(memberId: string, joinedAt: string) {
-    const supabase = await createClient()
-    const { error } = await supabase
-        .from('gym_members')
-        .update({ joined_at: joinedAt })
-        .eq('id', memberId)
-
-    if (error) return { error: '가입일 수정 실패: ' + error.message }
-
-    revalidatePath(`/dashboard/members/${memberId}`)
-    return { success: true }
-}
 
 
 
