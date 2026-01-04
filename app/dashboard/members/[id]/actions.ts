@@ -132,11 +132,16 @@ export async function togglePauseStatus(memberId: string, currentStatus: 'active
 
 export async function getPromotionLogs(memberId: string) {
     const supabase = await createClient()
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from('gym_promotion_logs')
         .select('*')
         .eq('member_id', memberId)
         .order('promoted_at', { ascending: false })
+
+    if (error) {
+        console.error('getPromotionLogs Error:', error)
+    }
+    console.log(`getPromotionLogs for ${memberId}:`, data?.length, 'records found')
 
     return data as PromotionLog[] || []
 }
@@ -155,6 +160,7 @@ export async function logPromotion(memberId: string, data: any) {
     if (!member) return { error: 'Member not found' }
 
     // 1. Insert Log
+    console.log(`Inserting Promotion Log for Member ${memberId}, Gym ${member.gym_id}`)
     const { error: logError } = await supabase
         .from('gym_promotion_logs')
         .insert({
@@ -169,26 +175,131 @@ export async function logPromotion(memberId: string, data: any) {
             memo: data.memo
         })
 
-    if (logError) return { error: '승급 기록 저장 실패: ' + logError.message }
+    if (logError) {
+        console.error('Promotion Log Insert Error:', logError)
+        return { error: '승급 기록 저장 실패: ' + logError.message }
+    }
 
     // 2. Update Member's Current Level
-    // TODO: Verify if the new log is actually the "latest" promotion before updating current level.
-    // Ideally, we only update member level if this promotion date is >= current last_promotion_date.
-    // For simplicity, we assume new logs are usually recent.
     const { error: updateError } = await supabase
         .from('gym_members')
         .update({
-            belt: data.belt, // Store belt name?
-            // stripe? If you have a stripe column in members, update it too. Schema v2 didn't strictly say members table has stripe column yet.
-            // Assuming 'belt' column stores "Blue" or "Blue 3" string? Or just Belt name?
-            // Based on previous schema, 'belt' is text. Let's store "Blue 3그랄" for readability? Or just "Blue".
-            // Let's stick to "Blue" in belt column for now, or match existing usage.
+            belt: data.belt, // Store belt name
             last_promotion_date: data.date
         })
         .eq('id', memberId)
 
+    if (updateError) {
+        console.error('Member Update Error:', updateError)
+        return { error: '회원 정보(벨트) 업데이트 실패: ' + updateError.message }
+    }
+
     revalidatePath(`/dashboard/members/${memberId}`)
-    return { success: true }
+
+    // Return updated logs
+    const { data: updatedLogs } = await supabase
+        .from('gym_promotion_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('promoted_at', { ascending: false })
+
+    return { success: true, logs: updatedLogs as PromotionLog[] }
+}
+
+export async function deletePromotionLog(logId: string, memberId: string) {
+    const supabase = await createClient()
+
+    // 1. Delete Log
+    const { error } = await supabase
+        .from('gym_promotion_logs')
+        .delete()
+        .eq('id', logId)
+
+    if (error) {
+        console.error('Delete Log Error:', error)
+        return { error: '삭제 실패: ' + error.message }
+    }
+
+    // 2. Re-calculate Member Level (optional but good practice)
+    // For now, we trust the user to fix the level manually if needed, or we just leave it.
+    // Ideally, we should find the *latest* log remaining and update the member's belt.
+    const { data: latestLog } = await supabase
+        .from('gym_promotion_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('promoted_at', { ascending: false })
+        .limit(1)
+        .single()
+
+    if (latestLog) {
+        // Update member to this latest log's belt
+        await supabase.from('gym_members').update({
+            belt: latestLog.belt_name,
+            last_promotion_date: latestLog.promoted_at
+        }).eq('id', memberId)
+    }
+
+    revalidatePath(`/dashboard/members/${memberId}`)
+
+    // Return updated logs
+    const { data: updatedLogs } = await supabase
+        .from('gym_promotion_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('promoted_at', { ascending: false })
+
+    return { success: true, logs: updatedLogs as PromotionLog[] }
+}
+
+export async function updatePromotionLog(logId: string, memberId: string, data: any) {
+    const supabase = await createClient()
+
+    // 1. Update Log
+    const { error } = await supabase
+        .from('gym_promotion_logs')
+        .update({
+            belt_name: data.belt,
+            stripe_level: data.stripe,
+            promoted_at: data.date,
+            training_days: data.trainingDays,
+            attendance_count: data.attendanceCount,
+            memo: data.memo
+        })
+        .eq('id', logId)
+
+    if (error) {
+        console.error('Update Log Error:', error)
+        return { error: '수정 실패: ' + error.message }
+    }
+
+    // 2. Update Member Level if this was the latest log
+    // Simplest approach: Just update member to match this log if it IS the latest by date/time.
+    // Or just always update member to match the *actual* latest log after this edit.
+    const { data: latestLog } = await supabase
+        .from('gym_promotion_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('promoted_at', { ascending: false })
+        .limit(1)
+        .single()
+
+    if (latestLog) {
+        await supabase.from('gym_members').update({
+            belt: latestLog.belt_name,
+            last_promotion_date: latestLog.promoted_at
+        }).eq('id', memberId)
+    }
+
+    revalidatePath(`/dashboard/members/${memberId}`)
+
+    // Return updated logs
+    const { data: updatedLogs } = await supabase
+        .from('gym_promotion_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('promoted_at', { ascending: false })
+
+    return { success: true, logs: updatedLogs as PromotionLog[] }
 }
 
 // --- 4. Helper: Calculate Stats ---
@@ -252,4 +363,20 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
         .lte('check_in_at', targetDate.toISOString()) // timestamp comparison
 
     return { trainingDays: netTrainingDays, attendanceCount: count || 0 }
+}
+
+export async function getMemberAttendanceLogs(memberId: string) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('gym_attendance_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('date', { ascending: false })
+
+    if (error) {
+        console.error('getMemberAttendanceLogs Error:', error)
+        return []
+    }
+
+    return data
 }

@@ -7,7 +7,8 @@ import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '
 import { updateMember } from '../actions'
 import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseButton } from './MemberComponents'
 import PromotionHistory from '../[id]/PromotionHistory'
-import { getPromotionLogs, type PromotionLog } from '../[id]/actions'
+import AttendanceHistory from '../[id]/AttendanceHistory'
+import { getPromotionLogs, getMemberAttendanceLogs, type PromotionLog } from '../[id]/actions'
 import { getMemberEnrollments, type EnrolledClassInfo } from '../../attendance/actions_enrollment'
 import { createClient } from '@/utils/supabase/client'
 
@@ -48,6 +49,7 @@ export default function MemberModal({ member }: { member: any }) {
 
     // New Data State
     const [promotionLogs, setPromotionLogs] = useState<PromotionLog[]>([])
+    const [attendanceLogs, setAttendanceLogs] = useState<any[]>([])
     const [enrolledClasses, setEnrolledClasses] = useState<EnrolledClassInfo[]>([])
     const [isPaused, setIsPaused] = useState(false)
 
@@ -206,7 +208,12 @@ export default function MemberModal({ member }: { member: any }) {
 
             // Load Promotion Logs
             const logs = await getPromotionLogs(member.id)
+            console.log('MemberModal: Loaded logs:', logs)
             setPromotionLogs(logs)
+
+            // Load Attendance Logs
+            const attLogs = await getMemberAttendanceLogs(member.id)
+            setAttendanceLogs(attLogs)
 
             // Load Enrolled Classes
             const enrolled = await getMemberEnrollments(member.id)
@@ -531,6 +538,10 @@ export default function MemberModal({ member }: { member: any }) {
                             </section>
 
                             {/* MemberActions and Promotions moved to other sections */}
+
+
+
+
 
                             {/* Section 2: Payment & Update (New Layout) */}
                             <section>
@@ -896,12 +907,10 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     <hr className="border-gray-100" />
 
-                                    {/* Row 2: Recent Attendance */}
+                                    {/* Attendance History Moved Here */}
                                     <div>
-                                        <p className="text-gray-400 text-xs mb-2">최근 출석</p>
-                                        <div className="relative h-16 rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
-                                            <p className="text-xs text-gray-400">최근 출석 기록이 없습니다.</p>
-                                        </div>
+                                        <p className="text-gray-400 text-xs mb-2">출석 기록</p>
+                                        <AttendanceHistory logs={attendanceLogs} />
                                     </div>
 
                                     <hr className="border-gray-100" />

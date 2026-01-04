@@ -24,6 +24,22 @@ const DAYS = [
     { id: 'Sun', label: '일요일' },
 ]
 
+// Helper to get date for specific day of THIS week (assuming Mon start or just relative to today)
+// User requirement seems to imply "Active Week".
+// Simplest approach: Get today, find difference to target day index.
+const getDateForDay = (dayId: string) => {
+    const dayMap: { [key: string]: number } = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+    const targetIndex = dayMap[dayId];
+    const today = new Date();
+    const todayIndex = today.getDay();
+
+    const diff = targetIndex - todayIndex;
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + diff);
+
+    return targetDate.toISOString().split('T')[0];
+}
+
 export default function ClassScheduleBoard({
     initialSchedules,
     activeMembers
@@ -140,10 +156,10 @@ export default function ClassScheduleBoard({
                         {displayedSchedules.length > 0 ? (
                             displayedSchedules.map(schedule => (
                                 <AttendanceCheck
-                                    key={schedule.id}
                                     schedule={schedule}
                                     allMembers={activeMembers}
                                     mode="daily"
+                                    targetDate={getDateForDay(selectedDay)}
                                 />
                             ))
                         ) : (
@@ -170,10 +186,10 @@ export default function ClassScheduleBoard({
                                         .filter(s => s.day_of_week === day.id)
                                         .map(schedule => (
                                             <AttendanceCheck
-                                                key={schedule.id}
                                                 schedule={schedule}
                                                 allMembers={activeMembers}
                                                 mode="weekly"
+                                                targetDate={getDateForDay(day.id)}
                                             />
                                         ))
                                     }

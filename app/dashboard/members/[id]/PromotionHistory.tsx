@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PromotionLog, logPromotion, calculatePromotionStats } from './actions'
+import { PromotionLog, logPromotion, updatePromotionLog, deletePromotionLog, calculatePromotionStats } from './actions'
 
-// Simple Belts Constant (Should ideally match DB or Global Config)
 // Simple Belts Constant (Should ideally match DB or Global Config)
 // Belt Config with Colors (Copied/Adapted from settings/promotion/page.tsx)
 type BeltOption = {
@@ -116,6 +115,10 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
+    // Edit Mode State
+    const [isEditMode, setIsEditMode] = useState(false)
+    const [editingLogId, setEditingLogId] = useState<string | null>(null)
+
     // Form State
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
     const [belt, setBelt] = useState('화이트 (성인)') // Default to new name
@@ -124,12 +127,40 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
     const [attendanceCount, setAttendanceCount] = useState(0)
     const [memo, setMemo] = useState('')
 
-    // Effect: Recalculate stats when Date changes
+    // Effect: Sync logs if initialLogs changes (e.g. parent refresh)
     useEffect(() => {
-        if (isModalOpen) {
+        setLogs(initialLogs)
+    }, [initialLogs])
+
+    // Effect: Recalculate stats when Date changes (Only in Create Mode)
+    useEffect(() => {
+        if (isModalOpen && !editingLogId) {
             updateStats(date)
         }
-    }, [date, isModalOpen])
+    }, [date, isModalOpen, editingLogId])
+
+    // Open Modal for Create
+    const openCreateModal = () => {
+        setEditingLogId(null)
+        setDate(new Date().toISOString().split('T')[0])
+        setBelt('화이트 (성인)')
+        setStripe('0')
+        setMemo('')
+        // Stats will be auto-calculated by Effect
+        setIsModalOpen(true)
+    }
+
+    // Open Modal for Edit
+    const openEditModal = (log: PromotionLog) => {
+        setEditingLogId(log.id)
+        setDate(log.promoted_at)
+        setBelt(displayBeltName(log.belt_name))
+        setStripe(String(log.stripe_level))
+        setTrainingDays(log.training_days)
+        setAttendanceCount(log.attendance_count)
+        setMemo(log.memo || '')
+        setIsModalOpen(true)
+    }
 
     const updateStats = async (targetDate: string) => {
         const stats = await calculatePromotionStats(memberId, targetDate)
@@ -137,44 +168,73 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
         setAttendanceCount(stats.attendanceCount)
     }
 
+    // Execute Delete Directly (No Confirm)
+    const handleDelete = async (logId: string) => {
+        setIsLoading(true)
+        const res = await deletePromotionLog(logId, memberId)
+
+        if (res.error) {
+            alert(res.error)
+        } else {
+            // alert('삭제되었습니다.') // Optional feedback
+            if (res.logs) setLogs(res.logs)
+        }
+        setIsLoading(false)
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!confirm('승급 기록을 저장하시겠습니까?')) return
+        const actionName = editingLogId ? '수정' : '저장'
+        if (!confirm(`승급 기록을 ${actionName}하시겠습니까?`)) return
 
         setIsLoading(true)
-        const res = await logPromotion(memberId, {
+
+        let res;
+        const payload = {
             belt,
             stripe: Number(stripe),
             date,
             trainingDays,
             attendanceCount,
             memo
-        })
+        }
+
+        if (editingLogId) {
+            res = await updatePromotionLog(editingLogId, memberId, payload)
+        } else {
+            res = await logPromotion(memberId, payload)
+        }
 
         if (res.error) {
             alert(res.error)
         } else {
-            alert('저장되었습니다.')
+            alert(`${actionName}되었습니다.`)
             setIsModalOpen(false)
-            // Ideally re-fetch logs or router.refresh(). 
-            // Since we use revalidatePath in action, refreshing router is enough, 
-            // but for instant feedback we might reload or rely on parent re-rendering if this was fully integrated.
-            // For now, let's just reload to be safe or assuming parent re-renders.
-            window.location.reload()
+            if (res.logs) {
+                setLogs(res.logs)
+            }
         }
         setIsLoading(false)
     }
 
     return (
         <div className="bg-white shadow sm:rounded-lg overflow-hidden">
-            <div className="px-4 py-5 sm:px-6 flex justify-between items-center bg-gray-50 border-b border-gray-200">
+            <div className="px-4 py-3 sm:px-6 flex justify-between items-center bg-gray-50 border-b border-gray-200">
                 <h3 className="text-base font-semibold leading-6 text-gray-900">승급 이력 (Promotion Logs)</h3>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-indigo-500 shadow-sm"
-                >
-                    + 승급 기록 추가
-                </button>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => setIsEditMode(!isEditMode)}
+                        className={`text-sm font-medium px-3 py-1.5 rounded-md border ${isEditMode ? 'bg-gray-200 text-gray-800 border-gray-300' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                    >
+                        {isEditMode ? '완료' : '편집'}
+                    </button>
+                    <button
+                        onClick={openCreateModal}
+                        className="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-indigo-500 shadow-sm"
+                    >
+                        승급
+                    </button>
+                </div>
             </div>
 
             <div className="flow-root">
@@ -188,20 +248,15 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
                             const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || { name: displayName, colorClass: 'bg-gray-100', style: undefined }
 
                             return (
-                                <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                                <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50 group">
                                     <div className="flex items-center justify-between">
-                                        <div className="flex gap-4 items-center">
+                                        <div className="flex gap-4 items-center flex-1">
                                             {/* Belt Icon in History List - Using color from config */}
-                                            <div className="flex flex-col items-center justify-center bg-white w-12 h-12 rounded-full shadow-sm border ring-1 ring-gray-100 overflow-hidden relative">
-                                                <div
-                                                    className={`absolute inset-0 opacity-80 ${beltMeta.colorClass}`}
-                                                    style={beltMeta.style}
-                                                ></div>
-                                                <span className="relative z-10 text-xs font-bold text-gray-800 drop-shadow-md bg-white/50 px-1 rounded">
-                                                    {displayName.split(' ')[0]}
-                                                </span>
-                                                {log.stripe_level > 0 && <span className="relative z-10 text-[10px] bg-black/50 text-white px-1 rounded-full mt-0.5">{log.stripe_level}</span>}
-                                            </div>
+                                            {/* Belt Icon in History List - Using color from config (Simple Style) */}
+                                            <div
+                                                className={`w-8 h-8 rounded shadow-sm flex-shrink-0 ${beltMeta.colorClass}`}
+                                                style={beltMeta.style}
+                                            ></div>
 
                                             <div>
                                                 <p className="text-sm font-bold text-gray-900 flex items-center gap-1">
@@ -210,11 +265,48 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
                                                 <p className="text-xs text-gray-500">수여자: {log.awarded_by}</p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-medium text-gray-900">{new Date(log.promoted_at).toLocaleDateString()}</p>
-                                            <p className="text-xs text-gray-500">
-                                                수련 {log.training_days}일 / 출석 {log.attendance_count}회
-                                            </p>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right">
+                                                <p className="text-sm font-medium text-gray-900">{new Date(log.promoted_at).toLocaleDateString()}</p>
+                                                <p className="text-xs text-gray-500">
+                                                    수련 {log.training_days}일 / 출석 {log.attendance_count}회
+                                                </p>
+                                            </div>
+
+                                            {/* Edit/Delete Actions */}
+                                            {isEditMode && (
+                                                <div className="flex items-center gap-1 ml-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            e.stopPropagation()
+                                                            openEditModal(log)
+                                                        }}
+                                                        className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors"
+                                                        title="수정"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            e.stopPropagation()
+                                                            handleDelete(log.id)
+                                                        }}
+                                                        className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"
+                                                        title="삭제"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     {log.memo && (
@@ -231,95 +323,124 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-                        <h2 className="text-lg font-bold mb-4 text-gray-900">승급 기록 추가</h2>
-
-                        {/* Info Header: Joined & Start Date */}
-                        <div className="mb-4 bg-gray-50 p-3 rounded-md flex justify-between text-xs text-gray-700">
-                            <div>
-                                <span className="text-gray-400 mr-1">등록일:</span>
-                                <span className="font-semibold">{new Date(joinedAt).toLocaleDateString()}</span>
-                            </div>
-                            <div>
-                                <span className="text-gray-400 mr-1">입문일:</span>
-                                <span className="font-semibold">{startDate ? new Date(startDate).toLocaleDateString() : '-'}</span>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">승급 날짜</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={date}
-                                    onChange={e => setDate(e.target.value)}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                />
-                            </div>
-
-                            {/* Belt & Stripe */}
-                            <div className="grid grid-cols-2 gap-4">
+                <div className="relative z-50">
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsModalOpen(false)}></div>
+                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <form
+                                onSubmit={handleSubmit}
+                                className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+                                onClick={e => e.stopPropagation()}
+                            >
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">벨트</label>
-                                    <BeltSelect value={belt} onChange={setBelt} />
+                                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+                                        <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div className="mt-3 text-center sm:mt-5">
+                                        <h3 className="text-base font-semibold leading-6 text-gray-900">
+                                            {editingLogId ? '승급 기록 수정' : '새 승급 기록 추가'}
+                                        </h3>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500">
+                                                회원의 새로운 벨트/그랄 승급 정보를 입력해주세요.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 space-y-4">
+                                        {/* Date */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">승급일</label>
+                                            <input
+                                                type="date"
+                                                required
+                                                value={date}
+                                                onChange={(e) => setDate(e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            />
+                                        </div>
+
+                                        {/* Belt Select */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">벨트 (Belt)</label>
+                                            <BeltSelect
+                                                value={belt}
+                                                onChange={setBelt}
+                                            />
+                                        </div>
+
+                                        {/* Stripe Select */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">그랄 (Stripe)</label>
+                                            <select
+                                                value={stripe}
+                                                onChange={(e) => setStripe(e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            >
+                                                {[0, 1, 2, 3, 4].map(num => (
+                                                    <option key={num} value={num}>{num} 그랄</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* Stats (Auto-calc / Manual overwrite) */}
+                                        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-md">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-500">누적 수련일 (자동계산)</label>
+                                                <input
+                                                    type="number"
+                                                    value={trainingDays}
+                                                    onChange={(e) => setTrainingDays(Number(e.target.value))}
+                                                    className="mt-1 block w-full rounded-md border-gray-300 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-500">누적 출석수 (자동계산)</label>
+                                                <input
+                                                    type="number"
+                                                    value={attendanceCount}
+                                                    onChange={(e) => setAttendanceCount(Number(e.target.value))}
+                                                    className="mt-1 block w-full rounded-md border-gray-300 text-sm"
+                                                />
+                                            </div>
+                                            <p className="col-span-2 text-[10px] text-gray-400 text-center">
+                                                * 승급일 기준, 이전 승급/가입일로부터 계산된 수치입니다.
+                                            </p>
+                                        </div>
+
+                                        {/* Memo */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">메모</label>
+                                            <textarea
+                                                rows={3}
+                                                value={memo}
+                                                onChange={(e) => setMemo(e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="특이사항이나 승급 심사 내용 등"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">그랄 (Stripe)</label>
-                                    <select
-                                        value={stripe}
-                                        onChange={e => setStripe(e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm h-[38px]"
+                                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2 disabled:opacity-50"
                                     >
-                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => <option key={n} value={n}>{n}</option>)}
-                                    </select>
+                                        {isLoading ? '처리 중...' : '저장'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                                        onClick={() => setIsModalOpen(false)}
+                                    >
+                                        취소
+                                    </button>
                                 </div>
-                            </div>
-
-                            {/* Stats */}
-                            <div className="bg-gray-50 p-3 rounded-md grid grid-cols-2 gap-4 text-center">
-                                <div>
-                                    <p className="text-xs text-gray-500 mb-1">총 수련일 (휴관 제외)</p>
-                                    <p className="text-lg font-bold text-indigo-600">{trainingDays}일</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 mb-1">총 누적 출석</p>
-                                    <p className="text-lg font-bold text-indigo-600">{attendanceCount}회</p>
-                                </div>
-                            </div>
-
-                            {/* Memo */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">메모</label>
-                                <textarea
-                                    value={memo}
-                                    onChange={e => setMemo(e.target.value)}
-                                    rows={2}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                    placeholder="특이사항 입력..."
-                                />
-                            </div>
-
-                            {/* Buttons */}
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200"
-                                >
-                                    취소
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-500 shadow-sm"
-                                >
-                                    {isLoading ? '저장 중...' : '기록 저장'}
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

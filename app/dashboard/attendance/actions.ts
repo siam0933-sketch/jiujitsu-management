@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function checkInMember(memberId: string, className?: string) {
+export async function checkInMember(memberId: string, className?: string, date?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
@@ -25,7 +25,7 @@ export async function checkInMember(memberId: string, className?: string) {
     // If className provided: Check if (member, date, class_name) exists.
     // If not provided: Check if (member, date) exists (legacy behavior).
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = date || new Date().toISOString().split('T')[0]
     let query = supabase
         .from('gym_attendance_logs')
         .select('id')
@@ -85,7 +85,79 @@ export async function checkInMember(memberId: string, className?: string) {
 
     revalidatePath('/dashboard/attendance')
     return { success: true }
+    return { success: true }
 }
+
+export async function cancelAttendance(memberId: string, date: string, className?: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // Get Gym ID (Could optimize by caching or context, but safe fetch here)
+    const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
+    if (!gym) return { error: 'Gym not found' }
+
+    // 1. Find the log to delete
+    let query = supabase
+        .from('gym_attendance_logs')
+        .delete()
+        .eq('gym_id', gym.id)
+        .eq('member_id', memberId)
+        .eq('date', date)
+
+    if (className) {
+        query = query.eq('class_name', className)
+    }
+
+    const { error } = await query
+
+    if (error) return { error: '출석 취소 실패: ' + error.message }
+
+    // 2. Decrement Member Attendance Count
+    const { data: member } = await supabase
+        .from('gym_members')
+        .select('attendance_count, remaining_sessions')
+        .eq('id', memberId)
+        .single()
+
+    const newCount = Math.max(0, (member?.attendance_count || 0) - 1)
+    let updateData: any = { attendance_count: newCount }
+
+    // If session-based, increment session count back?
+    // User logic: "Remaining sessions" usually means paid sessions.
+    // If we consumed one on check-in, we should restore it on cancel.
+    if (member && member.remaining_sessions !== undefined && member.remaining_sessions !== null) {
+        // Assuming unlimited if null? Schema says int4, nullable? usually 0 or positive.
+        // Let's increment.
+        updateData.remaining_sessions = member.remaining_sessions + 1
+    }
+
+    await supabase.from('gym_members').update(updateData).eq('id', memberId)
+
+    revalidatePath('/dashboard/attendance')
+    return { success: true }
+}
+
+export async function getMemberAttendanceDates(memberId: string) {
+    const supabase = await createClient()
+
+    // Simple fetch of all dates for this member
+    // Using distinct (or simple select and process in JS if distinct not supported easily in query builder without rpc)
+    // Supabase JS select allows distinct? No, usually separate RPC or post-process.
+    // Let's fetch dates.
+    const { data, error } = await supabase
+        .from('gym_attendance_logs')
+        .select('date')
+        .eq('member_id', memberId)
+        .order('date', { ascending: false })
+
+    if (error) return []
+
+    // distinct
+    const dates = Array.from(new Set(data.map(d => d.date)))
+    return dates
+}
+
 
 export async function getTodayAttendanceLogs() {
     const supabase = await createClient()
