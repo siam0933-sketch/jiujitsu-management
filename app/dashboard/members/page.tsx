@@ -87,6 +87,22 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         selectedMember = data
     }
 
+    // 4. Fetch Today's Attendance Logs for Button Status
+    const today = new Date().toISOString().split('T')[0]
+    const { data: rawLogs } = await supabase
+        .from('gym_attendance_logs')
+        .select('member_id, checked_out_at')
+        .eq('gym_id', gym.id)
+        .eq('date', today)
+
+    // Map logs by member_id for quick lookup
+    const attendanceMap = new Map()
+    rawLogs?.forEach((log: any) => {
+        attendanceMap.set(log.member_id, {
+            checkedOut: !!log.checked_out_at
+        })
+    })
+
     return (
         <div>
             {/* Modal */}
@@ -97,6 +113,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                 initialMembers={members || []}
                 count={count || 0}
                 status={status}
+                attendanceStatusMap={Object.fromEntries(attendanceMap)}
             />
         </div>
     )
