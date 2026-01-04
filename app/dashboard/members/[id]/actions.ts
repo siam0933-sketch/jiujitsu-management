@@ -49,84 +49,7 @@ export async function updateMemberJoinedDate(memberId: string, joinedAt: string)
     return { success: true }
 }
 
-// --- 2. Pause / Resume Logic ---
 
-export async function togglePauseStatus(memberId: string, currentStatus: 'active' | 'paused') {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'Unauthorized' }
-
-    // Get Gym ID
-    const { data: member } = await supabase
-        .from('gym_members')
-        .select('gym_id')
-        .eq('id', memberId)
-        .single()
-
-    if (!member) return { error: 'Member not found' }
-
-    if (currentStatus === 'active') {
-        // ACTION: PAUSE (Start a new pause record)
-        const { error } = await supabase
-            .from('gym_membership_pauses')
-            .insert({
-                gym_id: member.gym_id,
-                member_id: memberId,
-                start_date: new Date().toISOString(),
-                end_date: null
-            })
-
-        if (error) return { error: '휴관 처리 실패: ' + error.message }
-
-        // Update member status to 'paused'
-        await supabase.from('gym_members').update({ status: 'paused' }).eq('id', memberId)
-
-        // Request: Remove member from class enrollments when paused
-        await supabase.from('gym_class_enrollments').delete().eq('member_id', memberId)
-
-    } else {
-        // ACTION: RESUME (End the current pause record)
-        // 1. Find the open pause record
-        const { data: pause } = await supabase
-            .from('gym_membership_pauses')
-            .select('*')
-            .eq('member_id', memberId)
-            .is('end_date', null)
-            .single()
-
-        if (!pause) return { error: '진행 중인 휴관 기록을 찾을 수 없습니다.' }
-
-        const today = new Date()
-        const startDate = new Date(pause.start_date)
-        const pauseDurationMs = today.getTime() - startDate.getTime()
-        const pauseDays = Math.floor(pauseDurationMs / (1000 * 60 * 60 * 24))
-
-        // 2. Close the pause record
-        const { error: updateError } = await supabase
-            .from('gym_membership_pauses')
-            .update({ end_date: today.toISOString() })
-            .eq('id', pause.id)
-
-        if (updateError) return { error: '복귀 처리 실패: ' + updateError.message }
-
-        // 3. Extend Next Payment Date (Logic: Add pauseDays to next_payment_date)
-        // Fetch current next_payment_date from gym_members (or where it's stored, assuming gym_members based on context)
-        // Note: You might store payment info in 'gym_payments' or 'gym_members'. 
-        // Based on previous context, let's assume simple extension on member/payment record if applicable.
-        // For now, we will just update status back to active.
-        await supabase.from('gym_members').update({ status: 'active' }).eq('id', memberId)
-
-        // TODO: If you have a next_payment_date column, update it here.
-        // const { data: sub } = await supabase.from('gym_members').select('next_payment_date').eq('id', memberId).single()
-        // if (sub?.next_payment_date) {
-        //    const newDate = addDays(new Date(sub.next_payment_date), pauseDays)
-        //    await supabase.from('gym_members').update({ next_payment_date: newDate }).eq('id', memberId)
-        // }
-    }
-
-    revalidatePath(`/dashboard/members/${memberId}`)
-    return { success: true }
-}
 
 // --- 3. Promotion Logic ---
 
@@ -356,11 +279,23 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
     // User said "Training Days ... excludes holidays".
     // Attendance count is usually total attendance.
     const { count } = await supabase
-        .from('attendance_logs') // or gym_attendance_logs depending on which table is active. Checked schema: 'attendance_logs' (v1) and 'gym_attendance_logs' (v2).
-        // Let's check which one has data. Existing code uses 'attendance_logs'.
+        .from('gym_attendance_logs')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', memberId)
-        .lte('check_in_at', targetDate.toISOString()) // timestamp comparison
+        .eq('member_id', memberId) // Note: gym_attendance_logs uses member_id, not user_id
+        .lte('date', targetDateStr) // gym_attendance_logs uses date (string YYYY-MM-DD) or created_at? 
+    // Let's use date column for consistency with check-ins.
+    // If we want exact time comparison, we might need created_at, but date is safer for "days".
+    // BUT, targetDateStr is passed as YYYY-MM-DD from the form typically.
+    // Let's ensure we compare dates correctly.
+    // usage: .lte('date', targetDateStr) works if date is YYYY-MM-DD string column.
+
+    // Wait, looking at getMemberAttendanceLogs, 'date' is the column used.
+    // And it is YYYY-MM-DD string.
+    // targetDateStr passed from PromotionHistory is also YYYY-MM-DD (e.g. 2024-01-01).
+
+    if (count === null) return { trainingDays: netTrainingDays, attendanceCount: 0 }
+
+    return { trainingDays: netTrainingDays, attendanceCount: count }
 
     return { trainingDays: netTrainingDays, attendanceCount: count || 0 }
 }

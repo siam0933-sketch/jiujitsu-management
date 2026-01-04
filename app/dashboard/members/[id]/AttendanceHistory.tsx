@@ -10,9 +10,18 @@ type AttendanceLog = {
     created_at: string
 }
 
-export default function AttendanceHistory({ logs }: { logs: AttendanceLog[] }) {
+import { checkInMember, cancelAttendance } from '../../attendance/actions'
+
+interface Props {
+    logs: AttendanceLog[]
+    memberId: string
+    onUpdate: () => void
+}
+
+export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
     const [viewDate, setViewDate] = useState(new Date())
     const [showCalendar, setShowCalendar] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     // Group logs by date for easy lookup
     const datesSet = new Set(logs.map(log => log.date))
@@ -29,6 +38,40 @@ export default function AttendanceHistory({ logs }: { logs: AttendanceLog[] }) {
     // Calculate stats
     const totalAttendance = logs.length
     const thisMonthAttendance = logs.filter(l => l.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length
+
+    const handleDayClick = async (dateStr: string, isAttended: boolean) => {
+        if (isLoading) return
+
+        // Prevent future dates? Optional, but good practice.
+        if (new Date(dateStr) > new Date()) {
+            return alert('미래의 날짜에는 출석할 수 없습니다.')
+        }
+
+        const actionName = isAttended ? '취소' : '출석'
+        if (!confirm(`${dateStr} 출석을 ${actionName}하시겠습니까?`)) return
+
+        setIsLoading(true)
+        try {
+            let res
+            if (isAttended) {
+                res = await cancelAttendance(memberId, dateStr)
+            } else {
+                res = await checkInMember(memberId, undefined, dateStr)
+            }
+
+            if (res.error) {
+                alert(res.error)
+            } else {
+                // Success
+                onUpdate()
+            }
+        } catch (e) {
+            console.error(e)
+            alert('오류가 발생했습니다.')
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -97,18 +140,25 @@ export default function AttendanceHistory({ logs }: { logs: AttendanceLog[] }) {
                             return (
                                 <div
                                     key={day}
+                                    onClick={() => handleDayClick(dateStr, isAttended)}
                                     className={`
-                                    aspect-square rounded-full flex items-center justify-center text-sm relative group
+                                    aspect-square rounded-full flex items-center justify-center text-sm relative group cursor-pointer transition-all
                                     ${isAttended
-                                            ? 'bg-green-500 text-white font-bold shadow-sm'
-                                            : 'text-gray-700 hover:bg-gray-50'}
+                                            ? 'bg-green-500 text-white font-bold shadow-sm hover:bg-green-600'
+                                            : 'text-gray-700 hover:bg-gray-100'}
                                     ${isToday && !isAttended ? 'ring-1 ring-blue-500 text-blue-600' : ''}
+                                    ${isLoading ? 'opacity-50 pointer-events-none' : ''}
                                 `}
                                 >
                                     {day}
                                     {isAttended && (
                                         <div className="absolute bottom-full mb-2 hidden group-hover:block z-10 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg pointer-events-none">
-                                            {logs.find(l => l.date === dateStr)?.class_name || '출석'}
+                                            {logs.find(l => l.date === dateStr)?.class_name || '출석'} (클릭하여 취소)
+                                        </div>
+                                    )}
+                                    {!isAttended && (
+                                        <div className="absolute bottom-full mb-2 hidden group-hover:block z-10 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg pointer-events-none">
+                                            클릭하여 출석
                                         </div>
                                     )}
                                 </div>

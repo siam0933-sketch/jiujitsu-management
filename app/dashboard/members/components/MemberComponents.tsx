@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateMemberStartDate, updateMemberJoinedDate, togglePauseStatus } from '../[id]/actions'
+import { updateMemberStartDate, updateMemberJoinedDate } from '../[id]/actions'
 
 // --- 1. Status Badge ---
 export function MemberStatusBadge({ isPaused }: { isPaused: boolean }) {
@@ -110,43 +110,4 @@ export function MemberJoinedDate({ memberId, joinedAt }: { memberId: string, joi
     return <MemberDateEditor memberId={memberId} label="등록일" dateValue={joinedAt} onSave={updateMemberJoinedDate} />
 }
 
-// --- 3. Pause Button ---
-type MemberPauseButtonProps = {
-    memberId: string
-    isPaused: boolean
-}
 
-export function MemberPauseButton({ memberId, isPaused }: MemberPauseButtonProps) {
-    const [isLoading, setIsLoading] = useState(false)
-
-    const handleToggle = async () => {
-        const action = isPaused ? '복귀' : '휴관'
-        if (!confirm(`정말 ${action} 처리하시겠습니까?\n${isPaused ? '다시 수련 일수가 계산됩니다.' : '수련 일수 계산이 일시 정지되며, 결제일이 연장됩니다.'}`)) return
-
-        setIsLoading(true)
-        const res = await togglePauseStatus(memberId, isPaused ? 'paused' : 'active')
-        if (res.error) {
-            alert(res.error)
-        } else {
-            alert(`${action} 처리되었습니다.`)
-        }
-        setIsLoading(false)
-    }
-
-    // User requested "휴관 버튼은 결제내역박스 안으로 이동해줘".
-    // Style should probably match the buttons in Payment section (Edit/Delete are small text buttons, "결제하기" is a big action).
-    // Let's make it a noticeable but compact button, maybe outlined.
-
-    return (
-        <button
-            onClick={handleToggle}
-            disabled={isLoading}
-            className={`text-xs px-2 py-1 rounded border transition-colors ${isPaused
-                ? 'border-green-600 text-green-600 hover:bg-green-50'
-                : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'
-                }`}
-        >
-            {isLoading ? '처리 중...' : (isPaused ? '▶ 복귀 (Resume)' : '⏸ 휴관 (Pause)')}
-        </button>
-    )
-}

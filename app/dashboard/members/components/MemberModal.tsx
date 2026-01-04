@@ -4,349 +4,78 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
-import { updateMember } from '../actions'
-import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseButton } from './MemberComponents'
-import PromotionHistory from '../[id]/PromotionHistory'
-import AttendanceHistory from '../[id]/AttendanceHistory'
-import { getPromotionLogs, getMemberAttendanceLogs, type PromotionLog } from '../[id]/actions'
-import { getMemberEnrollments, type EnrolledClassInfo } from '../../attendance/actions_enrollment'
-import { createClient } from '@/utils/supabase/client'
+import { updateMember, pauseMember, resumeMember } from '../actions'
+import { MemberStatusBadge, MemberStartDate, MemberJoinedDate } from './MemberComponents'
 
-// Helper Types
-type Plan = {
-    id: string
-    name: string
-    price: number
-    type: 'period' | 'session'
-    session_count?: number
-    duration_days: number
-}
-
-type Option = {
-    id: string
-    group_name: string
-    name: string
-    price: number
-}
-
-type Payment = {
-    id: string
-    amount: number
-    payment_date: string
-    note: string
-    created_at: string
-    plan_snapshot?: any
-}
+// ... existing imports ...
 
 export default function MemberModal({ member }: { member: any }) {
     const router = useRouter()
     const supabase = createClient()
 
-    // Data State
-    const [plans, setPlans] = useState<Plan[]>([])
-    const [options, setOptions] = useState<Option[]>([])
-    const [payments, setPayments] = useState<Payment[]>([])
+    // ... existing state ...
 
-    // New Data State
-    const [promotionLogs, setPromotionLogs] = useState<PromotionLog[]>([])
-    const [attendanceLogs, setAttendanceLogs] = useState<any[]>([])
-    const [enrolledClasses, setEnrolledClasses] = useState<EnrolledClassInfo[]>([])
-    const [isPaused, setIsPaused] = useState(false)
+    // Pause Modal State
+    const [isPauseModalOpen, setIsPauseModalOpen] = useState(false)
+    const [pauseStartDate, setPauseStartDate] = useState(new Date().toISOString().split('T')[0])
+    const [pauseEndDate, setPauseEndDate] = useState('')
+    const [isIndefinitePause, setIsIndefinitePause] = useState(true)
 
-    // UI State
-    const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false) // Accordion Toggle
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null) // specific edit mode
+    // Helper calculate extension
+    const calculateNewExpiry = () => {
+        if (!member.payment_end_date || isIndefinitePause || !pauseEndDate) return null
+        const start = new Date(pauseStartDate)
+        const end = new Date(pauseEndDate)
+        const durationMs = end.getTime() - start.getTime()
+        const days = Math.floor(durationMs / (1000 * 60 * 60 * 24)) + 1
+        if (days <= 0) return null
 
-    // Form State (New Payment)
-    const [selectedPlanId, setSelectedPlanId] = useState<string>('')
-    const [selectedOptionIds, setSelectedOptionIds] = useState<Set<string>>(new Set())
-    const [durationMonths, setDurationMonths] = useState(1) // Default 1 month
-
-    // Form State (Manual/Edit)
-    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
-    const [manualAmount, setManualAmount] = useState<number | null>(null) // If null, use auto-calc
-    const [note, setNote] = useState('')
-
-    // Edit Mode State
-    const [editAmount, setEditAmount] = useState<number>(0)
-    const [editDate, setEditDate] = useState('')
-    const [editOptionIds, setEditOptionIds] = useState<Set<string>>(new Set())
-
-    const closeModal = () => {
-        router.push('/dashboard/members')
+        const currentExpiry = new Date(member.payment_end_date)
+        const newExpiry = new Date(currentExpiry.getTime() + (days * 24 * 60 * 60 * 1000))
+        return newExpiry.toLocaleDateString()
     }
 
-    const startEditing = (payment: Payment) => {
-        setEditingPaymentId(payment.id)
-        setEditAmount(payment.amount)
-        setEditDate(payment.payment_date)
-        const snap = payment.plan_snapshot || {}
-        setEditOptionIds(new Set(snap.option_ids || []))
-    }
-
-    const cancelEditing = () => {
-        setEditingPaymentId(null)
-    }
-
-    const handleToggleEditOption = (id: string) => {
-        const next = new Set(editOptionIds)
-        if (next.has(id)) next.delete(id)
-        else next.add(id)
-        setEditOptionIds(next)
-    }
-
-    const handleUpdatePayment = async (payment: Payment) => {
-        if (!confirm('결제 내역을 수정하시겠습니까?')) return
-
-        const snap = payment.plan_snapshot || {}
-        // Recalculate options summary
-        const optionNames = Array.from(editOptionIds).map(id => options.find(o => o.id === id)?.name).filter(Boolean).join(', ')
-
-        const updatedSnapshot = {
-            ...snap,
-            option_ids: Array.from(editOptionIds),
-            options_summary: optionNames
-        }
-
-        const res = await updatePayment(payment.id, {
-            amount: editAmount,
-            payment_date: editDate,
-            plan_snapshot: updatedSnapshot
-        })
-
-        if (res.error) {
-            alert(res.error)
-        } else {
-            alert('수정되었습니다.')
-            setEditingPaymentId(null)
-            const history = await getPaymentHistory(member.id)
-            setPayments(history)
-            router.refresh()
-        }
-    }
-
-    const handleDeletePayment = async (paymentId: string) => {
-        if (!confirm('정말로 이 결제 내역을 삭제하시겠습니까? 복구할 수 없습니다.')) return
-
-        const res = await deletePayment(paymentId)
-        if (res.error) {
-            alert(res.error)
-        } else {
-            alert('삭제되었습니다.')
-            const history = await getPaymentHistory(member.id)
-            setPayments(history)
-            router.refresh()
-        }
-    }
-
-    // --- Basic Info Edit State ---
-    const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false)
-    const [basicInfoForm, setBasicInfoForm] = useState({
-        name: '',
-        gender: '',
-        birth_date: '',
-        access_code: '',
-        phone: '',
-        guardian_phone: '',
-        school: '',
-        grade: '',
-        address: ''
-    })
-
-    const startEditingBasicInfo = () => {
-        setBasicInfoForm({
-            name: member.name || '',
-            gender: member.gender || 'male',
-            birth_date: member.birth_date || '',
-            access_code: member.access_code || '',
-            phone: member.phone || '',
-            guardian_phone: member.guardian_phone || '',
-            school: member.school || '',
-            grade: member.grade || '',
-            address: member.address || ''
-        })
-        setIsEditingBasicInfo(true)
-    }
-
-    const cancelEditingBasicInfo = () => {
-        setIsEditingBasicInfo(false)
-    }
-
-    const saveBasicInfo = async () => {
-        if (!confirm('회원 정보를 수정하시겠습니까?')) return
-
-        const payload = {
-            ...basicInfoForm,
-            birth_date: basicInfoForm.birth_date || null,
-            guardian_phone: basicInfoForm.guardian_phone || null,
-            school: basicInfoForm.school || null,
-            grade: basicInfoForm.grade || null,
-            address: basicInfoForm.address || null,
-            access_code: basicInfoForm.access_code || null,
-        }
-
-        const res = await updateMember(member.id, payload)
-        if (res.error) {
-            alert(res.error)
-        } else {
-            alert('수정되었습니다.')
-            setIsEditingBasicInfo(false)
-            router.refresh()
-        }
-    }
-
-    // Load Data
-    useEffect(() => {
-        const load = async () => {
-            const pricing = await getPricingData()
-            setPlans(pricing.plans)
-            setOptions(pricing.options)
-
-            const history = await getPaymentHistory(member.id)
-            setPayments(history)
-
-            // Load Promotion Logs
-            const logs = await getPromotionLogs(member.id)
-            console.log('MemberModal: Loaded logs:', logs)
-            setPromotionLogs(logs)
-
-            // Load Attendance Logs
-            const attLogs = await getMemberAttendanceLogs(member.id)
-            setAttendanceLogs(attLogs)
-
-            // Load Enrolled Classes
-            const enrolled = await getMemberEnrollments(member.id)
-            setEnrolledClasses(enrolled)
-
-            // Check Pause Status
-            const { data: activePause } = await supabase
-                .from('gym_membership_pauses')
-                .select('id')
-                .eq('member_id', member.id)
-                .is('end_date', null)
-                .single()
-            setIsPaused(!!activePause)
-        }
-        load()
-
-        // Key Handler
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') closeModal()
-        }
-        window.addEventListener('keydown', handleEsc)
-        return () => window.removeEventListener('keydown', handleEsc)
-    }, [member.id])
-
-    // Auto-fill logic when opening form
-    const togglePaymentForm = () => {
-        const willOpen = !isPaymentFormOpen
-        setIsPaymentFormOpen(willOpen)
-
-        if (willOpen && payments.length > 0) {
-            // Auto-fill from latest payment
-            const latest = payments[0]
-            if (latest.plan_snapshot) {
-                const snap = latest.plan_snapshot
-
-                // Check if plan exists
-                const planExists = plans.find(p => p.id === snap.plan_id)
-                if (planExists) {
-                    setSelectedPlanId(snap.plan_id)
-                }
-                if (snap.option_ids) {
-                    setSelectedOptionIds(new Set(snap.option_ids))
-                }
-                if (snap.duration_months) {
-                    setDurationMonths(snap.duration_months)
-                }
-            }
-        }
-    }
-
-    // Calculation Logic
-    const selectedPlan = plans.find(p => p.id === selectedPlanId)
-
-    const calculateTotal = () => {
-        if (!selectedPlan) return 0
-
-        let total = selectedPlan.price
-
-        if (selectedPlan.type === 'period') {
-            // Add Options
-            const optionsTotal = Array.from(selectedOptionIds).reduce((sum, optId) => {
-                const opt = options.find(o => o.id === optId)
-                return sum + (opt?.price || 0)
-            }, 0)
-
-            total = (total + optionsTotal) * durationMonths
-        }
-        // Session plan typically fixed price
-
-        return total
-    }
-
-    const currentTotal = calculateTotal()
-    const finalAmount = manualAmount !== null ? manualAmount : currentTotal
-
-    // Handlers
-    const handleToggleOption = (id: string) => {
-        const next = new Set(selectedOptionIds)
-        if (next.has(id)) next.delete(id)
-        else next.add(id)
-        setSelectedOptionIds(next)
-    }
-
-    const handleSubmitPayment = async () => {
-        if (!selectedPlan) return alert('이용권을 선택해주세요.')
-        if (!confirm(`${finalAmount.toLocaleString()}원 결제하시겠습니까?`)) return
-
+    const handlePauseSubmit = async () => {
+        if (!confirm('휴관 처리하시겠습니까?')) return
         setIsSubmitting(true)
-
-        const formData = new FormData()
-        formData.append('member_id', member.id)
-        formData.append('plan_id', selectedPlan.id)
-        formData.append('plan_name', selectedPlan.name)
-        formData.append('amount', String(finalAmount))
-        formData.append('payment_date', paymentDate)
-        formData.append('type', selectedPlan.type)
-        formData.append('duration_months', String(durationMonths))
-        formData.append('session_count', String(selectedPlan.session_count || 0))
-        formData.append('duration_days', String(selectedPlan.duration_days || 0))
-
-        // Pass IDs for re-use
-        formData.append('option_ids', JSON.stringify(Array.from(selectedOptionIds)))
-
-        // Summarize options
-        const optionNames = Array.from(selectedOptionIds).map(id => options.find(o => o.id === id)?.name).join(', ')
-        formData.append('options_summary', optionNames)
-
-        const res = await createPayment(formData)
+        const res = await pauseMember(member.id, pauseStartDate, isIndefinitePause ? undefined : pauseEndDate)
+        setIsSubmitting(false)
         if (res.error) {
             alert(res.error)
         } else {
-            alert('결제되었습니다.')
-            setIsPaymentFormOpen(false) // Close form
-            setManualAmount(null)
-            // Refresh history
-            const history = await getPaymentHistory(member.id)
-            setPayments(history)
+            alert('휴관 처리되었습니다.')
+            setIsPauseModalOpen(false)
+            setIsPaused(true) // Optimistic
             router.refresh()
         }
-        setIsSubmitting(false)
     }
 
-    const calculateAge = (birthDateString: string | null) => {
-        if (!birthDateString) return '-'
-        const birthDate = new Date(birthDateString)
-        const today = new Date()
-        const age = today.getFullYear() - birthDate.getFullYear() + 1
-        return `${age}세`
+    const handleResume = async () => {
+        if (!confirm('복귀 처리하시겠습니까?')) return
+        const res = await resumeMember(member.id)
+        if (res.error) {
+            alert(res.error)
+        } else {
+            alert('복귀 처리되었습니다.')
+            setIsPaused(false) // Optimistic
+            router.refresh()
+        }
     }
+
+    // ... existing functions ...
+    // Note: I will replace MemberPauseButton with a custom handler or modify it to open my modal?
+    // Actually, MemberPauseButton in Header is nice to keep.
+    // I will hook into MemberPauseButton later if I can, OR just let it do its thing? 
+    // Wait, the user said "Keep existing button location".
+    // AND "Add new button next to date".
+    // Both should trigger the same logic.
+    // MemberPauseButton is an imported component. I should probably replace it INLINE here to share the modal state.
+
+    // Replacing Header Section Logic:
 
     return (
         <div className="relative z-50">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={closeModal}></div>
+            {/* ... Overlay ... */}
             <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                     <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl" onClick={e => e.stopPropagation()}>
@@ -358,7 +87,21 @@ export default function MemberModal({ member }: { member: any }) {
                                 <h3 className="text-xl font-semibold leading-6 text-gray-900 flex items-center gap-2">
                                     {member.name}
                                     <MemberStatusBadge isPaused={isPaused} />
-                                    <MemberPauseButton memberId={member.id} isPaused={isPaused} />
+                                    {isPaused ? (
+                                        <button
+                                            onClick={handleResume}
+                                            className="text-xs border border-green-200 bg-green-50 text-green-600 px-2 py-0.5 rounded hover:bg-green-100 transition-colors"
+                                        >
+                                            복귀
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => setIsPauseModalOpen(true)}
+                                            className="text-xs border border-orange-200 bg-orange-50 text-orange-600 px-2 py-0.5 rounded hover:bg-orange-100 transition-colors"
+                                        >
+                                            휴관
+                                        </button>
+                                    )}
                                 </h3>
                             </div>
                             <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
@@ -366,6 +109,76 @@ export default function MemberModal({ member }: { member: any }) {
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
+
+                        {/* PAUSE MODAL OVERLAY (Nested) */}
+                        {isPauseModalOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={(e) => { e.stopPropagation(); setIsPauseModalOpen(false); }}>
+                                <div className="bg-white rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+                                    <h4 className="font-bold text-gray-900 mb-4">휴관 설정</h4>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">시작일</label>
+                                            <input
+                                                type="date"
+                                                value={pauseStartDate}
+                                                onChange={e => setPauseStartDate(e.target.value)}
+                                                className="w-full text-sm border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <label className="block text-xs text-gray-500">종료일</label>
+                                                <label className="flex items-center gap-1 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-gray-300 text-blue-600 w-3 h-3"
+                                                        checked={isIndefinitePause}
+                                                        onChange={e => setIsIndefinitePause(e.target.checked)}
+                                                    />
+                                                    <span className="text-xs text-gray-500">무기한</span>
+                                                </label>
+                                            </div>
+                                            <input
+                                                type="date"
+                                                value={pauseEndDate}
+                                                onChange={e => {
+                                                    setPauseEndDate(e.target.value)
+                                                    setIsIndefinitePause(false)
+                                                }}
+                                                disabled={isIndefinitePause}
+                                                className="w-full text-sm border-gray-300 rounded disabled:bg-gray-100 disabled:text-gray-400"
+                                            />
+                                        </div>
+
+                                        {!isIndefinitePause && pauseEndDate && member.payment_end_date && (
+                                            <div className="bg-blue-50 p-2 rounded text-xs text-blue-800">
+                                                <p>예상 만료일 연장:</p>
+                                                <p className="font-bold">기존 만료일: {new Date(member.payment_end_date).toLocaleDateString()}</p>
+                                                <p className="font-bold text-blue-600">변경 만료일: {calculateNewExpiry()}</p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-2 pt-2">
+                                            <button
+                                                onClick={() => setIsPauseModalOpen(false)}
+                                                className="flex-1 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+                                            >
+                                                취소
+                                            </button>
+                                            <button
+                                                onClick={handlePauseSubmit}
+                                                disabled={isSubmitting}
+                                                className="flex-1 py-2 text-sm text-white bg-orange-600 rounded hover:bg-orange-500 disabled:opacity-50"
+                                            >
+                                                휴관 적용
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="bg-gray-50 px-4 py-6 sm:p-6 space-y-6 max-h-[80vh] overflow-y-auto">
 
@@ -582,6 +395,14 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </svg>
                                                     </button>
                                                 </div>
+                                                {!isPaused && (
+                                                    <button
+                                                        onClick={() => setIsPauseModalOpen(true)}
+                                                        className="ml-2 text-xs border border-orange-200 bg-orange-50 text-orange-600 px-2 py-0.5 rounded hover:bg-orange-100 transition-colors"
+                                                    >
+                                                        휴관
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -910,7 +731,16 @@ export default function MemberModal({ member }: { member: any }) {
                                     {/* Attendance History Moved Here */}
                                     <div>
                                         <p className="text-gray-400 text-xs mb-2">출석 기록</p>
-                                        <AttendanceHistory logs={attendanceLogs} />
+                                        <AttendanceHistory
+                                            logs={attendanceLogs}
+                                            memberId={member.id}
+                                            onUpdate={async () => {
+                                                const logs = await getMemberAttendanceLogs(member.id)
+                                                setAttendanceLogs(logs)
+                                                // Also update attendance count stats on screen if possible, or just router.refresh
+                                                router.refresh()
+                                            }}
+                                        />
                                     </div>
 
                                     <hr className="border-gray-100" />

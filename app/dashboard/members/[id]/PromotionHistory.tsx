@@ -38,10 +38,29 @@ const BELT_OPTIONS_DATA: BeltOption[] = [
     { name: '그린-블랙', colorClass: 'border border-green-600', style: { background: 'linear-gradient(180deg, #16a34a 35%, #1f2937 35%, #1f2937 65%, #16a34a 65%)' } },
 ]
 
-// Helper to display legacy names correctly
+// Helper to display legacy names correctly and map for Edit Mode
 const displayBeltName = (name: string) => {
-    if (name === 'White') return '화이트 (성인)' // Default legacy White to Adult White for display
-    return name
+    const map: Record<string, string> = {
+        'White': '화이트 (성인)',
+        'Blue': '블루',
+        'Purple': '퍼플',
+        'Brown': '브라운',
+        'Black': '블랙',
+        // Add Kids mappings if necessary, though they are usually new data
+        'Gray-White': '그레이-화이트',
+        'Gray': '그레이',
+        'Gray-Black': '그레이-블랙',
+        'Yellow-White': '옐로우-화이트',
+        'Yellow': '옐로우',
+        'Yellow-Black': '옐로우-블랙',
+        'Orange-White': '오렌지-화이트',
+        'Orange': '오렌지',
+        'Orange-Black': '오렌지-블랙',
+        'Green-White': '그린-화이트',
+        'Green': '그린',
+        'Green-Black': '그린-블랙'
+    }
+    return map[name] || name
 }
 
 // Custom Select Component for Belts
