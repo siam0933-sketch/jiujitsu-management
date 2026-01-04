@@ -1,3 +1,9 @@
+# Jiu-Jitsu Management System
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fpackages%2Fcreate-next-app)
+
+**배포된 사이트:** [https://jiujitsu-management.vercel.app/](https://jiujitsu-management.vercel.app/)
+
 이 프로젝트는 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app)으로 생성된 [Next.js](https://nextjs.org) 프로젝트입니다.
 
 ## 시작하기
