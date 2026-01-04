@@ -16,7 +16,8 @@ export async function checkInMember(memberId: string, className?: string, date?:
         .single()
     if (!gym) return { error: 'Gym not found' }
 
-    const today = date || new Date().toISOString().split('T')[0]
+    // KST Correct Date
+    const today = date || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
     // Check if checks exist for today
     const { data: existing } = await supabase
@@ -163,7 +164,8 @@ export async function getTodayAttendanceLogs() {
         .single()
     if (!gym) return []
 
-    const today = new Date().toISOString().split('T')[0]
+    // KST Correct Date
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
     const { data, error } = await supabase
         .from('gym_attendance_logs')
         .select(`

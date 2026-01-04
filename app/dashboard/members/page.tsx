@@ -88,7 +88,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
     }
 
     // 4. Fetch Today's Attendance Logs for Button Status
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
     const { data: rawLogs } = await supabase
         .from('gym_attendance_logs')
         .select('member_id, checked_out_at')

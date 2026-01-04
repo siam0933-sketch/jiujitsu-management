@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { deleteMembers } from '../actions'
@@ -46,6 +46,14 @@ export default function MembersTable({ initialMembers, count, status, attendance
     const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
 
     const [searchTerm, setSearchTerm] = useState('')
+
+    // Optimistic UI State
+    const [optimisticAttendance, setOptimisticAttendance] = useState<Record<string, AttendanceStatus>>(attendanceStatusMap)
+
+    // Sync with server props
+    useEffect(() => {
+        setOptimisticAttendance(attendanceStatusMap)
+    }, [attendanceStatusMap])
 
     const calculateYearAge = (birthDate?: string) => {
         if (!birthDate) return '-'
@@ -115,29 +123,79 @@ export default function MembersTable({ initialMembers, count, status, attendance
         if (processingIds.has(memberId)) return
         setProcessingIds(prev => new Set(prev).add(memberId))
 
-        const today = new Date().toISOString().split('T')[0]
-        const status = attendanceStatusMap[memberId]
+        // Ensure KST Date for Consistency
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+        const status = optimisticAttendance[memberId]
+        const prevStatus = status
 
         try {
+            // 1. Calculate Next State
+            let nextStatus: AttendanceStatus | undefined = undefined
+            let action = ''
+
             if (!status) {
-                // 1. No Log -> Check In
-                const res = await checkInMember(memberId, undefined, today)
-                if (res?.error) alert(res.error)
+                // Check In
+                nextStatus = { checkedOut: false }
+                action = 'checkIn'
             } else if (!status.checkedOut) {
-                // 2. Log Exists, No Checkout -> Check Out
-                const res = await checkOutMember(memberId, today)
-                if (res?.error) alert(res.error)
+                // Check Out
+                nextStatus = { checkedOut: true }
+                action = 'checkOut'
             } else {
-                // 3. Checked Out -> Cancel (Reset)
-                if (confirm('출석 기록을 취소하시겠습니까?')) {
-                    const res = await cancelAttendance(memberId, today)
-                    if (res?.error) alert(res.error)
+                // Cancel
+                if (!confirm('출석 기록을 취소하시겠습니까?')) {
+                    setProcessingIds(prev => {
+                        const next = new Set(prev)
+                        next.delete(memberId)
+                        return next
+                    })
+                    return
                 }
+                nextStatus = undefined
+                action = 'cancel'
             }
-            router.refresh()
+
+            // 2. Optimistic Update
+            setOptimisticAttendance(prev => {
+                const next = { ...prev }
+                if (nextStatus === undefined) delete next[memberId]
+                else next[memberId] = nextStatus
+                return next
+            })
+
+            // 3. Server Action
+            let res
+            if (action === 'checkIn') {
+                res = await checkInMember(memberId, undefined, today)
+            } else if (action === 'checkOut') {
+                res = await checkOutMember(memberId, today)
+            } else if (action === 'cancel') {
+                res = await cancelAttendance(memberId, today)
+            }
+
+            if (res?.error) {
+                // Revert on Error
+                alert(res.error)
+                setOptimisticAttendance(prev => {
+                    const next = { ...prev }
+                    if (prevStatus === undefined) delete next[memberId]
+                    else next[memberId] = prevStatus
+                    return next
+                })
+            } else {
+                router.refresh()
+            }
+
         } catch (e) {
             console.error(e)
             alert('오류가 발생했습니다.')
+            // Revert on Exception
+            setOptimisticAttendance(prev => {
+                const next = { ...prev }
+                if (prevStatus === undefined) delete next[memberId]
+                else next[memberId] = prevStatus
+                return next
+            })
         } finally {
             setProcessingIds(prev => {
                 const next = new Set(prev)
@@ -272,7 +330,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                     {filteredMembers && filteredMembers.length > 0 ? (
                                         filteredMembers.map((member, index) => {
                                             const paymentInfo = getPaymentStatus(member)
-                                            const attendance = attendanceStatusMap[member.id]
+                                            // USE OPTIMISTIC STATE
+                                            const attendance = optimisticAttendance[member.id]
                                             const isProcessing = processingIds.has(member.id)
 
                                             return (
