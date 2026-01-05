@@ -332,3 +332,19 @@ export async function updateMemberJoinedDate(memberId: string, joinedAt: string)
 }
 
 
+
+export async function getMemberAttendanceLogs(memberId: string) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('gym_attendance_logs')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('date', { ascending: false })
+
+    if (error) {
+        console.error('getMemberAttendanceLogs Error:', error)
+        return []
+    }
+
+    return data
+}

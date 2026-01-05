@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { PromotionLog, logPromotion, updatePromotionLog, deletePromotionLog, calculatePromotionStats } from './actions'
+import { getPromotionCriteria } from '../../settings/promotion/actions'
 
 // Simple Belts Constant (Should ideally match DB or Global Config)
 // Belt Config with Colors (Copied/Adapted from settings/promotion/page.tsx)
@@ -133,6 +134,7 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
     const [logs, setLogs] = useState<PromotionLog[]>(initialLogs)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [criteria, setCriteria] = useState<{ adultConfig: any[], kidsConfig: any[] } | null>(null)
 
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false)
@@ -145,6 +147,17 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
     const [trainingDays, setTrainingDays] = useState(0)
     const [attendanceCount, setAttendanceCount] = useState(0)
     const [memo, setMemo] = useState('')
+
+    // Fetch Criteria on Mount
+    useEffect(() => {
+        const fetchCriteria = async () => {
+            const res = await getPromotionCriteria()
+            if (!('error' in res)) {
+                setCriteria(res)
+            }
+        }
+        fetchCriteria()
+    }, [])
 
     // Effect: Sync logs if initialLogs changes (e.g. parent refresh)
     useEffect(() => {
@@ -186,6 +199,23 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
         setTrainingDays(stats.trainingDays)
         setAttendanceCount(stats.attendanceCount)
     }
+
+    // Helper to get max stripes for selected belt
+    const getMaxStripes = (beltName: string) => {
+        if (!criteria) return 4 // Default fallback
+
+        // Search in Adult
+        const adultBelt = criteria.adultConfig.find(b => b.name === beltName)
+        if (adultBelt) return 4
+
+        // Search in Kids
+        const kidsBelt = criteria.kidsConfig.find(b => b.name === beltName)
+        if (kidsBelt) return kidsBelt.totalStripes || 4
+
+        return 4
+    }
+
+    const currentMaxStripes = getMaxStripes(belt)
 
     // Execute Delete Directly (No Confirm)
     const handleDelete = async (logId: string) => {
@@ -398,8 +428,8 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
                                                 onChange={(e) => setStripe(e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                             >
-                                                {[0, 1, 2, 3, 4].map(num => (
-                                                    <option key={num} value={num}>{num} 그랄</option>
+                                                {Array.from({ length: currentMaxStripes }).map((_, i) => (
+                                                    <option key={i} value={i}>{i} 그랄</option>
                                                 ))}
                                             </select>
                                         </div>

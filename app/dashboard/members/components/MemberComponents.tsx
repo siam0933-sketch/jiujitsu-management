@@ -130,7 +130,7 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
     }
 
     const handlePauseSubmit = async () => {
-        if (!confirm('휴관 처리하시겠습니까?')) return
+        // Confirmation is implicit via the Modal "Apply" button
         setIsLoading(true)
         const res = await pauseMember(memberId, pauseStartDate, isIndefinitePause ? undefined : pauseEndDate)
         setIsLoading(false)
