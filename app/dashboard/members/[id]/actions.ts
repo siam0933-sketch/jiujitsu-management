@@ -289,4 +289,4 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
 
     return { trainingDays: netTrainingDays, attendanceCount: count || 0 }
 }
-```
+

@@ -401,14 +401,10 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                 onClick={e => e.stopPropagation()}
                             >
                                 <div>
-                                    {/* Customized Header */}
                                     <div
                                         className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full shadow-sm border border-gray-100 mb-4 ${currentBeltMeta.colorClass || ''}`}
                                         style={currentBeltMeta.style || {}}
                                     >
-                                        {/* If belt has color class/style, show it. Else fallback. Actually we want CURRENT belt of member here, passed via props? */}
-                                        {/* But 'memberBelt' prop is the string. We want to show Visual. */}
-                                        {/* Let's just use the outer div as the belt indicator */}
                                     </div>
 
                                     <div className="mt-3 text-center sm:mt-5">
