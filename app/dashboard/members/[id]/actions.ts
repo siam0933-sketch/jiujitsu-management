@@ -206,7 +206,7 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
     const supabase = await createClient()
     const targetDate = new Date(targetDateStr)
 
-    // 1. Get Start Date & Pauses
+    // 1. Get Member Start/Join Date
     const { data: member } = await supabase
         .from('gym_members')
         .select('start_date, joined_at')
@@ -215,16 +215,40 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
 
     if (!member) return { trainingDays: 0, attendanceCount: 0 }
 
-    const startDate = new Date(member.start_date || member.joined_at) // Fallback to join date
+    // 2. Find Last Promotion Date (before targetDate)
+    const { data: lastPromo } = await supabase
+        .from('gym_promotion_logs')
+        .select('promoted_at')
+        .eq('member_id', memberId)
+        .lt('promoted_at', targetDateStr) // strictly less than current promotion date
+        .order('promoted_at', { ascending: false })
+        .limit(1)
+        .single()
 
-    // 2. Fetch Pauses
+    // Determine Start Date for Calculation
+    // If there is a previous promotion, start from there. Otherwise start from member start/join.
+    let startDateStr = member.start_date || member.joined_at
+    if (lastPromo && lastPromo.promoted_at) {
+        startDateStr = lastPromo.promoted_at
+    }
+
+    // Verify valid date
+    if (!startDateStr) return { trainingDays: 0, attendanceCount: 0 }
+
+    const startDate = new Date(startDateStr)
+
+    // Safety check if dates are inverted
+    if (startDate > targetDate) {
+        return { trainingDays: 0, attendanceCount: 0 }
+    }
+
+    // 3. Fetch Pauses
     const { data: pauses } = await supabase
         .from('gym_membership_pauses')
         .select('*')
         .eq('member_id', memberId)
 
-    // 3. Calculate Training Days (Start -> Target) - Pauses
-    // Total Days
+    // 4. Calculate Training Days (Start -> Target) - Pauses
     const totalDurationMs = targetDate.getTime() - startDate.getTime()
     let totalDays = Math.floor(totalDurationMs / (1000 * 60 * 60 * 24))
     if (totalDays < 0) totalDays = 0
@@ -234,7 +258,7 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
     if (pauses) {
         pauses.forEach((p: any) => {
             const pStart = new Date(p.start_date)
-            const pEnd = p.end_date ? new Date(p.end_date) : new Date() // If ongoing, calc until today(or target?)
+            const pEnd = p.end_date ? new Date(p.end_date) : new Date()
 
             // Intersection Logic: Only subtract pause days that fall within [StartDate, TargetDate]
             const effectiveStart = pStart < startDate ? startDate : pStart
@@ -249,30 +273,20 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
 
     const netTrainingDays = Math.max(0, totalDays - pauseDays)
 
-    // 4. Calculate Attendance
-    // Count logs where date <= targetDate and date >= startDate (conceptually)
-    // Assuming we count all attendance for simplicity? Or only since start_date?
-    // User said "Training Days ... excludes holidays".
-    // Attendance count is usually total attendance.
+    // 5. Calculate Attendance
+    // Count logs where date <= targetDate AND date > startDate
+    // Technically, if promoted on Jan 1, training for next belt starts Jan 2? 
+    // Usually inclusive or exclusive? Let's say > startDate to avoid double counting the promotion day itself if they trained?
+    // Or >=? If they trained on the day of last promotion, that likely counted for the *last* belt.
+    // So strictly > startDate is safer.
+
     const { count } = await supabase
         .from('gym_attendance_logs')
         .select('*', { count: 'exact', head: true })
-        .eq('member_id', memberId) // Note: gym_attendance_logs uses member_id, not user_id
-        .lte('date', targetDateStr) // gym_attendance_logs uses date (string YYYY-MM-DD) or created_at? 
-    // Let's use date column for consistency with check-ins.
-    // If we want exact time comparison, we might need created_at, but date is safer for "days".
-    // BUT, targetDateStr is passed as YYYY-MM-DD from the form typically.
-    // Let's ensure we compare dates correctly.
-    // usage: .lte('date', targetDateStr) works if date is YYYY-MM-DD string column.
-
-    // Wait, looking at getMemberAttendanceLogs, 'date' is the column used.
-    // And it is YYYY-MM-DD string.
-    // targetDateStr passed from PromotionHistory is also YYYY-MM-DD (e.g. 2024-01-01).
-
-    if (count === null) return { trainingDays: netTrainingDays, attendanceCount: 0 }
-
-    return { trainingDays: netTrainingDays, attendanceCount: count }
+        .eq('member_id', memberId)
+        .lte('date', targetDateStr)
+        .gt('date', startDateStr)
 
     return { trainingDays: netTrainingDays, attendanceCount: count || 0 }
 }
-
+```
