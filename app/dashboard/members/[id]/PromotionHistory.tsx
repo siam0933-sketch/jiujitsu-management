@@ -208,19 +208,26 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
 
     // Helper to get max stripes for selected belt
     const getMaxStripes = (beltName: string) => {
-        if (!criteria) return 4 // Default fallback
+        if (!criteria) {
+            console.log('DEBUG: criteria is null')
+            return 4
+        }
 
         // Search in Adult
         const adultBelt = criteria.adultConfig.find(b => b.name === beltName)
-        if (adultBelt) return 4
+        if (adultBelt) {
+            // Adults usually 4 stripes max
+            return 4
+        }
 
         // Search in Kids
         const kidsBelt = criteria.kidsConfig.find(b => b.name === beltName)
         if (kidsBelt) {
-            const limit = kidsBelt.totalStripes || 4
-            return limit
+            console.log(`DEBUG: Found Kids Belt [${beltName}] with totalStripes: ${kidsBelt.totalStripes}`)
+            return kidsBelt.totalStripes || 4
         }
 
+        console.log(`DEBUG: Belt [${beltName}] not found in criteria. Available keys:`, criteria.kidsConfig.map(k => k.name))
         return 4
     }
 
@@ -395,7 +402,10 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                             >
                                 <div>
                                     {/* Customized Header */}
-                                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full shadow-sm border border-gray-100 mb-4" style={currentBeltMeta.style || {}} className={currentBeltMeta.colorClass}>
+                                    <div
+                                        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full shadow-sm border border-gray-100 mb-4 ${currentBeltMeta.colorClass || ''}`}
+                                        style={currentBeltMeta.style || {}}
+                                    >
                                         {/* If belt has color class/style, show it. Else fallback. Actually we want CURRENT belt of member here, passed via props? */}
                                         {/* But 'memberBelt' prop is the string. We want to show Visual. */}
                                         {/* Let's just use the outer div as the belt indicator */}
@@ -446,7 +456,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                                 onChange={(e) => setStripe(e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                             >
-                                                {Array.from({ length: currentMaxStripes }).map((_, i) => (
+                                                {Array.from({ length: currentMaxStripes + 1 }).map((_, i) => (
                                                     <option key={i} value={i}>{i} 그랄</option>
                                                 ))}
                                             </select>
