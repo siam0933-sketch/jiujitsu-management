@@ -181,9 +181,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
         setDate(new Date().toISOString().split('T')[0])
         // Default belt: Try to use member's current belt if possible, or fallback
         const currentDisplayName = displayBeltName(memberBelt) || '화이트 (성인)'
-        // But usually promotion is to NEXT belt. Logic for finding next belt is complex without ordered list.
-        // For now, keep defaulting to '화이트 (성인)' or let user pick.
-        setBelt('화이트 (성인)') // Or maybe currentDisplayName? Let's stick to default.
+        setBelt(currentDisplayName)
         setStripe('0')
         setMemo('')
         // Stats will be auto-calculated by Effect
@@ -210,12 +208,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
 
     // Helper to get max stripes for selected belt
     const getMaxStripes = (beltName: string) => {
-        if (!criteria) {
-            console.log('Criteria not loaded yet')
-            return 4 // Default fallback
-        }
-
-        console.log('Checking limits for:', beltName)
+        if (!criteria) return 4 // Default fallback
 
         // Search in Adult
         const adultBelt = criteria.adultConfig.find(b => b.name === beltName)
@@ -225,11 +218,9 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
         const kidsBelt = criteria.kidsConfig.find(b => b.name === beltName)
         if (kidsBelt) {
             const limit = kidsBelt.totalStripes || 4
-            console.log('Found Kids Belt:', beltName, 'Limit:', limit)
             return limit
         }
 
-        console.log('Belt Not Configured:', beltName)
         return 4
     }
 
