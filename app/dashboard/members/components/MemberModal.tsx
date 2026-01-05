@@ -493,6 +493,8 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     <PromotionHistory
                                         memberId={member.id}
+                                        memberName={member.name}
+                                        memberBelt={member.belt}
                                         initialLogs={promotionLogs}
                                         joinedAt={member.joined_at}
                                         startDate={member.start_date}

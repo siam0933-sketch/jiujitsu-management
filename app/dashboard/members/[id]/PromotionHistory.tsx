@@ -125,12 +125,14 @@ const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string
 
 type PromotionHistoryProps = {
     memberId: string
+    memberName: string // New Prop
+    memberBelt: string // New Prop
     initialLogs: PromotionLog[]
     joinedAt: string
     startDate?: string | null
 }
 
-export default function PromotionHistory({ memberId, initialLogs, joinedAt, startDate }: PromotionHistoryProps) {
+export default function PromotionHistory({ memberId, memberName, memberBelt, initialLogs, joinedAt, startDate }: PromotionHistoryProps) {
     const [logs, setLogs] = useState<PromotionLog[]>(initialLogs)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -154,15 +156,13 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
             const res = await getPromotionCriteria()
             if (!('error' in res)) {
                 setCriteria(res)
+                console.log('Promotion Config Loaded:', res)
             }
         }
         fetchCriteria()
     }, [])
 
-    // Effect: Sync logs if initialLogs changes (e.g. parent refresh)
-    useEffect(() => {
-        setLogs(initialLogs)
-    }, [initialLogs])
+    // ... (rest of effects)
 
     // Effect: Recalculate stats when Date changes (Only in Create Mode)
     useEffect(() => {
@@ -171,11 +171,19 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
         }
     }, [date, isModalOpen, editingLogId])
 
+    // Detect if we should default to Kids belt based on member's current belt?
+    // Not critical, but user might want default selection to be smart.
+    // For now, let's just make sure "belt" state starts with something valid.
+
     // Open Modal for Create
     const openCreateModal = () => {
         setEditingLogId(null)
         setDate(new Date().toISOString().split('T')[0])
-        setBelt('화이트 (성인)')
+        // Default belt: Try to use member's current belt if possible, or fallback
+        const currentDisplayName = displayBeltName(memberBelt) || '화이트 (성인)'
+        // But usually promotion is to NEXT belt. Logic for finding next belt is complex without ordered list.
+        // For now, keep defaulting to '화이트 (성인)' or let user pick.
+        setBelt('화이트 (성인)') // Or maybe currentDisplayName? Let's stick to default.
         setStripe('0')
         setMemo('')
         // Stats will be auto-calculated by Effect
@@ -202,7 +210,12 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
 
     // Helper to get max stripes for selected belt
     const getMaxStripes = (beltName: string) => {
-        if (!criteria) return 4 // Default fallback
+        if (!criteria) {
+            console.log('Criteria not loaded yet')
+            return 4 // Default fallback
+        }
+
+        console.log('Checking limits for:', beltName)
 
         // Search in Adult
         const adultBelt = criteria.adultConfig.find(b => b.name === beltName)
@@ -210,8 +223,13 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
 
         // Search in Kids
         const kidsBelt = criteria.kidsConfig.find(b => b.name === beltName)
-        if (kidsBelt) return kidsBelt.totalStripes || 4
+        if (kidsBelt) {
+            const limit = kidsBelt.totalStripes || 4
+            console.log('Found Kids Belt:', beltName, 'Limit:', limit)
+            return limit
+        }
 
+        console.log('Belt Not Configured:', beltName)
         return 4
     }
 
@@ -266,6 +284,10 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
         setIsLoading(false)
     }
 
+    // Helper for Belt Color of Current Belt Header
+    const currentBeltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayBeltName(memberBelt)) || { name: memberBelt, colorClass: 'bg-gray-100', style: undefined }
+
+
     return (
         <div className="bg-white shadow sm:rounded-lg overflow-hidden">
             <div className="px-4 py-3 sm:px-6 flex justify-between items-center bg-gray-50 border-b border-gray-200">
@@ -300,7 +322,6 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
                                 <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50 group">
                                     <div className="flex items-center justify-between">
                                         <div className="flex gap-4 items-center flex-1">
-                                            {/* Belt Icon in History List - Using color from config */}
                                             {/* Belt Icon in History List - Using color from config (Simple Style) */}
                                             <div
                                                 className={`w-8 h-8 rounded shadow-sm flex-shrink-0 ${beltMeta.colorClass}`}
@@ -382,19 +403,25 @@ export default function PromotionHistory({ memberId, initialLogs, joinedAt, star
                                 onClick={e => e.stopPropagation()}
                             >
                                 <div>
-                                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-                                        <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                    {/* Customized Header */}
+                                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full shadow-sm border border-gray-100 mb-4" style={currentBeltMeta.style || {}} className={currentBeltMeta.colorClass}>
+                                        {/* If belt has color class/style, show it. Else fallback. Actually we want CURRENT belt of member here, passed via props? */}
+                                        {/* But 'memberBelt' prop is the string. We want to show Visual. */}
+                                        {/* Let's just use the outer div as the belt indicator */}
                                     </div>
+
                                     <div className="mt-3 text-center sm:mt-5">
-                                        <h3 className="text-base font-semibold leading-6 text-gray-900">
-                                            {editingLogId ? '승급 기록 수정' : '새 승급 기록 추가'}
+                                        <h3 className="text-xl font-bold leading-6 text-gray-900">
+                                            {memberName}
                                         </h3>
-                                        <div className="mt-2">
-                                            <p className="text-sm text-gray-500">
-                                                회원의 새로운 벨트/그랄 승급 정보를 입력해주세요.
-                                            </p>
+                                        <p className="text-sm font-medium text-gray-500 mt-1">
+                                            현재: {displayBeltName(memberBelt)}
+                                        </p>
+
+                                        <div className="mt-4 border-t border-gray-100 pt-4">
+                                            <h3 className="text-base font-semibold leading-6 text-gray-900">
+                                                {editingLogId ? '승급 기록 수정' : '새 승급 심사'}
+                                            </h3>
                                         </div>
                                     </div>
 
