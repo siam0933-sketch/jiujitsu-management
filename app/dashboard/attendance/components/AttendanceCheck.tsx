@@ -264,6 +264,23 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
         }
     }, [isMenuOpen])
 
+    // Weekly Mode: Handle Manage Click
+    const handleWeeklyManageClick = async (e: React.MouseEvent) => {
+        e.stopPropagation() // Prevent bubbling if needed
+        // Fetch fresh enrollments
+        await loadEnrollments()
+        // Open modal
+        // Note: loadEnrollments updates enrolledMemberIds state.
+        // We need to sync tempSelectedIds with the *newly fetched* data.
+        // Since setState is async, we can't rely on 'enrolledMemberIds' being updated immediately in the next line.
+        // So we should modify separate loadEnrollments to return data or handle it here.
+        // Re-implementing fetch here for clarity and safety:
+        const ids = await getEnrollments(schedule.id)
+        setEnrolledMemberIds(new Set(ids))
+        setTempSelectedIds(new Set(ids))
+        setIsManageModalOpen(true)
+    }
+
     // Weekly Mode: Simple View
     if (mode === 'weekly') {
         return (
@@ -294,15 +311,26 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     )}
                 </div>
 
-                <button
-                    onClick={handleDeleteClass}
-                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5"
-                    title="수업 삭제"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                </button>
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5">
+                    <button
+                        onClick={handleWeeklyManageClick}
+                        className="text-blue-400 hover:text-blue-600 p-0.5 rounded-full hover:bg-blue-50"
+                        title="회원 관리 (추가/삭제)"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={handleDeleteClass}
+                        className="text-gray-300 hover:text-red-500 p-0.5 rounded-full hover:bg-red-50"
+                        title="수업 삭제"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         )
     }
