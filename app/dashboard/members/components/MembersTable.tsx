@@ -320,6 +320,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             ) : 'No.'}
                                         </th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="name" label="이름" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">나이</th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">출석</th> {/* New Column */}
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="belt" label="등급" /></th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">다음 결제일</th>
@@ -355,9 +356,11 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                             >
                                                                 {member.name || '이름 없음'}
                                                             </Link>
-                                                            <span className="text-xs text-gray-500 font-normal" suppressHydrationWarning>({calculateYearAge(member.birth_date)})</span>
                                                         </div>
                                                         <div className="text-xs text-gray-400 mt-0.5">{member.phone || '-'}</div>
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                        {calculateYearAge(member.birth_date)}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm">
                                                         <button
