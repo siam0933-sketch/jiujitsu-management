@@ -441,6 +441,15 @@ export default function MemberModal({ member }: { member: any }) {
                                         )}
                                     </div>
 
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">보호자 전화번호</p>
+                                        {isEditingBasicInfo ? (
+                                            <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
+                                        ) : (
+                                            <p className="font-medium text-sm text-gray-900">{member.guardian_phone || '-'}</p>
+                                        )}
+                                    </div>
+
                                     <div className="col-span-2">
                                         <p className="text-xs text-gray-400 mb-1">주소</p>
                                         {isEditingBasicInfo ? (
