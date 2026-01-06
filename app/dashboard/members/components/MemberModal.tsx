@@ -470,6 +470,7 @@ export default function MemberModal({ member }: { member: any }) {
                                             <p className="font-medium text-sm text-gray-900">{member.birth_date || '-'}</p>
                                         )}
                                     </div>
+                                </div>
                             </section>
 
                             {/* Section 2: Payment */}
