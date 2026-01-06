@@ -7,6 +7,7 @@ import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs } from '../actions'
 import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseController } from './MemberComponents'
+import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
 import PromotionHistory from '../[id]/PromotionHistory'
 
@@ -63,28 +64,33 @@ export default function MemberModal({ member }: { member: any }) {
     // Load Data
     useEffect(() => {
         const loadData = async () => {
-            const [pricing, history, attLogs, promos, enrolls] = await Promise.all([
-                getPricingData(),
-                getPaymentHistory(member.id),
-                getMemberAttendanceLogs(member.id),
-                supabase.from('gym_promotion_logs').select('*').eq('member_id', member.id).order('date', { ascending: false }),
-                supabase.from('gym_class_enrollments').select('*, gym_classes(*)').eq('member_id', member.id)
-            ])
+            try {
+                const [pricing, history, attLogs, promos, enrolls] = await Promise.all([
+                    getPricingData(),
+                    getPaymentHistory(member.id),
+                    getMemberAttendanceLogs(member.id),
+                    supabase.from('gym_promotion_logs').select('*').eq('member_id', member.id).order('promoted_at', { ascending: false }),
+                    supabase.from('gym_class_enrollments').select('*, gym_schedules(*)').eq('member_id', member.id)
+                ])
 
-            setPlans(pricing.plans)
-            setOptions(pricing.options)
-            setPayments(history)
-            setAttendanceLogs(attLogs)
-            if (promos.data) setPromotionLogs(promos.data)
+                setPlans(pricing.plans)
+                setOptions(pricing.options)
+                setPayments(history)
+                setAttendanceLogs(attLogs)
+                if (promos.data) setPromotionLogs(promos.data)
 
-            // Format enrollments
-            if (enrolls.data) {
-                const formatted = enrolls.data.map((e: any) => ({
-                    class_name: e.gym_classes?.name || 'Unknown',
-                    day_of_week: e.gym_classes?.day_of_week,
-                    start_time: e.gym_classes?.start_time
-                }))
-                setEnrolledClasses(formatted)
+                // Format enrollments
+                if (enrolls.data) {
+                    const formatted = enrolls.data.map((e: any) => ({
+                        class_name: e.gym_schedules?.class_name || 'Unknown',
+                        day_of_week: e.gym_schedules?.day_of_week,
+                        start_time: e.gym_schedules?.start_time
+                    }))
+                    setEnrolledClasses(formatted)
+                }
+            } catch (err) {
+                console.error('Data Loading Error:', err)
+                alert('데이터를 불러오는 중 오류가 발생했습니다.')
             }
         }
         loadData()
@@ -264,28 +270,64 @@ export default function MemberModal({ member }: { member: any }) {
 
                         {/* Header */}
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 flex justify-between items-start">
-                            <div>
+                            <div className="flex-1">
                                 <p className="text-sm text-gray-500 mb-1">회원 상세 정보</p>
-                                <h3 className="text-xl font-semibold leading-6 text-gray-900 flex items-center gap-2">
-                                    {member.name}
-                                    <MemberStatusBadge isPaused={isPaused} />
-                                    {/* Inline Pause/Resume Button */}
-                                    {isPaused ? (
-                                        <button
-                                            onClick={handleResume}
-                                            className="text-xs border border-green-200 bg-green-50 text-green-600 px-2 py-0.5 rounded hover:bg-green-100 transition-colors"
-                                        >
-                                            복귀
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => setIsPauseModalOpen(true)}
-                                            className="text-xs border border-orange-200 bg-orange-50 text-orange-600 px-2 py-0.5 rounded hover:bg-orange-100 transition-colors"
-                                        >
-                                            휴관
-                                        </button>
-                                    )}
-                                </h3>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-2xl font-bold leading-6 text-gray-900">
+                                            {member.name}
+                                        </h3>
+                                        <span className="text-lg text-gray-500 font-medium">
+                                            ({calculateAge(member.birth_date)})
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        {/* Belt Info */}
+                                        {(() => {
+                                            const currentLog = promotionLogs.length > 0 ? promotionLogs[0] : null
+                                            // Fallback to member.belt if logs empty, though logs usually fetched. 
+                                            // If no logs, assume White (Adult).
+                                            const beltNameStr = currentLog ? currentLog.belt_name : (member.belt || 'White')
+                                            const displayName = displayBeltName(beltNameStr)
+                                            const stripe = currentLog ? currentLog.stripe_level : 0
+                                            const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || BELT_OPTIONS_DATA[0]
+
+                                            return (
+                                                <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+                                                    <div
+                                                        className={`w-4 h-4 rounded-full border ${beltMeta.colorClass?.includes('border') ? '' : 'border-gray-300'} ${beltMeta.colorClass}`}
+                                                        style={beltMeta.style}
+                                                    />
+                                                    <span className="text-sm font-semibold text-gray-700">
+                                                        {displayName} {stripe}그랄
+                                                    </span>
+                                                </div>
+                                            )
+                                        })()}
+
+                                        <div className="h-4 w-[1px] bg-gray-300 mx-1"></div>
+
+                                        <MemberStatusBadge isPaused={isPaused} />
+
+                                        {/* Inline Pause/Resume Button */}
+                                        {isPaused ? (
+                                            <button
+                                                onClick={handleResume}
+                                                className="text-xs border border-green-200 bg-green-50 text-green-600 px-2 py-1 rounded hover:bg-green-100 transition-colors font-medium"
+                                            >
+                                                복귀 처리
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsPauseModalOpen(true)}
+                                                className="text-xs border border-orange-200 bg-orange-50 text-orange-600 px-2 py-1 rounded hover:bg-orange-100 transition-colors font-medium"
+                                            >
+                                                휴관 설정
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
                                 <span className="sr-only">Close</span>

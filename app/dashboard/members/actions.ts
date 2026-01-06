@@ -238,6 +238,8 @@ export async function pauseMember(memberId: string, startDate: string, endDate?:
 
 export async function resumeMember(memberId: string) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
 
     // 1. Find Open Pause
     const { data: pause } = await supabase
