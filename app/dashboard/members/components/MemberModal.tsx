@@ -509,6 +509,44 @@ export default function MemberModal({ member }: { member: any }) {
                                                         {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
                                                     </select>
 
+                                                    {/* Options List */}
+                                                    {options.length > 0 && (
+                                                        <div className="space-y-2 pt-2">
+                                                            <p className="text-xs text-gray-400 font-bold">추가 옵션</p>
+                                                            {options.map(opt => (
+                                                                <label key={opt.id} className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-gray-50">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={selectedOptionIds.has(opt.id)}
+                                                                            onChange={() => handleToggleOption(opt.id)}
+                                                                            className="rounded border-gray-300 text-blue-600"
+                                                                        />
+                                                                        <span className="text-sm text-gray-700">{opt.name}</span>
+                                                                    </div>
+                                                                    <span className="text-sm font-medium text-gray-900">+{opt.price.toLocaleString()}원</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Class Enrollments */}
+                                                    <div className="pt-2 border-t mt-2">
+                                                        <p className="text-xs text-gray-400 font-bold mb-2">수강 중인 수업</p>
+                                                        <div className="bg-gray-50 rounded p-2 text-sm text-gray-600 space-y-1">
+                                                            {enrollments.length > 0 ? enrollments.map((enroll: any) => (
+                                                                <div key={enroll.id} className="flex justify-between">
+                                                                    <span>{enroll.gym_schedules?.class_name || '수업명 없음'}</span>
+                                                                    <span className="text-gray-400 text-xs">
+                                                                        {enroll.gym_schedules?.day_of_week} {enroll.gym_schedules?.start_time}
+                                                                    </span>
+                                                                </div>
+                                                            )) : (
+                                                                <p className="text-gray-400 text-center text-xs py-1">등록된 수업이 없습니다.</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
                                                     <div className="flex justify-between items-center bg-gray-50 p-3 rounded">
                                                         <span className="text-sm font-bold">총 결제금액</span>
                                                         <span className="text-xl font-bold text-blue-600">{(finalAmount || 0).toLocaleString()}원</span>
