@@ -509,23 +509,34 @@ export default function MemberModal({ member }: { member: any }) {
                                                         {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
                                                     </select>
 
-                                                    {/* Options List */}
+                                                    {/* Options List Grouped by Group Name */}
                                                     {options.length > 0 && (
-                                                        <div className="space-y-2 pt-2">
-                                                            <p className="text-xs text-gray-400 font-bold">추가 옵션</p>
-                                                            {options.map(opt => (
-                                                                <label key={opt.id} className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-gray-50">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={selectedOptionIds.has(opt.id)}
-                                                                            onChange={() => handleToggleOption(opt.id)}
-                                                                            className="rounded border-gray-300 text-blue-600"
-                                                                        />
-                                                                        <span className="text-sm text-gray-700">{opt.name}</span>
-                                                                    </div>
-                                                                    <span className="text-sm font-medium text-gray-900">+{opt.price.toLocaleString()}원</span>
-                                                                </label>
+                                                        <div className="space-y-4 pt-2">
+                                                            {Object.entries(
+                                                                options.reduce((acc, opt) => {
+                                                                    const group = opt.group_name || '기타';
+                                                                    if (!acc[group]) acc[group] = [];
+                                                                    acc[group].push(opt);
+                                                                    return acc;
+                                                                }, {} as Record<string, any[]>)
+                                                            ).map(([groupName, groupOptions]) => (
+                                                                <div key={groupName} className="space-y-2">
+                                                                    <p className="text-xs text-gray-400 font-bold">{groupName}</p>
+                                                                    {groupOptions.map((opt: any) => (
+                                                                        <label key={opt.id} className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-gray-50">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    checked={selectedOptionIds.has(opt.id)}
+                                                                                    onChange={() => handleToggleOption(opt.id)}
+                                                                                    className="rounded border-gray-300 text-blue-600"
+                                                                                />
+                                                                                <span className="text-sm text-gray-700">{opt.name}</span>
+                                                                            </div>
+                                                                            <span className="text-sm font-medium text-gray-900">+{opt.price.toLocaleString()}원</span>
+                                                                        </label>
+                                                                    ))}
+                                                                </div>
                                                             ))}
                                                         </div>
                                                     )}

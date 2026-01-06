@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Schedule, deleteSchedule } from '../actions_schedule'
-import { checkInMember, cancelAttendance, getMemberAttendanceDates } from '../actions'
+import { checkInMember, checkOutMember, cancelAttendance, getMemberAttendanceDates, getAttendanceLogsForDate } from '../actions'
 import { getEnrollments, updateEnrollments } from '../actions_enrollment'
 
 type Member = {
@@ -70,7 +70,8 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
     // Data States
     const [enrolledMemberIds, setEnrolledMemberIds] = useState<Set<string>>(new Set())
-    const [checkedInMembers, setCheckedInMembers] = useState<Set<string>>(new Set())
+    const [attendanceStatus, setAttendanceStatus] = useState<Record<string, { checkedOut: boolean }>>({})
+    const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
     const [manualAttendanceDates, setManualAttendanceDates] = useState<{ [memberId: string]: string[] }>({}) // Cached dates for calendar
 
     // Modal Selection State
@@ -96,14 +97,14 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     const loadEnrollments = async () => {
         const ids = await getEnrollments(schedule.id)
         setEnrolledMemberIds(new Set(ids))
-        // Note: We don't load "checkedIn" status here for 'Other Days' by default to keep it simple?
-        // Actually, if we are in 'Other Day' view (e.g. user clicked Monday but today is Tuesday),
-        // we might want to show who attended that past class?
-        // Implementation Plan said: "If targetDate != Today: Show Calendar icon".
-        // Use case: Master goes to yesterday's class. Should they see who attended?
-        // Current requirement: "Other day (than today) -> Calendar icon instead of button".
-        // So we don't necessarily show attendance stauts row-by-row for the *schedule*,
-        // but rather give access to *individual* member's calendar.
+
+        // Load Attendance Status for Effective Date
+        const logs = await getAttendanceLogsForDate(effectiveDate)
+        const statusMap: Record<string, { checkedOut: boolean }> = {}
+        logs.forEach((log: any) => {
+            statusMap[log.member_id] = { checkedOut: !!log.checked_out_at }
+        })
+        setAttendanceStatus(statusMap)
     }
 
     const openManageModal = () => {
@@ -133,34 +134,51 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
         }
     }
 
-    // 1. Today logic: One-click check-in, Click again to cancel
+    // 1. Today logic: 3-State Toggle (CheckIn -> CheckOut -> Cancel)
     const handleCheckInToggle = async (member: Member) => {
-        const isChecked = checkedInMembers.has(member.id)
+        if (processingIds.has(member.id)) return
+        setProcessingIds(prev => new Set(prev).add(member.id))
 
-        if (!isChecked) {
-            // Check-in
-            // No confirm for check-in as requested: "누르면 즉시 출석 처리"
-            const res = await checkInMember(member.id, schedule.class_name, effectiveDate)
-            if (res?.error) {
-                alert(res.error)
-            } else {
-                // alert(`${member.name} 출석 완료!`)
-                setCheckedInMembers(prev => new Set(prev).add(member.id))
-            }
-        } else {
-            // Cancel
-            if (!confirm('출석을 취소하시겠습니까?')) return
+        const status = attendanceStatus[member.id]
 
-            const res = await cancelAttendance(member.id, effectiveDate, schedule.class_name)
-            if (res?.error) {
-                alert(res.error)
+        try {
+            if (!status) {
+                // 1. Check In
+                const res = await checkInMember(member.id, schedule.class_name, effectiveDate)
+                if (res?.error) alert(res.error)
+                else {
+                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: false } }))
+                }
+            } else if (!status.checkedOut) {
+                // 2. Check Out (하원)
+                const res = await checkOutMember(member.id, effectiveDate)
+                if (res?.error) alert(res.error)
+                else {
+                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: true } }))
+                }
             } else {
-                setCheckedInMembers(prev => {
-                    const next = new Set(prev)
-                    next.delete(member.id)
-                    return next
-                })
+                // 3. Cancel (취소)
+                if (!confirm('출석 기록을 취소하시겠습니까?')) return // Early return, finally block handles cleanup
+
+                const res = await cancelAttendance(member.id, effectiveDate, schedule.class_name)
+                if (res?.error) alert(res.error)
+                else {
+                    setAttendanceStatus(prev => {
+                        const next = { ...prev }
+                        delete next[member.id]
+                        return next
+                    })
+                }
             }
+        } catch (e) {
+            console.error(e)
+            alert('오류가 발생했습니다.')
+        } finally {
+            setProcessingIds(prev => {
+                const next = new Set(prev)
+                next.delete(member.id)
+                return next
+            })
         }
     }
 
@@ -343,17 +361,35 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                                     {/* Action Button: Today -> CheckIn/Out, Other -> Calendar */}
                                     {isToday ? (
-                                        <button
-                                            onClick={() => handleCheckInToggle(member)}
-                                            className={`
-                                                px-3 py-1 rounded text-xs font-bold transition-all
-                                                ${checkedInMembers.has(member.id)
-                                                    ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700'
-                                                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'}
-                                            `}
-                                        >
-                                            {checkedInMembers.has(member.id) ? '출석됨' : '출석'}
-                                        </button>
+                                        (() => {
+                                            const status = attendanceStatus[member.id]
+                                            const isProcessing = processingIds.has(member.id)
+
+                                            let btnClass = 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                                            let btnText = '출석'
+
+                                            if (status) {
+                                                if (status.checkedOut) {
+                                                    // Checked Out
+                                                    btnClass = 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600 border border-gray-200'
+                                                    btnText = '하원완료'
+                                                } else {
+                                                    // Checked In
+                                                    btnClass = 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
+                                                    btnText = '출석됨'
+                                                }
+                                            }
+
+                                            return (
+                                                <button
+                                                    onClick={() => handleCheckInToggle(member)}
+                                                    disabled={isProcessing}
+                                                    className={`px-3 py-1 rounded text-xs font-bold transition-all ${btnClass} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                >
+                                                    {isProcessing ? '...' : btnText}
+                                                </button>
+                                            )
+                                        })()
                                     ) : (
                                         <button
                                             onClick={() => openCalendar(member.id)}

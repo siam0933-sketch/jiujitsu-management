@@ -153,6 +153,11 @@ export async function getMemberAttendanceDates(memberId: string) {
 }
 
 export async function getTodayAttendanceLogs() {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+    return getAttendanceLogsForDate(today)
+}
+
+export async function getAttendanceLogsForDate(date: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
@@ -164,8 +169,6 @@ export async function getTodayAttendanceLogs() {
         .single()
     if (!gym) return []
 
-    // KST Correct Date
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
     const { data, error } = await supabase
         .from('gym_attendance_logs')
         .select(`
@@ -176,7 +179,7 @@ export async function getTodayAttendanceLogs() {
             )
         `)
         .eq('gym_id', gym.id)
-        .eq('date', today)
+        .eq('date', date)
         .order('created_at', { ascending: false })
 
     if (error) return []
