@@ -530,23 +530,6 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </div>
                                                     )}
 
-                                                    {/* Class Enrollments */}
-                                                    <div className="pt-2 border-t mt-2">
-                                                        <p className="text-xs text-gray-400 font-bold mb-2">수강 중인 수업</p>
-                                                        <div className="bg-gray-50 rounded p-2 text-sm text-gray-600 space-y-1">
-                                                            {enrollments.length > 0 ? enrollments.map((enroll: any) => (
-                                                                <div key={enroll.id} className="flex justify-between">
-                                                                    <span>{enroll.gym_schedules?.class_name || '수업명 없음'}</span>
-                                                                    <span className="text-gray-400 text-xs">
-                                                                        {enroll.gym_schedules?.day_of_week} {enroll.gym_schedules?.start_time}
-                                                                    </span>
-                                                                </div>
-                                                            )) : (
-                                                                <p className="text-gray-400 text-center text-xs py-1">등록된 수업이 없습니다.</p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
                                                     <div className="flex justify-between items-center bg-gray-50 p-3 rounded">
                                                         <span className="text-sm font-bold">총 결제금액</span>
                                                         <span className="text-xl font-bold text-blue-600">{(finalAmount || 0).toLocaleString()}원</span>
@@ -586,6 +569,34 @@ export default function MemberModal({ member }: { member: any }) {
                                         <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
                                     </div>
                                     <hr className="border-gray-100" />
+
+                                    {/* Weekly Schedule */}
+                                    <div>
+                                        <h5 className="text-xs font-bold text-gray-400 mb-2">수강 중인 수업 (주간 시간표)</h5>
+                                        <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 rounded-lg p-2 border border-gray-100">
+                                            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
+                                                const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
+                                                const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
+
+                                                return (
+                                                    <div key={day} className="flex flex-col gap-1">
+                                                        <span className={`text-xs font-bold ${day === 'Sun' ? 'text-red-400' : day === 'Sat' ? 'text-blue-400' : 'text-gray-400'}`}>
+                                                            {dayMap[day]}
+                                                        </span>
+                                                        <div className="min-h-[40px] bg-white rounded border border-gray-100 p-1 flex flex-col gap-1 items-center justify-center">
+                                                            {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
+                                                                <span key={i} className="text-[10px] leading-tight text-blue-600 font-medium block">
+                                                                    {c.class_name}<br />{c.start_time}
+                                                                </span>
+                                                            )) : (
+                                                                <span className="text-[10px] text-gray-200">-</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
 
                                     <AttendanceHistory
                                         logs={attendanceLogs}
