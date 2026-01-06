@@ -11,6 +11,7 @@ export type Schedule = {
     class_name: string
     created_at: string
     enrollment_count?: number
+    enrolled_members?: { name: string }[]
 }
 
 export async function getSchedules() {
@@ -32,14 +33,18 @@ export async function getSchedules() {
         .from('gym_schedules')
         .select(`
             *,
-            gym_class_enrollments (count)
+            gym_class_enrollments (
+                count,
+                gym_members (name)
+            )
         `)
         .eq('gym_id', gym.id)
         .order('start_time', { ascending: true })
 
     const schedules = (data || []).map((s: any) => ({
         ...s,
-        enrollment_count: s.gym_class_enrollments?.[0]?.count || 0
+        enrollment_count: s.gym_class_enrollments?.[0]?.count || 0,
+        enrolled_members: s.gym_class_enrollments?.map((e: any) => ({ name: e.gym_members?.name || 'Unknown' })) || []
     }))
 
     return schedules as Schedule[]

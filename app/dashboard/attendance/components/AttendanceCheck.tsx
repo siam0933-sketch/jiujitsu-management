@@ -267,15 +267,36 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     // Weekly Mode: Simple View
     if (mode === 'weekly') {
         return (
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[60px] flex flex-col justify-center">
-                <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
-                <p className="text-xs text-blue-600 font-bold mt-1">{schedule.start_time}</p>
-                {/* Show enrollment count */}
-                <p className="text-[10px] text-gray-400 mt-1">수강생 {schedule.enrollment_count ?? 0}명</p>
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[100px] flex flex-col">
+                <div className="flex justify-between items-start mb-2">
+                    <div>
+                        <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
+                        <p className="text-xs text-blue-600 font-bold mt-0.5">{schedule.start_time}</p>
+                    </div>
+                    {/* Show enrollment count badge */}
+                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
+                        {schedule.enrollment_count ?? 0}명
+                    </span>
+                </div>
+
+                {/* Enrolled Students List */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[120px] border-t border-gray-50 pt-1">
+                    {schedule.enrolled_members && schedule.enrolled_members.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                            {schedule.enrolled_members.map((m, idx) => (
+                                <span key={idx} className="text-[11px] text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                                    {m.name}
+                                </span>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-[10px] text-gray-300 text-center py-2">수강생 없음</p>
+                    )}
+                </div>
 
                 <button
                     onClick={handleDeleteClass}
-                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5"
                     title="수업 삭제"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
