@@ -34,18 +34,20 @@ export async function getSchedules() {
         .select(`
             *,
             gym_class_enrollments (
-                count,
                 gym_members (name)
             )
         `)
         .eq('gym_id', gym.id)
         .order('start_time', { ascending: true })
 
-    const schedules = (data || []).map((s: any) => ({
-        ...s,
-        enrollment_count: s.gym_class_enrollments?.[0]?.count || 0,
-        enrolled_members: s.gym_class_enrollments?.map((e: any) => ({ name: e.gym_members?.name || 'Unknown' })) || []
-    }))
+    const schedules = (data || []).map((s: any) => {
+        const enrollments = s.gym_class_enrollments || []
+        return {
+            ...s,
+            enrollment_count: enrollments.length,
+            enrolled_members: enrollments.map((e: any) => ({ name: e.gym_members?.name || 'Unknown' }))
+        }
+    })
 
     return schedules as Schedule[]
 }
