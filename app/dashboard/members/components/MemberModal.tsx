@@ -446,12 +446,30 @@ export default function MemberModal({ member }: { member: any }) {
                                         {isEditingBasicInfo ? (
                                             <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
                                         ) : (
-                                            <p className="font-medium text-sm text-gray-900 truncate">{member.address}</p>
+                                            <p className="font-medium text-sm text-gray-900 truncate">{member.address || '-'}</p>
                                         )}
                                     </div>
 
-                                    {/* More fields can be added here as needed, keeping it simple for now to ensure compilation */}
-                                </div>
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">성별</p>
+                                        {isEditingBasicInfo ? (
+                                            <select value={basicInfoForm.gender || 'male'} onChange={e => setBasicInfoForm({ ...basicInfoForm, gender: e.target.value })} className="w-full text-xs border-gray-300 rounded">
+                                                <option value="male">남성</option>
+                                                <option value="female">여성</option>
+                                            </select>
+                                        ) : (
+                                            <p className="font-medium text-sm text-gray-900">{member.gender === 'male' ? '남성' : '여성'}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">생년월일</p>
+                                        {isEditingBasicInfo ? (
+                                            <input type="date" value={basicInfoForm.birth_date || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, birth_date: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
+                                        ) : (
+                                            <p className="font-medium text-sm text-gray-900">{member.birth_date || '-'}</p>
+                                        )}
+                                    </div>
                             </section>
 
                             {/* Section 2: Payment */}
