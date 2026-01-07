@@ -414,18 +414,19 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                             const status = attendanceStatus[member.id]
                                             const isProcessing = processingIds.has(member.id)
 
-                                            let btnClass = 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
-                                            let btnText = '출석'
+                                            // Default: Wait (대기)
+                                            let btnClass = 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200'
+                                            let btnText = '대기'
 
                                             if (status) {
                                                 if (status.checkedOut) {
-                                                    // Checked Out
-                                                    btnClass = 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600 border border-gray-200'
-                                                    btnText = '하원완료'
+                                                    // Checked Out: Left (하원)
+                                                    btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
+                                                    btnText = '하원'
                                                 } else {
-                                                    // Checked In
-                                                    btnClass = 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
-                                                    btnText = '출석됨'
+                                                    // Checked In: Present (출석)
+                                                    btnClass = 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
+                                                    btnText = '출석'
                                                 }
                                             }
 
@@ -433,7 +434,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 <button
                                                     onClick={() => handleCheckInToggle(member)}
                                                     disabled={isProcessing}
-                                                    className={`px-3 py-1 rounded text-xs font-bold transition-all ${btnClass} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    className={`
+                                                        rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
+                                                        ${btnClass}
+                                                        ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+                                                    `}
                                                 >
                                                     {isProcessing ? '...' : btnText}
                                                 </button>
