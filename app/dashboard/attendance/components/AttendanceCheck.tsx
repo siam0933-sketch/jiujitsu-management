@@ -282,189 +282,190 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     }
 
     // Weekly Mode: Simple View
-    if (mode === 'weekly') {
-        return (
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[100px] flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                    <div>
-                        <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
-                        <p className="text-xs text-blue-600 font-bold mt-0.5">{schedule.start_time}</p>
-                    </div>
-                    {/* Show enrollment count badge */}
-                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
-                        {schedule.enrollment_count ?? 0}명
-                    </span>
-                </div>
-
-                {/* Enrolled Students List */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[120px] border-t border-gray-50 pt-1">
-                    {schedule.enrolled_members && schedule.enrolled_members.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                            {schedule.enrolled_members.map((m, idx) => (
-                                <span key={idx} className="text-[11px] text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                    {m.name}
-                                </span>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-[10px] text-gray-300 text-center py-2">수강생 없음</p>
-                    )}
-                </div>
-
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5">
-                    <button
-                        onClick={handleWeeklyManageClick}
-                        className="text-blue-400 hover:text-blue-600 p-0.5 rounded-full hover:bg-blue-50"
-                        title="회원 관리 (추가/삭제)"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={handleDeleteClass}
-                        className="text-gray-300 hover:text-red-500 p-0.5 rounded-full hover:bg-red-50"
-                        title="수업 삭제"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        )
-    }
-
-    // Daily Mode: Interactive View
     return (
         <>
-            <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative ${isMenuOpen ? 'z-20' : 'z-0'}`}>
-                {/* Header */}
-                <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
-                    <div className="flex items-center gap-2">
-                        <p className="text-sm text-blue-600 font-bold">{schedule.start_time}</p>
-                        <h4 className="font-bold text-gray-800 text-lg">{schedule.class_name}</h4>
-                        <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
+            {/* Weekly Mode View */}
+            {mode === 'weekly' && (
+                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[100px] flex flex-col">
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
+                            <p className="text-xs text-blue-600 font-bold mt-0.5">{schedule.start_time}</p>
+                        </div>
+                        {/* Show enrollment count badge */}
+                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
+                            {schedule.enrollment_count ?? 0}명
+                        </span>
                     </div>
 
-                    <div className="relative" ref={menuRef}>
-                        <button
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {isMenuOpen && (
-                            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animation-fade-in">
-                                <button
-                                    onClick={() => {
-                                        setIsMenuOpen(false)
-                                        openManageModal()
-                                    }}
-                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                    </svg>
-                                    회원 추가/관리
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setIsMenuOpen(false)
-                                        handleDeleteClass()
-                                    }}
-                                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    수업 삭제
-                                </button>
+                    {/* Enrolled Students List */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[120px] border-t border-gray-50 pt-1">
+                        {schedule.enrolled_members && schedule.enrolled_members.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                                {schedule.enrolled_members.map((m, idx) => (
+                                    <span key={idx} className="text-[11px] text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                                        {m.name}
+                                    </span>
+                                ))}
                             </div>
+                        ) : (
+                            <p className="text-[10px] text-gray-300 text-center py-2">수강생 없음</p>
                         )}
                     </div>
-                </div>
 
-                {/* Enrolled List */}
-                <div className="border-t border-gray-100 bg-white">
-                    {enrolledMembers.length > 0 ? (
-                        <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
-                            {enrolledMembers.map(member => (
-                                <div
-                                    key={member.id}
-                                    className={`
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5">
+                        <button
+                            onClick={handleWeeklyManageClick}
+                            className="text-blue-400 hover:text-blue-600 p-0.5 rounded-full hover:bg-blue-50"
+                            title="회원 관리 (추가/삭제)"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={handleDeleteClass}
+                            className="text-gray-300 hover:text-red-500 p-0.5 rounded-full hover:bg-red-50"
+                            title="수업 삭제"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Daily Mode View */}
+            {mode === 'daily' && (
+                <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative ${isMenuOpen ? 'z-20' : 'z-0'}`}>
+                    {/* Header */}
+                    <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm text-blue-600 font-bold">{schedule.start_time}</p>
+                            <h4 className="font-bold text-gray-800 text-lg">{schedule.class_name}</h4>
+                            <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
+                        </div>
+
+                        <div className="relative" ref={menuRef}>
+                            <button
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {isMenuOpen && (
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animation-fade-in">
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false)
+                                            openManageModal()
+                                        }}
+                                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                        </svg>
+                                        회원 추가/관리
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false)
+                                            handleDeleteClass()
+                                        }}
+                                        className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        수업 삭제
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Enrolled List */}
+                    <div className="border-t border-gray-100 bg-white">
+                        {enrolledMembers.length > 0 ? (
+                            <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
+                                {enrolledMembers.map(member => (
+                                    <div
+                                        key={member.id}
+                                        className={`
                                         w-full px-3 py-2 rounded-md text-sm flex justify-between items-center transition-colors border-b border-gray-50 last:border-0
                                         hover:bg-gray-50
                                     `}
-                                >
-                                    <span className="text-gray-700">
-                                        {member.name}
-                                        {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
-                                        <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
-                                    </span>
+                                    >
+                                        <span className="text-gray-700">
+                                            {member.name}
+                                            {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
+                                            <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
+                                        </span>
 
-                                    {/* Action Button: Today -> CheckIn/Out, Other -> Calendar */}
-                                    {isToday ? (
-                                        (() => {
-                                            const status = attendanceStatus[member.id]
-                                            const isProcessing = processingIds.has(member.id)
+                                        {/* Action Button: Today -> CheckIn/Out, Other -> Calendar */}
+                                        {isToday ? (
+                                            (() => {
+                                                const status = attendanceStatus[member.id]
+                                                const isProcessing = processingIds.has(member.id)
 
-                                            // Default: Wait (대기)
-                                            let btnClass = 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200'
-                                            let btnText = '대기'
+                                                // Default: Wait (대기)
+                                                let btnClass = 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200'
+                                                let btnText = '대기'
 
-                                            if (status) {
-                                                if (status.checkedOut) {
-                                                    // Checked Out: Left (하원)
-                                                    btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
-                                                    btnText = '하원'
-                                                } else {
-                                                    // Checked In: Present (출석)
-                                                    btnClass = 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
-                                                    btnText = '출석'
+                                                if (status) {
+                                                    if (status.checkedOut) {
+                                                        // Checked Out: Left (하원)
+                                                        btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
+                                                        btnText = '하원'
+                                                    } else {
+                                                        // Checked In: Present (출석)
+                                                        btnClass = 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
+                                                        btnText = '출석'
+                                                    }
                                                 }
-                                            }
 
-                                            return (
-                                                <button
-                                                    onClick={() => handleCheckInToggle(member)}
-                                                    disabled={isProcessing}
-                                                    className={`
+                                                return (
+                                                    <button
+                                                        onClick={() => handleCheckInToggle(member)}
+                                                        disabled={isProcessing}
+                                                        className={`
                                                         rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
                                                         ${btnClass}
                                                         ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                     `}
-                                                >
-                                                    {isProcessing ? '...' : btnText}
-                                                </button>
-                                            )
-                                        })()
-                                    ) : (
-                                        <button
-                                            onClick={() => openCalendar(member.id)}
-                                            className="p-1 px-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                            title="달력 보기"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="p-4 text-center text-xs text-gray-400">
-                            등록된 수강생이 없습니다.
-                        </div>
-                    )}
+                                                    >
+                                                        {isProcessing ? '...' : btnText}
+                                                    </button>
+                                                )
+                                            })()
+                                        ) : (
+                                            <button
+                                                onClick={() => openCalendar(member.id)}
+                                                className="p-1 px-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                title="달력 보기"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-4 text-center text-xs text-gray-400">
+                                등록된 수강생이 없습니다.
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Member Management Modal */}
             {isManageModalOpen && (
@@ -481,16 +482,13 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                         </div>
 
                         {/* Column Headers */}
-                        <div className="px-4 py-2 border-b border-gray-100 bg-white grid grid-cols-[auto_1fr_0.5fr_0.5fr] gap-2 text-xs font-bold text-gray-500">
+                        <div className="px-4 py-2 border-b border-gray-100 bg-white grid grid-cols-[auto_1fr_0.4fr] gap-2 text-xs font-bold text-gray-500">
                             <div className="w-5">{/* Checkbox spacer */}</div>
                             <button onClick={() => handleSort('name')} className="text-left flex items-center gap-1 hover:text-blue-600">
                                 이름 <SortIcon colKey="name" />
                             </button>
                             <button onClick={() => handleSort('age')} className="text-left flex items-center gap-1 hover:text-blue-600">
                                 나이 <SortIcon colKey="age" />
-                            </button>
-                            <button onClick={() => handleSort('belt')} className="text-left flex items-center gap-1 hover:text-blue-600">
-                                등급 <SortIcon colKey="belt" />
                             </button>
                         </div>
 
@@ -501,7 +499,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                     <label
                                         key={member.id}
                                         className={`
-                                            grid grid-cols-[auto_1fr_0.5fr_0.5fr] gap-2 items-center p-3 rounded-lg border cursor-pointer transition-all
+                                            grid grid-cols-[auto_1fr_0.4fr] gap-2 items-center p-3 rounded-lg border cursor-pointer transition-all
                                             ${isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-gray-100 hover:bg-gray-50'}
                                         `}
                                     >
@@ -513,7 +511,6 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                         />
                                         <span className={`font-bold text-sm ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>{member.name}</span>
                                         <span className="text-xs text-gray-400">{calculateAge(member.birth_date)}</span>
-                                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded text-center">{member.belt}</span>
                                     </label>
                                 )
                             })}
