@@ -286,7 +286,10 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
         <>
             {/* Weekly Mode View */}
             {mode === 'weekly' && (
-                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 transition-colors h-auto min-h-[100px] flex flex-col">
+                <div
+                    onClick={handleWeeklyManageClick}
+                    className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 hover:shadow-md transition-all h-auto min-h-[100px] flex flex-col cursor-pointer"
+                >
                     <div className="flex justify-between items-start mb-2">
                         <div>
                             <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
@@ -315,16 +318,10 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5">
                         <button
-                            onClick={handleWeeklyManageClick}
-                            className="text-blue-400 hover:text-blue-600 p-0.5 rounded-full hover:bg-blue-50"
-                            title="회원 관리 (추가/삭제)"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={handleDeleteClass}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteClass()
+                            }}
                             className="text-gray-300 hover:text-red-500 p-0.5 rounded-full hover:bg-red-50"
                             title="수업 삭제"
                         >
