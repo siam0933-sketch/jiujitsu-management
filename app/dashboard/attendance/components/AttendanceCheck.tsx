@@ -305,11 +305,13 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[120px] border-t border-gray-50 pt-1">
                         {schedule.enrolled_members && schedule.enrolled_members.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
-                                {schedule.enrolled_members.map((m, idx) => (
-                                    <span key={idx} className="text-[11px] text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                        {m.name}
-                                    </span>
-                                ))}
+                                {[...schedule.enrolled_members]
+                                    .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+                                    .map((m, idx) => (
+                                        <span key={idx} className="text-[11px] text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                                            {m.name}
+                                        </span>
+                                    ))}
                             </div>
                         ) : (
                             <p className="text-[10px] text-gray-300 text-center py-2">수강생 없음</p>
