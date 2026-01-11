@@ -90,22 +90,22 @@ export async function createPayment(formData: FormData) {
 
         if (type === 'period') {
             // Calculate New End Date
-            // If current end date is in future, add to it. Else start from today(startDate).
-            const currentEnd = member?.payment_end_date ? new Date(member.payment_end_date) : null
-            const start = new Date(start_date)
+            // If explicit date provided (user override), use it.
+            const explicitEndDate = String(formData.get('new_payment_end_date') || '')
 
-            let baseDate = start
-            // User Request (2025-12-28): Do not add to previous period. 
-            // Calculate strictly from the new payment reference date.
-            // if (currentEnd && currentEnd > new Date()) {
-            //     baseDate = currentEnd
-            // }
+            if (explicitEndDate) {
+                updateData.payment_end_date = explicitEndDate
+            } else {
+                // If current end date is in future, add to it. Else start from today(startDate).
+                const currentEnd = member?.payment_end_date ? new Date(member.payment_end_date) : null
+                const start = new Date(start_date)
 
-            // Add Months
-            const newEnd = new Date(baseDate)
-            newEnd.setMonth(newEnd.getMonth() + durationMonths)
-
-            updateData.payment_end_date = newEnd.toISOString().split('T')[0]
+                let baseDate = start
+                // Add Months logic...
+                const newEnd = new Date(baseDate)
+                newEnd.setMonth(newEnd.getMonth() + durationMonths)
+                updateData.payment_end_date = newEnd.toISOString().split('T')[0]
+            }
         } else if (type === 'session') {
             // Add Sessions
             const currentSessions = member?.remaining_sessions || 0

@@ -321,7 +321,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                         </th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="name" label="이름" /></th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">나이</th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">출석</th> {/* New Column */}
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">출석</th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="belt" label="등급" /></th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">다음 결제일</th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="joined_at" label="등록일" /></th>

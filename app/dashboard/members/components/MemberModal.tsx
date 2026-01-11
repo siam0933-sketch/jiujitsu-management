@@ -42,6 +42,7 @@ export default function MemberModal({ member }: { member: any }) {
     const [options, setOptions] = useState<any[]>([])
     const [durationMonths, setDurationMonths] = useState(1)
     const [selectedOptionIds, setSelectedOptionIds] = useState<Set<string>>(new Set())
+    const [newExpiryDate, setNewExpiryDate] = useState('') // New state for expiry preview
 
     // Payments List
     const [payments, setPayments] = useState<any[]>([])
@@ -138,6 +139,29 @@ export default function MemberModal({ member }: { member: any }) {
         setManualAmount(null) // Reset manual override
     }
 
+    // Auto-calc Expiry Date when plan/months change
+    useEffect(() => {
+        if (!selectedPlan || selectedPlan.type !== 'period') {
+            setNewExpiryDate('')
+            return
+        }
+
+        // Base Date: Max(Current Expiry, Today)
+        let baseDate = new Date()
+        if (member.payment_end_date) {
+            const currentEnd = new Date(member.payment_end_date)
+            if (currentEnd > baseDate) {
+                baseDate = currentEnd
+            }
+        }
+
+        // Add Months
+        const nextDate = new Date(baseDate)
+        nextDate.setMonth(nextDate.getMonth() + durationMonths)
+        setNewExpiryDate(nextDate.toISOString().split('T')[0])
+
+    }, [selectedPlanId, durationMonths, member.payment_end_date])
+
     // Calculate Total
     const calculateTotal = () => {
         if (!selectedPlan) return 0
@@ -146,7 +170,7 @@ export default function MemberModal({ member }: { member: any }) {
             total = selectedPlan.price * durationMonths
             selectedOptionIds.forEach(id => {
                 const opt = options.find(o => o.id === id)
-                if (opt) total += opt.price
+                if (opt) total += opt.price * durationMonths
             })
         }
         return total
@@ -174,6 +198,10 @@ export default function MemberModal({ member }: { member: any }) {
         // Generate options summary text
         const selectedOptionNames = Array.from(selectedOptionIds).map(id => options.find(o => o.id === id)?.name).filter(Boolean).join(', ')
         formData.append('options_summary', selectedOptionNames)
+
+        if (newExpiryDate) {
+            formData.append('new_payment_end_date', newExpiryDate)
+        }
 
         const res = await createPayment(formData)
         setIsSubmitting(false)
@@ -509,6 +537,30 @@ export default function MemberModal({ member }: { member: any }) {
                                                         {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
                                                     </select>
 
+                                                    {selectedPlan?.type === 'period' && (
+                                                        <div className="flex gap-2 items-center">
+                                                            <div className="flex-1">
+                                                                <label className="block text-xs text-gray-500 mb-1">개월 수</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="1"
+                                                                    value={durationMonths}
+                                                                    onChange={e => setDurationMonths(Number(e.target.value))}
+                                                                    className="w-full text-sm border-gray-300 rounded"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <label className="block text-xs text-gray-500 mb-1">만료 예정일 (수정 가능)</label>
+                                                                <input
+                                                                    type="date"
+                                                                    value={newExpiryDate}
+                                                                    onChange={e => setNewExpiryDate(e.target.value)}
+                                                                    className="w-full text-sm border-gray-300 rounded"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+
                                                     {/* Options List Grouped by Group Name */}
                                                     {options.length > 0 && (
                                                         <div className="space-y-4 pt-2">
@@ -519,7 +571,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     acc[group].push(opt);
                                                                     return acc;
                                                                 }, {} as Record<string, any[]>)
-                                                            ).map(([groupName, groupOptions]) => (
+                                                            ).map(([groupName, groupOptions]: [string, any]) => (
                                                                 <div key={groupName} className="space-y-2">
                                                                     <p className="text-xs text-gray-400 font-bold">{groupName}</p>
                                                                     {groupOptions.map((opt: any) => (
@@ -533,7 +585,12 @@ export default function MemberModal({ member }: { member: any }) {
                                                                                 />
                                                                                 <span className="text-sm text-gray-700">{opt.name}</span>
                                                                             </div>
-                                                                            <span className="text-sm font-medium text-gray-900">+{opt.price.toLocaleString()}원</span>
+                                                                            <span className="text-sm font-medium text-gray-900">
+                                                                                {(() => {
+                                                                                    const price = selectedPlan?.type === 'period' ? opt.price * durationMonths : opt.price
+                                                                                    return `${price > 0 ? '+' : ''}${price.toLocaleString()}원`
+                                                                                })()}
+                                                                            </span>
                                                                         </label>
                                                                     ))}
                                                                 </div>
