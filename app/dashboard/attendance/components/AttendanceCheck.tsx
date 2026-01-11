@@ -522,9 +522,9 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setIsCopyMode(!isCopyMode)}
-                                    className={`px-3 py-1 text-xs font-bold rounded-lg border transition-colors ${isCopyMode ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}
+                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg border transition-colors shadow-sm ${isCopyMode ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'}`}
                                 >
-                                    {isCopyMode ? '취소' : '수업 복사하기'}
+                                    {isCopyMode ? '복사 취소' : '+ 수업 복사하기'}
                                 </button>
                                 <button onClick={() => setIsManageModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
                             </div>
