@@ -343,12 +343,6 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                 onClick={e => e.stopPropagation()}
                             >
                                 <div>
-                                    <div
-                                        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full shadow-sm border border-gray-100 mb-4 ${currentBeltMeta.colorClass || ''}`}
-                                        style={currentBeltMeta.style || {}}
-                                    >
-                                    </div>
-
                                     <div className="mt-3 text-center sm:mt-5">
                                         <h3 className="text-xl font-bold leading-6 text-gray-900">
                                             {memberName}
@@ -358,9 +352,16 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                         </p>
 
                                         <div className="mt-4 border-t border-gray-100 pt-4">
-                                            <h3 className="text-base font-semibold leading-6 text-gray-900">
-                                                {editingLogId ? '승급 기록 수정' : '새 승급 심사'}
-                                            </h3>
+                                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                                <div className="bg-gray-50 p-2 rounded">
+                                                    <span className="block text-xs text-gray-400">등록일</span>
+                                                    <span className="font-semibold">{joinedAt ? new Date(joinedAt).toLocaleDateString() : '-'}</span>
+                                                </div>
+                                                <div className="bg-gray-50 p-2 rounded">
+                                                    <span className="block text-xs text-gray-400">입학일</span>
+                                                    <span className="font-semibold">{startDate ? new Date(startDate).toLocaleDateString() : '-'}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Schedule, deleteSchedule } from '../actions_schedule'
+import { Schedule, deleteSchedule, createSchedule } from '../actions_schedule'
 import { checkInMember, checkOutMember, cancelAttendance, getMemberAttendanceDates, getAttendanceLogsForDate } from '../actions'
 import { getEnrollments, updateEnrollments } from '../actions_enrollment'
 
@@ -77,6 +77,51 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     // Modal Selection State
     const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(new Set())
 
+    // Copy Class State
+    const [isCopyMode, setIsCopyMode] = useState(false)
+    const [selectedCopyDays, setSelectedCopyDays] = useState<Set<string>>(new Set())
+    const [isCopying, setIsCopying] = useState(false)
+
+    const handleToggleCopyDay = (dayId: string) => {
+        const next = new Set(selectedCopyDays)
+        if (next.has(dayId)) next.delete(dayId)
+        else next.add(dayId)
+        setSelectedCopyDays(next)
+    }
+
+    const handleCopyClass = async () => {
+        if (selectedCopyDays.size === 0) {
+            alert('복사할 요일을 선택해주세요.')
+            return
+        }
+        if (!confirm(`선택한 ${selectedCopyDays.size}개 요일에 이 수업을 복사하시겠습니까?\n체크된 ${tempSelectedIds.size}명의 수강생도 함께 등록됩니다.`)) return
+
+        setIsCopying(true)
+        try {
+            const res = await createSchedule({
+                days: Array.from(selectedCopyDays),
+                time: schedule.start_time,
+                name: schedule.class_name,
+                initialEnrollments: Array.from(tempSelectedIds)
+            })
+
+            if (res?.error) {
+                alert(res.error)
+            } else {
+                alert('수업이 복사되었습니다.')
+                setIsCopyMode(false)
+                setSelectedCopyDays(new Set())
+                // No need to close Manage modal? Maybe close it to see result
+                setIsManageModalOpen(false)
+            }
+        } catch (e) {
+            console.error(e)
+            alert('오류가 발생했습니다.')
+        } finally {
+            setIsCopying(false)
+        }
+    }
+
     // Date Logic
     const todayStr = new Date().toISOString().split('T')[0]
     // If targetDate is not provided (weekly view default?), default to today. But ClassScheduleBoard sends it.
@@ -109,6 +154,8 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
     const openManageModal = () => {
         setTempSelectedIds(new Set(enrolledMemberIds))
+        setIsCopyMode(false) // Reset copy mode
+        setSelectedCopyDays(new Set())
         setIsManageModalOpen(true)
     }
 
@@ -472,8 +519,72 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
                         <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                             <h3 className="font-bold text-lg text-gray-800">수강생 관리</h3>
-                            <button onClick={() => setIsManageModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setIsCopyMode(!isCopyMode)}
+                                    className={`px-3 py-1 text-xs font-bold rounded-lg border transition-colors ${isCopyMode ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}
+                                >
+                                    {isCopyMode ? '취소' : '수업 복사하기'}
+                                </button>
+                                <button onClick={() => setIsManageModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                            </div>
                         </div>
+
+                        {/* Copy Mode Panel */}
+                        {isCopyMode && (
+                            <div className="bg-blue-50 p-4 border-b border-blue-100 animate-in slide-in-from-top-2">
+                                <p className="text-sm text-blue-800 font-bold mb-2">어떤 요일로 복사할까요?</p>
+                                <div className="flex justify-between gap-1 mb-3">
+                                    {[
+                                        { id: 'Mon', label: '월' },
+                                        { id: 'Tue', label: '화' },
+                                        { id: 'Wed', label: '수' },
+                                        { id: 'Thu', label: '목' },
+                                        { id: 'Fri', label: '금' },
+                                        { id: 'Sat', label: '토' },
+                                        { id: 'Sun', label: '일' },
+                                    ].map(day => (
+                                        <button
+                                            key={day.id}
+                                            onClick={() => handleToggleCopyDay(day.id)}
+                                            className={`
+                                                flex-1 h-9 rounded-lg text-sm font-bold transition-all
+                                                ${selectedCopyDays.has(day.id)
+                                                    ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                                    : 'bg-white text-gray-500 border border-blue-100 hover:border-blue-300'}
+                                            `}
+                                        >
+                                            {day.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={handleCopyClass}
+                                    disabled={selectedCopyDays.size === 0 || isCopying}
+                                    className={`
+                                        w-full py-2.5 rounded-lg font-bold text-sm shadow-sm transition-all flex justify-center items-center gap-2
+                                        ${selectedCopyDays.size > 0
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                                    `}
+                                >
+                                    {isCopying ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            복사 중...
+                                        </>
+                                    ) : (
+                                        `선택한 요일에 복사하기 (${selectedCopyDays.size}개)`
+                                    )}
+                                </button>
+                                <p className="text-[10px] text-blue-400 mt-2 text-center">
+                                    * 아래 리스트에서 체크된 <strong>{tempSelectedIds.size}명</strong>의 수강생도 함께 등록됩니다.
+                                </p>
+                            </div>
+                        )}
                         {/* Member List (Omitted for brevity, logic remains same as before) */}
                         {/* Note: I am pasting the FULL content, so I must include the modal body */}
                         <div className="p-2 border-b border-gray-100 bg-white">
