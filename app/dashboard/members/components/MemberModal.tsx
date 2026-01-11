@@ -609,7 +609,18 @@ export default function MemberModal({ member }: { member: any }) {
 
                                                     <div className="flex justify-between items-center bg-gray-50 p-3 rounded">
                                                         <span className="text-sm font-bold">총 결제금액</span>
-                                                        <span className="text-xl font-bold text-blue-600">{(finalAmount || 0).toLocaleString()}원</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={(manualAmount !== null ? manualAmount : currentTotal).toLocaleString()}
+                                                                onChange={e => {
+                                                                    const val = Number(e.target.value.replace(/[^0-9]/g, ''))
+                                                                    setManualAmount(val)
+                                                                }}
+                                                                className="text-xl font-bold text-blue-600 bg-transparent text-right border-0 border-b border-gray-300 focus:ring-0 focus:border-blue-500 w-32 p-0"
+                                                            />
+                                                            <span className="text-xl font-bold text-blue-600">원</span>
+                                                        </div>
                                                     </div>
 
                                                     <button onClick={handleSubmitPayment} disabled={isSubmitting} className="w-full py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-500">
@@ -624,12 +635,37 @@ export default function MemberModal({ member }: { member: any }) {
                                     <h5 className="text-xs font-bold text-gray-400 mb-2">최근 결제 내역</h5>
                                     <div className="space-y-2">
                                         {payments.map(pay => (
-                                            <div key={pay.id} className="flex justify-between text-sm py-2 border-b border-gray-50 last:border-0">
-                                                <span>{pay.payment_date}</span>
-                                                <div className="flex gap-2">
-                                                    <span className="font-bold">{pay.amount.toLocaleString()}원</span>
-                                                    <button onClick={() => handleDeletePayment(pay.id)} className="text-xs text-red-500">삭제</button>
-                                                </div>
+                                            <div key={pay.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 last:border-0">
+                                                {editingPaymentId === pay.id ? (
+                                                    <div className="flex items-center gap-2 w-full">
+                                                        <input
+                                                            type="date"
+                                                            value={editDate}
+                                                            onChange={e => setEditDate(e.target.value)}
+                                                            className="text-xs border border-blue-300 rounded px-1 py-0.5"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={editAmount.toLocaleString()}
+                                                            onChange={e => {
+                                                                const val = Number(e.target.value.replace(/[^0-9]/g, ''))
+                                                                setEditAmount(val)
+                                                            }}
+                                                            className="flex-1 text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+                                                        />
+                                                        <button onClick={() => handleUpdatePayment(pay)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
+                                                        <button onClick={cancelEditing} className="text-xs bg-gray-200 px-2 py-1 rounded">취소</button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span>{pay.payment_date}</span>
+                                                        <div className="flex gap-2 items-center">
+                                                            <span className="font-bold cursor-pointer hover:text-blue-600" onClick={() => startEditing(pay)}>{pay.amount.toLocaleString()}원</span>
+                                                            <button onClick={() => startEditing(pay)} className="text-xs text-blue-500 hover:underline">수정</button>
+                                                            <button onClick={() => handleDeletePayment(pay.id)} className="text-xs text-red-500 hover:underline">삭제</button>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
                                         {payments.length === 0 && <p className="text-xs text-gray-300 text-center py-2">내역 없음</p>}
