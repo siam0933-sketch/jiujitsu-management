@@ -284,3 +284,49 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }
 }
+
+export async function updateOption(optionId: string, data: { name?: string, price?: number, group_name?: string }) {
+    const supabase = await createClient()
+
+    // If group_name update is requested, we need to handle potential reordering or just move it. 
+    // Ideally user only updates name/price for single option. Moving group is trickier via this simple edit. 
+    // Let's stick to name/price for single option edit, or group_name for "Group Rename" (which affects all).
+    // Actually, allowing individual option to move group is useful. 
+
+    const { error } = await supabase
+        .from('gym_price_options')
+        .update(data)
+        .eq('id', optionId)
+
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function updateOptionGroup(oldGroupName: string, newGroupName: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // 1. Check if new group name already exists (to merge? or block?)
+    // For simplicity, let's just update. If it merges, so be it? 
+    // Merge might be confusing if orders mess up. But let's allow "Rename".
+
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+
+    if (!gym) return { error: 'Gym not found' }
+
+    const { error } = await supabase
+        .from('gym_price_options')
+        .update({ group_name: newGroupName })
+        .eq('gym_id', gym.id)
+        .eq('group_name', oldGroupName)
+
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}

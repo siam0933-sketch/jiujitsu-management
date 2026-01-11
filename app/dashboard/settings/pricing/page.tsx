@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption, reorderGroup } from './actions'
+import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption, reorderGroup, updateOption, updateOptionGroup } from './actions'
 import OptionReorderButton from './components/OptionReorderButton'
 
 export default function PricingSettingsPage() {
@@ -9,6 +9,8 @@ export default function PricingSettingsPage() {
     const [plans, setPlans] = useState<any[]>([])
     const [options, setOptions] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [editingOptionId, setEditingOptionId] = useState<string | null>(null)
+    const [editingGroupName, setEditingGroupName] = useState<string | null>(null)
 
     // Form States
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -21,10 +23,43 @@ export default function PricingSettingsPage() {
         console.log('[Page] loadData start')
         setIsLoading(true)
         const { plans, options } = await getPricingData()
-        console.log('[Page] loadData received:', options?.map((o: any) => `${o.name}:${o.display_order}`))
         setPlans(plans)
         setOptions(options)
         setIsLoading(false)
+    }
+
+    // ... create/delete handlers ...
+
+    const handleUpdateOption = async (optionId: string, e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget)
+        const name = String(formData.get('name'))
+        const price = Number(formData.get('price'))
+
+        const res = await updateOption(optionId, { name, price })
+        if (res?.error) alert(res.error)
+        else {
+            setEditingOptionId(null)
+            loadData()
+        }
+    }
+
+    const handleUpdateGroup = async (oldName: string, e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget)
+        const newName = String(formData.get('new_name'))
+
+        if (oldName === newName) {
+            setEditingGroupName(null)
+            return
+        }
+
+        const res = await updateOptionGroup(oldName, newName)
+        if (res?.error) alert(res.error)
+        else {
+            setEditingGroupName(null)
+            loadData()
+        }
     }
 
     const handleCreatePlan = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -315,36 +350,75 @@ export default function PricingSettingsPage() {
                                 {groupedOptions.map((group: any, gIdx: number) => (
                                     <div key={group.name} className="border rounded-lg bg-white overflow-hidden shadow-sm">
                                         <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-1">
                                                 <div className="flex flex-col gap-0.5 mr-2">
                                                     <OptionReorderButton direction="up" disabled={gIdx === 0} onReorder={() => handleGroupReorder(group.name, 'up')} />
                                                     <OptionReorderButton direction="down" disabled={gIdx === groupedOptions.length - 1} onReorder={() => handleGroupReorder(group.name, 'down')} />
                                                 </div>
-                                                <h3 className="font-bold text-gray-900 text-sm">{group.name}</h3>
-                                                <span className="text-[10px] text-gray-500 bg-white border border-gray-200 px-1.5 rounded">{group.items.length}개 옵션</span>
+
+                                                {editingGroupName === group.name ? (
+                                                    <form onSubmit={(e) => handleUpdateGroup(group.name, e)} className="flex items-center gap-2 flex-1">
+                                                        <input
+                                                            name="new_name"
+                                                            defaultValue={group.name}
+                                                            autoFocus
+                                                            className="text-sm border border-blue-300 rounded px-2 py-0.5 w-full max-w-[200px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                        />
+                                                        <button type="submit" className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-500">저장</button>
+                                                        <button type="button" onClick={() => setEditingGroupName(null)} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300">취소</button>
+                                                    </form>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setEditingGroupName(group.name)}>
+                                                        <h3 className="font-bold text-gray-900 text-sm hover:text-blue-600 transition-colors">{group.name}</h3>
+                                                        <svg className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                        <span className="text-[10px] text-gray-500 bg-white border border-gray-200 px-1.5 rounded ml-2 cursor-default" onClick={e => e.stopPropagation()}>{group.items.length}개 옵션</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
                                         <ul className="divide-y divide-gray-50">
                                             {group.items.map((opt: any, idx: number) => (
                                                 <li key={opt.id} className="flex justify-between items-center text-sm px-4 py-3 hover:bg-gray-50 transition-colors">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <OptionReorderButton direction="up" disabled={idx === 0} onReorder={() => handleOptionReorder(opt.id, 'up')} />
-                                                            <OptionReorderButton direction="down" disabled={idx === group.items.length - 1} onReorder={() => handleOptionReorder(opt.id, 'down')} />
-                                                        </div>
-                                                        <span className="text-gray-700 ml-2">{opt.name}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className={opt.price > 0 ? 'text-blue-600 font-medium' : 'text-gray-400'}>
-                                                            {opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()}원
-                                                        </span>
-                                                        <button onClick={() => handleDeleteOption(opt.id)} className="text-gray-300 hover:text-red-500 p-1 rounded hover:bg-red-50 transition-all">
-                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                    {editingOptionId === opt.id ? (
+                                                        <form onSubmit={(e) => handleUpdateOption(opt.id, e)} className="flex items-center gap-2 w-full">
+                                                            <div className="flex items-center gap-2 flex-1">
+                                                                <input name="name" defaultValue={opt.name} className="flex-1 text-sm border border-blue-300 rounded px-2 py-1" autoFocus />
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <input name="price" type="number" defaultValue={opt.price} className="w-24 text-sm border border-blue-300 rounded px-2 py-1 text-right" />
+                                                                <button type="submit" className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
+                                                                <button type="button" onClick={() => setEditingOptionId(null)} className="text-xs bg-white border border-gray-300 px-2 py-1 rounded">취소</button>
+                                                            </div>
+                                                        </form>
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex items-center gap-2 flex-1">
+                                                                <div className="flex flex-col gap-0.5">
+                                                                    <OptionReorderButton direction="up" disabled={idx === 0} onReorder={() => handleOptionReorder(opt.id, 'up')} />
+                                                                    <OptionReorderButton direction="down" disabled={idx === group.items.length - 1} onReorder={() => handleOptionReorder(opt.id, 'down')} />
+                                                                </div>
+                                                                <span className="text-gray-700 ml-2 cursor-pointer hover:text-blue-600 flex items-center gap-1 group" onClick={() => setEditingOptionId(opt.id)}>
+                                                                    {opt.name}
+                                                                    <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                                    </svg>
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className={`font-medium cursor-pointer hover:text-blue-600 ${opt.price > 0 ? 'text-blue-600' : 'text-gray-400'}`} onClick={() => setEditingOptionId(opt.id)}>
+                                                                    {opt.price > 0 ? '+' : ''}{opt.price.toLocaleString()}원
+                                                                </span>
+                                                                <button onClick={() => handleDeleteOption(opt.id)} className="text-gray-300 hover:text-red-500 p-1 rounded hover:bg-red-50 transition-all">
+                                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </li>
                                             ))}
 
