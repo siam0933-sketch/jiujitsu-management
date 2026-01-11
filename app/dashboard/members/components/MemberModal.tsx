@@ -550,6 +550,15 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 />
                                                             </div>
                                                             <div className="flex-1">
+                                                                <label className="block text-xs text-gray-500 mb-1">결제일</label>
+                                                                <input
+                                                                    type="date"
+                                                                    value={paymentDate}
+                                                                    onChange={e => setPaymentDate(e.target.value)}
+                                                                    className="w-full text-sm border-gray-300 rounded"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1">
                                                                 <label className="block text-xs text-gray-500 mb-1">만료 예정일 (수정 가능)</label>
                                                                 <input
                                                                     type="date"
