@@ -658,11 +658,31 @@ export default function MemberModal({ member }: { member: any }) {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <span>{pay.payment_date}</span>
-                                                        <div className="flex gap-2 items-center">
-                                                            <span className="font-bold cursor-pointer hover:text-blue-600" onClick={() => startEditing(pay)}>{pay.amount.toLocaleString()}원</span>
-                                                            <button onClick={() => startEditing(pay)} className="text-xs text-blue-500 hover:underline">수정</button>
-                                                            <button onClick={() => handleDeletePayment(pay.id)} className="text-xs text-red-500 hover:underline">삭제</button>
+                                                        <div className="flex flex-col gap-1 w-full">
+                                                            <span className="text-xs text-gray-400">{pay.payment_date}</span>
+                                                            <div className="flex justify-between items-center w-full">
+                                                                <span className="text-gray-700">
+                                                                    {(() => {
+                                                                        const snap = pay.plan_snapshot
+                                                                        if (!snap) return '결제 내역'
+                                                                        const parts = []
+                                                                        if (snap.plan_name) parts.push(snap.plan_name)
+                                                                        if (snap.type === 'period' && snap.duration_months) parts.push(`${snap.duration_months}개월`)
+                                                                        else if (snap.type === 'session' && snap.session_count) parts.push(`${snap.session_count}회`)
+                                                                        if (snap.options_summary) parts.push(snap.options_summary.replace(/, /g, '/'))
+                                                                        return parts.join('/')
+                                                                    })()}
+                                                                </span>
+                                                                <div className="flex gap-2 items-center">
+                                                                    <span className="font-bold cursor-pointer hover:text-blue-600" onClick={() => startEditing(pay)}>
+                                                                        {pay.amount.toLocaleString()}원
+                                                                    </span>
+                                                                    <div className="flex gap-1 ml-2">
+                                                                        <button onClick={() => startEditing(pay)} className="text-xs text-blue-500 hover:underline">수정</button>
+                                                                        <button onClick={() => handleDeletePayment(pay.id)} className="text-xs text-red-500 hover:underline">삭제</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </>
                                                 )}
