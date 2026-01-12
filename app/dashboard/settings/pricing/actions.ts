@@ -102,7 +102,32 @@ export async function createOption(formData: FormData) {
     const name = String(formData.get('name'))
     const price = Number(formData.get('price'))
 
-    // Get max order for this group
+    // 1. Determine group_order
+    // Check if group exists
+    const { data: existingGroup } = await supabase
+        .from('gym_price_options')
+        .select('group_order')
+        .eq('gym_id', gym.id)
+        .eq('group_name', group_name)
+        .limit(1)
+        .maybeSingle()
+
+    let group_order = existingGroup?.group_order
+
+    if (group_order === undefined || group_order === null) {
+        // New group or existing group has null order -> get max + 1
+        const { data: maxGroup } = await supabase
+            .from('gym_price_options')
+            .select('group_order')
+            .eq('gym_id', gym.id)
+            .order('group_order', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        group_order = (maxGroup?.group_order ?? -1) + 1
+    }
+
+    // 2. Determine display_order (within group)
     const { data: maxOrder } = await supabase
         .from('gym_price_options')
         .select('display_order')
@@ -121,6 +146,7 @@ export async function createOption(formData: FormData) {
             group_name,
             name,
             price,
+            group_order,
             display_order: nextOrder,
             is_active: true
         })
@@ -225,61 +251,77 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
 
     if (!gym) return { error: 'Gym not found' }
 
-    // 1. Get current group stats
-    const { data: targetGroup } = await supabase
+    // 1. Fetch ALL distinct groups with their current orders
+    // We fetch all active options to determine group structure
+    const { data: allOptions } = await supabase
         .from('gym_price_options')
-        .select('group_order')
+        .select('group_name, group_order, created_at')
         .eq('gym_id', gym.id)
-        .eq('group_name', groupName)
-        .limit(1)
-        .single()
+        .eq('is_active', true)
 
-    if (!targetGroup) return { error: 'Group not found' }
+    if (!allOptions || allOptions.length === 0) return { success: true }
 
-    const currentOrder = targetGroup.group_order
+    // 2. Reduce to unique groups and sort them
+    // Sort logic: group_order (asc), then created_at (asc) for stability
+    const uniqueGroupsMap = new Map<string, { name: string, order: number, minCreated: string }>()
 
-    // 2. Find adjacent group
-    let adjacentQuery = supabase
-        .from('gym_price_options')
-        .select('group_name, group_order')
-        .eq('gym_id', gym.id)
-        .neq('group_name', groupName)
+    allOptions.forEach(opt => {
+        const existing = uniqueGroupsMap.get(opt.group_name)
+        if (!existing) {
+            uniqueGroupsMap.set(opt.group_name, {
+                name: opt.group_name,
+                order: opt.group_order ?? 999999, // Handle nulls by pushing to end
+                minCreated: opt.created_at
+            })
+        } else {
+            // Keep strictly the same order logic (min group_order seen? usually they are same. min created_at?)
+            // We assume group_order is consistent. If not, we take min.
+            if (opt.group_order !== null && opt.group_order < existing.order) {
+                existing.order = opt.group_order
+            }
+            if (opt.created_at < existing.minCreated) {
+                existing.minCreated = opt.created_at
+            }
+        }
+    })
 
-    if (direction === 'up') {
-        adjacentQuery = adjacentQuery
-            .lt('group_order', currentOrder)
-            .order('group_order', { ascending: false })
-            .limit(1)
-    } else {
-        adjacentQuery = adjacentQuery
-            .gt('group_order', currentOrder)
-            .order('group_order', { ascending: true })
-            .limit(1)
+    const groups = Array.from(uniqueGroupsMap.values()).sort((a, b) => {
+        if (a.order !== b.order) return a.order - b.order
+        return a.minCreated > b.minCreated ? 1 : -1
+    })
+
+    // 3. Find current index
+    const currentIndex = groups.findIndex(g => g.name === groupName)
+    if (currentIndex === -1) return { error: 'Group not found' }
+
+    // 4. Determine Swap Target
+    let targetIndex = currentIndex
+    if (direction === 'up' && currentIndex > 0) {
+        targetIndex = currentIndex - 1
+    } else if (direction === 'down' && currentIndex < groups.length - 1) {
+        targetIndex = currentIndex + 1
     }
 
-    const { data: adjacentGroup } = await adjacentQuery.maybeSingle()
+    if (targetIndex === currentIndex) return { success: true } // No move
 
-    if (!adjacentGroup) return { success: true } // Already at top/bottom
+    // 5. Swap in array
+    const temp = groups[currentIndex]
+    groups[currentIndex] = groups[targetIndex]
+    groups[targetIndex] = temp
 
-    const adjacentOrder = adjacentGroup.group_order
-    const adjacentName = adjacentGroup.group_name
+    // 6. Update DB with normalized indices [0, 1, 2...]
+    // We update ALL groups to ensure clean state
+    const updates = groups.map((g, idx) => {
+        // Only update if changed or if we want to enforce normalization
+        // Enforcing normalization is good to fix 'null' issues
+        return supabase
+            .from('gym_price_options')
+            .update({ group_order: idx })
+            .eq('gym_id', gym.id)
+            .eq('group_name', g.name)
+    })
 
-    // 3. Swap group_order for ALL items in both groups
-    const { error: e1 } = await supabase
-        .from('gym_price_options')
-        .update({ group_order: adjacentOrder })
-        .eq('gym_id', gym.id)
-        .eq('group_name', groupName)
-
-    if (e1) return { error: e1.message }
-
-    const { error: e2 } = await supabase
-        .from('gym_price_options')
-        .update({ group_order: currentOrder })
-        .eq('gym_id', gym.id)
-        .eq('group_name', adjacentName)
-
-    if (e2) return { error: e2.message }
+    await Promise.all(updates)
 
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }

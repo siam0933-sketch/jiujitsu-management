@@ -150,8 +150,9 @@ export default function PricingSettingsPage() {
         const res = await reorderGroup(groupName, direction);
         if (res?.error) {
             alert('그룹 순서 변경 실패: ' + res.error);
-            loadData();
         }
+        // Always reload to sync with server-side normalization
+        loadData();
     }
 
     const handleOptionReorder = async (optionId: string, direction: 'up' | 'down') => {
