@@ -300,62 +300,7 @@ export default function MemberModal({ member }: { member: any }) {
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 flex justify-between items-start">
                             <div className="flex-1">
                                 <p className="text-sm text-gray-500 mb-1">회원 상세 정보</p>
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-2xl font-bold leading-6 text-gray-900">
-                                            {member.name}
-                                        </h3>
-                                        <span className="text-lg text-gray-500 font-medium">
-                                            ({calculateAge(member.birth_date)})
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 flex-wrap">
-                                        {/* Belt Info */}
-                                        {(() => {
-                                            const currentLog = promotionLogs.length > 0 ? promotionLogs[0] : null
-                                            // Fallback to member.belt if logs empty, though logs usually fetched. 
-                                            // If no logs, assume White (Adult).
-                                            const beltNameStr = currentLog ? currentLog.belt_name : (member.belt || 'White')
-                                            const displayName = displayBeltName(beltNameStr)
-                                            const stripe = currentLog ? currentLog.stripe_level : 0
-                                            const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || BELT_OPTIONS_DATA[0]
-
-                                            return (
-                                                <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
-                                                    <div
-                                                        className={`w-4 h-4 rounded-full border ${beltMeta.colorClass?.includes('border') ? '' : 'border-gray-300'} ${beltMeta.colorClass}`}
-                                                        style={beltMeta.style}
-                                                    />
-                                                    <span className="text-sm font-semibold text-gray-700">
-                                                        {displayName} {stripe}그랄
-                                                    </span>
-                                                </div>
-                                            )
-                                        })()}
-
-                                        <div className="h-4 w-[1px] bg-gray-300 mx-1"></div>
-
-                                        <MemberStatusBadge isPaused={isPaused} />
-
-                                        {/* Inline Pause/Resume Button */}
-                                        {isPaused ? (
-                                            <button
-                                                onClick={handleResume}
-                                                className="text-xs border border-green-200 bg-green-50 text-green-600 px-2 py-1 rounded hover:bg-green-100 transition-colors font-medium"
-                                            >
-                                                복귀 처리
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => setIsPauseModalOpen(true)}
-                                                className="text-xs border border-orange-200 bg-orange-50 text-orange-600 px-2 py-1 rounded hover:bg-orange-100 transition-colors font-medium"
-                                            >
-                                                휴관 설정
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                                {/* Header content removed as per request */}
                             </div>
                             <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
                                 <span className="sr-only">Close</span>
@@ -437,16 +382,34 @@ export default function MemberModal({ member }: { member: any }) {
 
                             {/* Section 1: Basic Info */}
                             <section>
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex justify-between items-center w-full mb-2">
                                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">기본 정보</h4>
-                                    {!isEditingBasicInfo ? (
-                                        <button onClick={startEditingBasicInfo} className="text-xs text-gray-400 hover:text-blue-600 underline">편집</button>
-                                    ) : (
-                                        <div className="flex gap-2">
-                                            <button onClick={cancelEditingBasicInfo} className="text-xs text-gray-400 hover:text-gray-600 underline">취소</button>
-                                            <button onClick={saveBasicInfo} className="text-xs text-blue-600 hover:text-blue-800 font-bold underline">저장</button>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {isPaused ? (
+                                            <button
+                                                onClick={handleResume}
+                                                className="text-xs border border-green-200 bg-green-50 text-green-600 px-2 py-1 rounded hover:bg-green-100 transition-colors font-medium"
+                                            >
+                                                복귀 처리
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsPauseModalOpen(true)}
+                                                className="text-xs border border-orange-200 bg-orange-50 text-orange-600 px-2 py-1 rounded hover:bg-orange-100 transition-colors font-medium"
+                                            >
+                                                휴관 설정
+                                            </button>
+                                        )}
+                                        <div className="h-3 w-[1px] bg-gray-300 mx-1"></div>
+                                        {!isEditingBasicInfo ? (
+                                            <button onClick={startEditingBasicInfo} className="text-xs text-gray-400 hover:text-blue-600 underline">편집</button>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <button onClick={cancelEditingBasicInfo} className="text-xs text-gray-400 hover:text-gray-600 underline">취소</button>
+                                                <button onClick={saveBasicInfo} className="text-xs text-blue-600 hover:text-blue-800 font-bold underline">저장</button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className={`bg-white rounded-xl border border-gray-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-4 gap-4 ${isEditingBasicInfo ? 'ring-2 ring-blue-100' : ''}`}>
@@ -456,7 +419,11 @@ export default function MemberModal({ member }: { member: any }) {
                                         {isEditingBasicInfo ? (
                                             <input value={basicInfoForm.name} onChange={e => setBasicInfoForm({ ...basicInfoForm, name: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
                                         ) : (
-                                            <p className="font-medium text-sm text-gray-900">{member.name}</p>
+                                            <div className="flex items-end gap-1">
+                                                <p className="font-medium text-sm text-gray-900 leading-none">{member.name}</p>
+                                                <span className="text-xs text-gray-500 leading-none">({calculateAge(member.birth_date)})</span>
+                                                <span className="text-[10px] text-gray-400 leading-none ml-1">ID: {member.access_code || member.phone?.slice(-4) || '-'}</span>
+                                            </div>
                                         )}
                                     </div>
 
