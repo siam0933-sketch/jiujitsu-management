@@ -97,6 +97,9 @@ export default function ClassScheduleBoard({
                         <span className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-500">
                             총 회원: {activeMembers.length}명
                         </span>
+                        <span className="ml-2 text-xs bg-yellow-100 px-2 py-1 rounded-full text-yellow-600">
+                            총 수업: {initialSchedules.length}개
+                        </span>
                     </p>
                 </div>
                 <div className="flex gap-2">

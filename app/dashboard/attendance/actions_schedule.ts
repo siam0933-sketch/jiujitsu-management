@@ -106,7 +106,7 @@ export async function createSchedule(data: { days: string[], time: string, name:
         }
     }
 
-    revalidatePath('/dashboard/attendance')
+    revalidatePath('/', 'layout')
     return { success: true }
 }
 
