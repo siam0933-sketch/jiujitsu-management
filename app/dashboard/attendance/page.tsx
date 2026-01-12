@@ -14,6 +14,18 @@ export default async function AttendancePage() {
 
     return (
         <div className="h-[calc(100vh-100px)] p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">출석부</h1>
+                <a
+                    href="/dashboard/attendance/kiosk"
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    키오스크 모드 (Full Screen)
+                </a>
+            </div>
             <ClassScheduleBoard
                 initialSchedules={schedules}
                 activeMembers={members}
