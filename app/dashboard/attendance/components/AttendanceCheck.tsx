@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Schedule, deleteSchedule, createSchedule } from '../actions_schedule'
 import { checkInMember, checkOutMember, cancelAttendance, getMemberAttendanceDates, getAttendanceLogsForDate } from '../actions'
 import { getEnrollments, updateEnrollments } from '../actions_enrollment'
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function AttendanceCheck({ schedule, allMembers, mode, targetDate }: Props) {
+    const router = useRouter()
     // Mode States
     const [isMenuOpen, setIsMenuOpen] = useState(false) // Gear menu toggle
     const [isManageModalOpen, setIsManageModalOpen] = useState(false) // Enrollment Modal
@@ -109,6 +111,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                 alert(res.error)
             } else {
                 alert('수업이 복사되었습니다.')
+                router.refresh()
                 setIsCopyMode(false)
                 setSelectedCopyDays(new Set())
                 // No need to close Manage modal? Maybe close it to see result
@@ -178,6 +181,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
             setEnrolledMemberIds(new Set(ids))
             setIsManageModalOpen(false)
             alert('저장되었습니다.')
+            router.refresh()
         }
     }
 
@@ -277,6 +281,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     const handleDeleteClass = async () => {
         if (!confirm('정말 이 수업을 삭제하시겠습니까?')) return
         await deleteSchedule(schedule.id)
+        router.refresh()
     }
 
     const calculateAge = (birthDate?: string) => {
