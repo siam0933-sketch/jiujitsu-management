@@ -422,7 +422,6 @@ export default function MemberModal({ member }: { member: any }) {
                                             <div className="flex items-end gap-1">
                                                 <p className="font-medium text-sm text-gray-900 leading-none">{member.name}</p>
                                                 <span className="text-xs text-gray-500 leading-none">({calculateAge(member.birth_date)})</span>
-                                                <span className="text-[10px] text-gray-400 leading-none ml-1">ID: {member.access_code || member.phone?.slice(-4) || '-'}</span>
                                             </div>
                                         )}
                                     </div>
@@ -443,6 +442,15 @@ export default function MemberModal({ member }: { member: any }) {
                                         ) : (
                                             <p className="font-medium text-sm text-gray-900">{member.guardian_phone || '-'}</p>
                                         )}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">고유번호 (ID)</p>
+                                        <div className="flex items-center">
+                                            <code className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono truncate max-w-full" title={member.id}>
+                                                {member.id}
+                                            </code>
+                                        </div>
                                     </div>
 
                                     <div className="col-span-2">
