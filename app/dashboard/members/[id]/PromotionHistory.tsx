@@ -92,6 +92,10 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
     const [attendanceCount, setAttendanceCount] = useState(0)
     const [memo, setMemo] = useState('')
 
+    useEffect(() => {
+        setLogs(initialLogs)
+    }, [initialLogs])
+
     // Fetch Criteria on Mount
     useEffect(() => {
         const fetchCriteria = async () => {
