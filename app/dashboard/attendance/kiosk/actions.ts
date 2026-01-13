@@ -75,30 +75,59 @@ export async function checkInByPhone(phoneFragment: string): Promise<CheckInResu
 
 async function processCheckIn(supabase: any, gymId: string, member: any): Promise<CheckInResult> {
 
-    // 5. Find Verification (Already done effectively by finding member)
-
-    // 6. Find Active Schedule (Optional: Tag attendance with class name)
-    // Current time in UTC?
-    // We need to match day of week and time... this is complex with timezones.
-    // For now, let's just log it. 
-    // Ideally we find the schedule that started recently or is about to start.
-
     // Simple approach: Check if they already checked in today?
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
     const { data: existingLog } = await supabase
         .from('gym_attendance_logs')
-        .select('id')
+        .select('id, created_at, checked_out_at')
         .eq('gym_id', gymId)
         .eq('member_id', member.id)
         .eq('date', today)
         .single()
 
     if (existingLog) {
-        return {
-            success: true,
-            message: `${member.name}님, 이미 출석 처리되었습니다.`,
-            member: { id: member.id, name: member.name, phone: member.phone }
+        // Condition 1: Already Checked Out
+        if (existingLog.checked_out_at) {
+            return {
+                success: true,
+                message: `${member.name}님, 이미 하원 처리되었습니다.`,
+                member: { id: member.id, name: member.name, phone: member.phone }
+            }
+        }
+
+        // Condition 2: Check time difference
+        // created_at is UTC usually, so we compare with UTC now
+        const checkedInTime = new Date(existingLog.created_at).getTime()
+        const now = new Date().getTime()
+        const diffMinutes = (now - checkedInTime) / (1000 * 60)
+
+        if (diffMinutes <= 5) {
+            return {
+                success: true,
+                message: `${member.name}님, 이미 등원 처리되었습니다.`,
+                member: { id: member.id, name: member.name, phone: member.phone }
+            }
+        } else {
+            // Condition 3: Sign Out (After 5 mins)
+            const { error: updateError } = await supabase
+                .from('gym_attendance_logs')
+                .update({ checked_out_at: new Date().toISOString() })
+                .eq('id', existingLog.id)
+
+            if (updateError) {
+                console.error('Check-out error:', updateError)
+                return { success: false, message: '하원 처리 중 오류가 발생했습니다.' }
+            }
+
+            // Revalidate
+            revalidatePath('/dashboard/attendance')
+
+            return {
+                success: true,
+                message: `${member.name}님, 하원 처리가 완료되었습니다.`,
+                member: { id: member.id, name: member.name, phone: member.phone }
+            }
         }
     }
 
