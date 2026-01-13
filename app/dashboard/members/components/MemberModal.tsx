@@ -427,6 +427,15 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
 
                                     <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">고유번호 (ID)</p>
+                                        <div className="flex items-center gap-2">
+                                            <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                {member.phone ? member.phone.slice(-4) : '-'}
+                                            </code>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-1">
                                         <p className="text-xs text-gray-400 mb-1">전화번호</p>
                                         {isEditingBasicInfo ? (
                                             <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
@@ -476,14 +485,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         )}
                                     </div>
 
-                                    <div className="col-span-2 sm:col-span-4 border-t border-gray-100 pt-3 mt-1">
-                                        <p className="text-xs text-gray-400 mb-1">고유번호 (휴대폰 뒷번호)</p>
-                                        <div className="flex items-center gap-2">
-                                            <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
-                                                {member.phone ? member.phone.slice(-4) : '-'}
-                                            </code>
-                                        </div>
-                                    </div>
+
                                 </div>
                             </section>
 
