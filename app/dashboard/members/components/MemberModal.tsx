@@ -444,14 +444,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         )}
                                     </div>
 
-                                    <div className="col-span-1">
-                                        <p className="text-xs text-gray-400 mb-1">고유번호 (ID)</p>
-                                        <div className="flex items-center">
-                                            <code className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono truncate max-w-full" title={member.id}>
-                                                {member.id}
-                                            </code>
-                                        </div>
-                                    </div>
+
 
                                     <div className="col-span-2">
                                         <p className="text-xs text-gray-400 mb-1">주소</p>
@@ -481,6 +474,15 @@ export default function MemberModal({ member }: { member: any }) {
                                         ) : (
                                             <p className="font-medium text-sm text-gray-900">{member.birth_date || '-'}</p>
                                         )}
+                                    </div>
+
+                                    <div className="col-span-2 sm:col-span-4 border-t border-gray-100 pt-3 mt-1">
+                                        <p className="text-xs text-gray-400 mb-1">고유번호 (휴대폰 뒷번호)</p>
+                                        <div className="flex items-center gap-2">
+                                            <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                {member.phone ? member.phone.slice(-4) : '-'}
+                                            </code>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
