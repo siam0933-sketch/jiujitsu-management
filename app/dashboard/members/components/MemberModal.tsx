@@ -414,6 +414,7 @@ export default function MemberModal({ member }: { member: any }) {
 
                                 <div className={`bg-white rounded-xl border border-gray-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-4 gap-4 ${isEditingBasicInfo ? 'ring-2 ring-blue-100' : ''}`}>
                                     {/* Simplified View/Edit Fields */}
+                                    {/* Row 1: Name, Gender, Birth Date, ID */}
                                     <div className="col-span-1">
                                         <p className="text-xs text-gray-400 mb-1">이름</p>
                                         {isEditingBasicInfo ? (
@@ -423,44 +424,6 @@ export default function MemberModal({ member }: { member: any }) {
                                                 <p className="font-medium text-sm text-gray-900 leading-none">{member.name}</p>
                                                 <span className="text-xs text-gray-500 leading-none">({calculateAge(member.birth_date)})</span>
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <div className="col-span-1">
-                                        <p className="text-xs text-gray-400 mb-1">고유번호 (ID)</p>
-                                        <div className="flex items-center gap-2">
-                                            <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
-                                                {member.phone ? member.phone.slice(-4) : '-'}
-                                            </code>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-span-1">
-                                        <p className="text-xs text-gray-400 mb-1">전화번호</p>
-                                        {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
-                                        ) : (
-                                            <p className="font-medium text-sm text-gray-900">{member.phone}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="col-span-1">
-                                        <p className="text-xs text-gray-400 mb-1">보호자 전화번호</p>
-                                        {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
-                                        ) : (
-                                            <p className="font-medium text-sm text-gray-900">{member.guardian_phone || '-'}</p>
-                                        )}
-                                    </div>
-
-
-
-                                    <div className="col-span-2">
-                                        <p className="text-xs text-gray-400 mb-1">주소</p>
-                                        {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
-                                        ) : (
-                                            <p className="font-medium text-sm text-gray-900 truncate">{member.address || '-'}</p>
                                         )}
                                     </div>
 
@@ -482,6 +445,43 @@ export default function MemberModal({ member }: { member: any }) {
                                             <input type="date" value={basicInfoForm.birth_date || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, birth_date: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
                                         ) : (
                                             <p className="font-medium text-sm text-gray-900">{member.birth_date || '-'}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">고유번호 (ID)</p>
+                                        <div className="flex items-center gap-2">
+                                            <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                {member.phone ? member.phone.slice(-4) : '-'}
+                                            </code>
+                                        </div>
+                                    </div>
+
+                                    {/* Row 2: Phone, Guardian Phone, Address */}
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">전화번호</p>
+                                        {isEditingBasicInfo ? (
+                                            <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
+                                        ) : (
+                                            <p className="font-medium text-sm text-gray-900">{member.phone}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">보호자 전화번호</p>
+                                        {isEditingBasicInfo ? (
+                                            <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
+                                        ) : (
+                                            <p className="font-medium text-sm text-gray-900">{member.guardian_phone || '-'}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <p className="text-xs text-gray-400 mb-1">주소</p>
+                                        {isEditingBasicInfo ? (
+                                            <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-xs border-gray-300 rounded" />
+                                        ) : (
+                                            <p className="font-medium text-sm text-gray-900 truncate">{member.address || '-'}</p>
                                         )}
                                     </div>
 
