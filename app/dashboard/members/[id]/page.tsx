@@ -110,12 +110,6 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                     <dt className="text-sm font-medium text-gray-500">주소</dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.address}</dd>
                                 </div>
-                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">회원번호 (ID)</dt>
-                                    <dd className="mt-1 text-xs font-mono text-gray-500 sm:col-span-2 sm:mt-0 flex items-center">
-                                        {member.id}
-                                    </dd>
-                                </div>
                             </dl>
                         </div>
                     </div>
@@ -155,6 +149,14 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                     <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">출결/접속 코드(PIN)</dt>
                                     <dd className="text-2xl font-mono font-bold text-blue-600 tracking-widest text-center py-2 bg-blue-50 rounded-lg border border-blue-100">
                                         {member.access_code}
+                                    </dd>
+                                </div>
+
+                                {/* Member Unique ID (UUID) */}
+                                <div className="bg-gray-50 px-4 py-4 border-t border-gray-200">
+                                    <dt className="text-xs font-medium text-gray-500 mb-1">시스템 고유번호 (ID)</dt>
+                                    <dd className="text-xs font-mono text-gray-500 break-all bg-white p-2 rounded border border-gray-200">
+                                        {member.id}
                                     </dd>
                                 </div>
 
