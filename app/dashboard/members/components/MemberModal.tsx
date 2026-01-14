@@ -449,11 +449,40 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
 
                                     <div className="col-span-1">
-                                        <p className="text-xs text-gray-400 mb-1">고유번호 (ID)</p>
+                                        <p className="text-xs text-gray-400 mb-1">출석번호</p>
                                         <div className="flex items-center gap-2">
                                             <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
-                                                {member.phone ? member.phone.slice(-4) : '-'}
+                                                {member.access_code || (member.phone ? member.phone.slice(-4) : '-')}
                                             </code>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <p className="text-xs text-gray-400 mb-1">로그인 비밀번호</p>
+                                        <div className="flex items-center gap-2">
+                                            {member.login_password ? (
+                                                <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                    {member.login_password}
+                                                </code>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">미설정</span>
+                                            )}
+                                            <button
+                                                onClick={async () => {
+                                                    const password = Math.random().toString(36).slice(2, 8).toUpperCase()
+                                                    if (confirm(`비밀번호 [${password}]로 설정하시겠습니까?`)) {
+                                                        const res = await updateMember(member.id, { login_password: password })
+                                                        if (res?.error) alert(res.error)
+                                                        else {
+                                                            alert('비밀번호가 설정되었습니다.')
+                                                            router.refresh()
+                                                        }
+                                                    }
+                                                }}
+                                                className="text-xs border border-gray-200 bg-white text-gray-600 px-2 py-1 rounded hover:bg-gray-50"
+                                            >
+                                                {member.login_password ? '재발급' : '생성'}
+                                            </button>
                                         </div>
                                     </div>
 

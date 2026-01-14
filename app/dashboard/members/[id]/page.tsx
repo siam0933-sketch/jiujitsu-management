@@ -111,7 +111,7 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.address}</dd>
                                 </div>
                                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">고유번호 (ID)</dt>
+                                    <dt className="text-sm font-medium text-gray-500">시스템 ID</dt>
                                     <dd className="mt-1 text-xs font-mono text-gray-500 sm:col-span-2 sm:mt-0 flex items-center">
                                         {member.id}
                                     </dd>
@@ -150,11 +150,19 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                         </div>
                         <div className="border-t border-gray-200">
                             <dl>
-                                {/* Access Code */}
+                                {/* Attendance Number */}
                                 <div className="bg-white px-4 py-5">
-                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">출결/접속 코드(PIN)</dt>
+                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">출석번호</dt>
                                     <dd className="text-2xl font-mono font-bold text-blue-600 tracking-widest text-center py-2 bg-blue-50 rounded-lg border border-blue-100">
                                         {member.access_code}
+                                    </dd>
+                                </div>
+
+                                {/* Login Password */}
+                                <div className="bg-white px-4 py-5 border-t border-gray-100">
+                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">로그인 비밀번호</dt>
+                                    <dd className="text-xl font-mono font-bold text-gray-700 tracking-widest text-center py-2 bg-gray-50 rounded-lg border border-gray-200">
+                                        {member.login_password || '미설정'}
                                     </dd>
                                 </div>
 
