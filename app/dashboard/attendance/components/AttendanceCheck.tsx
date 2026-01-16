@@ -354,7 +354,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     </div>
 
                     {/* Enrolled Students List */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[120px] border-t border-gray-50 pt-1">
+                    <div className="flex-1 overflow-y-auto scrollbar-hide max-h-[120px] border-t border-gray-50 pt-1">
                         {schedule.enrolled_members && schedule.enrolled_members.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                                 {[...schedule.enrolled_members]

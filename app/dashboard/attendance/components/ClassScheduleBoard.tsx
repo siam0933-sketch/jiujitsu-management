@@ -159,6 +159,7 @@ export default function ClassScheduleBoard({
                         {displayedSchedules.length > 0 ? (
                             displayedSchedules.map(schedule => (
                                 <AttendanceCheck
+                                    key={schedule.id}
                                     schedule={schedule}
                                     allMembers={activeMembers}
                                     mode="daily"
@@ -189,6 +190,7 @@ export default function ClassScheduleBoard({
                                         .filter(s => s.day_of_week === day.id)
                                         .map(schedule => (
                                             <AttendanceCheck
+                                                key={schedule.id}
                                                 schedule={schedule}
                                                 allMembers={activeMembers}
                                                 mode="weekly"
