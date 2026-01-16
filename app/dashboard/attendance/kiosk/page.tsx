@@ -92,14 +92,13 @@ export default function KioskPage() {
 
     const router = useRouter()
 
-    return (
     const handleGlobalClick = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Error attempting to enable full-screen mode:', err)
-                })
-            }
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log('Error attempting to enable full-screen mode:', err)
+            })
         }
+    }
 
     return (
         <div
