@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { checkInByPhone, type CheckInResult, type KioskMember } from './actions'
+import { checkInByPhone, checkInById, type CheckInResult, type KioskMember } from './actions'
 import { useRouter } from 'next/navigation'
 
 export default function KioskPage() {
@@ -78,16 +78,14 @@ export default function KioskPage() {
 
     const handleSelectCandidate = async (member: KioskMember) => {
         setStatus('loading')
-        // We call checkInByPhone again with full phone number to exact match
-        // Or we need a specific 'checkInById' action? 
-        // For security in a kiosk (public facing?), ID might be spoofable if exposed.
-        // But here we are authenticated as Admin on the device.
-        // Let's just use the full phone number of the selected candidate to retry.
-        // Or matching ID.
-        // To be safe and simple, let's just retry with the EXACT phone number
 
-        const result = await checkInByPhone(member.phone)
-        handleResult(result)
+        try {
+            const result = await checkInById(member.id)
+            handleResult(result)
+        } catch (e) {
+            setStatus('error')
+            setMessage('오류가 발생했습니다.')
+        }
     }
 
     const router = useRouter()

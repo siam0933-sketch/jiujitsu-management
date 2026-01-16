@@ -450,11 +450,20 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     <div className="col-span-1">
                                         <p className="text-xs text-gray-400 mb-1">출석번호</p>
-                                        <div className="flex items-center gap-2">
-                                            <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
-                                                {member.access_code || (member.phone ? member.phone.slice(-4) : '-')}
-                                            </code>
-                                        </div>
+                                        {isEditingBasicInfo ? (
+                                            <input
+                                                value={basicInfoForm.access_code || ''}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, access_code: e.target.value })}
+                                                className="w-full text-xs border-gray-300 rounded font-mono"
+                                                placeholder="출석번호"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <code className="text-sm bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                    {member.access_code || (member.phone ? member.phone.slice(-4) : '-')}
+                                                </code>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="col-span-1">

@@ -17,7 +17,7 @@ export type CheckInResult = {
     multipleMatches?: KioskMember[]
 }
 
-export async function checkInByPhone(phoneFragment: string): Promise<CheckInResult> {
+export async function checkInByPhone(input: string): Promise<CheckInResult> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -32,14 +32,13 @@ export async function checkInByPhone(phoneFragment: string): Promise<CheckInResu
 
     if (!gym) return { success: false, message: '도장 정보를 찾을 수 없습니다.' }
 
-    // 2. Find Member(s) matching phone
-    // We search for phone matching %fragment
+    // 2. Find Member(s) matching phone OR access_code
     const { data: members, error: searchError } = await supabase
         .from('gym_members')
-        .select('id, name, phone, user_id')
+        .select('id, name, phone, user_id, access_code')
         .eq('gym_id', gym.id)
-        .ilike('phone', `%${phoneFragment}`)
-        .eq('status', 'active') // Only active members
+        .eq('status', 'active')
+        .or(`phone.ilike.%${input},access_code.eq.${input}`)
 
     if (searchError) {
         console.error('Member search error:', searchError)
@@ -50,14 +49,8 @@ export async function checkInByPhone(phoneFragment: string): Promise<CheckInResu
         return { success: false, message: '해당 번호의 회원을 찾을 수 없습니다.' }
     }
 
-    // 3. If multiple matches, ask for clarification (or just pick first if exact match? No, return list)
+    // 3. If multiple matches, ALWAYS return selection list
     if (members.length > 1) {
-        // Narrow down if exact match exists among them?
-        const exactMatch = members.find(m => m.phone === phoneFragment)
-        if (exactMatch) {
-            return await processCheckIn(supabase, gym.id, exactMatch)
-        }
-
         return {
             success: false,
             message: '여러 명의 회원이 검색되었습니다. 본인을 선택해주세요.',
@@ -71,6 +64,20 @@ export async function checkInByPhone(phoneFragment: string): Promise<CheckInResu
 
     // 4. Single match -> Process Check-in
     return await processCheckIn(supabase, gym.id, members[0])
+}
+
+export async function checkInById(memberId: string): Promise<CheckInResult> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, message: 'Auth error' }
+
+    const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
+    if (!gym) return { success: false, message: 'Gym error' }
+
+    const { data: member } = await supabase.from('gym_members').select('*').eq('id', memberId).single()
+    if (!member) return { success: false, message: 'Member not found' }
+
+    return await processCheckIn(supabase, gym.id, member)
 }
 
 async function processCheckIn(supabase: any, gymId: string, member: any): Promise<CheckInResult> {

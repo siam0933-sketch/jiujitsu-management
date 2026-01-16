@@ -1,14 +1,17 @@
+import BottomNav from './components/BottomNav';
+import { PORTAL_STYLES } from './styles';
+
 export default function PortalLayout({
     children,
 }: {
-    children: React.ReactNode
+    children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-gray-900 text-white font-sans antialiased">
-            {/* Background effects could go here */}
-            <div className="relative z-10 min-h-screen flex flex-col">
+        <div className={PORTAL_STYLES.PAGE_WRAPPER}>
+            <main className="flex-1">
                 {children}
-            </div>
+            </main>
+            <BottomNav />
         </div>
-    )
+    );
 }
