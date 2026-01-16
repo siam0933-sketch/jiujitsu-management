@@ -93,11 +93,29 @@ export default function KioskPage() {
     const router = useRouter()
 
     return (
-        <div className="fixed inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center p-4">
+    const handleGlobalClick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Error attempting to enable full-screen mode:', err)
+                })
+            }
+        }
+
+    return (
+        <div
+            onClick={handleGlobalClick}
+            className="fixed inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center p-4"
+        >
             {/* Exit Button (Hidden or discreet) */}
             <button
-                onClick={() => router.back()}
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-400 p-2"
+                onClick={(e) => {
+                    e.stopPropagation()
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen()
+                    }
+                    router.back()
+                }}
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-400 p-2 z-[60]"
                 aria-label="Exit Kiosk"
             >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,12 +123,12 @@ export default function KioskPage() {
                 </svg>
             </button>
 
-            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[80vh]" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header / Display Area */}
-                <div className={`p-8 text-center flex-1 flex flex-col justify-center items-center transition-colors ${status === 'success' ? 'bg-green-100' :
-                        status === 'error' ? 'bg-red-50' :
-                            'bg-white'
+                <div onClick={handleGlobalClick} className={`p-8 text-center flex-1 flex flex-col justify-center items-center transition-colors ${status === 'success' ? 'bg-green-100' :
+                    status === 'error' ? 'bg-red-50' :
+                        'bg-white'
                     }`}>
                     {status === 'success' ? (
                         <div className="animate-bounce">
