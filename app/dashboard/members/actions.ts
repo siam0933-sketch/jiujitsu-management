@@ -428,11 +428,16 @@ export async function generateMissingPasswords() {
 
     if (members.length === 0) return { success: true, count: 0, message: '생성할 대상이 없습니다.' }
 
+    // Batch limit to prevent timeout
+    const BATCH_LIMIT = 50
+    const targetMembers = members.slice(0, BATCH_LIMIT)
+    const remainingCount = members.length - targetMembers.length
+
     let count = 0
     let failCount = 0
 
-    // Use sequential execution to avoid flooding connection pool or hitting rate limits
-    for (const m of members) {
+    // Use sequential execution
+    for (const m of targetMembers) {
         const pwd = generateInitialPassword()
         const { error } = await supabase
             .from('gym_members')
@@ -449,8 +454,13 @@ export async function generateMissingPasswords() {
 
     revalidatePath('/dashboard/members')
 
-    if (failCount > 0) {
-        return { success: true, count, message: `${count}명 성공, ${failCount}명 실패` }
+    let message = `${count}명의 비밀번호가 생성되었습니다.`
+    if (remainingCount > 0) {
+        message += ` (남은 대상: ${remainingCount}명 - 다시 실행하여 나머지를 생성하세요)`
     }
-    return { success: true, count, message: `${count}명의 비밀번호가 생성되었습니다.` }
+    if (failCount > 0) {
+        message += `, 실패: ${failCount}명`
+    }
+
+    return { success: true, count, message }
 }
