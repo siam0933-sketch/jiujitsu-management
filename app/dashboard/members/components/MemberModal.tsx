@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
-import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs } from '../actions'
+import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword } from '../actions'
 import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseController } from './MemberComponents'
 import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
@@ -476,28 +476,20 @@ export default function MemberModal({ member }: { member: any }) {
                                             ) : (
                                                 <button
                                                     onClick={async () => {
-                                                        const digits = '0123456789';
-                                                        const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                                                        let pwd = '';
-                                                        for (let i = 0; i < 4; i++) pwd += digits.charAt(Math.floor(Math.random() * digits.length));
-                                                        for (let i = 0; i < 2; i++) pwd += alphas.charAt(Math.floor(Math.random() * alphas.length));
-                                                        pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
+                                                        if (confirm(`비밀번호를 자동으로 생성하시겠습니까?`)) {
+                                                            setIsSubmitting(true)
+                                                            const res = await generateMemberPassword(member.id)
+                                                            setIsSubmitting(false)
 
-                                                        if (confirm(`비밀번호 [${pwd}]로 자동 생성하시겠습니까?`)) {
-                                                            // Pass only the field to update
-                                                            const res = await updateMember(member.id, { login_password: pwd })
                                                             if (res?.error) alert(res.error)
                                                             else {
-                                                                alert('비밀번호가 생성되었습니다.')
-                                                                // Update local state to reflect change immediately without full reload if possible, 
-                                                                // or just refresh. Since we are in a modal, refresh might close it or reload data.
-                                                                // Ideally, we should update local member object wrapper if we had one, but router.refresh() 
-                                                                // will re-fetch server components. The modal is client-side but 'member' prop comes from server.
+                                                                alert(`비밀번호가 생성되었습니다: [${res.password}]`)
                                                                 router.refresh()
                                                             }
                                                         }
                                                     }}
-                                                    className="text-xs border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-bold flex items-center gap-1"
+                                                    disabled={isSubmitting}
+                                                    className="text-xs border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-bold flex items-center gap-1 disabled:opacity-50"
                                                 >
                                                     <span>⚠️ 미설정</span>
                                                     <span className="text-[10px] font-normal text-blue-400">(클릭하여 자동생성)</span>

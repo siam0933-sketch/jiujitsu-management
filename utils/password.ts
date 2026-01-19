@@ -17,7 +17,13 @@ export function generateInitialPassword(): string {
     // Shuffle the password to mix digits and alphabets? 
     // The requirement says "4자리 숫자와 2자리 알파벳". 
     // Usually implies a mix or specific order. random mix is better for security.
-    return password.split('').sort(() => 0.5 - Math.random()).join('');
+    // Fisher-Yates Shuffle
+    const arr = password.split('');
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr.join('');
 }
 
 export function validatePassword(password: string): { isValid: boolean; message?: string } {

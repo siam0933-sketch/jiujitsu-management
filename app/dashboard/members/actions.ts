@@ -373,6 +373,34 @@ export async function getMemberAttendanceLogs(memberId: string) {
 }
 
 
+
+export async function generateMemberPassword(memberId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: '로그인이 필요합니다.' }
+
+    const pwd = generateInitialPassword()
+
+    try {
+        const { error } = await supabase
+            .from('gym_members')
+            .update({ login_password: pwd })
+            .eq('id', memberId)
+
+        if (error) {
+            console.error('Password generation error:', error)
+            return { error: '비밀번호 생성 실패: ' + error.message }
+        }
+
+        revalidatePath('/dashboard/members')
+        revalidatePath(`/dashboard/members/${memberId}`)
+        return { success: true, password: pwd }
+    } catch (e: any) {
+        return { error: e.message }
+    }
+}
+
 export async function generateMissingPasswords() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -389,7 +417,6 @@ export async function generateMissingPasswords() {
     if (!gym) return { error: 'Gym not found' }
 
     // Find members with empty password
-    // Find members with empty password
     const { data: allMembers, error } = await supabase
         .from('gym_members')
         .select('id, login_password')
@@ -397,24 +424,33 @@ export async function generateMissingPasswords() {
 
     if (error) return { error: '회원 목록 조회 실패: ' + error.message }
 
-    // Filter in-memory to avoid complex OR query syntax issues
     const members = allMembers?.filter(m => !m.login_password) || []
 
     if (members.length === 0) return { success: true, count: 0, message: '생성할 대상이 없습니다.' }
 
     let count = 0
-    const updates = members.map(async (m) => {
+    let failCount = 0
+
+    // Use sequential execution to avoid flooding connection pool or hitting rate limits
+    for (const m of members) {
         const pwd = generateInitialPassword()
         const { error } = await supabase
             .from('gym_members')
             .update({ login_password: pwd })
             .eq('id', m.id)
 
-        if (!error) count++
-    })
-
-    await Promise.all(updates)
+        if (!error) {
+            count++
+        } else {
+            failCount++
+            console.error(`Failed to update password for member ${m.id}:`, error)
+        }
+    }
 
     revalidatePath('/dashboard/members')
+
+    if (failCount > 0) {
+        return { success: true, count, message: `${count}명 성공, ${failCount}명 실패` }
+    }
     return { success: true, count, message: `${count}명의 비밀번호가 생성되었습니다.` }
 }
