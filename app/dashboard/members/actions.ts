@@ -46,6 +46,20 @@ export async function registerMember(prevState: any, formData: FormData) {
         login_password = generateInitialPassword()
     }
 
+    // Check for duplicates
+    const { data: existingPhone } = await supabase
+        .from('gym_members')
+        .select('id')
+        .eq('gym_id', gym.id)
+        .eq('phone', phone)
+        .single()
+
+    if (existingPhone) {
+        return { error: '이미 등록된 전화번호입니다.' }
+    }
+
+
+
     const { error } = await supabase.from('gym_members').insert({
         gym_id: gym.id,
         name,
@@ -65,7 +79,7 @@ export async function registerMember(prevState: any, formData: FormData) {
 
     if (error) {
         console.error('Error registering member:', error)
-        return { error: '회원 등록에 실패했습니다. 다시 시도해주세요.' }
+        return { error: `회원 등록 실패: ${error.message} (${error.details || ''})` }
     }
 
     redirect('/dashboard/members')
