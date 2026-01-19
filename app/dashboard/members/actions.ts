@@ -389,14 +389,18 @@ export async function generateMissingPasswords() {
     if (!gym) return { error: 'Gym not found' }
 
     // Find members with empty password
-    const { data: members, error } = await supabase
+    // Find members with empty password
+    const { data: allMembers, error } = await supabase
         .from('gym_members')
-        .select('id')
+        .select('id, login_password')
         .eq('gym_id', gym.id)
-        .or('login_password.is.null,login_password.eq.""')
 
     if (error) return { error: '회원 목록 조회 실패: ' + error.message }
-    if (!members || members.length === 0) return { success: true, count: 0, message: '생성할 대상이 없습니다.' }
+
+    // Filter in-memory to avoid complex OR query syntax issues
+    const members = allMembers?.filter(m => !m.login_password) || []
+
+    if (members.length === 0) return { success: true, count: 0, message: '생성할 대상이 없습니다.' }
 
     let count = 0
     const updates = members.map(async (m) => {
