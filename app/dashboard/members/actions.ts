@@ -349,6 +349,49 @@ export async function getMemberAttendanceLogs(memberId: string) {
         console.error('getMemberAttendanceLogs Error:', error)
         return []
     }
-
     return data
+}
+
+import { generateInitialPassword } from '../../../utils/password'
+
+export async function generateMissingPasswords() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Unauthorized' }
+
+    // Get Gym ID
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+
+    if (!gym) return { error: 'Gym not found' }
+
+    // Find members with empty password
+    const { data: members, error } = await supabase
+        .from('gym_members')
+        .select('id')
+        .eq('gym_id', gym.id)
+        .or('login_password.is.null,login_password.eq.""')
+
+    if (error) return { error: '회원 목록 조회 실패: ' + error.message }
+    if (!members || members.length === 0) return { success: true, count: 0, message: '생성할 대상이 없습니다.' }
+
+    let count = 0
+    const updates = members.map(async (m) => {
+        const pwd = generateInitialPassword()
+        const { error } = await supabase
+            .from('gym_members')
+            .update({ login_password: pwd })
+            .eq('id', m.id)
+
+        if (!error) count++
+    })
+
+    await Promise.all(updates)
+
+    revalidatePath('/dashboard/members')
+    return { success: true, count, message: `${count}명의 비밀번호가 생성되었습니다.` }
 }

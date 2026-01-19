@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { deleteMembers } from '../actions'
+import { deleteMembers, generateMissingPasswords } from '../actions'
 import { checkInMember, checkOutMember, cancelAttendance } from '../../attendance/actions'
 import MemberModal from './MemberModal'
 
@@ -43,9 +43,12 @@ export default function MembersTable({ initialMembers, count, status, attendance
     const [isEditMode, setIsEditMode] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isGenerating, setIsGenerating] = useState(false)
     const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
 
     const [searchTerm, setSearchTerm] = useState('')
+
+    // ... (rest of state items: Optimistic UI State etc)
 
     // Optimistic UI State
     const [optimisticAttendance, setOptimisticAttendance] = useState<Record<string, AttendanceStatus>>(attendanceStatusMap)
@@ -117,6 +120,18 @@ export default function MembersTable({ initialMembers, count, status, attendance
             router.refresh()
         }
         setIsDeleting(false)
+    }
+
+    const handleGeneratePasswords = async () => {
+        if (!confirm('비밀번호가 설정되지 않은 회원들의 비밀번호를 일괄 생성하시겠습니까?')) return
+        setIsGenerating(true)
+        const res = await generateMissingPasswords()
+        setIsGenerating(false)
+        if (res?.error) alert(res.error)
+        else {
+            alert(res.message)
+            router.refresh()
+        }
     }
 
     const handleAttendanceToggle = async (memberId: string) => {
@@ -266,6 +281,13 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             </>
                         ) : (
                             <>
+                                <button
+                                    onClick={handleGeneratePasswords}
+                                    disabled={isGenerating}
+                                    className="block rounded-md bg-blue-50 px-3 py-2 text-center text-sm font-semibold text-blue-700 shadow-sm hover:bg-blue-100 disabled:opacity-50"
+                                >
+                                    {isGenerating ? '생성 중...' : '🔑 미설정 PW 일괄생성'}
+                                </button>
                                 <button
                                     onClick={() => setIsEditMode(true)}
                                     className="block rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
