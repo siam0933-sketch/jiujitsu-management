@@ -474,24 +474,36 @@ export default function MemberModal({ member }: { member: any }) {
                                                     {member.login_password}
                                                 </code>
                                             ) : (
-                                                <span className="text-xs text-gray-400">미설정</span>
-                                            )}
-                                            <button
-                                                onClick={async () => {
-                                                    const password = Math.random().toString(36).slice(2, 8).toUpperCase()
-                                                    if (confirm(`비밀번호 [${password}]로 설정하시겠습니까?`)) {
-                                                        const res = await updateMember(member.id, { login_password: password })
-                                                        if (res?.error) alert(res.error)
-                                                        else {
-                                                            alert('비밀번호가 설정되었습니다.')
-                                                            router.refresh()
+                                                <button
+                                                    onClick={async () => {
+                                                        const digits = '0123456789';
+                                                        const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                                                        let pwd = '';
+                                                        for (let i = 0; i < 4; i++) pwd += digits.charAt(Math.floor(Math.random() * digits.length));
+                                                        for (let i = 0; i < 2; i++) pwd += alphas.charAt(Math.floor(Math.random() * alphas.length));
+                                                        pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
+
+                                                        if (confirm(`비밀번호 [${pwd}]로 자동 생성하시겠습니까?`)) {
+                                                            // Pass only the field to update
+                                                            const res = await updateMember(member.id, { login_password: pwd })
+                                                            if (res?.error) alert(res.error)
+                                                            else {
+                                                                alert('비밀번호가 생성되었습니다.')
+                                                                // Update local state to reflect change immediately without full reload if possible, 
+                                                                // or just refresh. Since we are in a modal, refresh might close it or reload data.
+                                                                // Ideally, we should update local member object wrapper if we had one, but router.refresh() 
+                                                                // will re-fetch server components. The modal is client-side but 'member' prop comes from server.
+                                                                router.refresh()
+                                                            }
                                                         }
-                                                    }
-                                                }}
-                                                className="text-xs border border-gray-200 bg-white text-gray-600 px-2 py-1 rounded hover:bg-gray-50"
-                                            >
-                                                {member.login_password ? '재발급' : '생성'}
-                                            </button>
+                                                    }}
+                                                    className="text-xs border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-bold flex items-center gap-1"
+                                                >
+                                                    <span>⚠️ 미설정</span>
+                                                    <span className="text-[10px] font-normal text-blue-400">(클릭하여 자동생성)</span>
+                                                </button>
+                                            )}
+                                            {/* 재발급 버튼 제거 (요청사항) */}
                                         </div>
                                     </div>
 
@@ -780,7 +792,7 @@ export default function MemberModal({ member }: { member: any }) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }
