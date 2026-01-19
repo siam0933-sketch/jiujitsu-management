@@ -230,6 +230,57 @@ export default function NewMemberPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* 로그인 비밀번호 (자동생성) */}
+                        <div className="sm:col-span-3">
+                            <label htmlFor="login_password" className="block text-sm font-medium leading-6 text-gray-900">
+                                로그인 비밀번호 (초기값 자동생성)
+                            </label>
+                            <div className="mt-2 flex gap-2">
+                                <input
+                                    type="text"
+                                    name="login_password"
+                                    id="login_password"
+                                    readOnly
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 bg-gray-50 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 font-mono tracking-wider font-bold"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const digits = '0123456789';
+                                        const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                                        let pwd = '';
+                                        for (let i = 0; i < 4; i++) pwd += digits.charAt(Math.floor(Math.random() * digits.length));
+                                        for (let i = 0; i < 2; i++) pwd += alphas.charAt(Math.floor(Math.random() * alphas.length));
+                                        pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
+
+                                        const el = document.getElementById('login_password') as HTMLInputElement;
+                                        if (el) el.value = pwd;
+                                    }}
+                                    className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                >
+                                    재생성
+                                </button>
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                                * 4자리 숫자 + 2자리 영문 조합 (자동 생성됨)
+                                <script dangerouslySetInnerHTML={{
+                                    __html: `
+                                    (function(){
+                                        const digits = '0123456789';
+                                        const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                                        let pwd = '';
+                                        for (let i = 0; i < 4; i++) pwd += digits.charAt(Math.floor(Math.random() * digits.length));
+                                        for (let i = 0; i < 2; i++) pwd += alphas.charAt(Math.floor(Math.random() * alphas.length));
+                                        pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
+                                        setTimeout(() => {
+                                            const el = document.getElementById('login_password');
+                                            if(el && !el.value) el.value = pwd;
+                                        }, 100);
+                                    })();
+                                `}} />
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">

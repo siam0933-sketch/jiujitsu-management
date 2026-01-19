@@ -38,6 +38,7 @@ export async function registerMember(prevState: any, formData: FormData) {
     const school = String(formData.get('school') || '')
     const grade = String(formData.get('grade') || '')
     const access_code = String(formData.get('access_code') || '')
+    const login_password = String(formData.get('login_password') || '')
 
     const { error } = await supabase.from('gym_members').insert({
         gym_id: gym.id,
@@ -51,6 +52,7 @@ export async function registerMember(prevState: any, formData: FormData) {
         school: school || null,
         grade: grade || null,
         access_code: access_code || null,
+        login_password: login_password || null,
         status: 'active',
         belt: 'white', // Default
     })
