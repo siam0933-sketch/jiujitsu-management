@@ -95,10 +95,11 @@ export default function LoginForm() {
                             이메일
                         </label>
                         <input
-                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black"
                             name="email"
                             placeholder="admin@example.com"
                             required
+                            style={{ colorScheme: 'light' }}
                         />
                     </>
                 ) : (
@@ -107,10 +108,11 @@ export default function LoginForm() {
                             이름
                         </label>
                         <input
-                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black"
                             name="name"
                             placeholder="본인 성함"
                             required
+                            style={{ colorScheme: 'light' }}
                         />
                     </>
                 )}
@@ -119,11 +121,12 @@ export default function LoginForm() {
                     비밀번호
                 </label>
                 <input
-                    className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+                    className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black"
                     type="password"
                     name="password"
                     placeholder={loginType === 'admin' ? "••••••••" : "6자리 비밀번호"}
                     required
+                    style={{ colorScheme: 'light' }}
                 />
 
                 <button
