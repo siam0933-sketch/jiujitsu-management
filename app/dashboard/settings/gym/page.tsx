@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { getGymSettings, updateGymSettings } from './actions'
+import { QrCode } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function GymSettingsPage() {
     const [isLoading, setIsLoading] = useState(true)
@@ -9,9 +11,11 @@ export default function GymSettingsPage() {
     const [gymName, setGymName] = useState('')
     const [adminName, setAdminName] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [portalUrl, setPortalUrl] = useState('')
 
     useEffect(() => {
         loadData()
+        setPortalUrl(`${window.location.origin}/login`)
     }, [])
 
     const loadData = async () => {
@@ -53,7 +57,7 @@ export default function GymSettingsPage() {
         <div className="max-w-2xl mx-auto px-4 py-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-8">도장 및 관리자 정보 설정</h1>
 
-            <div className="bg-white shadow rounded-lg p-6 border border-gray-200">
+            <div className="bg-white shadow rounded-lg p-6 border border-gray-200 mb-8">
                 <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                     <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -96,6 +100,31 @@ export default function GymSettingsPage() {
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <div className="bg-white shadow rounded-lg p-6 border border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <QrCode className="w-5 h-5 text-gray-900" />
+                    회원 전용 포탈 접속 QR코드
+                </h2>
+                <div className="flex flex-col items-center justify-center space-y-6">
+                    <div className="p-4 bg-white border-2 border-gray-100 rounded-xl shadow-sm">
+                        {portalUrl && <QRCodeSVG value={portalUrl} size={200} />}
+                    </div>
+                    <div className="text-center w-full max-w-md">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">접속 URL</label>
+                        <input
+                            type="text"
+                            value={portalUrl}
+                            onChange={(e) => setPortalUrl(e.target.value)}
+                            className="block w-full text-center rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border mb-2"
+                        />
+                        <p className="text-sm text-gray-500">
+                            이 코드를 출력하여 체육관에 비치해주세요.<br />
+                            회원들이 스마트폰으로 스캔하면 로그인 페이지로 이동합니다.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     )
