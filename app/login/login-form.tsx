@@ -59,8 +59,8 @@ export default function LoginForm() {
                     type="button"
                     onClick={() => { setLoginType('admin'); setMessage(''); }}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${loginType === 'admin'
-                            ? 'bg-white text-blue-600 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     <ShieldCheck size={18} />
@@ -70,8 +70,8 @@ export default function LoginForm() {
                     type="button"
                     onClick={() => { setLoginType('member'); setMessage(''); }}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${loginType === 'member'
-                            ? 'bg-white text-blue-600 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     <User size={18} />
@@ -95,7 +95,7 @@ export default function LoginForm() {
                             이메일
                         </label>
                         <input
-                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                             name="email"
                             placeholder="admin@example.com"
                             required
@@ -107,7 +107,7 @@ export default function LoginForm() {
                             이름
                         </label>
                         <input
-                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                             name="name"
                             placeholder="본인 성함"
                             required
@@ -119,7 +119,7 @@ export default function LoginForm() {
                     비밀번호
                 </label>
                 <input
-                    className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className="rounded-md px-4 py-3 bg-gray-50 border border-gray-200 mb-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                     type="password"
                     name="password"
                     placeholder={loginType === 'admin' ? "••••••••" : "6자리 비밀번호"}

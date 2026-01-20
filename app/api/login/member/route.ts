@@ -14,17 +14,27 @@ export async function POST(request: Request) {
 
         const supabase = await createClient()
 
-        // 1. Find Member by Name and Password
-        // Note: In production, password hashing is recommended.
-        // For this MVP, we are comparing plain text as stored.
-        const { data: member, error } = await supabase
-            .from('gym_members')
-            .select('id, gym_id, name, status')
-            .eq('name', name)
-            .eq('login_password', password)
-            .single()
+        // 1. Authenticate using RPC (Secure Bypassing of RLS)
+        // We use an RPC function 'authenticate_member' with SECURITY DEFINER
+        // to find the member even if RLS normally blocks access.
+        const { data: members, error } = await supabase.rpc('authenticate_member', {
+            p_name: name,
+            p_password: password
+        })
 
-        if (error || !member) {
+        if (error) {
+            console.error('Member Login RPC Error:', error)
+            // Fallback for clearer error message if function is missing
+            if (error.code === '42883') { // undefined_function
+                return NextResponse.json({ success: false, message: 'System Error: Authentication function missing. Please ask admin to run db_member_login_rpc.sql' }, { status: 500 })
+            }
+            return NextResponse.json({ success: false, message: '인증 중 오류가 발생했습니다.' }, { status: 500 })
+        }
+
+        // RPC returns an array (SETOF)
+        const member = members && members.length > 0 ? members[0] : null
+
+        if (!member) {
             return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
         }
 
@@ -32,18 +42,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: '활성 상태인 회원만 로그인할 수 있습니다.' }, { status: 403 })
         }
 
-        // 2. Create a Session manually or use a custom cookie
-        // Since Supabase Auth is for Users (checking against auth.users), and members are in public.gym_members,
-        // we cannot use supabase.auth.signInWithPassword.
-        // We will set a secure HttpOnly cookie with the member ID.
-
+        // 2. Create Session
         const cookieStore = await cookies()
 
-        // Simple session cookie. In production, use a JWT or signed token.
-        // For MVP, we store member_id and gym_id.
         const sessionData = JSON.stringify({ memberId: member.id, gymId: member.gym_id, name: member.name, role: 'member' })
 
-        // Set cookie
         cookieStore.set('member_session', sessionData, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
