@@ -5,8 +5,10 @@ import { cookies } from 'next/headers'
 export async function POST(request: Request) {
     try {
         const json = await request.json()
-        const name = json.name
-        const password = json.password
+        const name = json.name ? String(json.name).trim() : ''
+        const password = json.password ? String(json.password).trim() : ''
+
+        console.log(`[Member Login Attempt] Name: '${name}', Password Length: ${password.length}`)
 
         if (!name || !password) {
             return NextResponse.json({ success: false, message: '이름과 비밀번호를 입력해주세요.' }, { status: 400 })
@@ -28,17 +30,21 @@ export async function POST(request: Request) {
             if (error.code === '42883') { // undefined_function
                 return NextResponse.json({ success: false, message: 'System Error: Authentication function missing. Please ask admin to run db_member_login_rpc.sql' }, { status: 500 })
             }
-            return NextResponse.json({ success: false, message: '인증 중 오류가 발생했습니다.' }, { status: 500 })
+            return NextResponse.json({ success: false, message: `인증 중 오류가 발생했습니다. (${error.message})` }, { status: 500 })
         }
 
         // RPC returns an array (SETOF)
         const member = members && members.length > 0 ? members[0] : null
 
         if (!member) {
+            console.log(`[Member Login Failure] No member found for name: '${name}'`)
             return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
         }
 
+        // Check if member belongs to an active gym? (Optional, schema doesn't strictly enforce gym status here yet)
+
         if (member.status !== 'active' && member.status !== 'paused') {
+            console.log(`[Member Login Failure] Member status inactive: ${member.status}`)
             return NextResponse.json({ success: false, message: '활성 상태인 회원만 로그인할 수 있습니다.' }, { status: 403 })
         }
 
@@ -55,6 +61,7 @@ export async function POST(request: Request) {
             maxAge: 60 * 60 * 24 * 7 // 1 week
         })
 
+        console.log(`[Member Login Success] Logged in as ${member.name} (${member.id})`)
         return NextResponse.json({ success: true, message: 'Login successful' })
     } catch (e: any) {
         console.error('Member Login API Error:', e)

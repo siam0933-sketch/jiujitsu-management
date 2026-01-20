@@ -155,7 +155,7 @@ export default function ClassScheduleBoard({
 
                 {/* DAILY VIEW LIST */}
                 {viewMode === 'daily' && (
-                    <div className="space-y-4 max-w-2xl">
+                    <div className="space-y-4 max-w-2xl pb-[70vh]">
                         {displayedSchedules.length > 0 ? (
                             displayedSchedules.map(schedule => (
                                 <AttendanceCheck

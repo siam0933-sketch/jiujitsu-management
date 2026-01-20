@@ -14,7 +14,7 @@ BEGIN
   SELECT *
   FROM gym_members
   WHERE name = p_name
-  AND login_password = p_password
+  AND lower(login_password) = lower(p_password)
   LIMIT 1;
 END;
 $$;

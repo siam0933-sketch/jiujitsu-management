@@ -13,7 +13,7 @@ export default async function AttendancePage() {
     ])
 
     return (
-        <div className="h-[calc(100vh-100px)] p-6">
+        <div className="min-h-[calc(100vh-100px)] p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">출석부</h1>
                 <a
