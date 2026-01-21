@@ -1,6 +1,5 @@
-
 -- Function to authenticate a member securely (bypassing RLS)
--- This allows the public (anon) to find a member ONLY by providing the correct name and password.
+-- Updated to allow case-insensitive name matching
 
 CREATE OR REPLACE FUNCTION authenticate_member(
   p_name text,

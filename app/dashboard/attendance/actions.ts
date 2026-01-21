@@ -22,13 +22,47 @@ export async function checkInMember(memberId: string, className?: string, date?:
     // Check if checks exist for today
     const { data: existing } = await supabase
         .from('gym_attendance_logs')
-        .select('id, checked_out_at')
+        .select('id, checked_out_at, status')
         .eq('gym_id', gym.id)
         .eq('member_id', memberId)
         .eq('date', today)
         .single()
 
     if (existing) {
+        // If pending, approve it (change to present)
+        if (existing.status === 'pending') {
+            const { error: updateError } = await supabase
+                .from('gym_attendance_logs')
+                .update({ status: 'present', method: className ? 'class' : 'manual', class_name: className || null }) // Update method/class if needed, or keep request? Let's override.
+                .eq('id', existing.id)
+
+            if (updateError) return { error: updateError.message }
+
+            // Increment count logic (Same as new check-in)
+            const { data: member } = await supabase
+                .from('gym_members')
+                .select('attendance_count, remaining_sessions')
+                .eq('id', memberId)
+                .single()
+
+            const newCount = (member?.attendance_count || 0) + 1
+            let updateData: any = { attendance_count: newCount }
+
+            if (member && member.remaining_sessions > 0) {
+                updateData.remaining_sessions = member.remaining_sessions - 1
+            }
+
+            const { error: memberUpdateError } = await supabase
+                .from('gym_members')
+                .update(updateData)
+                .eq('id', memberId)
+
+            if (memberUpdateError) console.error('Failed to update member stats:', memberUpdateError)
+
+            revalidatePath('/dashboard/attendance')
+            revalidatePath('/dashboard/members')
+            return { success: true }
+        }
         return { error: '이미 금일 출석 처리되었습니다.' }
     }
 
@@ -38,7 +72,8 @@ export async function checkInMember(memberId: string, className?: string, date?:
         member_id: memberId,
         date: today,
         method: className ? 'class' : 'manual',
-        class_name: className || null
+        class_name: className || null,
+        status: 'present'
     })
 
     if (logError) return { error: logError.message }
@@ -67,6 +102,26 @@ export async function checkInMember(memberId: string, className?: string, date?:
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
     return { success: true }
+}
+
+export async function getPendingAttendanceCount() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return 0
+
+    const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
+    if (!gym) return 0
+
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+
+    const { count, error } = await supabase
+        .from('gym_attendance_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('gym_id', gym.id)
+        .eq('date', today)
+        .eq('status', 'pending')
+
+    return count || 0
 }
 
 export async function checkOutMember(memberId: string, date: string) {

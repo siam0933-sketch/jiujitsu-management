@@ -72,7 +72,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
     // Data States
     const [enrolledMemberIds, setEnrolledMemberIds] = useState<Set<string>>(new Set())
-    const [attendanceStatus, setAttendanceStatus] = useState<Record<string, { checkedOut: boolean }>>({})
+    const [attendanceStatus, setAttendanceStatus] = useState<Record<string, { checkedOut: boolean, status?: string }>>({})
     const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
     const [manualAttendanceDates, setManualAttendanceDates] = useState<{ [memberId: string]: string[] }>({}) // Cached dates for calendar
 
@@ -148,9 +148,9 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
         // Load Attendance Status for Effective Date
         const logs = await getAttendanceLogsForDate(effectiveDate)
-        const statusMap: Record<string, { checkedOut: boolean }> = {}
+        const statusMap: Record<string, { checkedOut: boolean, status?: string }> = {}
         logs.forEach((log: any) => {
-            statusMap[log.member_id] = { checkedOut: !!log.checked_out_at }
+            statusMap[log.member_id] = { checkedOut: !!log.checked_out_at, status: log.status }
         })
         setAttendanceStatus(statusMap)
     }
@@ -198,14 +198,21 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                 const res = await checkInMember(member.id, schedule.class_name, effectiveDate)
                 if (res?.error) alert(res.error)
                 else {
-                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: false } }))
+                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: false, status: 'present' } }))
+                }
+            } else if (status.status === 'pending') {
+                // 1.5 Approve (Pending -> Present)
+                const res = await checkInMember(member.id, schedule.class_name, effectiveDate) // Re-use checkIn to approve
+                if (res?.error) alert(res.error)
+                else {
+                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: false, status: 'present' } }))
                 }
             } else if (!status.checkedOut) {
                 // 2. Check Out (하원)
                 const res = await checkOutMember(member.id, effectiveDate)
                 if (res?.error) alert(res.error)
                 else {
-                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: true } }))
+                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: true, status: 'present' } }))
                 }
             } else {
                 // 3. Cancel (취소)
@@ -470,7 +477,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 let btnText = '대기'
 
                                                 if (status) {
-                                                    if (status.checkedOut) {
+                                                    if (status.status === 'pending') {
+                                                        // Pending: Approval Request (승인 요청)
+                                                        btnClass = 'bg-red-100 text-red-700 ring-red-600/20 hover:bg-red-200 animate-pulse'
+                                                        btnText = '승인 요청'
+                                                    } else if (status.checkedOut) {
                                                         // Checked Out: Left (하원)
                                                         btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
                                                         btnText = '하원'
