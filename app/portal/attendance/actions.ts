@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
@@ -21,7 +21,7 @@ export async function requestAttendance() {
         return { error: '로그인이 필요합니다.' }
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
     // Check existing
@@ -58,7 +58,7 @@ export async function checkOutMemberSelf() {
         return { error: '로그인이 필요합니다.' }
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
     // Get current log

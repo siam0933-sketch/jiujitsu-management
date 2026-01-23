@@ -11,8 +11,8 @@ export default async function MemberDashboard() {
 
     return (
         <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Member Dashboard</h1>
-            <p className="text-gray-400">Welcome to your portal. (Content coming soon)</p>
+            <h1 className="text-2xl font-bold mb-4">회원 대시보드</h1>
+            <p className="text-gray-400">회원 포털에 오신 것을 환영합니다. (콘텐츠 준비 중)</p>
         </div>
     )
 }

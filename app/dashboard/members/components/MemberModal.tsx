@@ -40,8 +40,10 @@ export default function MemberModal({ member }: { member: any }) {
     // Config Data
     const [plans, setPlans] = useState<any[]>([])
     const [options, setOptions] = useState<any[]>([])
+    const [products, setProducts] = useState<any[]>([]) // [NEW] Products
     const [durationMonths, setDurationMonths] = useState(1)
     const [selectedOptionIds, setSelectedOptionIds] = useState<Set<string>>(new Set())
+    const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set()) // [NEW] Selected Products
     const [newExpiryDate, setNewExpiryDate] = useState('') // New state for expiry preview
 
     // Payments List
@@ -76,6 +78,7 @@ export default function MemberModal({ member }: { member: any }) {
 
                 setPlans(pricing.plans)
                 setOptions(pricing.options)
+                setProducts(pricing.products) // [NEW]
                 setPayments(history)
                 setAttendanceLogs(attLogs)
                 if (promos.data) setPromotionLogs(promos.data)
@@ -139,6 +142,14 @@ export default function MemberModal({ member }: { member: any }) {
         setManualAmount(null) // Reset manual override
     }
 
+    const handleToggleProduct = (prodId: string) => {
+        const next = new Set(selectedProductIds)
+        if (next.has(prodId)) next.delete(prodId)
+        else next.add(prodId)
+        setSelectedProductIds(next)
+        setManualAmount(null)
+    }
+
     // Auto-calc Expiry Date when plan/months change
     useEffect(() => {
         if (!selectedPlan || selectedPlan.type !== 'period') {
@@ -173,6 +184,13 @@ export default function MemberModal({ member }: { member: any }) {
                 if (opt) total += opt.price * durationMonths
             })
         }
+
+        // Add Products Price (Independent of duration)
+        selectedProductIds.forEach(id => {
+            const prod = products.find(p => p.id === id)
+            if (prod) total += prod.price
+        })
+
         return total
     }
     const currentTotal = calculateTotal()
@@ -194,10 +212,14 @@ export default function MemberModal({ member }: { member: any }) {
         formData.append('plan_name', selectedPlan?.name || '')
         formData.append('type', selectedPlan?.type || '')
         formData.append('option_ids', JSON.stringify(Array.from(selectedOptionIds)))
+        formData.append('product_ids', JSON.stringify(Array.from(selectedProductIds))) // [NEW]
 
         // Generate options summary text
-        const selectedOptionNames = Array.from(selectedOptionIds).map(id => options.find(o => o.id === id)?.name).filter(Boolean).join(', ')
-        formData.append('options_summary', selectedOptionNames)
+        const selectedOptionNames = Array.from(selectedOptionIds).map(id => options.find(o => o.id === id)?.name).filter(Boolean)
+        const selectedProductNames = Array.from(selectedProductIds).map(id => products.find(p => p.id === id)?.name).filter(Boolean) // [NEW]
+
+        const allSummary = [...selectedOptionNames, ...selectedProductNames].join(', ')
+        formData.append('options_summary', allSummary)
 
         if (newExpiryDate) {
             formData.append('new_payment_end_date', newExpiryDate)
@@ -627,6 +649,31 @@ export default function MemberModal({ member }: { member: any }) {
                                                             ))}
                                                         </div>
                                                     )}
+                                                    {/* Product List */}
+                                                    {products.length > 0 && (
+                                                        <div className="space-y-4 pt-2 border-t border-gray-100">
+                                                            <div className="space-y-2">
+                                                                <p className="text-xs text-gray-400 font-bold">상품 (일회성 구매)</p>
+                                                                {products.map((prod: any) => (
+                                                                    <label key={prod.id} className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-gray-50">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={selectedProductIds.has(prod.id)}
+                                                                                onChange={() => handleToggleProduct(prod.id)}
+                                                                                className="rounded border-gray-300 text-blue-600"
+                                                                            />
+                                                                            <span className="text-sm text-gray-700">{prod.name}</span>
+                                                                        </div>
+                                                                        <span className="text-sm font-medium text-gray-900">
+                                                                            +{prod.price.toLocaleString()}원
+                                                                        </span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
 
                                                     <div className="flex justify-between items-center bg-gray-50 p-3 rounded">
                                                         <span className="text-sm font-bold">총 결제금액</span>
