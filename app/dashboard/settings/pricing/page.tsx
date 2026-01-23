@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption, reorderGroup, updateOption, updateOptionGroup } from './actions'
+import { getPricingData, createPlan, deletePlan, createOption, deleteOption, reorderOption, reorderGroup, updateOption, updateOptionGroup, createProduct, updateProduct, deleteProduct, copyProduct, reorderProduct } from './actions'
 import OptionReorderButton from './components/OptionReorderButton'
 
 export default function PricingSettingsPage() {
-    const [activeTab, setActiveTab] = useState<'period' | 'session'>('period')
+    const [activeTab, setActiveTab] = useState<'period' | 'session' | 'product'>('period')
     const [plans, setPlans] = useState<any[]>([])
     const [options, setOptions] = useState<any[]>([])
+    const [products, setProducts] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [editingOptionId, setEditingOptionId] = useState<string | null>(null)
     const [editingGroupName, setEditingGroupName] = useState<string | null>(null)
+    const [editingProductId, setEditingProductId] = useState<string | null>(null)
 
     // Form States
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -20,15 +22,13 @@ export default function PricingSettingsPage() {
     }, [])
 
     const loadData = async () => {
-        console.log('[Page] loadData start')
         setIsLoading(true)
-        const { plans, options } = await getPricingData()
+        const { plans, options, products } = await getPricingData()
         setPlans(plans)
         setOptions(options)
+        setProducts(products || [])
         setIsLoading(false)
     }
-
-    // ... create/delete handlers ...
 
     const handleUpdateOption = async (optionId: string, e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -115,92 +115,68 @@ export default function PricingSettingsPage() {
 
 
     const handleGroupReorder = async (groupName: string, direction: 'up' | 'down') => {
-        // 1. Optimistic Update for Groups
-        // Find current group index in the sorted array
-        const currentIndex = groupedOptions.findIndex(g => g.name === groupName);
-        if (currentIndex === -1) return;
-
-        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        if (targetIndex < 0 || targetIndex >= groupedOptions.length) return;
-
-        // Clone the full options array to modify
-        const newOptions = [...options];
-
-        // We need to swap the 'group_order' of all items in these two groups
-        const currentGroup = groupedOptions[currentIndex];
-        const adjacentGroup = groupedOptions[targetIndex];
-
-        // Calculate new orders (swap)
-        const currentOrder = currentGroup.order;
-        const adjacentOrder = adjacentGroup.order;
-
-        // Apply to all items in newOptions
-        newOptions.forEach(opt => {
-            if (opt.group_name === currentGroup.name) {
-                opt.group_order = adjacentOrder;
-            } else if (opt.group_name === adjacentGroup.name) {
-                opt.group_order = currentOrder;
-            }
-        });
-
-        // Trigger render
-        setOptions(newOptions);
-
-        // 2. Server Action
+        // Optimistic Update can be added here if needed, but skipping for simplicity
         const res = await reorderGroup(groupName, direction);
         if (res?.error) {
             alert('그룹 순서 변경 실패: ' + res.error);
         }
-        // Always reload to sync with server-side normalization
         loadData();
     }
 
     const handleOptionReorder = async (optionId: string, direction: 'up' | 'down') => {
-        console.log(`[Optimistic] Option Request: id=${optionId}, dir=${direction}`);
-
-        // 1. Optimistic Update
-        const newOptions = [...options];
-        const targetIndex = newOptions.findIndex(o => o.id === optionId);
-        if (targetIndex === -1) return;
-
-        const targetOption = { ...newOptions[targetIndex] };
-
-        // Find adjacent option in the same group
-        let adjacentIndex = -1;
-        if (direction === 'up') {
-            for (let i = targetIndex - 1; i >= 0; i--) {
-                if (newOptions[i].group_name === targetOption.group_name) {
-                    adjacentIndex = i;
-                    break;
-                }
-            }
-        } else {
-            for (let i = targetIndex + 1; i < newOptions.length; i--) { // Corrected loop condition
-                if (newOptions[i].group_name === targetOption.group_name) {
-                    adjacentIndex = i;
-                    break;
-                }
-            }
-        }
-
-        if (adjacentIndex === -1) return;
-
-        const adjacentOption = { ...newOptions[adjacentIndex] };
-        const tempOrder = targetOption.display_order;
-        targetOption.display_order = adjacentOption.display_order;
-        adjacentOption.display_order = tempOrder;
-
-        newOptions[targetIndex] = adjacentOption;
-        newOptions[adjacentIndex] = targetOption;
-
-        setOptions(newOptions);
-
-        // 2. Server Action
         const res = await reorderOption(optionId, direction);
         if (res?.error) {
             alert('옵션 순서 변경 실패');
-            loadData();
         }
+        loadData();
+    }
+
+    // --- Product Handlers ---
+
+    const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setIsSubmitting(true)
+        const formData = new FormData(e.currentTarget)
+        const res = await createProduct(formData)
+        if (res.error) alert(res.error)
+        else {
+            (e.target as HTMLFormElement).reset()
+            loadData()
+        }
+        setIsSubmitting(false)
+    }
+
+    const handleUpdateProduct = async (id: string, e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget)
+        const name = String(formData.get('name'))
+        const price = Number(formData.get('price'))
+
+        const res = await updateProduct(id, { name, price })
+        if (res?.error) alert(res.error)
+        else {
+            setEditingProductId(null)
+            loadData()
+        }
+    }
+
+    const handleDeleteProduct = async (id: string) => {
+        if (!confirm('정말 삭제하시겠습니까?')) return
+        await deleteProduct(id)
+        loadData()
+    }
+
+    const handleCopyProduct = async (id: string) => {
+        if (!confirm('이 상품을 복사하시겠습니까?')) return
+        const res = await copyProduct(id)
+        if (res?.error) alert(res.error)
+        else loadData()
+    }
+
+    const handleProductReorder = async (id: string, direction: 'up' | 'down') => {
+        const res = await reorderProduct(id, direction)
+        if (res?.error) alert('순서 변경 실패')
+        else loadData()
     }
 
     const filteredPlans = plans.filter(p => p.type === activeTab)
@@ -229,6 +205,15 @@ export default function PricingSettingsPage() {
                             }`}
                     >
                         횟수권 (쿠폰)
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('product')}
+                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'product'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                    >
+                        상품 (도복 등)
                     </button>
                 </nav>
             </div>
@@ -299,31 +284,6 @@ export default function PricingSettingsPage() {
                                     옵션 관리
                                     <span className="text-xs font-normal text-gray-500">(기간권에만 적용)</span>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        const groupName = prompt('새로운 옵션 그룹 이름을 입력하세요:');
-                                        if (groupName) {
-                                            // Ideally we shouldn't manipulate DOM directly or alerts, but for quick UX:
-                                            // We can just trigger a createOption with a dummy, or better, just scroll or focus.
-                                            // Actually, simplest way: Just use the creating form but pre-fill group?
-                                            // Proposed design: "Add Group" opens a modal or just asks for name and adds a focused empty card?
-                                            // Let's use a specialized Form for "New Group" that creates the first entry.
-                                            // Or simplified: Just use a new small form at the top for "New Group".
-                                            const name = prompt('첫 번째 옵션 이름을 입력하세요 (예: 셔틀버스):');
-                                            if (!name) return;
-                                            const priceInput = prompt('옵션 가격을 입력하세요 (예: 20000):', '0');
-                                            if (priceInput === null) return;
-
-                                            // Create via form submission simulation or direct call?
-                                            // Direct call is cleaner but I need to import it properly or use a hidden form submit.
-                                            // Let's use a hidden form hack or just better UI.
-                                            // Actually, I'll add a 'New Group' form block at the top.
-                                        }
-                                    }}
-                                    className="hidden text-xs bg-gray-100 px-3 py-1 rounded hover:bg-gray-200"
-                                >
-                                    + 새 그룹
-                                </button>
                             </h2>
 
                             <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -499,6 +459,89 @@ export default function PricingSettingsPage() {
                         </div>
                     </div>
                 )}
+
+                {/* 3. Product Tab */}
+                {activeTab === 'product' && (
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            상품 관리
+                            <span className="text-xs font-normal text-gray-500">(도복, 벨트 등 물품)</span>
+                        </h2>
+
+                        <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h3 className="text-sm font-bold text-gray-900 mb-3">새 상품 만들기</h3>
+                            <form onSubmit={handleCreateProduct} className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">상품 이름</label>
+                                    <input name="name" required placeholder="예: 도복 (블랙)" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
+                                </div>
+                                <div className="w-32">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">판매 금액 (원)</label>
+                                    <input name="price" type="number" required placeholder="0" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
+                                </div>
+                                <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] min-w-[60px]">
+                                    추가
+                                </button>
+                            </form>
+                        </div>
+
+                        <div className="border rounded-md p-4 bg-white">
+                            <h3 className="font-semibold text-gray-900 mb-3 text-sm border-b border-gray-100 pb-2">등록된 상품 목록</h3>
+                            <ul className="space-y-3">
+                                {products.map((product, idx) => (
+                                    <li key={product.id} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2 last:border-0 last:pb-0 hover:bg-gray-50 transition-colors p-1">
+                                        {editingProductId === product.id ? (
+                                            <form onSubmit={(e) => handleUpdateProduct(product.id, e)} className="flex items-center gap-2 w-full">
+                                                <div className="flex items-center gap-2 flex-1">
+                                                    <input name="name" defaultValue={product.name} className="flex-1 text-sm border border-blue-300 rounded px-2 py-1" autoFocus />
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <input name="price" type="number" defaultValue={product.price} className="w-24 text-sm border border-blue-300 rounded px-2 py-1 text-right" />
+                                                    <button type="submit" className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
+                                                    <button type="button" onClick={() => setEditingProductId(null)} className="text-xs bg-white border border-gray-300 px-2 py-1 rounded">취소</button>
+                                                </div>
+                                            </form>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center gap-2 flex-1">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <OptionReorderButton direction="up" disabled={idx === 0} onReorder={() => handleProductReorder(product.id, 'up')} />
+                                                        <OptionReorderButton direction="down" disabled={idx === products.length - 1} onReorder={() => handleProductReorder(product.id, 'down')} />
+                                                    </div>
+                                                    <span className="font-medium text-gray-900 mr-2 cursor-pointer hover:text-blue-600 flex items-center gap-2 group" onClick={() => setEditingProductId(product.id)}>
+                                                        {product.name}
+                                                        <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-gray-900 font-medium cursor-pointer hover:text-blue-600" onClick={() => setEditingProductId(product.id)}>{product.price.toLocaleString()}원</span>
+
+                                                    <button onClick={() => handleCopyProduct(product.id)} className="text-gray-400 hover:text-blue-600 text-xs p-1 rounded hover:bg-blue-50" title="복사">
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button onClick={() => handleDeleteProduct(product.id)} className="text-gray-400 hover:text-red-600 text-xs p-1 rounded hover:bg-red-50" title="삭제">
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </li>
+                                ))}
+                                {products.length === 0 && <p className="text-gray-500 text-center text-sm py-8">등록된 상품이 없습니다.</p>}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     )

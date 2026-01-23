@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 export async function getPricingData() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { plans: [], options: [] }
+    if (!user) return { plans: [], options: [], products: [] }
 
     // Get Gym ID
     const { data: gym } = await supabase
@@ -15,7 +15,7 @@ export async function getPricingData() {
         .eq('owner_id', user.id)
         .single()
 
-    if (!gym) return { plans: [], options: [] }
+    if (!gym) return { plans: [], options: [], products: [] }
 
     const { data: plans } = await supabase
         .from('gym_price_plans')
@@ -34,7 +34,15 @@ export async function getPricingData() {
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: true })
 
-    return { plans: plans || [], options: options || [] }
+    const { data: products } = await supabase
+        .from('gym_products')
+        .select('*')
+        .eq('gym_id', gym.id)
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: true })
+
+    return { plans: plans || [], options: options || [], products: products || [] }
 }
 
 export async function createPlan(formData: FormData) {
@@ -170,7 +178,6 @@ export async function deleteOption(optionId: string) {
 
 export async function reorderOption(optionId: string, direction: 'up' | 'down') {
     const supabase = await createClient()
-    console.log(`[Reorder] Start: id=${optionId}, dir=${direction}`)
 
     // 1. Get Target
     const { data: target } = await supabase
@@ -180,10 +187,8 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
         .single()
 
     if (!target) {
-        console.error('[Reorder] Target not found')
         return { error: 'Option not found' }
     }
-    console.log(`[Reorder] Target found: order=${target.display_order}, group=${target.group_name}`)
 
     // 2. Find Adjacent
     let adjacentQuery = supabase
@@ -206,10 +211,8 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
     const { data: adjacent } = await adjacentQuery.single()
 
     if (!adjacent) {
-        console.log('[Reorder] No adjacent item found')
         return { success: true } // Already at top/bottom
     }
-    console.log(`[Reorder] Adjacent found: id=${adjacent.id}, order=${adjacent.display_order}`)
 
     // 3. Swap
     const { error: e1 } = await supabase
@@ -217,22 +220,15 @@ export async function reorderOption(optionId: string, direction: 'up' | 'down') 
         .update({ display_order: adjacent.display_order })
         .eq('id', target.id)
 
-    if (e1) {
-        console.error('[Reorder] Swap 1 failed:', e1)
-        return { error: e1.message }
-    }
+    if (e1) return { error: e1.message }
 
     const { error: e2 } = await supabase
         .from('gym_price_options')
         .update({ display_order: target.display_order })
         .eq('id', adjacent.id)
 
-    if (e2) {
-        console.error('[Reorder] Swap 2 failed:', e2)
-        return { error: e2.message }
-    }
+    if (e2) return { error: e2.message }
 
-    console.log('[Reorder] Swap success')
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }
 }
@@ -252,7 +248,6 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
     if (!gym) return { error: 'Gym not found' }
 
     // 1. Fetch ALL distinct groups with their current orders
-    // We fetch all active options to determine group structure
     const { data: allOptions } = await supabase
         .from('gym_price_options')
         .select('group_name, group_order, created_at')
@@ -262,7 +257,6 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
     if (!allOptions || allOptions.length === 0) return { success: true }
 
     // 2. Reduce to unique groups and sort them
-    // Sort logic: group_order (asc), then created_at (asc) for stability
     const uniqueGroupsMap = new Map<string, { name: string, order: number, minCreated: string }>()
 
     allOptions.forEach(opt => {
@@ -274,8 +268,6 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
                 minCreated: opt.created_at
             })
         } else {
-            // Keep strictly the same order logic (min group_order seen? usually they are same. min created_at?)
-            // We assume group_order is consistent. If not, we take min.
             if (opt.group_order !== null && opt.group_order < existing.order) {
                 existing.order = opt.group_order
             }
@@ -310,10 +302,7 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
     groups[targetIndex] = temp
 
     // 6. Update DB with normalized indices [0, 1, 2...]
-    // We update ALL groups to ensure clean state
     const updates = groups.map((g, idx) => {
-        // Only update if changed or if we want to enforce normalization
-        // Enforcing normalization is good to fix 'null' issues
         return supabase
             .from('gym_price_options')
             .update({ group_order: idx })
@@ -330,11 +319,6 @@ export async function reorderGroup(groupName: string, direction: 'up' | 'down') 
 export async function updateOption(optionId: string, data: { name?: string, price?: number, group_name?: string }) {
     const supabase = await createClient()
 
-    // If group_name update is requested, we need to handle potential reordering or just move it. 
-    // Ideally user only updates name/price for single option. Moving group is trickier via this simple edit. 
-    // Let's stick to name/price for single option edit, or group_name for "Group Rename" (which affects all).
-    // Actually, allowing individual option to move group is useful. 
-
     const { error } = await supabase
         .from('gym_price_options')
         .update(data)
@@ -349,10 +333,6 @@ export async function updateOptionGroup(oldGroupName: string, newGroupName: stri
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
-
-    // 1. Check if new group name already exists (to merge? or block?)
-    // For simplicity, let's just update. If it merges, so be it? 
-    // Merge might be confusing if orders mess up. But let's allow "Rename".
 
     const { data: gym } = await supabase
         .from('gyms')
@@ -369,6 +349,169 @@ export async function updateOptionGroup(oldGroupName: string, newGroupName: stri
         .eq('group_name', oldGroupName)
 
     if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+// --- Product Actions ---
+
+export async function createProduct(formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+
+    if (!gym) return { error: 'Gym not found' }
+
+    const name = String(formData.get('name'))
+    const price = Number(formData.get('price'))
+
+    // Get max display_order
+    const { data: maxOrder } = await supabase
+        .from('gym_products')
+        .select('display_order')
+        .eq('gym_id', gym.id)
+        .order('display_order', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    const nextOrder = (maxOrder?.display_order || 0) + 1
+
+    const { error } = await supabase
+        .from('gym_products')
+        .insert({
+            gym_id: gym.id,
+            name,
+            price,
+            display_order: nextOrder,
+            is_active: true
+        })
+
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function updateProduct(id: string, data: { name?: string, price?: number }) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('gym_products')
+        .update(data)
+        .eq('id', id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function deleteProduct(id: string) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('gym_products')
+        .update({ is_active: false })
+        .eq('id', id)
+
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function copyProduct(id: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // 1. Get Original
+    const { data: original } = await supabase
+        .from('gym_products')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (!original) return { error: 'Product not found' }
+
+    // 2. Get Next Order
+    const { data: maxOrder } = await supabase
+        .from('gym_products')
+        .select('display_order')
+        .eq('gym_id', original.gym_id)
+        .order('display_order', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    const nextOrder = (maxOrder?.display_order || 0) + 1
+
+    // 3. Insert Copy
+    const { error } = await supabase
+        .from('gym_products')
+        .insert({
+            gym_id: original.gym_id,
+            name: `${original.name} (복사됨)`,
+            price: original.price,
+            display_order: nextOrder,
+            is_active: true
+        })
+
+    if (error) return { error: error.message }
+    revalidatePath('/dashboard/settings/pricing')
+    return { success: true }
+}
+
+export async function reorderProduct(id: string, direction: 'up' | 'down') {
+    const supabase = await createClient()
+
+    // 1. Get Target
+    const { data: target } = await supabase
+        .from('gym_products')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (!target) return { error: 'Product not found' }
+
+    // 2. Find Adjacent
+    let adjacentQuery = supabase
+        .from('gym_products')
+        .select('*')
+        .eq('gym_id', target.gym_id)
+        .eq('is_active', true)
+        .limit(1)
+
+    if (direction === 'up') {
+        adjacentQuery = adjacentQuery
+            .lt('display_order', target.display_order)
+            .order('display_order', { ascending: false })
+    } else {
+        adjacentQuery = adjacentQuery
+            .gt('display_order', target.display_order)
+            .order('display_order', { ascending: true })
+    }
+
+    const { data: adjacent } = await adjacentQuery.single()
+
+    if (!adjacent) return { success: true }
+
+    // 3. Swap
+    const { error: e1 } = await supabase
+        .from('gym_products')
+        .update({ display_order: adjacent.display_order })
+        .eq('id', target.id)
+
+    if (e1) return { error: e1.message }
+
+    const { error: e2 } = await supabase
+        .from('gym_products')
+        .update({ display_order: target.display_order })
+        .eq('id', adjacent.id)
+
+    if (e2) return { error: e2.message }
+
     revalidatePath('/dashboard/settings/pricing')
     return { success: true }
 }
