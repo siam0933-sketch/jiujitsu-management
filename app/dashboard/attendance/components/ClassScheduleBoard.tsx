@@ -27,36 +27,49 @@ const DAYS = [
 // Helper to get date for specific day of THIS week (assuming Mon start or just relative to today)
 // User requirement seems to imply "Active Week".
 // Simplest approach: Get today, find difference to target day index.
-const getDateForDay = (dayId: string) => {
-    const dayMap: { [key: string]: number } = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
-    const targetIndex = dayMap[dayId];
-    const today = new Date();
-    const todayIndex = today.getDay();
 
-    const diff = targetIndex - todayIndex;
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + diff);
-
-    return targetDate.toISOString().split('T')[0];
-}
 
 export default function ClassScheduleBoard({
     initialSchedules,
-    activeMembers
+    activeMembers,
+    todayKST
 }: {
     initialSchedules: Schedule[],
-    activeMembers: Member[]
+    activeMembers: Member[],
+    todayKST: string
 }) {
     const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily')
-    const [selectedDay, setSelectedDay] = useState<string>('Mon') // Default to Mon safely
+    const [selectedDay, setSelectedDay] = useState<string>('Mon') // Default
     const [isMounted, setIsMounted] = useState(false)
+
+    // Helper to get date for specific day relative to passed todayKST
+    const getDateForDay = (dayId: string) => {
+        const dayMap: { [key: string]: number } = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+        const targetIndex = dayMap[dayId];
+
+        const todayDate = new Date(todayKST)
+        const todayIndex = todayDate.getDay();
+
+        const diff = targetIndex - todayIndex;
+        const targetDate = new Date(todayDate);
+        targetDate.setDate(todayDate.getDate() + diff);
+
+        // Format manually to avoid timezone shifts back to UTC
+        // Since we created Date from YYYY-MM-DD string, it might be UTC 00:00.
+        // setDate works on that. 
+        // toISOString().split('T')[0] will return YYYY-MM-DD correctly IF it doesn't cross boundary.
+        // But local Date construction from string "YYYY-MM-DD" is UTC usually.
+        // Let's ensure string output is correct.
+        return targetDate.toISOString().split('T')[0];
+    }
 
     useEffect(() => {
         setIsMounted(true)
-        const todayIndex = new Date().getDay()
+        // Use todayKST to determine initial selected Day
+        const todayIndex = new Date(todayKST).getDay()
         const todayId = todayIndex === 0 ? 'Sun' : DAYS[todayIndex - 1].id
         setSelectedDay(todayId)
-    }, [])
+    }, [todayKST])
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -164,6 +177,7 @@ export default function ClassScheduleBoard({
                                     allMembers={activeMembers}
                                     mode="daily"
                                     targetDate={getDateForDay(selectedDay)}
+                                    todayKST={todayKST}
                                 />
                             ))
                         ) : (
@@ -195,6 +209,7 @@ export default function ClassScheduleBoard({
                                                 allMembers={activeMembers}
                                                 mode="weekly"
                                                 targetDate={getDateForDay(day.id)}
+                                                todayKST={todayKST}
                                             />
                                         ))
                                     }

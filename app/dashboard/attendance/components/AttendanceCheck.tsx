@@ -20,9 +20,10 @@ interface Props {
     allMembers: Member[]
     mode: 'daily' | 'weekly'
     targetDate?: string
+    todayKST: string
 }
 
-export default function AttendanceCheck({ schedule, allMembers, mode, targetDate }: Props) {
+export default function AttendanceCheck({ schedule, allMembers, mode, targetDate, todayKST }: Props) {
     const router = useRouter()
     // Mode States
     const [isMenuOpen, setIsMenuOpen] = useState(false) // Gear menu toggle
@@ -126,13 +127,14 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     }
 
     // Date Logic
-    const todayStr = new Date().toISOString().split('T')[0]
+    // Use passed KST Date instead of local UTC
+    const todayStr = todayKST
     // If targetDate is not provided (weekly view default?), default to today. But ClassScheduleBoard sends it.
     const effectiveDate = targetDate || todayStr
     const isToday = effectiveDate === todayStr
 
     // Calendar State (Current View)
-    const [calendarMonth, setCalendarMonth] = useState(new Date())
+    const [calendarMonth, setCalendarMonth] = useState(new Date(todayKST))
     const [selectedMemberForCalendar, setSelectedMemberForCalendar] = useState<string | null>(null)
 
     // Initial Load of Enrollments

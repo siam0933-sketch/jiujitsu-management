@@ -12,6 +12,8 @@ export default async function AttendancePage() {
         getActiveMembers()
     ])
 
+    const todayKST = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+
     return (
         <div className="min-h-[calc(100vh-100px)] p-6">
             <div className="flex justify-between items-center mb-6">
@@ -29,6 +31,7 @@ export default async function AttendancePage() {
             <ClassScheduleBoard
                 initialSchedules={schedules}
                 activeMembers={members}
+                todayKST={todayKST}
             />
         </div>
     )
