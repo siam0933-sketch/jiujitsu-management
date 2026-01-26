@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Schedule } from '../actions_schedule'
 import CreateClassModal from './CreateClassModal'
 import AttendanceCheck from './AttendanceCheck'
+import PendingApprovalList from './PendingApprovalList'
 
 type Member = {
     id: string
@@ -169,6 +170,9 @@ export default function ClassScheduleBoard({
                 {/* DAILY VIEW LIST */}
                 {viewMode === 'daily' && (
                     <div className="space-y-4 max-w-2xl pb-[70vh]">
+                        {/* Always show pending list here, independent of schedules */}
+                        <PendingApprovalList todayKST={todayKST} />
+
                         {displayedSchedules.length > 0 ? (
                             displayedSchedules.map(schedule => (
                                 <AttendanceCheck
