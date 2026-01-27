@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -14,7 +14,19 @@ interface AttendanceCalendarProps {
 }
 
 export default function AttendanceCalendar({ attendanceDates }: AttendanceCalendarProps) {
-    const [currentDate, setCurrentDate] = useState(new Date())
+    if (!attendanceDates) {
+        console.error('AttendanceCalendar: attendanceDates is missing');
+        return <div className="p-4 text-red-500 font-bold border border-red-200 rounded-lg">데이터 로딩 오류 (Dates missing)</div>;
+    }
+
+    const [currentDate, setCurrentDate] = useState<Date | null>(null);
+
+    // Hydration fix: Set date on mount
+    useEffect(() => {
+        setCurrentDate(new Date());
+    }, []);
+
+    if (!currentDate) return <div className="p-10 text-center animate-pulse bg-white rounded-2xl">달력 로딩 중...</div>;
 
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
