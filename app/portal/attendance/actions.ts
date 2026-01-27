@@ -138,13 +138,26 @@ export async function getAttendanceHistory() {
 
     // Fetch all 'present' logs for this member
     // Optimizing: select only 'date' field
-    const { data } = await supabase
+    console.log('[getAttendanceHistory] Fetching for', session.memberId);
+
+    // First, check basic query without filters to debug
+    const { count } = await supabase
         .from('gym_attendance_logs')
-        .select('date')
+        .select('*', { count: 'exact', head: true })
+        .eq('gym_id', session.gymId)
+        .eq('member_id', session.memberId);
+    console.log('[getAttendanceHistory] Total logs found:', count);
+
+    const { data, error } = await supabase
+        .from('gym_attendance_logs')
+        .select('date, status')
         .eq('gym_id', session.gymId)
         .eq('member_id', session.memberId)
         .eq('status', 'present')
         .order('date', { ascending: false })
+
+    console.log('[getAttendanceHistory] Data:', data);
+    console.log('[getAttendanceHistory] Error:', error);
 
     if (!data) return []
 
