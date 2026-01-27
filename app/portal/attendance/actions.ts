@@ -127,3 +127,27 @@ export async function getTodayAttendanceStatus() {
 
     return null
 }
+
+export async function getAttendanceHistory() {
+    const session = await getMemberSession()
+    if (!session || !session.memberId || !session.gymId) {
+        return []
+    }
+
+    const supabase = await createClient()
+
+    // Fetch all 'present' logs for this member
+    // Optimizing: select only 'date' field
+    const { data } = await supabase
+        .from('gym_attendance_logs')
+        .select('date')
+        .eq('gym_id', session.gymId)
+        .eq('member_id', session.memberId)
+        .eq('status', 'present')
+        .order('date', { ascending: false })
+
+    if (!data) return []
+
+    // Return array of date strings (YYYY-MM-DD)
+    return data.map(log => log.date)
+}

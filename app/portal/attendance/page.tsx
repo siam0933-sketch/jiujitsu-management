@@ -1,13 +1,18 @@
 import { PORTAL_STYLES } from '../styles';
-import { getTodayAttendanceStatus } from './actions';
+import { getTodayAttendanceStatus, getAttendanceHistory } from './actions';
 import AttendanceRequestButton from './AttendanceRequestButton';
+import AttendanceCalendar from './AttendanceCalendar';
 
 export default async function AttendancePage() {
     const status = await getTodayAttendanceStatus();
+    const attendanceHistory = await getAttendanceHistory();
 
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
             <h1 className={PORTAL_STYLES.HEADING_LG}>출석 현황</h1>
+
+            {/* Calendar Section */}
+            <AttendanceCalendar attendanceDates={attendanceHistory} />
 
             <div className="mb-6">
                 <AttendanceRequestButton initialStatus={status} />
@@ -16,9 +21,9 @@ export default async function AttendancePage() {
             <div className={PORTAL_STYLES.CARD}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
                     <p className={PORTAL_STYLES.TEXT_BODY}>
-                        최근 출석 기록이 여기에 표시됩니다.
+                        * 출석 버튼을 누르면 관리자에게 요청이 전송됩니다.<br />
+                        * 5분 후 하원 처리가 가능합니다.
                     </p>
-                    {/* List of recent attendance can be added here later */}
                 </div>
             </div>
         </div>
