@@ -98,69 +98,74 @@ export async function checkOutMemberSelf() {
 }
 
 export async function getTodayAttendanceStatus() {
-    const session = await getMemberSession()
-    if (!session || !session.memberId || !session.gymId) {
+    try {
+        const session = await getMemberSession()
+        if (!session || !session.memberId || !session.gymId) {
+            return null
+        }
+
+        const supabase = await createAdminClient()
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+
+        const { data: log, error } = await supabase
+            .from('gym_attendance_logs')
+            .select('*')
+            .eq('gym_id', session.gymId)
+            .eq('member_id', session.memberId)
+            .eq('date', today)
+            .single()
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+            console.error('[getTodayAttendanceStatus] Error fetching log:', error)
+            return null
+        }
+
+        if (log) {
+            return {
+                status: log.status, // 'pending' | 'present'
+                checked_out_at: log.checked_out_at,
+                check_in_at: log.check_in_at,
+                id: log.id
+            }
+        }
+        return null
+    } catch (e) {
+        console.error('[getTodayAttendanceStatus] Unexpected error:', e)
         return null
     }
-
-    const supabase = await createAdminClient()
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
-
-    const { data: log } = await supabase
-        .from('gym_attendance_logs')
-        .select('*')
-        .eq('gym_id', session.gymId)
-        .eq('member_id', session.memberId)
-        .eq('date', today)
-        .single()
-
-    // Add check for 5 minute rule here to pass to frontend?
-    // Frontend can calculate if we pass check_in_at
-    if (log) {
-        return {
-            status: log.status, // 'pending' | 'present'
-            checked_out_at: log.checked_out_at,
-            check_in_at: log.check_in_at,
-            id: log.id
-        }
-    }
-
-    return null
 }
 
 export async function getAttendanceHistory() {
-    const session = await getMemberSession()
-    if (!session || !session.memberId || !session.gymId) {
+    try {
+        const session = await getMemberSession()
+        if (!session || !session.memberId || !session.gymId) {
+            return []
+        }
+
+        const supabase = await createAdminClient()
+
+        // Fetch all 'present' logs for this member
+        console.log('[getAttendanceHistory] Fetching for', session.memberId);
+
+        const { data, error } = await supabase
+            .from('gym_attendance_logs')
+            .select('date, status')
+            .eq('gym_id', session.gymId)
+            .eq('member_id', session.memberId)
+            .eq('status', 'present')
+            .order('date', { ascending: false })
+
+        if (error) {
+            console.error('[getAttendanceHistory] Error:', error);
+            return []
+        }
+
+        if (!data) return []
+
+        // Return array of date strings (YYYY-MM-DD)
+        return data.map(log => log.date)
+    } catch (e) {
+        console.error('[getAttendanceHistory] Unexpected error:', e)
         return []
     }
-
-    const supabase = await createAdminClient()
-
-    // Fetch all 'present' logs for this member
-    // Optimizing: select only 'date' field
-    console.log('[getAttendanceHistory] Fetching for', session.memberId);
-
-    // First, check basic query without filters to debug
-    const { count } = await supabase
-        .from('gym_attendance_logs')
-        .select('*', { count: 'exact', head: true })
-        .eq('gym_id', session.gymId)
-        .eq('member_id', session.memberId);
-    console.log('[getAttendanceHistory] Total logs found:', count);
-
-    const { data, error } = await supabase
-        .from('gym_attendance_logs')
-        .select('date, status')
-        .eq('gym_id', session.gymId)
-        .eq('member_id', session.memberId)
-        .eq('status', 'present')
-        .order('date', { ascending: false })
-
-    console.log('[getAttendanceHistory] Data:', data);
-    console.log('[getAttendanceHistory] Error:', error);
-
-    if (!data) return []
-
-    // Return array of date strings (YYYY-MM-DD)
-    return data.map(log => log.date)
 }
