@@ -142,6 +142,14 @@ export async function getAttendanceHistory() {
             return { data: [], error: '로그인이 필요합니다.' }
         }
 
+        // Debugging Env Vars
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+            return { data: [], error: 'Config Error: NEXT_PUBLIC_SUPABASE_URL is missing' }
+        }
+        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            return { data: [], error: 'Config Error: SUPABASE_SERVICE_ROLE_KEY is missing' }
+        }
+
         const supabase = await createAdminClient()
 
         console.log('[getAttendanceHistory] Fetching for', session.memberId);
