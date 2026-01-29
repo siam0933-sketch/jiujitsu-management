@@ -147,7 +147,11 @@ export async function getAttendanceHistory() {
             return { data: [], error: 'Config Error: NEXT_PUBLIC_SUPABASE_URL is missing' }
         }
         if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-            return { data: [], error: 'Config Error: SUPABASE_SERVICE_ROLE_KEY is missing' }
+            // Debugging: List available keys (security safe)
+            const availableKeys = Object.keys(process.env)
+                .filter(key => key.startsWith('SUPABASE') || key.startsWith('NEXT_'))
+                .join(', ');
+            return { data: [], error: `Config Error: SUPABASE_SERVICE_ROLE_KEY is missing. Available: ${availableKeys}` }
         }
 
         const supabase = await createAdminClient()
