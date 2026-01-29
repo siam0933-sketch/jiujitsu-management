@@ -139,12 +139,11 @@ export async function getAttendanceHistory() {
     try {
         const session = await getMemberSession()
         if (!session || !session.memberId || !session.gymId) {
-            return []
+            return { data: [], error: '로그인이 필요합니다.' }
         }
 
         const supabase = await createAdminClient()
 
-        // Fetch all 'present' logs for this member
         console.log('[getAttendanceHistory] Fetching for', session.memberId);
 
         const { data, error } = await supabase
@@ -157,15 +156,15 @@ export async function getAttendanceHistory() {
 
         if (error) {
             console.error('[getAttendanceHistory] Error:', error);
-            return []
+            // Return actual error message for debugging on UI
+            return { data: [], error: `DB Error: ${error.message}` }
         }
 
-        if (!data) return []
+        if (!data) return { data: [], error: null }
 
-        // Return array of date strings (YYYY-MM-DD)
-        return data.map(log => log.date)
-    } catch (e) {
+        return { data: data.map(log => log.date), error: null }
+    } catch (e: any) {
         console.error('[getAttendanceHistory] Unexpected error:', e)
-        return []
+        return { data: [], error: `Server Error: ${e.message || 'Unknown error'}` }
     }
 }

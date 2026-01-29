@@ -5,14 +5,21 @@ import AttendanceCalendar from './AttendanceCalendar';
 
 export default async function AttendancePage() {
     const status = await getTodayAttendanceStatus();
-    const attendanceHistory = await getAttendanceHistory();
+
+    const attendanceResult = await getAttendanceHistory();
 
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
             <h1 className={PORTAL_STYLES.HEADING_LG}>출석 현황</h1>
 
             {/* Calendar Section */}
-            <AttendanceCalendar attendanceDates={attendanceHistory} />
+            {attendanceResult.error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm">
+                    <p className="font-bold">데이터 로딩 오류</p>
+                    <p>{attendanceResult.error}</p>
+                </div>
+            )}
+            <AttendanceCalendar attendanceDates={attendanceResult.data} />
 
             <div className="mb-6">
                 <AttendanceRequestButton initialStatus={status} />
