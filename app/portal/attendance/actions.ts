@@ -103,7 +103,7 @@ export async function getTodayAttendanceStatus() {
         return null
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
     const { data: log } = await supabase
@@ -134,7 +134,7 @@ export async function getAttendanceHistory() {
         return []
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // Fetch all 'present' logs for this member
     // Optimizing: select only 'date' field
