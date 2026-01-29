@@ -135,22 +135,22 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
                             <div key={day} className="flex flex-col items-center justify-center p-1 relative min-h-[40px]">
                                 <div
                                     className={cn(
-                                        "w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-all",
-                                        today
-                                            ? "bg-blue-600 text-white shadow-md z-10"
-                                            : "text-gray-700"
+                                        "w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-all shadow-sm",
+                                        // Base Text Color
+                                        !attended && !today && "text-gray-700 hover:bg-gray-100",
+
+                                        // Attendance Style (Green Circle)
+                                        attended && !today && "bg-green-500 text-white",
+
+                                        // Today Style (Blue Circle)
+                                        !attended && today && "bg-blue-600 text-white font-bold",
+
+                                        // Today AND Attended (Green BG + Blue Ring)
+                                        attended && today && "bg-green-600 text-white font-bold ring-2 ring-offset-1 ring-blue-600"
                                     )}
                                 >
                                     {day}
                                 </div>
-
-                                {attended && !today && (
-                                    <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-green-500 ring-2 ring-white"></div>
-                                )}
-
-                                {attended && today && (
-                                    <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-white opacity-90"></div>
-                                )}
                             </div>
                         )
                     })}
@@ -163,7 +163,7 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
                     <span>오늘</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
                     <span>출석</span>
                 </div>
             </div>
