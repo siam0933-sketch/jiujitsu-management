@@ -4,7 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import { Mail } from 'lucide-react'
 import Link from 'next/link'
 
-export default function PortalHeader() {
+interface PortalHeaderProps {
+    dojoName?: string
+}
+
+export default function PortalHeader({ dojoName }: PortalHeaderProps) {
     const [isVisible, setIsVisible] = useState(true)
     const lastScrollY = useRef(0)
 
@@ -36,8 +40,8 @@ export default function PortalHeader() {
             <div className="w-6"></div>
 
             {/* Center: Dojo Name */}
-            <h1 className="text-lg font-bold text-gray-900">
-                무짐(MUGYM)
+            <h1 className="text-lg font-bold text-gray-900 truncate max-w-[200px]">
+                {dojoName || '무짐(MUGYM)'}
             </h1>
 
             {/* Right: Message Icon */}
