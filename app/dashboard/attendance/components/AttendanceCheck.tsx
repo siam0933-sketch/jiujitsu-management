@@ -142,7 +142,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
         if (mode === 'daily') {
             loadEnrollments()
         }
-    }, [schedule.id, mode, effectiveDate])
+    }, [schedule, mode, effectiveDate]) // schedule object changes on router.refresh()
 
     const loadEnrollments = async () => {
         const ids = await getEnrollments(schedule.id)
