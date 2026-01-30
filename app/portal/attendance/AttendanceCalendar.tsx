@@ -152,7 +152,7 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
                                     {day}
                                 </div>
                                 {today && (
-                                    <div className="absolute bottom-1 w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                                    <div className="absolute bottom-1 w-4 h-[3px] bg-blue-600 rounded-full"></div>
                                 )}
                             </div>
                         )
@@ -162,7 +162,7 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
 
             <div className="px-4 pb-4 flex justify-end gap-3 text-xs text-gray-500">
                 <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                    <div className="w-4 h-[3px] rounded-full bg-blue-600"></div>
                     <span>오늘</span>
                 </div>
                 <div className="flex items-center gap-1">
