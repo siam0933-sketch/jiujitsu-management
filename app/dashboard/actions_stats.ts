@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 interface AttendanceStat {
     rate: number
     avgDaily: number
-    ranking: { name: string; count: number; memberId: string }[]
+    ranking: { name: string; count: number; memberId: string; age?: number }[]
 }
 
 export async function getAttendanceStats(): Promise<{
@@ -52,7 +52,7 @@ export async function getAttendanceStats(): Promise<{
     // --- Monthly Stats ---
     const { data: monthLogs } = await supabase
         .from('gym_attendance_logs')
-        .select('member_id, date, member:gym_members(name)')
+        .select('member_id, date, member:gym_members(name, birth_date)')
         .eq('gym_id', gym.id)
         .eq('status', 'present')
         .gte('date', startOfMonth)
@@ -60,7 +60,7 @@ export async function getAttendanceStats(): Promise<{
     // --- Yearly Stats ---
     const { data: yearLogs } = await supabase
         .from('gym_attendance_logs')
-        .select('member_id, date, member:gym_members(name)')
+        .select('member_id, date, member:gym_members(name, birth_date)')
         .eq('gym_id', gym.id)
         .eq('status', 'present')
         .gte('date', startOfYear)
@@ -88,22 +88,33 @@ function calculateStats(logs: any[], totalMembers: number): AttendanceStat {
     const rate = Math.round((avgDaily / totalMembers) * 100)
 
     // 4. Ranking
-    const counts: Record<string, { count: number, name: string }> = {}
+    const counts: Record<string, { count: number, name: string, age?: number }> = {}
 
     logs.forEach(log => {
         const id = log.member_id
         if (!counts[id]) {
-            // member might be an array or object depending on join, typically object with `name`
             const name = log.member?.name || 'Unknown'
-            counts[id] = { count: 0, name }
+            let age: number | undefined = undefined;
+            if (log.member?.birth_date) {
+                const birthDate = new Date(log.member.birth_date);
+                const today = new Date();
+                // Simple age calculation
+                let calcAge = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    calcAge--;
+                }
+                age = calcAge;
+            }
+            counts[id] = { count: 0, name, age }
         }
         counts[id].count++
     })
 
     const ranking = Object.entries(counts)
-        .map(([id, val]) => ({ memberId: id, name: val.name, count: val.count }))
+        .map(([id, val]) => ({ memberId: id, name: val.name, count: val.count, age: val.age }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 10) // Top 10
+    // .slice(0, 10) // Return all for client-side filtering
 
     return {
         rate,
