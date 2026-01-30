@@ -141,10 +141,9 @@ export default async function DashboardPage() {
                     </div>
                 </div>
             </div>
-        </div>
 
-            {/* Attendance Statistics */ }
-    <AttendanceStatsWidget />
-        </div >
+            {/* Attendance Statistics */}
+            <AttendanceStatsWidget />
+        </div>
     )
 }
