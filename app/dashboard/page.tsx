@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { getPromotionCandidates } from './attendance/actions_promotion'
 import { getTodayAttendanceLogs } from './attendance/actions'
 import PromotionWidget from './components/PromotionWidget'
+import AttendanceStatsWidget from './components/AttendanceStatsWidget'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -141,5 +142,9 @@ export default async function DashboardPage() {
                 </div>
             </div>
         </div>
+
+            {/* Attendance Statistics */ }
+    <AttendanceStatsWidget />
+        </div >
     )
 }
