@@ -142,15 +142,18 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
                                         // Attendance Style (Green Circle)
                                         attended && !today && "bg-green-500 text-white",
 
-                                        // Today Style (Blue Circle)
-                                        !attended && today && "bg-blue-600 text-white font-bold",
+                                        // Today Style (Blue Text)
+                                        !attended && today && "text-blue-600 font-bold",
 
-                                        // Today AND Attended (Green BG + Blue Ring)
-                                        attended && today && "bg-green-600 text-white font-bold ring-2 ring-offset-1 ring-blue-600"
+                                        // Today AND Attended (Green BG + Blue Text/Underline effect via parent)
+                                        attended && today && "bg-green-600 text-white font-bold"
                                     )}
                                 >
                                     {day}
                                 </div>
+                                {today && (
+                                    <div className="absolute bottom-1 w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                                )}
                             </div>
                         )
                     })}
@@ -159,7 +162,7 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
 
             <div className="px-4 pb-4 flex justify-end gap-3 text-xs text-gray-500">
                 <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                     <span>오늘</span>
                 </div>
                 <div className="flex items-center gap-1">
