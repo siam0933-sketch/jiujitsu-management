@@ -1,33 +1,13 @@
 import { PORTAL_STYLES } from '../styles';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getPromotionLogs } from '@/app/dashboard/members/[id]/actions'; // Re-use action
+import { getPortalPromotionLogs } from './actions';
 import { BELT_OPTIONS_DATA, displayBeltName } from '@/app/dashboard/members/constants';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PromotionPage() {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('member_session');
-
-    if (!sessionCookie) {
-        redirect('/portal');
-    }
-
-    let memberId = '';
-    try {
-        const session = JSON.parse(sessionCookie.value);
-        memberId = session.memberId;
-    } catch (e) {
-        // Fallback for string ID (legacy consistency)
-        memberId = sessionCookie.value;
-    }
-
-    if (!memberId) {
-        redirect('/portal');
-    }
-
-    const logs = await getPromotionLogs(memberId);
+    const logs = await getPortalPromotionLogs();
 
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
