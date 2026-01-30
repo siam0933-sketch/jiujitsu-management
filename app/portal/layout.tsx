@@ -1,4 +1,5 @@
 import BottomNav from './components/BottomNav';
+import PortalHeader from './components/PortalHeader';
 import { PORTAL_STYLES } from './styles';
 
 export default function PortalLayout({
@@ -8,7 +9,8 @@ export default function PortalLayout({
 }) {
     return (
         <div className={PORTAL_STYLES.PAGE_WRAPPER}>
-            <main className="flex-1">
+            <PortalHeader />
+            <main className="flex-1 pt-14"> {/* pt-14 matches header height */}
                 {children}
             </main>
             <BottomNav />
