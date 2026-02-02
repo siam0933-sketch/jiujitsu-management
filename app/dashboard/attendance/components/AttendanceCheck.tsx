@@ -349,11 +349,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
             {mode === 'weekly' && (
                 <div
                     onClick={handleWeeklyManageClick}
-                    className="bg-white border-b-2 border-gray-900 p-3 group relative hover:bg-gray-50 transition-all h-auto min-h-[100px] flex flex-col cursor-pointer last:border-b-0"
+                    className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 hover:shadow-md transition-all h-auto min-h-[100px] flex flex-col cursor-pointer"
                 >
-                    <div className="flex justify-between items-start mb-2 pb-2 border-b border-gray-300">
+                    <div className="flex justify-between items-start mb-2">
                         <div>
-                            <h4 className="font-bold text-gray-900 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
+                            <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
                             <p className="text-xs text-blue-600 font-bold mt-0.5">{schedule.start_time}</p>
                         </div>
                         {/* Show enrollment count badge */}
@@ -363,7 +363,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     </div>
 
                     {/* Enrolled Students List */}
-                    <div className="flex-1 overflow-y-auto scrollbar-hide max-h-[120px] pt-1">
+                    <div className="flex-1 overflow-y-auto scrollbar-hide max-h-[120px] border-t border-gray-50 pt-1">
                         {schedule.enrolled_members && schedule.enrolled_members.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                                 {[...schedule.enrolled_members]

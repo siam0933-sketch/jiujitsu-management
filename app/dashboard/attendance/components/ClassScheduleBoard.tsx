@@ -184,8 +184,8 @@ export default function ClassScheduleBoard({
                     <div className="flex-1 overflow-x-auto custom-scrollbar">
                         <div className="grid grid-cols-7 gap-3 min-w-[1050px] h-full">
                             {DAYS.map(day => (
-                                <div key={day.id} className="flex flex-col h-full bg-white border-2 border-gray-900 overflow-hidden">
-                                    <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500' : 'text-gray-900'} border-b-2 border-gray-900 bg-white`}>
+                                <div key={day.id} className="flex flex-col h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                    <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-50'} border-b border-gray-100`}>
                                         {day.label}
                                     </div>
                                     <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50">
