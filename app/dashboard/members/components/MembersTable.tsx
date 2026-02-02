@@ -284,19 +284,21 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                 <button
                                     onClick={handleGeneratePasswords}
                                     disabled={isGenerating}
-                                    className="block rounded-md bg-blue-50 px-3 py-2 text-center text-sm font-semibold text-blue-700 shadow-sm hover:bg-blue-100 disabled:opacity-50"
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors"
                                 >
-                                    {isGenerating ? '생성 중...' : '🔑 미설정 PW 일괄생성'}
+                                    {isGenerating ? '생성 중...' : '미설정 PW 일괄생성'}
                                 </button>
+                                <span className="text-gray-300">|</span>
                                 <button
                                     onClick={() => setIsEditMode(true)}
-                                    className="block rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
                                 >
                                     일괄 편집
                                 </button>
+                                <span className="text-gray-300">|</span>
                                 <Link
                                     href="/dashboard/members/new"
-                                    className="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
                                 >
                                     신규 회원 등록
                                 </Link>

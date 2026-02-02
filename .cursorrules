@@ -14,4 +14,6 @@
 
 4.  **Troubleshooting**:
     - **No Repeats**: If an error or problem persists after one attempt, **STOP**.
-    - **Alternative Solutions**: Immediately propose a different approach or alternative solution (Pivot) instead of retrying the same failed method.
+
+5.  **Git Workflow**:
+    - **Always Push**: Push all changes to the remote repository after completing a task or upon user request.

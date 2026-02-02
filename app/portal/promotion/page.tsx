@@ -29,53 +29,28 @@ export default async function PromotionPage() {
                                 const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || { name: displayName, colorClass: 'bg-gray-100', style: undefined };
 
                                 return (
-                                    <li key={log.id} className="px-4 py-5 sm:px-6 hover:bg-gray-50 transition-colors">
+                                    <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50 transition-colors">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex gap-4 items-center flex-1">
-                                                {/* Belt Icon */}
+                                            {/* LEFT: Belt Icon + Name/Stripe */}
+                                            <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-10 h-10 rounded-md shadow-sm flex-shrink-0 border flex items-center justify-center ${beltMeta.colorClass}`}
+                                                    className={`w-10 h-10 rounded-md shadow-sm border flex-shrink-0 flex items-center justify-center ${beltMeta.colorClass}`}
                                                     style={beltMeta.style}
-                                                >
-                                                    {/* Optional: Add stripe lines if needed, but color is sufficient for now */}
-                                                </div>
-
-                                                <div>
-                                                    <p className="text-base font-bold text-gray-900 flex items-center gap-2">
-                                                        {displayName}
-                                                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
-                                                            {log.stripe_level}그랄
-                                                        </span>
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 mt-0.5">승급일: {new Date(log.promoted_at).toLocaleDateString()}</p>
-                                                </div>
+                                                />
+                                                <p className="text-base font-bold text-gray-900">
+                                                    {displayName} {log.stripe_level}그랄
+                                                </p>
                                             </div>
 
-                                            <div className="text-right hidden sm:block">
-                                                <div className="flex flex-col gap-1 items-end">
-                                                    <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-                                                        수련일 <span className="font-bold text-gray-700">{log.training_days}일</span>
-                                                    </span>
-                                                    <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-                                                        출석 <span className="font-bold text-gray-700">{log.attendance_count}회</span>
-                                                    </span>
-                                                </div>
-                                                {log.awarded_by && (
-                                                    <p className="text-[10px] text-gray-400 mt-1">
-                                                        Checked by {log.awarded_by}
-                                                    </p>
-                                                )}
+                                            {/* RIGHT: Date + Stats (2 lines) */}
+                                            <div className="text-right">
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {new Date(log.promoted_at).toLocaleDateString()}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    수련 {log.training_days}일 · 출석 {log.attendance_count}회
+                                                </p>
                                             </div>
-                                        </div>
-
-                                        {/* Mobile View Stats */}
-                                        <div className="mt-3 flex gap-2 sm:hidden">
-                                            <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100">
-                                                수련 {log.training_days}일
-                                            </span>
-                                            <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100">
-                                                출석 {log.attendance_count}회
-                                            </span>
                                         </div>
 
                                         {log.memo && (

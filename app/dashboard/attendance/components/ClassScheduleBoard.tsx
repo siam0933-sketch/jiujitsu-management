@@ -97,49 +97,33 @@ export default function ClassScheduleBoard({
     return (
         <div className="h-full flex flex-col">
             {/* Header Actions */}
-            <div className="mb-6 flex justify-between items-center">
-                <div>
-                    <h2 className="text-xl font-bold text-gray-800">
-                        {viewMode === 'daily'
-                            ? `${DAYS.find(d => d.id === selectedDay)?.label} 수업`
-                            : '주간 시간표 관리'}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                        {viewMode === 'daily'
-                            ? `${DAYS.find(d => d.id === selectedDay)?.label} 수업 내역입니다.`
-                            : '전체 시간표를 확인하고 새 수업을 등록하세요.'}
-                        <span className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-500">
-                            총 회원: {activeMembers.length}명
-                        </span>
-                        <span className="ml-2 text-xs bg-yellow-100 px-2 py-1 rounded-full text-yellow-600">
-                            총 수업: {initialSchedules.length}개
-                        </span>
-                    </p>
-                </div>
-                <div className="flex gap-2">
+            <div className="mb-6 flex justify-end items-center">
+                <div className="flex gap-2 items-center">
                     <button
                         onClick={() => setViewMode('daily')}
-                        className={`px-4 py-2 rounded-lg font-bold transition border ${viewMode === 'daily'
-                            ? 'bg-blue-50 text-blue-600 border-blue-200'
-                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                        className={`text-sm font-medium transition-colors ${viewMode === 'daily'
+                            ? 'text-gray-900 font-bold'
+                            : 'text-gray-500 hover:text-gray-900'
                             }`}
                     >
                         오늘 수업 보기
                     </button>
+                    <span className="text-gray-300">|</span>
                     <button
                         onClick={() => setViewMode('weekly')}
-                        className={`px-4 py-2 rounded-lg font-bold transition border ${viewMode === 'weekly'
-                            ? 'bg-blue-50 text-blue-600 border-blue-200'
-                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                        className={`text-sm font-medium transition-colors ${viewMode === 'weekly'
+                            ? 'text-gray-900 font-bold'
+                            : 'text-gray-500 hover:text-gray-900'
                             }`}
                     >
                         전체 수업 보기
                     </button>
+                    <span className="text-gray-300">|</span>
                     <button
                         onClick={handleCreateClassClick}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-2"
+                        className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
                     >
-                        <span>+ 클래스 만들기</span>
+                        + 클래스 만들기
                     </button>
                 </div>
             </div>
