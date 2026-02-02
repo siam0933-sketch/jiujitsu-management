@@ -21,10 +21,9 @@ interface Props {
     mode: 'daily' | 'weekly'
     targetDate?: string
     todayKST: string
-    isLast?: boolean
 }
 
-export default function AttendanceCheck({ schedule, allMembers, mode, targetDate, todayKST, isLast }: Props) {
+export default function AttendanceCheck({ schedule, allMembers, mode, targetDate, todayKST }: Props) {
     const router = useRouter()
     // Mode States
     const [isMenuOpen, setIsMenuOpen] = useState(false) // Gear menu toggle
@@ -399,12 +398,12 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
             {/* Daily Mode View */}
             {mode === 'daily' && (
-                <div className={`bg-white hover:bg-gray-50 transition-all overflow-visible relative ${isMenuOpen ? 'z-20' : 'z-0'} ${!isLast ? 'border-b-2 border-gray-900' : ''}`}>
+                <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative ${isMenuOpen ? 'z-20' : 'z-0'}`}>
                     {/* Header */}
-                    <div className="p-3 flex justify-between items-center bg-white border-b border-gray-300 relative">
+                    <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
                         <div className="flex items-center gap-2">
                             <p className="text-sm text-blue-600 font-bold">{schedule.start_time}</p>
-                            <h4 className="font-bold text-gray-900 text-lg">{schedule.class_name}</h4>
+                            <h4 className="font-bold text-gray-800 text-lg">{schedule.class_name}</h4>
                             <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
                         </div>
 
@@ -452,7 +451,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     </div>
 
                     {/* Enrolled List */}
-                    <div className="bg-white">
+                    <div className="border-t border-gray-100 bg-white">
                         {enrolledMembers.length > 0 ? (
                             <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
                                 {enrolledMembers.map(member => (

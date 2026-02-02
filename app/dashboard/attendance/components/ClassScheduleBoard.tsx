@@ -153,36 +153,29 @@ export default function ClassScheduleBoard({
 
                 {/* DAILY VIEW LIST */}
                 {viewMode === 'daily' && (
-                    <div className="max-w-2xl pb-[70vh]">
+                    <div className="space-y-4 max-w-2xl pb-[70vh]">
                         {/* Always show pending list here, independent of schedules */}
                         <PendingApprovalList todayKST={todayKST} />
 
-                        <div className="mt-4 border-2 border-gray-900 bg-white">
-                            <div className="text-center font-bold py-2 text-sm border-b-2 border-gray-900 bg-white">
-                                {DAYS.find(d => d.id === selectedDay)?.label}
+                        {displayedSchedules.length > 0 ? (
+                            displayedSchedules.map(schedule => (
+                                <AttendanceCheck
+                                    key={schedule.id}
+                                    schedule={schedule}
+                                    allMembers={activeMembers}
+                                    mode="daily"
+                                    targetDate={getDateForDay(selectedDay)}
+                                    todayKST={todayKST}
+                                />
+                            ))
+                        ) : (
+                            <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                <p className="text-gray-400 mb-2">예정된 수업이 없습니다.</p>
+                                <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
+                                    + 첫 수업 만들기
+                                </button>
                             </div>
-
-                            {displayedSchedules.length > 0 ? (
-                                displayedSchedules.map((schedule, idx) => (
-                                    <AttendanceCheck
-                                        key={schedule.id}
-                                        schedule={schedule}
-                                        allMembers={activeMembers}
-                                        mode="daily"
-                                        targetDate={getDateForDay(selectedDay)}
-                                        todayKST={todayKST}
-                                        isLast={idx === displayedSchedules.length - 1}
-                                    />
-                                ))
-                            ) : (
-                                <div className="text-center py-20 bg-white">
-                                    <p className="text-gray-400 mb-2">예정된 수업이 없습니다.</p>
-                                    <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
-                                        + 첫 수업 만들기
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        )}
                     </div>
                 )}
 
