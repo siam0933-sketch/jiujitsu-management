@@ -181,29 +181,31 @@ export default function ClassScheduleBoard({
 
                 {/* WEEKLY VIEW GRID */}
                 {viewMode === 'weekly' && (
-                    <div className="grid grid-cols-7 gap-3 min-w-[800px] h-full">
-                        {DAYS.map(day => (
-                            <div key={day.id} className="flex flex-col h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                                <div className={`text-center font-bold py-2 text-sm ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-50'} border-b border-gray-100`}>
-                                    {day.label}
+                    <div className="flex-1 overflow-x-auto custom-scrollbar">
+                        <div className="grid grid-cols-7 gap-3 min-w-[1050px] h-full">
+                            {DAYS.map(day => (
+                                <div key={day.id} className="flex flex-col h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                    <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-50'} border-b border-gray-100`}>
+                                        {day.label}
+                                    </div>
+                                    <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50">
+                                        {initialSchedules
+                                            .filter(s => s.day_of_week === day.id)
+                                            .map(schedule => (
+                                                <AttendanceCheck
+                                                    key={schedule.id}
+                                                    schedule={schedule}
+                                                    allMembers={activeMembers}
+                                                    mode="weekly"
+                                                    targetDate={getDateForDay(day.id)}
+                                                    todayKST={todayKST}
+                                                />
+                                            ))
+                                        }
+                                    </div>
                                 </div>
-                                <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50">
-                                    {initialSchedules
-                                        .filter(s => s.day_of_week === day.id)
-                                        .map(schedule => (
-                                            <AttendanceCheck
-                                                key={schedule.id}
-                                                schedule={schedule}
-                                                allMembers={activeMembers}
-                                                mode="weekly"
-                                                targetDate={getDateForDay(day.id)}
-                                                todayKST={todayKST}
-                                            />
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
