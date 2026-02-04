@@ -101,7 +101,7 @@ export default function KioskPage() {
     return (
         <div
             onClick={handleGlobalClick}
-            className="fixed inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-gray-900 flex flex-col overflow-hidden overscroll-none h-[100dvh] w-screen"
         >
             {/* Exit Button (Hidden or discreet) */}
             <button
@@ -112,7 +112,7 @@ export default function KioskPage() {
                     }
                     router.back()
                 }}
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-400 p-2 z-[60]"
+                className="absolute top-4 right-4 text-gray-400/50 hover:text-gray-600 p-2 z-[60]"
                 aria-label="Exit Kiosk"
             >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,10 +120,10 @@ export default function KioskPage() {
                 </svg>
             </button>
 
-            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[80vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header / Display Area */}
-                <div onClick={handleGlobalClick} className={`p-8 text-center flex-1 flex flex-col justify-center items-center transition-colors ${status === 'success' ? 'bg-green-100' :
+                <div onClick={handleGlobalClick} className={`p-4 text-center flex-[0.35] flex flex-col justify-center items-center transition-colors ${status === 'success' ? 'bg-green-100' :
                     status === 'error' ? 'bg-red-50' :
                         'bg-white'
                     }`}>
@@ -134,18 +134,18 @@ export default function KioskPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <h2 className="text-2xl font-bold text-green-800">{message}</h2>
+                            <h2 className="text-3xl font-bold text-green-800">{message}</h2>
                         </div>
                     ) : (
                         <>
                             <h1 className="text-xl font-medium text-gray-500 mb-2">
                                 {status === 'selection' ? '회원을 선택해주세요' : '출석체크'}
                             </h1>
-                            <div className="text-4xl font-bold text-gray-900 tracking-widest min-h-[3rem]">
+                            <div className="text-5xl font-bold text-gray-900 tracking-widest min-h-[4rem] flex items-center justify-center">
                                 {phone.length > 0 ? phone : <span className="text-gray-200">01012345678</span>}
                             </div>
                             {message && status !== 'selection' && (
-                                <p className={`mt-4 ${status === 'error' ? 'text-red-500' : 'text-blue-500'}`}>
+                                <p className={`mt-2 text-lg ${status === 'error' ? 'text-red-500' : 'text-blue-500'}`}>
                                     {message}
                                 </p>
                             )}
@@ -155,20 +155,20 @@ export default function KioskPage() {
 
                 {/* Selection Overlay */}
                 {status === 'selection' && (
-                    <div className="absolute inset-x-0 bottom-0 top-32 bg-white/95 backdrop-blur-sm p-4 overflow-y-auto">
-                        <div className="space-y-2">
+                    <div className="absolute inset-x-0 bottom-0 top-[35%] bg-white/95 backdrop-blur-sm p-4 overflow-y-auto">
+                        <div className="space-y-3">
                             {candidates.map(candidate => (
                                 <button
                                     key={candidate.id}
                                     onClick={() => handleSelectCandidate(candidate)}
-                                    className="w-full p-4 bg-white border-2 border-blue-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all flex justify-between items-center text-left shadow-sm"
+                                    className="w-full p-6 bg-white border-2 border-blue-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all flex justify-between items-center text-left shadow-md"
                                 >
                                     <div>
-                                        <div className="font-bold text-lg text-gray-900">{candidate.name}</div>
-                                        <div className="text-sm text-gray-500">{candidate.phone}</div>
+                                        <div className="font-bold text-xl text-gray-900">{candidate.name}</div>
+                                        <div className="text-gray-500">{candidate.phone}</div>
                                     </div>
                                     <div className="text-blue-500">
-                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </div>
@@ -177,7 +177,7 @@ export default function KioskPage() {
                         </div>
                         <button
                             onClick={handleClear}
-                            className="w-full mt-4 p-3 text-gray-500 hover:bg-gray-100 rounded-lg"
+                            className="w-full mt-4 p-4 text-lg font-medium text-gray-500 hover:bg-gray-100 rounded-xl"
                         >
                             취소하고 다시 입력
                         </button>
@@ -186,31 +186,31 @@ export default function KioskPage() {
 
                 {/* Keypad */}
                 {status !== 'selection' && status !== 'success' && (
-                    <div className="bg-gray-50 p-6 grid grid-cols-3 gap-4">
+                    <div className="bg-gray-50 p-2 grid grid-cols-3 gap-2 flex-[0.65]">
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                             <button
                                 key={num}
                                 onClick={() => handleDigit(num.toString())}
-                                className="h-16 rounded-xl bg-white shadow-sm border border-gray-200 text-2xl font-semibold text-gray-800 active:bg-gray-100 hover:shadow-md transition-all"
+                                className="h-full rounded-xl bg-white shadow-sm border border-gray-200 text-3xl font-semibold text-gray-800 active:bg-gray-100 active:scale-[0.98] transition-all"
                             >
                                 {num}
                             </button>
                         ))}
                         <button
                             onClick={handleClear}
-                            className="h-16 rounded-xl bg-red-100 text-red-600 font-medium active:bg-red-200"
+                            className="h-full rounded-xl bg-red-50 text-red-600 font-medium active:bg-red-100 border border-red-100 text-xl"
                         >
                             초기화
                         </button>
                         <button
                             onClick={() => handleDigit('0')}
-                            className="h-16 rounded-xl bg-white shadow-sm border border-gray-200 text-2xl font-semibold text-gray-800 active:bg-gray-100"
+                            className="h-full rounded-xl bg-white shadow-sm border border-gray-200 text-3xl font-semibold text-gray-800 active:bg-gray-100 active:scale-[0.98]"
                         >
                             0
                         </button>
                         <button
                             onClick={handleBackspace}
-                            className="h-16 rounded-xl bg-gray-200 text-gray-700 active:bg-gray-300 flex items-center justify-center"
+                            className="h-full rounded-xl bg-gray-100 text-gray-700 active:bg-gray-200 flex items-center justify-center border border-gray-200"
                         >
                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
@@ -220,19 +220,15 @@ export default function KioskPage() {
                         <button
                             onClick={handleSubmit}
                             disabled={phone.length < 4}
-                            className="col-span-3 h-20 mt-2 rounded-xl bg-blue-600 text-white text-xl font-bold hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+                            className="col-span-3 h-full rounded-xl bg-blue-600 text-white text-2xl font-bold hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 mt-1"
                         >
                             <span>출석하기</span>
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </button>
                     </div>
                 )}
-            </div>
-
-            <div className="mt-8 text-white/50 text-sm">
-                관리자가 로그인한 상태에서 사용하는 키오스크 모드입니다.
             </div>
         </div>
     )
