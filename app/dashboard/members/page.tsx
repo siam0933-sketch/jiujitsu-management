@@ -104,7 +104,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
     })
 
     return (
-        <div>
+        <div className="max-w-7xl mx-auto">
             {/* Modal */}
             {selectedMember && <MemberModal member={selectedMember} />}
 

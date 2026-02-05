@@ -17,7 +17,7 @@ export default async function AttendancePage() {
     const todayKST = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
     return (
-        <div className="min-h-[calc(100vh-100px)] p-6">
+        <div className="min-h-[calc(100vh-100px)] p-6 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold text-gray-800">출석부</h1>
