@@ -575,7 +575,7 @@ export default function MemberModal({ member }: { member: any }) {
                                             <div className="p-6 bg-white border-t">
                                                 {/* Simple Payment Form */}
                                                 <div className="space-y-4">
-                                                    <select value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)} className="w-full text-base border-gray-300 rounded p-2">
+                                                    <select value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)} className="w-full text-base border-2 border-gray-900 rounded p-2">
                                                         <option value="">이용권 선택</option>
                                                         {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
                                                     </select>
