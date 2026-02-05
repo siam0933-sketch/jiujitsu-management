@@ -321,7 +321,7 @@ export default function MemberModal({ member }: { member: any }) {
                         {/* Header */}
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 flex justify-between items-start">
                             <div className="flex-1">
-                                <p className="text-sm text-gray-500 mb-1">회원 상세 정보</p>
+                                <p className="text-2xl font-bold text-gray-900 mb-1">회원 상세 정보</p>
                                 {/* Header content removed as per request */}
                             </div>
                             <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
