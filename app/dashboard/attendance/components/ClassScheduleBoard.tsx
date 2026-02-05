@@ -128,87 +128,88 @@ export default function ClassScheduleBoard({
                 </div>
             </div>
 
-            {/* Daily View Tabs */}
+            {/* Daily View: Unified Box */}
             {viewMode === 'daily' && (
-                <div className="flex-none w-full bg-white border-b border-gray-200 mb-6 space-x-1 overflow-x-auto pb-1 z-10 relative">
-                    {DAYS.map(day => (
-                        <button
-                            key={day.id}
-                            onClick={() => setSelectedDay(day.id)}
-                            className={`
-                                px-6 py-3 rounded-t-lg font-bold text-sm transition-all whitespace-nowrap
-                                ${selectedDay === day.id
-                                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}
-                            `}
-                        >
-                            {day.label}
-                        </button>
-                    ))}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full max-h-[calc(100vh-200px)]">
+                    {/* Tabs Header */}
+                    <div className="flex-none flex w-full bg-gray-50 border-b border-gray-200 overflow-x-auto">
+                        {DAYS.map(day => (
+                            <button
+                                key={day.id}
+                                onClick={() => setSelectedDay(day.id)}
+                                className={`
+                                    flex-1 px-4 py-4 text-sm font-bold transition-all whitespace-nowrap border-r border-gray-100 last:border-0
+                                    ${selectedDay === day.id
+                                        ? 'bg-white text-blue-600 shadow-[inset_0_2px_0_0_rgba(37,99,235,1)]'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}
+                                `}
+                            >
+                                {day.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/30">
+                        <div className="max-w-3xl mx-auto space-y-4">
+                            {/* Always show pending list here */}
+                            <PendingApprovalList todayKST={todayKST} />
+
+                            {displayedSchedules.length > 0 ? (
+                                displayedSchedules.map(schedule => (
+                                    <AttendanceCheck
+                                        key={schedule.id}
+                                        schedule={schedule}
+                                        allMembers={activeMembers}
+                                        mode="daily"
+                                        targetDate={getDateForDay(selectedDay)}
+                                        todayKST={todayKST}
+                                    />
+                                ))
+                            ) : (
+                                <div className="text-center py-20">
+                                    <div className="bg-white rounded-xl border border-dashed border-gray-300 p-10 inline-block">
+                                        <p className="text-gray-400 mb-2">예정된 수업이 없습니다.</p>
+                                        <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
+                                            + 첫 수업 만들기
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* Content Area */}
-            <div className={`flex-1 overflow-visible ${viewMode === 'weekly' ? 'bg-gray-50 rounded-xl border border-gray-200 p-4' : ''}`}>
-
-                {/* DAILY VIEW LIST */}
-                {viewMode === 'daily' && (
-                    <div className="space-y-4 max-w-2xl pb-[70vh]">
-                        {/* Always show pending list here, independent of schedules */}
-                        <PendingApprovalList todayKST={todayKST} />
-
-                        {displayedSchedules.length > 0 ? (
-                            displayedSchedules.map(schedule => (
-                                <AttendanceCheck
-                                    key={schedule.id}
-                                    schedule={schedule}
-                                    allMembers={activeMembers}
-                                    mode="daily"
-                                    targetDate={getDateForDay(selectedDay)}
-                                    todayKST={todayKST}
-                                />
-                            ))
-                        ) : (
-                            <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                                <p className="text-gray-400 mb-2">예정된 수업이 없습니다.</p>
-                                <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
-                                    + 첫 수업 만들기
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* WEEKLY VIEW GRID */}
-                {viewMode === 'weekly' && (
-                    <div className="flex-1 overflow-x-auto custom-scrollbar">
-                        <div className="grid grid-cols-7 gap-3 min-w-[1050px] h-full">
-                            {DAYS.map(day => (
-                                <div key={day.id} className="flex flex-col h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                                    <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-50'} border-b border-gray-100`}>
-                                        {day.label}
-                                    </div>
-                                    <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50">
-                                        {initialSchedules
-                                            .filter(s => s.day_of_week === day.id)
-                                            .map(schedule => (
-                                                <AttendanceCheck
-                                                    key={schedule.id}
-                                                    schedule={schedule}
-                                                    allMembers={activeMembers}
-                                                    mode="weekly"
-                                                    targetDate={getDateForDay(day.id)}
-                                                    todayKST={todayKST}
-                                                />
-                                            ))
-                                        }
-                                    </div>
+            {/* Weekly View GRID (unchanged structure, just conditional) */}
+            {viewMode === 'weekly' && (
+                <div className="flex-1 overflow-visible bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <div className="grid grid-cols-7 gap-3 min-w-[1050px] h-full">
+                        {DAYS.map(day => (
+                            <div key={day.id} className="flex flex-col h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 bg-gray-50'} border-b border-gray-100`}>
+                                    {day.label}
                                 </div>
-                            ))}
-                        </div>
+                                <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50">
+                                    {initialSchedules
+                                        .filter(s => s.day_of_week === day.id)
+                                        .map(schedule => (
+                                            <AttendanceCheck
+                                                key={schedule.id}
+                                                schedule={schedule}
+                                                allMembers={activeMembers}
+                                                mode="weekly"
+                                                targetDate={getDateForDay(day.id)}
+                                                todayKST={todayKST}
+                                            />
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {isModalOpen && <CreateClassModal onClose={() => { setIsModalOpen(false); }} allMembers={activeMembers} />}
         </div>
