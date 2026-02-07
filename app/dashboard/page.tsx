@@ -4,7 +4,8 @@ import { getTodayAttendanceLogs } from './attendance/actions'
 import PromotionWidget from './components/PromotionWidget'
 import AttendanceStatsWidget from './components/AttendanceStatsWidget'
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: { searchParams: Promise<{ statsMonth?: string }> }) {
+    const searchParamsObj = await props.searchParams
     const supabase = await createClient()
 
     const {
@@ -143,7 +144,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Attendance Statistics */}
-            <AttendanceStatsWidget />
+            <AttendanceStatsWidget monthStr={searchParamsObj?.statsMonth} />
         </div>
     )
 }

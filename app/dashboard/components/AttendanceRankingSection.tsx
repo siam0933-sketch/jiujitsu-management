@@ -18,11 +18,13 @@ interface RankingItem {
 interface AttendanceRankingSectionProps {
     monthRanking: RankingItem[]
     yearRanking: RankingItem[]
+    monthTitle: string
+    yearTitle: string
 }
 
 type FilterType = 'all' | 'under16' | 'over16'
 
-export default function AttendanceRankingSection({ monthRanking, yearRanking }: AttendanceRankingSectionProps) {
+export default function AttendanceRankingSection({ monthRanking, yearRanking, monthTitle, yearTitle }: AttendanceRankingSectionProps) {
     const [filter, setFilter] = useState<FilterType>('all')
 
     const filterList = (list: RankingItem[]) => {
@@ -55,10 +57,10 @@ export default function AttendanceRankingSection({ monthRanking, yearRanking }: 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Monthly Ranking */}
-                <RankingCard title="🏆 이번 달 출석 랭킹" items={filteredMonth} />
+                <RankingCard title={`🏆 ${monthTitle}`} items={filteredMonth} />
 
                 {/* Yearly Ranking */}
-                <RankingCard title="👑 올해 출석 랭킹" items={filteredYear} />
+                <RankingCard title={`👑 ${yearTitle}`} items={filteredYear} />
             </div>
         </div>
     )
