@@ -474,31 +474,32 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                             key={member.id}
                                             className="
                                                 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all
-                                                flex flex-col justify-between overflow-hidden aspect-video relative group
+                                                flex flex-col justify-between overflow-hidden aspect-video relative group p-3
                                             "
                                         >
-                                            {/* Header: Number + Name + Info */}
-                                            <div className="p-2 flex-none">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                                        <span className="text-xs font-bold text-gray-400 min-w-[1.2em]">{enrolledMembers.length - idx}.</span>
-                                                        <span className="font-bold text-gray-800 text-sm truncate">{member.name}</span>
-                                                    </div>
+                                            {/* Header: Name (Left) + Info (Right) */}
+                                            <div className="flex justify-between items-start w-full mb-2">
+                                                {/* Left: Number + Name */}
+                                                <div className="flex flex-col flex-1 min-w-0 pr-2">
+                                                    <span className="text-[10px] text-gray-400 font-bold mb-0.5">{enrolledMembers.length - idx}.</span>
+                                                    <span className="font-extrabold text-gray-900 text-lg sm:text-xl leading-tight truncate tracking-tight">{member.name}</span>
                                                 </div>
-                                                <div className="flex gap-1 mt-1 flex-wrap">
+
+                                                {/* Right: Info Stack */}
+                                                <div className="flex flex-col items-end gap-1 flex-shrink-0">
                                                     {member.birth_date && (
-                                                        <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                                                        <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md whitespace-nowrap">
                                                             {calculateAge(member.birth_date)}
                                                         </span>
                                                     )}
-                                                    <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full truncate max-w-full">
+                                                    <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md whitespace-nowrap max-w-[80px] truncate text-right">
                                                         {member.belt}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             {/* Footer: Action Button */}
-                                            <div className="p-2 pt-0 flex-1 flex items-end">
+                                            <div className="mt-auto w-full">
                                                 {isToday ? (
                                                     (() => {
                                                         const status = attendanceStatus[member.id]
@@ -525,19 +526,24 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                                 onClick={() => handleCheckInToggle(member)}
                                                                 disabled={isProcessing}
                                                                 className={`
-                                                                    w-full py-2 rounded-md text-sm font-bold shadow-sm transition-all
+                                                                    w-full py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all flex items-center justify-center
                                                                     ${btnClass}
                                                                     ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 `}
                                                             >
-                                                                {isProcessing ? '처리중' : btnText}
+                                                                {isProcessing ? (
+                                                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                    </svg>
+                                                                ) : btnText}
                                                             </button>
                                                         )
                                                     })()
                                                 ) : (
                                                     <button
                                                         onClick={() => openCalendar(member.id)}
-                                                        className="w-full py-2 rounded-md text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:bg-white hover:border-blue-300 hover:text-blue-600 transition-all flex items-center justify-center gap-1"
+                                                        className="w-full py-2.5 rounded-lg text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:bg-white hover:border-blue-300 hover:text-blue-600 transition-all flex items-center justify-center gap-1"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
