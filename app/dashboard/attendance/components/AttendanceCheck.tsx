@@ -466,80 +466,91 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                     {/* Enrolled List */}
                     {isExpanded && (
-                        <div className="border-t border-gray-100 bg-white">
+                        <div className="border-t border-gray-100 bg-white p-3">
                             {enrolledMembers.length > 0 ? (
-                                <div className="p-1">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                     {enrolledMembers.map((member, idx) => (
                                         <div
                                             key={member.id}
-                                            className={`
-                                            w-full px-3 py-2 rounded-md text-sm flex justify-between items-center transition-colors border-b border-gray-50 last:border-0
-                                            hover:bg-gray-50
-                                        `}
+                                            className="
+                                                bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all
+                                                flex flex-col justify-between overflow-hidden aspect-video relative group
+                                            "
                                         >
-                                            <span className="text-gray-700">
-                                                <span className="text-gray-400 text-xs mr-2 inline-block min-w-[1.5em]">{enrolledMembers.length - idx}.</span>
-                                                {member.name}
-                                                {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
-                                                <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
-                                            </span>
+                                            {/* Header: Number + Name + Info */}
+                                            <div className="p-2 flex-none">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                                        <span className="text-xs font-bold text-gray-400 min-w-[1.2em]">{enrolledMembers.length - idx}.</span>
+                                                        <span className="font-bold text-gray-800 text-sm truncate">{member.name}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-1 mt-1 flex-wrap">
+                                                    {member.birth_date && (
+                                                        <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                                                            {calculateAge(member.birth_date)}
+                                                        </span>
+                                                    )}
+                                                    <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full truncate max-w-full">
+                                                        {member.belt}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                            {/* Action Button: Today -> CheckIn/Out, Other -> Calendar */}
-                                            {isToday ? (
-                                                (() => {
-                                                    const status = attendanceStatus[member.id]
-                                                    const isProcessing = processingIds.has(member.id)
+                                            {/* Footer: Action Button */}
+                                            <div className="p-2 pt-0 flex-1 flex items-end">
+                                                {isToday ? (
+                                                    (() => {
+                                                        const status = attendanceStatus[member.id]
+                                                        const isProcessing = processingIds.has(member.id)
 
-                                                    // Default: Wait (대기)
-                                                    let btnClass = 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200'
-                                                    let btnText = '대기'
+                                                        let btnClass = 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:border-gray-300'
+                                                        let btnText = '출석'
 
-                                                    if (status) {
-                                                        if (status.status === 'pending') {
-                                                            // Pending: Approval Request (승인 요청)
-                                                            btnClass = 'bg-red-100 text-red-700 ring-red-600/20 hover:bg-red-200 animate-pulse'
-                                                            btnText = '승인 요청'
-                                                        } else if (status.checkedOut) {
-                                                            // Checked Out: Left (하원)
-                                                            btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
-                                                            btnText = '하원'
-                                                        } else {
-                                                            // Checked In: Present (출석)
-                                                            btnClass = 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
-                                                            btnText = '출석'
+                                                        if (status) {
+                                                            if (status.status === 'pending') {
+                                                                btnClass = 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 animate-pulse'
+                                                                btnText = '승인'
+                                                            } else if (status.checkedOut) {
+                                                                btnClass = 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                                                                btnText = '하원'
+                                                            } else {
+                                                                btnClass = 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                                                                btnText = '완료'
+                                                            }
                                                         }
-                                                    }
 
-                                                    return (
-                                                        <button
-                                                            onClick={() => handleCheckInToggle(member)}
-                                                            disabled={isProcessing}
-                                                            className={`
-                                                            rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
-                                                            ${btnClass}
-                                                            ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-                                                        `}
-                                                        >
-                                                            {isProcessing ? '...' : btnText}
-                                                        </button>
-                                                    )
-                                                })()
-                                            ) : (
-                                                <button
-                                                    onClick={() => openCalendar(member.id)}
-                                                    className="p-1 px-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                                    title="달력 보기"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </button>
-                                            )}
+                                                        return (
+                                                            <button
+                                                                onClick={() => handleCheckInToggle(member)}
+                                                                disabled={isProcessing}
+                                                                className={`
+                                                                    w-full py-2 rounded-md text-sm font-bold shadow-sm transition-all
+                                                                    ${btnClass}
+                                                                    ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+                                                                `}
+                                                            >
+                                                                {isProcessing ? '처리중' : btnText}
+                                                            </button>
+                                                        )
+                                                    })()
+                                                ) : (
+                                                    <button
+                                                        onClick={() => openCalendar(member.id)}
+                                                        className="w-full py-2 rounded-md text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:bg-white hover:border-blue-300 hover:text-blue-600 transition-all flex items-center justify-center gap-1"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        달력
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="p-4 text-center text-xs text-gray-400">
+                                <div className="p-10 text-center text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                                     등록된 수강생이 없습니다.
                                 </div>
                             )}
