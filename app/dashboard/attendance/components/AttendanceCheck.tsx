@@ -469,7 +469,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                         <div className="border-t border-gray-100 bg-white">
                             {enrolledMembers.length > 0 ? (
                                 <div className="p-1">
-                                    {enrolledMembers.map(member => (
+                                    {enrolledMembers.map((member, idx) => (
                                         <div
                                             key={member.id}
                                             className={`
@@ -478,6 +478,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                         `}
                                         >
                                             <span className="text-gray-700">
+                                                <span className="text-gray-400 text-xs mr-2 inline-block min-w-[1.5em]">{enrolledMembers.length - idx}.</span>
                                                 {member.name}
                                                 {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
                                                 <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
