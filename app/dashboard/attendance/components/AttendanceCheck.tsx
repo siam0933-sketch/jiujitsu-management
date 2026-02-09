@@ -474,52 +474,46 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                             key={member.id}
                                             className="
                                                 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all
-                                                flex flex-row overflow-hidden relative group
-                                                h-24 sm:h-28
+                                                flex flex-row items-center justify-between p-3 gap-3
                                             "
                                         >
-                                            {/* Left: Info (Name, Age, Belt) */}
-                                            <div className="flex-1 p-3 flex flex-col justify-center min-w-0">
-                                                {/* Top: Number, Name (Age) */}
-                                                <div className="flex items-center gap-1.5 mb-1.5 w-full">
-                                                    <span className="text-xs font-bold text-gray-400 min-w-[1.2em]">{enrolledMembers.length - idx}.</span>
-                                                    <div className="flex items-baseline gap-1 min-w-0 flex-1">
-                                                        <span className="font-extrabold text-gray-900 text-lg leading-tight truncate">{member.name}</span>
-                                                        {member.birth_date && (
-                                                            <span className="text-xs text-gray-500 font-normal">
-                                                                ({calculateAge(member.birth_date)})
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                            {/* Left: Info (3 Lines) */}
+                                            <div className="flex flex-col justify-center min-w-0 flex-1">
+                                                {/* Line 1: Name */}
+                                                <div className="font-extrabold text-gray-900 text-base leading-tight truncate mb-0.5">
+                                                    {member.name}
                                                 </div>
-
-                                                {/* Bottom: Belt */}
-                                                <div className="flex items-center w-full pl-5">
-                                                    <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md truncate max-w-full">
-                                                        {member.belt}
-                                                    </span>
+                                                {/* Line 2: Age */}
+                                                {member.birth_date && (
+                                                    <div className="text-xs text-gray-500 font-normal mb-1">
+                                                        {calculateAge(member.birth_date)}
+                                                    </div>
+                                                )}
+                                                {/* Line 3: Belt */}
+                                                <div className="text-[10px] font-semibold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-md truncate w-fit">
+                                                    {member.belt}
                                                 </div>
                                             </div>
 
                                             {/* Right: Action Button */}
-                                            <div className="w-[30%] min-w-[80px] border-l border-gray-100">
+                                            <div className="flex-shrink-0">
                                                 {isToday ? (
                                                     (() => {
                                                         const status = attendanceStatus[member.id]
                                                         const isProcessing = processingIds.has(member.id)
 
-                                                        let btnClass = 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                                        let btnClass = 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                                         let btnText = '출석'
 
                                                         if (status) {
                                                             if (status.status === 'pending') {
-                                                                btnClass = 'bg-red-50 text-red-600 hover:bg-red-100 animate-pulse'
+                                                                btnClass = 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 animate-pulse'
                                                                 btnText = '승인'
                                                             } else if (status.checkedOut) {
-                                                                btnClass = 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                                                btnClass = 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
                                                                 btnText = '하원'
                                                             } else {
-                                                                btnClass = 'bg-green-50 text-green-700 hover:bg-green-100'
+                                                                btnClass = 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
                                                                 btnText = '완료'
                                                             }
                                                         }
@@ -529,31 +523,26 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                                 onClick={() => handleCheckInToggle(member)}
                                                                 disabled={isProcessing}
                                                                 className={`
-                                                                    w-full h-full text-sm font-bold transition-all flex flex-col items-center justify-center p-1
+                                                                    min-w-[3.5rem] py-1.5 px-2.5 rounded-md text-sm font-bold shadow-sm transition-all flex items-center justify-center
                                                                     ${btnClass}
                                                                     ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 `}
                                                             >
                                                                 {isProcessing ? (
-                                                                    <svg className="animate-spin h-5 w-5 mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                                     </svg>
-                                                                ) : (
-                                                                    <>
-                                                                        {/* Icon based on status could go here if needed */}
-                                                                        <span>{btnText}</span>
-                                                                    </>
-                                                                )}
+                                                                ) : btnText}
                                                             </button>
                                                         )
                                                     })()
                                                 ) : (
                                                     <button
                                                         onClick={() => openCalendar(member.id)}
-                                                        className="w-full h-full text-sm font-medium text-gray-500 bg-gray-50 hover:bg-white hover:text-blue-600 transition-all flex flex-col items-center justify-center p-1"
+                                                        className="min-w-[3.5rem] py-1.5 px-2.5 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 hover:text-blue-600 transition-all flex items-center justify-center gap-1"
                                                     >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                         </svg>
                                                         달력
