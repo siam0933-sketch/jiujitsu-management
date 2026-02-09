@@ -474,32 +474,30 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                             key={member.id}
                                             className="
                                                 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all
-                                                flex flex-col justify-between overflow-hidden aspect-video relative group p-3
+                                                flex flex-col justify-between relative group p-3
+                                                min-h-[140px] sm:aspect-video
                                             "
                                         >
-                                            {/* Header: Name (Left) + Info (Right) */}
-                                            <div className="flex justify-between items-start w-full mb-2">
-                                                {/* Left: Number + Name */}
-                                                <div className="flex flex-col flex-1 min-w-0 pr-2">
-                                                    <span className="text-[10px] text-gray-400 font-bold mb-0.5">{enrolledMembers.length - idx}.</span>
-                                                    <span className="font-extrabold text-gray-900 text-lg sm:text-xl leading-tight truncate tracking-tight">{member.name}</span>
-                                                </div>
+                                            {/* Header: Number (Left) + Name (Right) */}
+                                            <div className="flex justify-between items-start w-full mb-1">
+                                                <span className="text-[10px] text-gray-400 font-bold mt-0.5">{enrolledMembers.length - idx}.</span>
+                                                <span className="font-extrabold text-gray-900 text-lg leading-tight truncate tracking-tight text-right ml-2">{member.name}</span>
+                                            </div>
 
-                                                {/* Right: Info Stack */}
-                                                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                                    {member.birth_date && (
-                                                        <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md whitespace-nowrap">
-                                                            {calculateAge(member.birth_date)}
-                                                        </span>
-                                                    )}
-                                                    <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md whitespace-nowrap max-w-[80px] truncate text-right">
-                                                        {member.belt}
+                                            {/* Middle: Age & Belt (Centered, One Line) */}
+                                            <div className="flex justify-center items-center gap-1.5 w-full my-1">
+                                                {member.birth_date && (
+                                                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                                                        {calculateAge(member.birth_date)}
                                                     </span>
-                                                </div>
+                                                )}
+                                                <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md whitespace-nowrap truncate max-w-[80px]">
+                                                    {member.belt}
+                                                </span>
                                             </div>
 
                                             {/* Footer: Action Button */}
-                                            <div className="mt-auto w-full">
+                                            <div className="w-full mt-auto">
                                                 {isToday ? (
                                                     (() => {
                                                         const status = attendanceStatus[member.id]
@@ -526,7 +524,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                                 onClick={() => handleCheckInToggle(member)}
                                                                 disabled={isProcessing}
                                                                 className={`
-                                                                    w-full py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all flex items-center justify-center
+                                                                    w-full py-2 rounded-lg text-sm font-bold shadow-sm transition-all flex items-center justify-center
                                                                     ${btnClass}
                                                                     ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 `}
