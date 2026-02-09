@@ -29,6 +29,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     const [isMenuOpen, setIsMenuOpen] = useState(false) // Gear menu toggle
     const [isManageModalOpen, setIsManageModalOpen] = useState(false) // Enrollment Modal
     const [isCalendarOpen, setIsCalendarOpen] = useState(false) // Calendar Popover
+    const [isExpanded, setIsExpanded] = useState(true) // Collapsible state, default expanded
 
     // Sorting State
     const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'age' | 'belt', direction: 'asc' | 'desc' } | null>(null)
@@ -401,7 +402,20 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                 <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative ${isMenuOpen ? 'z-20' : 'z-0'}`}>
                     {/* Header */}
                     <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+                            <button
+                                className="p-1 rounded-full text-gray-400 hover:bg-gray-200 transition-colors mr-1"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
                             <p className="text-sm text-blue-600 font-bold">{schedule.start_time}</p>
                             <h4 className="font-bold text-gray-800 text-lg">{schedule.class_name}</h4>
                             <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
@@ -451,83 +465,85 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     </div>
 
                     {/* Enrolled List */}
-                    <div className="border-t border-gray-100 bg-white">
-                        {enrolledMembers.length > 0 ? (
-                            <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
-                                {enrolledMembers.map(member => (
-                                    <div
-                                        key={member.id}
-                                        className={`
-                                        w-full px-3 py-2 rounded-md text-sm flex justify-between items-center transition-colors border-b border-gray-50 last:border-0
-                                        hover:bg-gray-50
-                                    `}
-                                    >
-                                        <span className="text-gray-700">
-                                            {member.name}
-                                            {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
-                                            <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
-                                        </span>
+                    {isExpanded && (
+                        <div className="border-t border-gray-100 bg-white">
+                            {enrolledMembers.length > 0 ? (
+                                <div className="p-1">
+                                    {enrolledMembers.map(member => (
+                                        <div
+                                            key={member.id}
+                                            className={`
+                                            w-full px-3 py-2 rounded-md text-sm flex justify-between items-center transition-colors border-b border-gray-50 last:border-0
+                                            hover:bg-gray-50
+                                        `}
+                                        >
+                                            <span className="text-gray-700">
+                                                {member.name}
+                                                {member.birth_date && <span className="text-gray-400 text-xs ml-1 font-normal">({calculateAge(member.birth_date)})</span>}
+                                                <span className="text-gray-400 text-xs ml-1">({member.belt})</span>
+                                            </span>
 
-                                        {/* Action Button: Today -> CheckIn/Out, Other -> Calendar */}
-                                        {isToday ? (
-                                            (() => {
-                                                const status = attendanceStatus[member.id]
-                                                const isProcessing = processingIds.has(member.id)
+                                            {/* Action Button: Today -> CheckIn/Out, Other -> Calendar */}
+                                            {isToday ? (
+                                                (() => {
+                                                    const status = attendanceStatus[member.id]
+                                                    const isProcessing = processingIds.has(member.id)
 
-                                                // Default: Wait (대기)
-                                                let btnClass = 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200'
-                                                let btnText = '대기'
+                                                    // Default: Wait (대기)
+                                                    let btnClass = 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200'
+                                                    let btnText = '대기'
 
-                                                if (status) {
-                                                    if (status.status === 'pending') {
-                                                        // Pending: Approval Request (승인 요청)
-                                                        btnClass = 'bg-red-100 text-red-700 ring-red-600/20 hover:bg-red-200 animate-pulse'
-                                                        btnText = '승인 요청'
-                                                    } else if (status.checkedOut) {
-                                                        // Checked Out: Left (하원)
-                                                        btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
-                                                        btnText = '하원'
-                                                    } else {
-                                                        // Checked In: Present (출석)
-                                                        btnClass = 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
-                                                        btnText = '출석'
+                                                    if (status) {
+                                                        if (status.status === 'pending') {
+                                                            // Pending: Approval Request (승인 요청)
+                                                            btnClass = 'bg-red-100 text-red-700 ring-red-600/20 hover:bg-red-200 animate-pulse'
+                                                            btnText = '승인 요청'
+                                                        } else if (status.checkedOut) {
+                                                            // Checked Out: Left (하원)
+                                                            btnClass = 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
+                                                            btnText = '하원'
+                                                        } else {
+                                                            // Checked In: Present (출석)
+                                                            btnClass = 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
+                                                            btnText = '출석'
+                                                        }
                                                     }
-                                                }
 
-                                                return (
-                                                    <button
-                                                        onClick={() => handleCheckInToggle(member)}
-                                                        disabled={isProcessing}
-                                                        className={`
-                                                        rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
-                                                        ${btnClass}
-                                                        ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-                                                    `}
-                                                    >
-                                                        {isProcessing ? '...' : btnText}
-                                                    </button>
-                                                )
-                                            })()
-                                        ) : (
-                                            <button
-                                                onClick={() => openCalendar(member.id)}
-                                                className="p-1 px-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                                title="달력 보기"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="p-4 text-center text-xs text-gray-400">
-                                등록된 수강생이 없습니다.
-                            </div>
-                        )}
-                    </div>
+                                                    return (
+                                                        <button
+                                                            onClick={() => handleCheckInToggle(member)}
+                                                            disabled={isProcessing}
+                                                            className={`
+                                                            rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
+                                                            ${btnClass}
+                                                            ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+                                                        `}
+                                                        >
+                                                            {isProcessing ? '...' : btnText}
+                                                        </button>
+                                                    )
+                                                })()
+                                            ) : (
+                                                <button
+                                                    onClick={() => openCalendar(member.id)}
+                                                    className="p-1 px-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                    title="달력 보기"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-4 text-center text-xs text-gray-400">
+                                    등록된 수강생이 없습니다.
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 
