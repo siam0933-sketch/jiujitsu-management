@@ -151,7 +151,7 @@ export default function ClassScheduleBoard({
 
                     {/* Content Area */}
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/30">
-                        <div className="max-w-3xl mx-auto space-y-4">
+                        <div className="max-w-5xl mx-auto space-y-4">
                             {/* Always show pending list here */}
                             <PendingApprovalList todayKST={todayKST} />
 
