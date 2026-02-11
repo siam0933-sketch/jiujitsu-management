@@ -25,16 +25,25 @@ interface AttendanceRankingSectionProps {
 type FilterType = 'all' | 'under16' | 'over16'
 
 export default function AttendanceRankingSection({ monthRanking, yearRanking, monthTitle, yearTitle }: AttendanceRankingSectionProps) {
-    const [filter, setFilter] = useState<FilterType>('all')
+    const [filter, setFilter] = useState<FilterType | 'custom'>('all')
+    const [customAgeStart, setCustomAgeStart] = useState<string>('')
+    const [customAgeEnd, setCustomAgeEnd] = useState<string>('')
 
     const filterList = (list: RankingItem[]) => {
         return list.filter(item => {
             if (filter === 'all') return true
             if (item.age === undefined) return false // Unknown age
+
             if (filter === 'under16') return item.age < 16
             if (filter === 'over16') return item.age >= 16
+
+            if (filter === 'custom') {
+                const start = customAgeStart ? parseInt(customAgeStart, 10) : 0
+                const end = customAgeEnd ? parseInt(customAgeEnd, 10) : 200
+                return item.age >= start && item.age <= end
+            }
             return true
-        }) // showing all matching members
+        })
     }
 
     const filteredMonth = filterList(monthRanking)
@@ -42,16 +51,37 @@ export default function AttendanceRankingSection({ monthRanking, yearRanking, mo
 
     return (
         <div className="space-y-4">
-            {/* Filter Dropdown */}
-            <div className="flex justify-end">
+            {/* Filter Dropdown & Inputs */}
+            <div className="flex flex-col sm:flex-row justify-end gap-2 items-center">
+                {filter === 'custom' && (
+                    <div className="flex items-center gap-1 animate-in fade-in slide-in-from-right-2">
+                        <input
+                            type="number"
+                            value={customAgeStart}
+                            onChange={(e) => setCustomAgeStart(e.target.value)}
+                            placeholder="0"
+                            className="w-16 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border text-center"
+                        />
+                        <span className="text-gray-500 text-sm">~</span>
+                        <input
+                            type="number"
+                            value={customAgeEnd}
+                            onChange={(e) => setCustomAgeEnd(e.target.value)}
+                            placeholder="100"
+                            className="w-16 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border text-center"
+                        />
+                        <span className="text-gray-500 text-sm">세</span>
+                    </div>
+                )}
                 <select
                     value={filter}
-                    onChange={(e) => setFilter(e.target.value as FilterType)}
+                    onChange={(e) => setFilter(e.target.value as any)}
                     className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
                 >
                     <option value="all">전체 보기</option>
                     <option value="under16">16세 미만 (키즈)</option>
                     <option value="over16">16세 이상 (성인)</option>
+                    <option value="custom">나이 지정</option>
                 </select>
             </div>
 
