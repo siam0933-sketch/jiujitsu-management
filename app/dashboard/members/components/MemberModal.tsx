@@ -76,7 +76,23 @@ export default function MemberModal({ member }: { member: any }) {
                     supabase.from('gym_class_enrollments').select('*, gym_schedules(*)').eq('member_id', member.id)
                 ])
 
-                setPlans(pricing.plans)
+                // Sort plans: Period tickets first, then by price descending
+                const sortedPlans = (pricing.plans || []).sort((a: any, b: any) => {
+                    // Prioritize period type
+                    if (a.type === 'period' && b.type !== 'period') return -1
+                    if (a.type !== 'period' && b.type === 'period') return 1
+
+                    // Then sort by price descending
+                    return b.price - a.price
+                })
+
+                setPlans(sortedPlans)
+
+                // Default select the first plan (most expensive period ticket)
+                if (sortedPlans.length > 0) {
+                    setSelectedPlanId(sortedPlans[0].id)
+                }
+
                 setOptions(pricing.options)
                 setProducts(pricing.products) // [NEW]
                 setPayments(history)
@@ -575,10 +591,13 @@ export default function MemberModal({ member }: { member: any }) {
                                             <div className="p-6 bg-white border-t">
                                                 {/* Simple Payment Form */}
                                                 <div className="space-y-4">
-                                                    <select value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)} className="w-full text-base border-2 border-gray-900 rounded p-2">
-                                                        <option value="">이용권 선택</option>
-                                                        {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
-                                                    </select>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-500 mb-1 font-bold">이용권 선택</label>
+                                                        <select value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)} className="w-full text-base border-2 border-gray-900 rounded p-2">
+                                                            <option value="">이용권 선택</option>
+                                                            {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
+                                                        </select>
+                                                    </div>
 
                                                     {selectedPlan?.type === 'period' && (
                                                         <div className="flex gap-4 items-center">
