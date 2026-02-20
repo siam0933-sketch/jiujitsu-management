@@ -348,7 +348,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">출석</th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="belt" label="등급" /></th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">결제일</th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="joined_at" label="등록일" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
@@ -425,7 +425,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                         {paymentInfo.status === 'normal' && <span className="text-gray-500">{paymentInfo.dateStr}</span>}
                                                         {paymentInfo.status === 'none' && <span className="text-gray-300">-</span>}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500" suppressHydrationWarning>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 hidden sm:table-cell" suppressHydrationWarning>
                                                         {(() => {
                                                             const d = new Date(member.joined_at)
                                                             return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
