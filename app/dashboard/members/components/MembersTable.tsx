@@ -309,8 +309,24 @@ export default function MembersTable({ initialMembers, count, status, attendance
                 </div>
             </div>
 
-            <div className="mt-6 border-b border-gray-200">
-                <nav className="-mb-px flex space-x-6">
+            <div className="mt-6 sm:border-b sm:border-gray-200">
+                <div className="sm:hidden mb-4">
+                    <label htmlFor="status-tabs" className="sr-only">회원 상태 선택</label>
+                    <select
+                        id="status-tabs"
+                        name="status-tabs"
+                        className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm shadow-sm"
+                        value={currentStatus}
+                        onChange={(e) => {
+                            router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)
+                        }}
+                    >
+                        <option value="active">수련 중 (Active)</option>
+                        <option value="paused">휴관 중 (Paused)</option>
+                        <option value="all">전체 (All)</option>
+                    </select>
+                </div>
+                <nav className="-mb-px hidden sm:flex space-x-6">
                     {['active', 'paused', 'all'].map((tab) => {
                         const label = tab === 'active' ? '수련 중 (Active)' : tab === 'paused' ? '휴관 중 (Paused)' : '전체 (All)'
                         const isActive = currentStatus === tab
@@ -318,7 +334,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <Link
                                 key={tab}
                                 href={`/dashboard/members?status=${tab}&sort=${sort}&order=${order}`}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                             >
                                 {label}
                             </Link>
