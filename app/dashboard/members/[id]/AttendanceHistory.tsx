@@ -168,42 +168,31 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                 </div>
             )}
 
-            {/* Recent Logs List (Optional: Show last 5) */}
+            {/* Recent Logs List */}
             <div className="border-t border-gray-200 px-4 py-4 bg-gray-50 sm:px-6">
                 <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">최근 활동</h5>
-                <div className="flow-root">
-                    <ul role="list" className="-mb-8">
-                        {logs.slice(0, 3).map((log, idx) => (
-                            <li key={log.id}>
-                                <div className="relative pb-8">
-                                    {idx !== logs.slice(0, 3).length - 1 ? (
-                                        <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
-                                    ) : null}
-                                    <div className="relative flex space-x-3">
+                {logs.length > 0 ? (
+                    <div className="max-h-[220px] overflow-y-auto pr-2">
+                        <ul role="list" className="divide-y divide-gray-200">
+                            {logs.map((log) => (
+                                <li key={log.id} className="py-3 mt-0">
+                                    <div className="flex min-w-0 flex-1 justify-between space-x-4">
                                         <div>
-                                            <span className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </span>
+                                            <p className="text-sm text-gray-500">
+                                                <span className="font-medium text-gray-900">{log.class_name || '일반 출석'}</span>
+                                            </p>
                                         </div>
-                                        <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                                            <div>
-                                                <p className="text-sm text-gray-500">
-                                                    <span className="font-medium text-gray-900">{log.class_name || '일반 출석'}</span>
-                                                </p>
-                                            </div>
-                                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                                                <time dateTime={log.date}>{log.date}</time>
-                                            </div>
+                                        <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                                            <time dateTime={log.date}>{log.date}</time>
                                         </div>
                                     </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                {logs.length === 0 && <p className="text-sm text-gray-500 text-center py-2">출석 기록이 없습니다.</p>}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-500 text-center py-2">출석 기록이 없습니다.</p>
+                )}
             </div>
         </div>
     )
