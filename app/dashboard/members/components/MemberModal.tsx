@@ -805,11 +805,11 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </span>
                                                         <div className="min-h-[40px] bg-white rounded border border-gray-100 p-1 flex flex-col gap-1 items-center justify-center">
                                                             {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
-                                                                <span key={i} className="text-[10px] leading-tight text-blue-600 font-medium block">
+                                                                <span key={i} className="text-xs leading-tight text-blue-600 font-normal block">
                                                                     {c.class_name}<br />{c.start_time}
                                                                 </span>
                                                             )) : (
-                                                                <span className="text-[10px] text-gray-200">-</span>
+                                                                <span className="text-xs text-gray-200">-</span>
                                                             )}
                                                         </div>
                                                     </div>
