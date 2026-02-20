@@ -240,11 +240,11 @@ export default function MembersTable({ initialMembers, count, status, attendance
     return (
         <div>
             <div className="sm:flex sm:items-center justify-between">
-                <div className="sm:flex-auto">
-                    <h1 className="text-2xl font-semibold text-gray-900">회원 관리</h1>
-                    <p className="mt-2 text-sm text-gray-700">총 {count}명의 회원이 등록되어 있습니다.</p>
-                </div>
-                <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 items-end sm:items-center">
+                <div className="sm:flex-auto flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-gray-900">회원 관리</h1>
+                        <p className="mt-2 text-sm text-gray-700 whitespace-nowrap">총 {count}명의 회원이 등록</p>
+                    </div>
                     <div className="relative w-full sm:w-64">
                         <input
                             type="text"
@@ -259,7 +259,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             </svg>
                         </div>
                     </div>
-                    <div className="flex gap-2 items-center">
+                </div>
+                <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 items-end sm:items-center">
                         {isEditMode ? (
                             <>
                                 <button
@@ -443,6 +444,6 @@ export default function MembersTable({ initialMembers, count, status, attendance
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
