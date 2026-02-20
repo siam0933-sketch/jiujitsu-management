@@ -399,7 +399,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
             {/* Daily Mode View */}
             {mode === 'daily' && (
-                <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative ${isMenuOpen ? 'z-20' : 'z-0'}`}>
+                <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative min-w-[480px] ${isMenuOpen ? 'z-20' : 'z-0'}`}>
                     {/* Header */}
                     <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
