@@ -259,9 +259,17 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             </svg>
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                         {isEditMode ? (
                             <>
+                                <button
+                                    onClick={handleGeneratePasswords}
+                                    disabled={isGenerating}
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors mr-2"
+                                >
+                                    {isGenerating ? '생성 중...' : '미설정 PW 일괄생성'}
+                                </button>
+                                <span className="text-gray-300 mr-2">|</span>
                                 <button
                                     onClick={handleDelete}
                                     disabled={selectedIds.size === 0 || isDeleting}
@@ -281,14 +289,6 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             </>
                         ) : (
                             <>
-                                <button
-                                    onClick={handleGeneratePasswords}
-                                    disabled={isGenerating}
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors"
-                                >
-                                    {isGenerating ? '생성 중...' : '미설정 PW 일괄생성'}
-                                </button>
-                                <span className="text-gray-300">|</span>
                                 <button
                                     onClick={() => setIsEditMode(true)}
                                     className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
