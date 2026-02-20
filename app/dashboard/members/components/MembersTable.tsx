@@ -239,13 +239,13 @@ export default function MembersTable({ initialMembers, count, status, attendance
 
     return (
         <div>
-            <div className="sm:flex sm:items-center justify-between">
-                <div className="flex-auto flex flex-row items-center justify-between gap-2 sm:gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
                         <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">회원 관리</h1>
                         <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-700 whitespace-nowrap">총 {count}명 등록</p>
                     </div>
-                    <div className="relative w-full max-w-[180px] sm:max-w-none sm:w-64">
+                    <div className="relative w-full max-w-[180px] sm:max-w-xs">
                         <input
                             type="text"
                             placeholder="이름/전화번호 검색"
@@ -260,21 +260,59 @@ export default function MembersTable({ initialMembers, count, status, attendance
                         </div>
                     </div>
                 </div>
-                <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 items-end sm:items-center">
+            </div>
+
+            <div className="mt-6 sm:border-b sm:border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pb-0 sm:pb-0">
+                    <div className="w-full sm:w-auto">
+                        <div className="sm:hidden mb-4">
+                            <label htmlFor="status-tabs" className="sr-only">회원 상태 선택</label>
+                            <select
+                                id="status-tabs"
+                                name="status-tabs"
+                                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm shadow-sm"
+                                value={currentStatus}
+                                onChange={(e) => {
+                                    router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)
+                                }}
+                            >
+                                <option value="active">수련 중 (Active)</option>
+                                <option value="paused">휴관 중 (Paused)</option>
+                                <option value="all">전체 (All)</option>
+                            </select>
+                        </div>
+                        <nav className="-mb-px hidden sm:flex space-x-6">
+                            {['active', 'paused', 'all'].map((tab) => {
+                                const label = tab === 'active' ? '수련 중 (Active)' : tab === 'paused' ? '휴관 중 (Paused)' : '전체 (All)'
+                                const isActive = currentStatus === tab
+                                return (
+                                    <Link
+                                        key={tab}
+                                        href={`/dashboard/members?status=${tab}&sort=${sort}&order=${order}`}
+                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                                    >
+                                        {label}
+                                    </Link>
+                                )
+                            })}
+                        </nav>
+                    </div>
+
+                    <div className="flex gap-2 items-center mb-4 sm:mb-2 w-full sm:w-auto justify-end">
                         {isEditMode ? (
                             <>
                                 <button
                                     onClick={handleGeneratePasswords}
                                     disabled={isGenerating}
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors mr-2"
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
                                 >
-                                    {isGenerating ? '생성 중...' : '미설정 PW 일괄생성'}
+                                    {isGenerating ? '생성 중...' : '미설정 PW생성'}
                                 </button>
-                                <span className="text-gray-300 mr-2">|</span>
+                                <span className="text-gray-300 mr-1 sm:mr-2">|</span>
                                 <button
                                     onClick={handleDelete}
                                     disabled={selectedIds.size === 0 || isDeleting}
-                                    className="block rounded-md bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50"
+                                    className="block rounded-md bg-red-600 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 whitespace-nowrap"
                                 >
                                     {isDeleting ? '삭제 중...' : `선택 삭제 (${selectedIds.size})`}
                                 </button>
@@ -283,7 +321,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                         setIsEditMode(false)
                                         setSelectedIds(new Set())
                                     }}
-                                    className="block rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                    className="block rounded-md bg-white px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 whitespace-nowrap"
                                 >
                                     취소
                                 </button>
@@ -292,55 +330,22 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <>
                                 <button
                                     onClick={() => setIsEditMode(true)}
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap"
                                 >
                                     일괄 편집
                                 </button>
-                                <span className="text-gray-300">|</span>
+                                <span className="text-gray-300 mx-1">|</span>
                                 <Link
                                     href="/dashboard/members/new"
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap flex items-center"
                                 >
-                                    신규 회원 등록
+                                    <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                                    신규 등록
                                 </Link>
                             </>
                         )}
                     </div>
                 </div>
-            </div>
-
-            <div className="mt-6 sm:border-b sm:border-gray-200">
-                <div className="sm:hidden mb-4">
-                    <label htmlFor="status-tabs" className="sr-only">회원 상태 선택</label>
-                    <select
-                        id="status-tabs"
-                        name="status-tabs"
-                        className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm shadow-sm"
-                        value={currentStatus}
-                        onChange={(e) => {
-                            router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)
-                        }}
-                    >
-                        <option value="active">수련 중 (Active)</option>
-                        <option value="paused">휴관 중 (Paused)</option>
-                        <option value="all">전체 (All)</option>
-                    </select>
-                </div>
-                <nav className="-mb-px hidden sm:flex space-x-6">
-                    {['active', 'paused', 'all'].map((tab) => {
-                        const label = tab === 'active' ? '수련 중 (Active)' : tab === 'paused' ? '휴관 중 (Paused)' : '전체 (All)'
-                        const isActive = currentStatus === tab
-                        return (
-                            <Link
-                                key={tab}
-                                href={`/dashboard/members?status=${tab}&sort=${sort}&order=${order}`}
-                                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                            >
-                                {label}
-                            </Link>
-                        )
-                    })}
-                </nav>
             </div>
 
             <div className="mt-8 flow-root">
