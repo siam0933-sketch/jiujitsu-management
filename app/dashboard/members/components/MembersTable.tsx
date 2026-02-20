@@ -263,22 +263,22 @@ export default function MembersTable({ initialMembers, count, status, attendance
             </div>
 
             <div className="mt-6 sm:border-b sm:border-gray-200">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pb-0 sm:pb-0">
-                    <div className="w-full sm:w-auto">
-                        <div className="sm:hidden mb-4">
+                <div className="flex flex-row justify-between items-center sm:items-end gap-2 sm:gap-4 pb-4 sm:pb-0">
+                    <div className="flex-shrink-0">
+                        <div className="sm:hidden">
                             <label htmlFor="status-tabs" className="sr-only">회원 상태 선택</label>
                             <select
                                 id="status-tabs"
                                 name="status-tabs"
-                                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm shadow-sm"
+                                className="block rounded-md border-gray-300 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm"
                                 value={currentStatus}
                                 onChange={(e) => {
                                     router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)
                                 }}
                             >
-                                <option value="active">수련 중 (Active)</option>
-                                <option value="paused">휴관 중 (Paused)</option>
-                                <option value="all">전체 (All)</option>
+                                <option value="active">수련 중</option>
+                                <option value="paused">휴관 중</option>
+                                <option value="all">전체</option>
                             </select>
                         </div>
                         <nav className="-mb-px hidden sm:flex space-x-6">
@@ -298,7 +298,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                         </nav>
                     </div>
 
-                    <div className="flex gap-2 items-center mb-4 sm:mb-2 w-full sm:w-auto justify-end">
+                    <div className="flex gap-2 items-center flex-shrink-0 justify-end">
                         {isEditMode ? (
                             <>
                                 <button
