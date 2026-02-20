@@ -35,16 +35,40 @@ export default async function DashboardLayout({
     const pendingCount = await getPendingAttendanceCount()
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex flex-col md:flex-row h-screen bg-gray-100 overflow-hidden">
+            {/* Mobile Header */}
+            <div className="md:hidden flex items-center justify-between bg-white px-5 py-3 border-b border-gray-200 shadow-sm shrink-0 z-40">
+                <h1 className="text-xl font-extrabold text-gray-800 tracking-tight">Gym Manager</h1>
+                <label htmlFor="mobile-menu" className="p-2 -mr-2 text-gray-600 cursor-pointer rounded-md hover:bg-gray-100 transition-colors active:bg-gray-200">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </label>
+            </div>
+
             {/* Sidebar Responsive Wrapper */}
             <div className="group fixed inset-y-0 left-0 z-50 flex h-full pointer-events-none md:static md:z-auto md:pointer-events-auto">
-                {/* Invisible trigger area for mobile/small screens */}
+                {/* Mobile Menu Toggle Checkbox (Invisible) */}
+                <input type="checkbox" id="mobile-menu" className="peer hidden" />
+
+                {/* Mobile Backdrop Overlay */}
+                <label
+                    htmlFor="mobile-menu"
+                    className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300 peer-checked:opacity-100 peer-checked:pointer-events-auto md:hidden"
+                />
+
+                {/* Invisible trigger area for mobile/small screens (keep for mouse edge-cases) */}
                 <div className="w-6 h-full bg-transparent pointer-events-auto md:hidden" />
 
                 {/* Sidebar */}
-                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md">
-                    <div className="p-6">
+                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md">
+                    <div className="p-6 md:block flex justify-between items-center">
                         <h1 className="text-2xl font-bold text-gray-800">Gym Manager</h1>
+                        <label htmlFor="mobile-menu" className="md:hidden p-2 -mr-2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </label>
                     </div>
                     <nav className="mt-6 px-4 space-y-2 flex-1">
                         <Link
