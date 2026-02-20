@@ -608,7 +608,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     min="1"
                                                                     value={durationMonths}
                                                                     onChange={e => setDurationMonths(Number(e.target.value))}
-                                                                    className="w-full text-base border-gray-300 rounded p-2"
+                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                                 />
                                                             </div>
                                                             <div className="flex-1">
@@ -617,7 +617,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     type="date"
                                                                     value={paymentDate}
                                                                     onChange={e => setPaymentDate(e.target.value)}
-                                                                    className="w-full text-base border-gray-300 rounded p-2"
+                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                                 />
                                                             </div>
                                                             <div className="flex-1">
@@ -626,7 +626,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     type="date"
                                                                     value={newExpiryDate}
                                                                     onChange={e => setNewExpiryDate(e.target.value)}
-                                                                    className="w-full text-base border-gray-300 rounded p-2"
+                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                                 />
                                                             </div>
                                                         </div>

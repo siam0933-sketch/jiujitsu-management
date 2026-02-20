@@ -32,6 +32,8 @@ export async function registerMember(prevState: any, formData: FormData) {
     const gender = String(formData.get('gender'))
     const birth_date = formData.get('birth_date') ? String(formData.get('birth_date')) : null
     const joined_at = formData.get('joined_at') ? new Date(String(formData.get('joined_at'))).toISOString() : new Date().toISOString()
+    // [NEW] Default start_date to joined_at
+    const start_date = joined_at
 
     // New Fields
     const guardian_phone = String(formData.get('guardian_phone') || '')
@@ -67,6 +69,7 @@ export async function registerMember(prevState: any, formData: FormData) {
         gender,
         birth_date,
         joined_at,
+        start_date, // [NEW]
         guardian_phone: guardian_phone || null,
         address: address || null,
         school: school || null,
@@ -115,6 +118,7 @@ export async function registerBatch(members: any[]) {
         const batchData = members.map(member => {
             const birthDateIso = safeIsoString(member.birth_date)
             const joinedAtIso = safeIsoString(member.joined_at) || new Date().toISOString()
+            const startDateIso = joinedAtIso // [NEW] Default start_date to joined_at
 
             return {
                 gym_id: gym.id,
@@ -123,6 +127,7 @@ export async function registerBatch(members: any[]) {
                 gender: member.gender,
                 birth_date: birthDateIso ? birthDateIso.split('T')[0] : null,
                 joined_at: joinedAtIso,
+                start_date: startDateIso, // [NEW]
                 guardian_phone: member.guardian_phone || null,
                 address: member.address || null,
                 school: member.school || null,
