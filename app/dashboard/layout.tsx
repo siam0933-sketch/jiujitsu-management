@@ -121,9 +121,11 @@ export default async function DashboardLayout({
             </div>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-8">
-                {children}
-            </main >
+            <main className="flex-1 overflow-auto p-8 bg-gray-100">
+                <div className="min-w-[1024px] mx-auto h-full">
+                    {children}
+                </div>
+            </main>
         </div >
     )
 }
