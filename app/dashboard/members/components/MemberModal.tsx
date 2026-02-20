@@ -745,10 +745,10 @@ export default function MemberModal({ member }: { member: any }) {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <div className="flex flex-col gap-1 w-full">
-                                                            <span className="text-xs text-gray-400">{pay.payment_date}</span>
-                                                            <div className="flex justify-between items-center w-full">
-                                                                <span className="text-gray-700 text-base">
+                                                        <div className="flex items-center gap-3 w-full">
+                                                            <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">{pay.payment_date}</span>
+                                                            <div className="flex justify-between items-center flex-1 min-w-0">
+                                                                <span className="text-gray-700 text-base truncate pr-2">
                                                                     {(() => {
                                                                         const snap = pay.plan_snapshot
                                                                         if (!snap) return '결제 내역'
