@@ -468,7 +468,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     {isExpanded && (
                         <div className="border-t border-gray-100 bg-white p-3">
                             {enrolledMembers.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                <div className="flex flex-wrap gap-3 min-w-[540px]">
                                     {enrolledMembers.map((member, idx) => {
                                         const status = attendanceStatus[member.id]
                                         const isProcessing = processingIds.has(member.id)
@@ -500,7 +500,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 }}
                                                 className={`
                                                     bg-white border border-gray-200 rounded-lg shadow-sm transition-all
-                                                    flex flex-row items-center justify-between p-3 gap-3
+                                                    flex flex-row items-center justify-between p-3 gap-3 w-[260px] flex-shrink-0
                                                     ${isToday && !isProcessing ? 'cursor-pointer hover:shadow-md hover:border-blue-300 active:scale-[0.99]' : ''}
                                                 `}
                                             >
