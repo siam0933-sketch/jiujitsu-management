@@ -468,7 +468,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                     {isExpanded && (
                         <div className="border-t border-gray-100 bg-white p-3">
                             {enrolledMembers.length > 0 ? (
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-wrap gap-3 min-w-[452px]">
                                     {enrolledMembers.map((member, idx) => {
                                         const status = attendanceStatus[member.id]
                                         const isProcessing = processingIds.has(member.id)
