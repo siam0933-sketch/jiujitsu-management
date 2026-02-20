@@ -240,20 +240,20 @@ export default function MembersTable({ initialMembers, count, status, attendance
     return (
         <div>
             <div className="sm:flex sm:items-center justify-between">
-                <div className="sm:flex-auto flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">회원 관리</h1>
-                        <p className="mt-2 text-sm text-gray-700 whitespace-nowrap">총 {count}명의 회원이 등록</p>
+                <div className="flex-auto flex flex-row items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex-shrink-0">
+                        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">회원 관리</h1>
+                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-700 whitespace-nowrap">총 {count}명 등록</p>
                     </div>
-                    <div className="relative w-full sm:w-64">
+                    <div className="relative w-full max-w-[180px] sm:max-w-none sm:w-64">
                         <input
                             type="text"
-                            placeholder="이름 또는 전화번호 검색"
+                            placeholder="이름/전화번호 검색"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-8 sm:pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-xs sm:text-sm sm:leading-6"
                         />
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3">
                             <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
