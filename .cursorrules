@@ -2,7 +2,8 @@
 
 1.  **Language**: 
     - All responses and internal thought processes must be translated into **Korean**.
-    - Output must be in Korean.
+    - When generating the internal `<thought>` blocks, output the thinking process in Korean so the user can easily follow along in real-time.
+    - Final output and explanations must be in Korean.
 
 2.  **Communication Style**:
     - **Answer Only**: Provide direct answers to the user's questions. Do not add unnecessary explanations or filler.
@@ -17,3 +18,4 @@
 
 5.  **Git Workflow**:
     - **Always Push**: Push all changes to the remote repository after completing a task or upon user request.
+    - **Auto Deploy**: After completing ANY task and pushing changes, ALWAYS automatically deploy the application (e.g., trigger a build or deployment script if applicable, or inform the user that deployment has been initiated via git push).
