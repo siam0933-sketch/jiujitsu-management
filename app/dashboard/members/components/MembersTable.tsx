@@ -66,11 +66,6 @@ export default function MembersTable({ initialMembers, count, status, attendance
         return `${currentYear - birthYear + 1}세`
     }
 
-    const filteredMembers = initialMembers.filter(member =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (member.phone && member.phone.includes(searchTerm))
-    )
-
     const getPaymentStatus = (member: Member) => {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -83,17 +78,43 @@ export default function MembersTable({ initialMembers, count, status, attendance
             targetDate.setDate(member.payment_due_day)
         }
 
-        if (!targetDate) return { status: 'normal', label: '-', dateStr: '-' }
+        if (!targetDate) return { status: 'normal', label: '-', dateStr: '-', diffDays: Infinity }
 
         targetDate.setHours(0, 0, 0, 0)
         const diffTime = targetDate.getTime() - today.getTime()
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`
 
-        if (diffDays < 0) return { status: 'unpaid', label: '미납', dateStr }
-        if (diffDays >= 0 && diffDays <= 5) return { status: 'due', label: '결제예정', dateStr }
-        return { status: 'normal', label: dateStr, dateStr }
+        if (diffDays < 0) return { status: 'unpaid', label: '미납', dateStr, diffDays }
+        if (diffDays >= 0 && diffDays <= 5) return { status: 'due', label: '결제예정', dateStr, diffDays }
+        return { status: 'normal', label: dateStr, dateStr, diffDays }
     }
+
+    const getAttendanceWeight = (id: string) => {
+        const att = optimisticAttendance[id]
+        if (!att) return 0 // 대기
+        if (!att.checkedOut) return 1 // 출석
+        return 2 // 하원
+    }
+
+    const filteredMembers = initialMembers.filter(member =>
+        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (member.phone && member.phone.includes(searchTerm))
+    ).sort((a, b) => {
+        if (sort === 'attendance') {
+            const wA = getAttendanceWeight(a.id)
+            const wB = getAttendanceWeight(b.id)
+            if (wA !== wB) return order === 'asc' ? wA - wB : wB - wA
+            return a.name.localeCompare(b.name)
+        }
+        if (sort === 'payment') {
+            const pA = getPaymentStatus(a)
+            const pB = getPaymentStatus(b)
+            if (pA.diffDays !== pB.diffDays) return order === 'asc' ? pA.diffDays - pB.diffDays : pB.diffDays - pA.diffDays
+            return a.name.localeCompare(b.name)
+        }
+        return 0
+    })
 
     const toggleSelection = (id: string) => {
         const next = new Set(selectedIds)
@@ -230,9 +251,11 @@ export default function MembersTable({ initialMembers, count, status, attendance
                 className="group inline-flex items-center cursor-pointer"
             >
                 {label}
-                <span className={`ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible ${isCurrent ? 'visible text-gray-900' : 'invisible'}`}>
-                    {isCurrent ? (order === 'desc' ? '↓' : '↑') : '↕'}
-                </span>
+                {isCurrent && (
+                    <span className="ml-2 flex-none rounded text-gray-900 font-bold">
+                        {order === 'desc' ? '↓' : '↑'}
+                    </span>
+                )}
             </Link>
         )
     }
@@ -366,10 +389,10 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             ) : 'No.'}
                                         </th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="name" label="이름" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">나이</th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">출석</th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="birth_date" label="나이" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="attendance" label="출석" /></th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="belt" label="등급" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">결제일</th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="payment" label="결제일" /></th>
                                         <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
                                     </tr>
                                 </thead>

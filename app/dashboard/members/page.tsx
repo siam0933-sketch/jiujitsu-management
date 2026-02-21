@@ -47,11 +47,19 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
     }
 
     // 2. Fetch Members with Sorting & Filtering
+    const dbSortColumns = ['name', 'belt', 'joined_at', 'birth_date']
+    const isDbSort = dbSortColumns.includes(sort)
+
     let query = supabase
         .from('gym_members')
         .select('*', { count: 'exact' })
         .eq('gym_id', gym.id)
-        .order(sort, { ascending: order === 'asc' })
+
+    if (isDbSort) {
+        query = query.order(sort, { ascending: order === 'asc' })
+    } else {
+        query = query.order('name', { ascending: true })
+    }
 
     // Apply Filter
     if (status !== 'all') {
