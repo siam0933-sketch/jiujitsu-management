@@ -355,7 +355,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <table className="min-w-full divide-y divide-gray-300">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-16">
+                                        <th scope="col" className={`py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-16 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
                                             {isEditMode ? (
                                                 <input
                                                     type="checkbox"
@@ -383,7 +383,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
 
                                             return (
                                                 <tr key={member.id} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
+                                                    <td className={`whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
                                                         {isEditMode ? (
                                                             <input
                                                                 type="checkbox"
