@@ -2,6 +2,7 @@ import { PORTAL_STYLES } from '../styles';
 import { getTodayAttendanceStatus, getAttendanceHistory } from './actions';
 import AttendanceRequestButton from './AttendanceRequestButton';
 import AttendanceCalendar from './AttendanceCalendar';
+import AttendanceStats from './AttendanceStats';
 
 export default async function AttendancePage() {
     const status = await getTodayAttendanceStatus();
@@ -19,6 +20,8 @@ export default async function AttendancePage() {
                     <p>{attendanceResult.error}</p>
                 </div>
             )}
+
+            <AttendanceStats attendanceDates={attendanceResult.data} />
             <AttendanceCalendar attendanceDates={attendanceResult.data} />
 
             <div className="mb-6">
