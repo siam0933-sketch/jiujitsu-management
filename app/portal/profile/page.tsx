@@ -90,12 +90,7 @@ export default async function ProfilePage() {
                 </div>
             </div>
 
-            <div className={`${PORTAL_STYLES.CARD} mb-6`}>
-                <div className={PORTAL_STYLES.CARD_PADDING}>
-                    <h2 className={PORTAL_STYLES.HEADING_MD}>비밀번호 변경</h2>
-                    <ChangePasswordForm />
-                </div>
-            </div>
+            <ChangePasswordForm />
 
             <div className={PORTAL_STYLES.CARD}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
