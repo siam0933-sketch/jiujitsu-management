@@ -70,18 +70,36 @@ export default async function ProfilePage() {
                     ) : (
                         <ul className="mt-4 space-y-3">
                             {payments.map(payment => (
-                                <li key={payment.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col gap-1">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-semibold text-gray-900">
-                                            {payment.amount.toLocaleString()}원
-                                        </span>
-                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600">
+                                <li key={payment.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col gap-2">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900">
+                                                {payment.plan_snapshot?.plan_name || '일반 결제'}
+                                            </p>
+                                            {payment.plan_snapshot?.options_summary && (
+                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                                                    <span className="font-medium text-gray-400">옵션:</span> {payment.plan_snapshot.options_summary}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600 shrink-0 ml-2">
                                             {payment.payment_method === 'card' ? '카드' : payment.payment_method === 'cash' ? '현금' : '계좌이체'}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center text-xs text-gray-500">
-                                        <span>{new Date(payment.payment_date).toLocaleDateString('ko-KR')}</span>
-                                        {payment.memo && <span className="truncate max-w-[120px] text-right" title={payment.memo}>{payment.memo}</span>}
+
+                                    <div className="flex justify-between items-center mt-1 border-t border-gray-200/60 pt-2">
+                                        <span className="text-[14px] font-bold text-gray-900">
+                                            {payment.amount.toLocaleString()}원
+                                        </span>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <span>{new Date(payment.payment_date).toLocaleDateString('ko-KR')}</span>
+                                            {payment.memo && (
+                                                <>
+                                                    <span className="text-gray-300">|</span>
+                                                    <span className="truncate max-w-[100px] text-right" title={payment.memo}>{payment.memo}</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </li>
                             ))}
