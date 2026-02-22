@@ -1,5 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { PORTAL_STYLES } from '../styles';
+import ChangePasswordForm from './ChangePasswordForm';
 
 export default function ProfilePage() {
     return (
@@ -14,9 +15,16 @@ export default function ProfilePage() {
                 </div>
             </div>
 
+            <div className={`${PORTAL_STYLES.CARD} mb-6`}>
+                <div className={PORTAL_STYLES.CARD_PADDING}>
+                    <h2 className={PORTAL_STYLES.HEADING_MD}>비밀번호 변경</h2>
+                    <ChangePasswordForm />
+                </div>
+            </div>
+
             <div className={PORTAL_STYLES.CARD}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
-                    <h2 className={PORTAL_STYLES.HEADING_MD}>계정 관리</h2>
+                    <h2 className={PORTAL_STYLES.HEADING_MD}>계정 로그아웃</h2>
                     <form action="/auth/sign-out" method="post">
                         <button
                             type="submit"
