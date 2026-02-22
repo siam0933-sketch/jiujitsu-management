@@ -71,7 +71,6 @@ export async function checkOutMemberSelf() {
         .single()
 
     if (!log) return { error: '금일 출석 기록이 없습니다.' }
-    if (log.status !== 'present') return { error: '출석 승인이 필요합니다.' }
     if (log.checked_out_at) return { error: '이미 하원 처리되었습니다.' }
 
     // 5-minute rule

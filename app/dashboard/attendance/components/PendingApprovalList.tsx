@@ -15,6 +15,7 @@ type AttendanceLog = {
     member_id: string
     status: string
     created_at: string
+    checked_out_at: string | null
     gym_members: {
         name: string
         belt: string
@@ -103,8 +104,13 @@ export default function PendingApprovalList({ todayKST }: Props) {
                                     {log.gym_members.name}
                                     <span className="text-xs text-gray-500 font-normal ml-1">({log.gym_members.belt})</span>
                                 </p>
-                                <p className="text-xs text-red-500">
-                                    {new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 요청
+                                <p className="text-xs text-red-500 mt-0.5">
+                                    <span className="font-semibold text-gray-700">출석:</span> {new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                    {log.checked_out_at && (
+                                        <span className="ml-2 text-blue-500">
+                                            <span className="font-semibold text-gray-700">하원:</span> {new Date(log.checked_out_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    )}
                                 </p>
                             </div>
                         </div>

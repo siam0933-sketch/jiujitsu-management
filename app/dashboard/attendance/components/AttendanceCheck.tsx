@@ -208,7 +208,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                 const res = await checkInMember(member.id, schedule.class_name, effectiveDate) // Re-use checkIn to approve
                 if (res?.error) alert(res.error)
                 else {
-                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: false, status: 'present' } }))
+                    setAttendanceStatus(prev => ({ ...prev, [member.id]: { checkedOut: status.checkedOut, status: 'present' } }))
                 }
             } else if (!status.checkedOut) {
                 // 2. Check Out (하원)
