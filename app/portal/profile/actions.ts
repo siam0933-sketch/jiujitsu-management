@@ -80,7 +80,7 @@ export async function getMemberProfileData() {
 
     // 2. Fetch Payment History
     const { data: payments } = await supabase
-        .from('gym_payment_history')
+        .from('gym_payments')
         .select('*')
         .eq('member_id', session.memberId)
         .order('payment_date', { ascending: false })
