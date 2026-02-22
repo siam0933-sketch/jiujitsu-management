@@ -1,17 +1,78 @@
 import { LogOut } from 'lucide-react';
 import { PORTAL_STYLES } from '../styles';
 import ChangePasswordForm from './ChangePasswordForm';
+import { getMemberProfileData } from './actions';
+import { displayBeltName } from '@/app/dashboard/members/constants';
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+    const data = await getMemberProfileData();
+    if (!data || !data.member) return <div>정보를 불러올 수 없습니다.</div>;
+
+    const { member, payments } = data;
+
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
             <h1 className={PORTAL_STYLES.HEADING_LG}>내 정보</h1>
+
             <div className={`${PORTAL_STYLES.CARD} mb-6`}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
                     <h2 className={PORTAL_STYLES.HEADING_MD}>기본 정보</h2>
-                    <p className={PORTAL_STYLES.TEXT_BODY}>
-                        회원님의 개인 정보를 확인하고 수정할 수 있습니다.
-                    </p>
+                    <ul className="mt-4 space-y-4 text-sm text-gray-700">
+                        <li className="flex justify-between border-b border-gray-100 pb-2">
+                            <span className="text-gray-500">이름</span>
+                            <span className="font-semibold text-gray-900">{member.name}</span>
+                        </li>
+                        <li className="flex justify-between border-b border-gray-100 pb-2">
+                            <span className="text-gray-500">현재 등급</span>
+                            <span className="font-semibold text-gray-900">{member.belt ? displayBeltName(member.belt) : '-'}</span>
+                        </li>
+                        <li className="flex justify-between border-b border-gray-100 pb-2">
+                            <span className="text-gray-500">전화번호</span>
+                            <span className="font-medium">{member.phone || '-'}</span>
+                        </li>
+                        <li className="flex justify-between border-b border-gray-100 pb-2">
+                            <span className="text-gray-500">최초 등록일</span>
+                            <span className="font-medium">{member.joined_at ? new Date(member.joined_at).toLocaleDateString('ko-KR') : '-'}</span>
+                        </li>
+                        <li className="flex justify-between border-b border-gray-100 pb-2">
+                            <span className="text-gray-500">다음 결제 예정일 (참고용)</span>
+                            <span className="font-medium">
+                                {member.payment_end_date
+                                    ? new Date(member.payment_end_date).toLocaleDateString('ko-KR')
+                                    : (member.payment_due_day ? `매월 ${member.payment_due_day}일` : '-')}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div className={`${PORTAL_STYLES.CARD} mb-6`}>
+                <div className={PORTAL_STYLES.CARD_PADDING}>
+                    <h2 className={PORTAL_STYLES.HEADING_MD}>결제 내역</h2>
+                    {payments.length === 0 ? (
+                        <p className="mt-4 text-sm text-gray-500 text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                            결제 내역이 없습니다.
+                        </p>
+                    ) : (
+                        <ul className="mt-4 space-y-3">
+                            {payments.map(payment => (
+                                <li key={payment.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col gap-1">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-semibold text-gray-900">
+                                            {payment.amount.toLocaleString()}원
+                                        </span>
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600">
+                                            {payment.payment_method === 'card' ? '카드' : payment.payment_method === 'cash' ? '현금' : '계좌이체'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs text-gray-500">
+                                        <span>{new Date(payment.payment_date).toLocaleDateString('ko-KR')}</span>
+                                        {payment.memo && <span className="truncate max-w-[120px] text-right" title={payment.memo}>{payment.memo}</span>}
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
 

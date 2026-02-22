@@ -64,3 +64,29 @@ export async function changePassword(current: string, newPw: string) {
 
     return { success: true }
 }
+
+export async function getMemberProfileData() {
+    const session = await getMemberSession()
+    if (!session || !session.memberId) return null
+
+    const supabase = await createAdminClient()
+
+    // 1. Fetch Member Basic Info
+    const { data: member } = await supabase
+        .from('gym_members')
+        .select('*')
+        .eq('id', session.memberId)
+        .single()
+
+    // 2. Fetch Payment History
+    const { data: payments } = await supabase
+        .from('gym_payment_history')
+        .select('*')
+        .eq('member_id', session.memberId)
+        .order('payment_date', { ascending: false })
+
+    return {
+        member,
+        payments: payments || []
+    }
+}
