@@ -1,14 +1,17 @@
-import { LogOut } from 'lucide-react';
+import { LogOut, AlertCircle } from 'lucide-react';
 import { PORTAL_STYLES } from '../styles';
 import ChangePasswordForm from './ChangePasswordForm';
 import { getMemberProfileData } from './actions';
 import { displayBeltName } from '@/app/dashboard/members/constants';
+import { getPaymentStatus } from '@/utils/payment';
 
 export default async function ProfilePage() {
     const data = await getMemberProfileData();
     if (!data || !data.member) return <div>정보를 불러올 수 없습니다.</div>;
 
     const { member, payments } = data;
+    const paymentInfo = getPaymentStatus(member);
+    const isUnpaid = paymentInfo.status === 'unpaid';
 
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
@@ -49,6 +52,17 @@ export default async function ProfilePage() {
             <div className={`${PORTAL_STYLES.CARD} mb-6`}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
                     <h2 className={PORTAL_STYLES.HEADING_MD}>결제 내역</h2>
+
+                    {isUnpaid && (
+                        <div className="mt-3 mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-start gap-3 text-sm">
+                            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            <p className="font-medium leading-relaxed">
+                                결제 예정일을 <strong className="text-red-700">{Math.abs(paymentInfo.diffDays)}일</strong> 지났습니다.<br />
+                                관장님께 회비 납부를 문의해 주세요.
+                            </p>
+                        </div>
+                    )}
+
                     {payments.length === 0 ? (
                         <p className="mt-4 text-sm text-gray-500 text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                             결제 내역이 없습니다.
