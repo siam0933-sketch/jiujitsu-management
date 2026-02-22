@@ -45,7 +45,7 @@ export default async function PromotionPage() {
                                             {/* RIGHT: Date + Stats (2 lines) */}
                                             <div className="text-right">
                                                 <p className="text-sm font-medium text-gray-900">
-                                                    {new Date(log.promoted_at).toLocaleDateString()}
+                                                    {new Date(log.promoted_at).toLocaleDateString('ko-KR')}
                                                 </p>
                                                 <p className="text-xs text-gray-500 mt-0.5">
                                                     수련 {log.training_days}일 · 출석 {log.attendance_count}회
