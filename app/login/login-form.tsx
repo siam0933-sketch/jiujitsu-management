@@ -20,7 +20,9 @@ export default function LoginForm() {
         const formData = new FormData(e.currentTarget)
         const email = formData.get('email') // Admin only
         const name = formData.get('name')   // Member only
-        const password = formData.get('password')
+        const password = loginType === 'member'
+            ? String(formData.get('password')).toLowerCase()
+            : formData.get('password')
 
         try {
             const endpoint = loginType === 'admin' ? '/api/login' : '/api/login/member'

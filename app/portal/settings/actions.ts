@@ -18,6 +18,9 @@ async function getMemberSession() {
 
 export async function changePassword(current: string, newPw: string) {
     const session = await getMemberSession()
+    current = current.toLowerCase()
+    newPw = newPw.toLowerCase()
+
     if (!session || !session.memberId || !session.gymId) {
         return { error: '로그인이 필요합니다.' }
     }

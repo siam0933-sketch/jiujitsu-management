@@ -22,7 +22,7 @@ export default function ChangePasswordForm() {
         }
 
         try {
-            const result = await changePassword(currentPw, newPw)
+            const result = await changePassword(currentPw.toLowerCase(), newPw.toLowerCase())
 
             if (result.error) {
                 setMessage({ type: 'error', text: result.error })
@@ -82,8 +82,8 @@ export default function ChangePasswordForm() {
 
             {message && (
                 <div className={`p-3 rounded-lg text-sm ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
                     {message.text}
                 </div>
