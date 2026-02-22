@@ -36,6 +36,7 @@ export default function MemberModal({ member }: { member: any }) {
     const [selectedPlanId, setSelectedPlanId] = useState('')
     const [manualAmount, setManualAmount] = useState<number | null>(null)
     const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
+    const [paymentMethod, setPaymentMethod] = useState<string>('card')
 
     // Config Data
     const [plans, setPlans] = useState<any[]>([])
@@ -223,7 +224,7 @@ export default function MemberModal({ member }: { member: any }) {
         formData.append('plan_id', selectedPlanId)
         formData.append('amount', String(finalAmount))
         formData.append('payment_date', paymentDate)
-        formData.append('payment_method', 'card')
+        formData.append('payment_method', paymentMethod)
         formData.append('duration_months', String(durationMonths))
         formData.append('plan_name', selectedPlan?.name || '')
         formData.append('type', selectedPlan?.type || '')
@@ -693,8 +694,21 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </div>
                                                     )}
 
+                                                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded mb-2 border border-gray-100">
+                                                        <span className="text-base font-bold text-gray-700">결제 수단</span>
+                                                        <select
+                                                            value={paymentMethod}
+                                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                                        >
+                                                            <option value="card">카드</option>
+                                                            <option value="cash">현금</option>
+                                                            <option value="transfer">계좌이체</option>
+                                                            <option value="other">기타</option>
+                                                        </select>
+                                                    </div>
 
-                                                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded">
+                                                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded border border-gray-100 mb-4">
                                                         <span className="text-base font-bold">총 결제금액</span>
                                                         <div className="flex items-center gap-2">
                                                             <input
