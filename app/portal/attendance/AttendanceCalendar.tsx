@@ -10,23 +10,16 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 }
 
 interface AttendanceCalendarProps {
-    attendanceDates: string[] // 'YYYY-MM-DD'
+    attendanceDates: string[]; // 'YYYY-MM-DD'
+    currentDate: Date;
+    onDateChange: (date: Date) => void;
 }
 
-export default function AttendanceCalendar({ attendanceDates }: AttendanceCalendarProps) {
+export default function AttendanceCalendar({ attendanceDates, currentDate, onDateChange }: AttendanceCalendarProps) {
     if (!attendanceDates) {
         console.error('AttendanceCalendar: attendanceDates is missing');
         return <div className="p-4 text-red-500 font-bold border border-red-200 rounded-lg">데이터 로딩 오류 (Dates missing)</div>;
     }
-
-    const [currentDate, setCurrentDate] = useState<Date | null>(null);
-
-    // Hydration fix: Set date on mount
-    useEffect(() => {
-        setCurrentDate(new Date());
-    }, []);
-
-    if (!currentDate) return <div className="p-10 text-center animate-pulse bg-white rounded-2xl">달력 로딩 중...</div>;
 
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
@@ -41,12 +34,12 @@ export default function AttendanceCalendar({ attendanceDates }: AttendanceCalend
 
     // Previous month navigation
     const prevMonth = () => {
-        setCurrentDate(new Date(year, month - 1, 1))
+        onDateChange(new Date(year, month - 1, 1))
     }
 
     // Next month navigation
     const nextMonth = () => {
-        setCurrentDate(new Date(year, month + 1, 1))
+        onDateChange(new Date(year, month + 1, 1))
     }
 
     const days = []

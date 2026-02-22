@@ -2,12 +2,16 @@
 
 import { CalendarDays, Trophy } from 'lucide-react'
 
-export default function AttendanceStats({ attendanceDates }: { attendanceDates: string[] }) {
+interface AttendanceStatsProps {
+    attendanceDates: string[];
+    currentDate: Date;
+}
+
+export default function AttendanceStats({ attendanceDates, currentDate }: AttendanceStatsProps) {
     if (!attendanceDates) return null
 
-    const today = new Date()
-    const currentYear = today.getFullYear()
-    const currentMonth = today.getMonth() + 1
+    const currentYear = currentDate.getFullYear()
+    const currentMonth = currentDate.getMonth() + 1
     const currentMonthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`
 
     const monthlyCount = attendanceDates.filter(d => d.startsWith(currentMonthStr)).length
