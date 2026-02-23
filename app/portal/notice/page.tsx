@@ -1,7 +1,8 @@
 import { PORTAL_STYLES } from '../styles';
 import { getPortalNotices, getPortalRanking } from './actions';
 import Link from 'next/link';
-import { Bell, ImageIcon, ChevronRightIcon, Trophy, Flame } from 'lucide-react';
+import { Bell, ImageIcon, ChevronRightIcon } from 'lucide-react';
+import PortalRankingClient from './PortalRankingClient';
 
 export default async function PortalHome() {
     // 1. Fetching Notices and Rankings in parallel
@@ -63,60 +64,7 @@ export default async function PortalHome() {
             </div>
 
             {/* SECTION 2: Attendance Ranking */}
-            <div>
-                <div className="flex items-center mb-4">
-                    <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                        <Flame className="w-5 h-5 text-orange-500" />
-                        {currentMonth}월 출석 랭킹
-                    </h2>
-                </div>
-
-                <div className={PORTAL_STYLES.CARD}>
-                    {rankingData && rankingData.length > 0 ? (
-                        <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                            {rankingData.map((member: any, index: number) => {
-                                const isMe = member.memberId === currentMemberId;
-                                const isTop3 = index < 3;
-
-                                return (
-                                    <li
-                                        key={member.memberId}
-                                        className={`flex items-center justify-between p-4 transition-colors ${isMe ? 'bg-orange-50/50 dark:bg-orange-950/20' : ''
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <span className={`w-8 text-center font-bold ${index === 0 ? 'text-yellow-500 text-lg' :
-                                                    index === 1 ? 'text-slate-400 text-lg' :
-                                                        index === 2 ? 'text-amber-600 text-lg' :
-                                                            'text-zinc-400 text-base'
-                                                }`}>
-                                                {isTop3 ? <Trophy className="w-5 h-5 mx-auto" /> : `${index + 1}`}
-                                            </span>
-
-                                            <div className="flex items-center gap-2">
-                                                <span className={`font-medium ${isMe ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
-                                                    {member.name}
-                                                </span>
-                                                {isMe && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">나</span>}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{member.count}</span>
-                                            <span className="text-xs text-zinc-500 font-medium">회</span>
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    ) : (
-                        <div className="p-8 text-center text-zinc-500 text-sm">
-                            <p>아직 이번 달 출석 기록이 없습니다.</p>
-                            <p className="mt-1">가장 먼저 출석해 랭킹에 이름을 올려보세요!</p>
-                        </div>
-                    )}
-                </div>
-            </div>
+            <PortalRankingClient initialRanking={rankingResult} />
 
             {/* Bottom spacer for infinite scrolling / nav bar spacing */}
             <div className="h-4"></div>
