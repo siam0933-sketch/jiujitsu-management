@@ -51,7 +51,7 @@ export default function PendingApprovalList({ todayKST }: Props) {
     }, [todayKST])
 
     const handleApprove = async (log: AttendanceLog) => {
-        if (!confirm(`${log.gym_members.name}님의 출석을 승인하시겠습니까?`)) return
+
 
         setProcessingIds(prev => new Set(prev).add(log.member_id))
         try {
