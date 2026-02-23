@@ -25,7 +25,7 @@ export default function ChangePasswordForm() {
         }
 
         try {
-            const result = await changePassword(currentPw.toLowerCase(), newPw.toLowerCase())
+            const result = await changePassword(currentPw, newPw)
 
             if (result.error) {
                 setMessage({ type: 'error', text: result.error })

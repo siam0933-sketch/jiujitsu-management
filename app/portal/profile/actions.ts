@@ -18,8 +18,6 @@ async function getMemberSession() {
 
 export async function changePassword(current: string, newPw: string) {
     const session = await getMemberSession()
-    current = current.toLowerCase()
-    newPw = newPw.toLowerCase()
 
     if (!session || !session.memberId || !session.gymId) {
         return { error: '로그인이 필요합니다.' }
@@ -44,8 +42,8 @@ export async function changePassword(current: string, newPw: string) {
         return { error: '회원 정보를 불러올 수 없습니다.' }
     }
 
-    // 3. Check Current Password
-    if (member.login_password !== current) {
+    // 3. Check Current Password (Case-insensitive to match login logic)
+    if (member.login_password?.toLowerCase() !== current.toLowerCase()) {
         return { error: '현재 비밀번호가 일치하지 않습니다.' }
     }
 
