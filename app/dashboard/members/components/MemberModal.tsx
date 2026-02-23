@@ -28,6 +28,8 @@ export default function MemberModal({ member }: { member: any }) {
 
     // Basic Info State
     const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false)
+    const [isSavingBasicInfo, setIsSavingBasicInfo] = useState(false)
+    const [isManualExpiry, setIsManualExpiry] = useState(false) // [NEW] Manually edited expiry date tracking
     const [basicInfoForm, setBasicInfoForm] = useState({ ...member })
 
     // Payment Form State
@@ -173,6 +175,8 @@ export default function MemberModal({ member }: { member: any }) {
             setNewExpiryDate('')
             return
         }
+
+        if (isManualExpiry) return // Skip auto-calc if user manually edited the date
 
         // Base Date: Max(Current Expiry, Today)
         let baseDate = new Date()
@@ -594,7 +598,14 @@ export default function MemberModal({ member }: { member: any }) {
                                                 <div className="space-y-4">
                                                     <div>
                                                         <label className="block text-sm text-gray-500 mb-1 font-bold">이용권 선택</label>
-                                                        <select value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)} className="w-full text-base border-2 border-gray-900 rounded p-2">
+                                                        <select
+                                                            value={selectedPlanId}
+                                                            onChange={e => {
+                                                                setSelectedPlanId(e.target.value)
+                                                                setIsManualExpiry(false) // Reset manual override on plan change
+                                                            }}
+                                                            className="w-full text-base border-2 border-gray-900 rounded p-2"
+                                                        >
                                                             <option value="">이용권 선택</option>
                                                             {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
                                                         </select>
@@ -608,7 +619,10 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     type="number"
                                                                     min="1"
                                                                     value={durationMonths}
-                                                                    onChange={e => setDurationMonths(Number(e.target.value))}
+                                                                    onChange={e => {
+                                                                        setDurationMonths(Number(e.target.value))
+                                                                        setIsManualExpiry(false) // Re-enable auto-calc when duration changes
+                                                                    }}
                                                                     className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                                 />
                                                             </div>
@@ -623,12 +637,26 @@ export default function MemberModal({ member }: { member: any }) {
                                                             </div>
                                                             <div className="flex-1">
                                                                 <label className="block text-sm text-gray-500 mb-1">만료 예정일 (수정 가능)</label>
-                                                                <input
-                                                                    type="date"
-                                                                    value={newExpiryDate}
-                                                                    onChange={e => setNewExpiryDate(e.target.value)}
-                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
-                                                                />
+                                                                <div className="flex items-center gap-2">
+                                                                    <input
+                                                                        type="date"
+                                                                        value={newExpiryDate}
+                                                                        onChange={e => {
+                                                                            setNewExpiryDate(e.target.value)
+                                                                            setIsManualExpiry(true) // Lock auto-calc when user edits
+                                                                        }}
+                                                                        className="w-full text-base border-2 border-gray-900 rounded p-2"
+                                                                    />
+                                                                    {isManualExpiry && (
+                                                                        <button
+                                                                            onClick={() => setIsManualExpiry(false)}
+                                                                            className="text-xs text-blue-500 underline whitespace-nowrap hidden sm:block"
+                                                                            title="자동 계산으로 복귀"
+                                                                        >
+                                                                            자동계산
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}
