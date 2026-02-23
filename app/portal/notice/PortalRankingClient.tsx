@@ -163,9 +163,9 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                             {(() => {
                                 let currentRank = 1;
                                 return currentData.ranking.map((member: any, index: number, arr: any[]) => {
-                                    // Calculate tie rank
+                                    // Calculate tie rank (Dense Ranking)
                                     if (index > 0 && member.count < arr[index - 1].count) {
-                                        currentRank = index + 1;
+                                        currentRank++;
                                     }
 
                                     const isMe = member.memberId === currentData.currentMemberId;
