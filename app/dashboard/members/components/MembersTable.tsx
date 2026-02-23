@@ -241,6 +241,18 @@ export default function MembersTable({ initialMembers, count, status, attendance
         }
     }
 
+    const handleRowClick = (e: React.MouseEvent, memberId: string) => {
+        const target = e.target as HTMLElement
+        // 버튼, 인풋, 체크박스 등을 눌렀을 때는 상세모달이 뜨지 않도록 방지
+        if (target.closest('button') || target.closest('input') || target.closest('a')) {
+            return
+        }
+
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('id', memberId)
+        router.push(`/dashboard/members?${params.toString()}`, { scroll: false })
+    }
+
     const SortLink = ({ column, label }: { column: string, label: string }) => {
         const isCurrent = sort === column
         const nextOrder = isCurrent && order === 'desc' ? 'asc' : 'desc'
@@ -405,7 +417,11 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             const isProcessing = processingIds.has(member.id)
 
                                             return (
-                                                <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                                                <tr
+                                                    key={member.id}
+                                                    onClick={(e) => handleRowClick(e, member.id)}
+                                                    className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                                                >
                                                     <td className={`whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
                                                         {isEditMode ? (
                                                             <input
@@ -418,13 +434,9 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                                                         <div className="flex items-center gap-2">
-                                                            <Link
-                                                                href={`/dashboard/members?${new URLSearchParams({ ...Object.fromEntries(searchParams), id: member.id }).toString()}`}
-                                                                scroll={false}
-                                                                className="text-blue-600 hover:text-blue-900 hover:underline cursor-pointer"
-                                                            >
+                                                            <span className="text-gray-900 font-semibold select-none group-hover:text-blue-600 transition-colors">
                                                                 {member.name || '이름 없음'}
-                                                            </Link>
+                                                            </span>
                                                         </div>
                                                         <div className="text-xs text-gray-400 mt-0.5">{member.phone || '-'}</div>
                                                     </td>
