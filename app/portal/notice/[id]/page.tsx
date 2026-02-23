@@ -31,7 +31,7 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
             </div>
 
             <article className={`${PORTAL_STYLES.CARD} overflow-hidden`}>
-                <div className={`${PORTAL_STYLES.CARD_PADDING} ${PORTAL_STYLES.BORDER_BOTTOM} bg-zinc-50/50 dark:bg-zinc-900/50 space-y-3`}>
+                <div className={`${PORTAL_STYLES.CARD_PADDING} border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-3`}>
                     <h1 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                         {notice.title}
                     </h1>
@@ -48,9 +48,10 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
                 </div>
 
                 <div className={`${PORTAL_STYLES.CARD_PADDING} space-y-8`}>
-                    <div className="whitespace-pre-wrap leading-relaxed text-zinc-800 dark:text-zinc-200 text-sm md:text-base">
-                        {notice.content}
-                    </div>
+                    <div
+                        className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mb-8"
+                        dangerouslySetInnerHTML={{ __html: notice.content }}
+                    />
 
                     {notice.images && notice.images.length > 0 && (
                         <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">

@@ -11,6 +11,11 @@
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tiptap/extension-image": "^3.20.0",
+    "@tiptap/react": "^3.20.0",
+    "@tiptap/starter-kit": "^3.20.0",
+    "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.562.0",

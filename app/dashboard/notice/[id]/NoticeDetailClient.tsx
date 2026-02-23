@@ -2,37 +2,20 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
 import { updateNotice, deleteNotice } from '../actions'
-import { Loader2, ImageIcon, XIcon, TrashIcon, Edit2Icon } from 'lucide-react'
+import { Loader2, TrashIcon, Edit2Icon, ImageIcon } from 'lucide-react'
+import NoticeEditor from '../../components/NoticeEditor'
 
 export default function NoticeDetailClient({ initialData }: { initialData: any }) {
     const router = useRouter()
-    const supabase = createClient()
-
     const [isEditing, setIsEditing] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const [title, setTitle] = useState(initialData.title)
     const [content, setContent] = useState(initialData.content)
+    // We keep existing images just in case this is a legacy post without HTML images
     const [existingImages, setExistingImages] = useState<string[]>(initialData.images || [])
-    const [newFiles, setNewFiles] = useState<File[]>([])
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const selectedFiles = Array.from(e.target.files)
-            setNewFiles(prev => [...prev, ...selectedFiles])
-        }
-    }
-
-    const removeNewFile = (index: number) => {
-        setNewFiles(prev => prev.filter((_, i) => i !== index))
-    }
-
-    const removeExistingImage = (index: number) => {
-        setExistingImages(prev => prev.filter((_, i) => i !== index))
-    }
 
     const handleDelete = async () => {
         if (!confirm('정말 이 공지사항을 삭제하시겠습니까?')) return
@@ -57,40 +40,15 @@ export default function NoticeDetailClient({ initialData }: { initialData: any }
 
         setIsSubmitting(true)
         try {
-            let uploadedImageUrls = [...existingImages]
-
-            if (newFiles.length > 0) {
-                for (const file of newFiles) {
-                    const fileExt = file.name.split('.').pop()
-                    const fileName = `${crypto.randomUUID()}.${fileExt}`
-
-                    const { error: uploadError } = await supabase.storage
-                        .from('notices')
-                        .upload(fileName, file)
-
-                    if (uploadError) {
-                        throw new Error(`Failed to upload ${file.name}`)
-                    }
-
-                    const { data } = supabase.storage
-                        .from('notices')
-                        .getPublicUrl(fileName)
-
-                    uploadedImageUrls.push(data.publicUrl)
-                }
-            }
-
             const res = await updateNotice(initialData.id, {
                 title,
                 content,
-                images: uploadedImageUrls
+                images: existingImages // Keeping legacy images, new ones are in HTML
             })
 
             if (res.error) throw new Error(res.error)
 
             setIsEditing(false)
-            setNewFiles([])
-            // Assuming Next.js revalidatePath updates the page data
             router.refresh()
         } catch (error: any) {
             console.error('Error updating notice:', error)
@@ -133,14 +91,16 @@ export default function NoticeDetailClient({ initialData }: { initialData: any }
                     </div>
                 </div>
 
-                <div className="whitespace-pre-wrap leading-relaxed text-zinc-800 dark:text-zinc-200 mb-8">
-                    {content}
-                </div>
+                <div
+                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mb-8"
+                    dangerouslySetInnerHTML={{ __html: content }}
+                />
 
+                {/* Legacy Images Support */}
                 {existingImages.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                         <h4 className="text-sm font-medium text-zinc-500 flex items-center gap-2">
-                            <ImageIcon className="w-4 h-4" /> 첨부 이미지
+                            <ImageIcon className="w-4 h-4" /> 첨부 이미지 (이전 버전)
                         </h4>
                         <div className="flex flex-col gap-6">
                             {existingImages.map((url, idx) => (
@@ -174,84 +134,16 @@ export default function NoticeDetailClient({ initialData }: { initialData: any }
 
             <div className="space-y-2">
                 <label className="text-sm font-medium border-l-2 border-black dark:border-white pl-2">내용</label>
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    rows={10}
-                    className="w-full px-3 py-2 border rounded-md dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all resize-y"
-                    required
-                />
-            </div>
-
-            <div className="space-y-4">
-                <label className="text-sm font-medium border-l-2 border-black dark:border-white pl-2">첨부 이미지 수정</label>
-
-                {/* Existing Images */}
-                {existingImages.length > 0 && (
-                    <div className="space-y-2 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-                        <span className="text-xs text-zinc-500">기존 이미지 (클릭하여 삭제)</span>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {existingImages.map((url, idx) => (
-                                <div key={idx} className="relative group rounded-md border border-zinc-200 dark:border-zinc-800 aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                                    <img src={url} alt={`Existing ${idx}`} className="object-cover w-full h-full" />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeExistingImage(idx)}
-                                        className="absolute inset-0 bg-red-500/80 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        삭제
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* New Files */}
-                <div className="space-y-2 pt-2">
-                    <div className="flex items-center space-x-4">
-                        <label className="flex items-center justify-center px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-md cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
-                            <ImageIcon className="w-4 h-4 mr-2" />
-                            <span className="text-sm">추가할 이미지 선택</span>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                className="hidden"
-                                onChange={handleFileChange}
-                            />
-                        </label>
-                    </div>
-
-                    {newFiles.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                            {newFiles.map((file, idx) => (
-                                <div key={idx} className="relative group rounded-md border border-amber-200 dark:border-amber-900 aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                                    <img src={URL.createObjectURL(file)} alt={`New ${idx}`} className="object-cover w-full h-full" />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeNewFile(idx)}
-                                        className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <XIcon className="w-4 h-4" />
-                                    </button>
-                                    <span className="absolute bottom-1 left-1 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded">새 이미지</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                <NoticeEditor content={content} onChange={setContent} />
             </div>
 
             <div className="pt-6 flex justify-end gap-3 border-t border-zinc-100 dark:border-zinc-800">
                 <button
                     type="button"
                     onClick={() => {
-                        // Reset form state to initial
                         setTitle(initialData.title)
                         setContent(initialData.content)
                         setExistingImages(initialData.images || [])
-                        setNewFiles([])
                         setIsEditing(false)
                     }}
                     className="px-4 py-2 bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-md transition-colors"
