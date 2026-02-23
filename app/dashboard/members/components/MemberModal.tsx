@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
-import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword } from '../actions'
+import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword, updateMemberPaymentEndDate } from '../actions'
 import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseController } from './MemberComponents'
 import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
@@ -29,8 +29,22 @@ export default function MemberModal({ member }: { member: any }) {
     // Basic Info State
     const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false)
     const [isSavingBasicInfo, setIsSavingBasicInfo] = useState(false)
-    const [isManualExpiry, setIsManualExpiry] = useState(false) // [NEW] Manually edited expiry date tracking
     const [basicInfoForm, setBasicInfoForm] = useState({ ...member })
+
+    // Expiry Date Edit State
+    const [isEditingExpiryDate, setIsEditingExpiryDate] = useState(false)
+    const [tempExpiryDate, setTempExpiryDate] = useState(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '')
+
+    const handleSaveExpiryDate = async () => {
+        setIsSubmitting(true)
+        const res = await updateMemberPaymentEndDate(member.id, tempExpiryDate || null)
+        setIsSubmitting(false)
+        if (res?.error) alert(res.error)
+        else {
+            setIsEditingExpiryDate(false)
+            router.refresh()
+        }
+    }
 
     // Payment Form State
     const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false)
@@ -175,8 +189,6 @@ export default function MemberModal({ member }: { member: any }) {
             setNewExpiryDate('')
             return
         }
-
-        if (isManualExpiry) return // Skip auto-calc if user manually edited the date
 
         // Base Date: Max(Current Expiry, Today)
         let baseDate = new Date()
@@ -581,8 +593,27 @@ export default function MemberModal({ member }: { member: any }) {
                                     {/* Status */}
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
-                                            <p className="text-gray-500 text-sm font-bold">만료일</p>
-                                            <p className="text-2xl font-bold text-gray-900">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="text-gray-500 text-sm font-bold">만료일</p>
+                                                {!isEditingExpiryDate ? (
+                                                    <button onClick={() => setIsEditingExpiryDate(true)} className="text-xs text-blue-500 hover:text-blue-700 underline px-1 py-0.5 rounded focus:outline-none focus:bg-blue-50">수정</button>
+                                                ) : (
+                                                    <div className="flex gap-1 ml-2">
+                                                        <button onClick={handleSaveExpiryDate} disabled={isSubmitting} className="text-xs text-white bg-blue-600 px-2 py-1 rounded shadow-sm hover:bg-blue-700 transition">저장</button>
+                                                        <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded border border-gray-300 shadow-sm hover:bg-gray-200 transition">취소</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {!isEditingExpiryDate ? (
+                                                <p className="text-2xl font-bold text-gray-900">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
+                                            ) : (
+                                                <input
+                                                    type="date"
+                                                    value={tempExpiryDate}
+                                                    onChange={e => setTempExpiryDate(e.target.value)}
+                                                    className="block w-full text-xl font-bold border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                                                />
+                                            )}
                                         </div>
                                     </div>
 
@@ -600,10 +631,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                         <label className="block text-sm text-gray-500 mb-1 font-bold">이용권 선택</label>
                                                         <select
                                                             value={selectedPlanId}
-                                                            onChange={e => {
-                                                                setSelectedPlanId(e.target.value)
-                                                                setIsManualExpiry(false) // Reset manual override on plan change
-                                                            }}
+                                                            onChange={e => setSelectedPlanId(e.target.value)}
                                                             className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                         >
                                                             <option value="">이용권 선택</option>
@@ -619,10 +647,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     type="number"
                                                                     min="1"
                                                                     value={durationMonths}
-                                                                    onChange={e => {
-                                                                        setDurationMonths(Number(e.target.value))
-                                                                        setIsManualExpiry(false) // Re-enable auto-calc when duration changes
-                                                                    }}
+                                                                    onChange={e => setDurationMonths(Number(e.target.value))}
                                                                     className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                                 />
                                                             </div>
@@ -636,27 +661,13 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 />
                                                             </div>
                                                             <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 mb-1">만료 예정일 (수정 가능)</label>
-                                                                <div className="flex items-center gap-2">
-                                                                    <input
-                                                                        type="date"
-                                                                        value={newExpiryDate}
-                                                                        onChange={e => {
-                                                                            setNewExpiryDate(e.target.value)
-                                                                            setIsManualExpiry(true) // Lock auto-calc when user edits
-                                                                        }}
-                                                                        className="w-full text-base border-2 border-gray-900 rounded p-2"
-                                                                    />
-                                                                    {isManualExpiry && (
-                                                                        <button
-                                                                            onClick={() => setIsManualExpiry(false)}
-                                                                            className="text-xs text-blue-500 underline whitespace-nowrap hidden sm:block"
-                                                                            title="자동 계산으로 복귀"
-                                                                        >
-                                                                            자동계산
-                                                                        </button>
-                                                                    )}
-                                                                </div>
+                                                                <label className="block text-sm text-gray-500 mb-1">만료 예정일</label>
+                                                                <input
+                                                                    type="date"
+                                                                    value={newExpiryDate}
+                                                                    readOnly
+                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2 bg-gray-50 outline-none"
+                                                                />
                                                             </div>
                                                         </div>
                                                     )}

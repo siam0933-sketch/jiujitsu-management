@@ -360,6 +360,20 @@ export async function updateMemberJoinedDate(memberId: string, joinedAt: string)
     return { success: true }
 }
 
+export async function updateMemberPaymentEndDate(memberId: string, endDate: string | null) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('gym_members')
+        .update({ payment_end_date: endDate })
+        .eq('id', memberId)
+
+    if (error) return { error: '만료일 수정 실패: ' + error.message }
+
+    revalidatePath(`/dashboard/members`)
+    revalidatePath(`/dashboard/members/${memberId}`)
+    return { success: true }
+}
+
 
 
 export async function getMemberAttendanceLogs(memberId: string) {
