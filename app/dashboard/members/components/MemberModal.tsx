@@ -707,8 +707,8 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 <input
                                                                     type="date"
                                                                     value={newExpiryDate}
-                                                                    readOnly
-                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2 bg-gray-50 outline-none"
+                                                                    onChange={e => setNewExpiryDate(e.target.value)}
+                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
                                                                 />
                                                             </div>
                                                         </div>
