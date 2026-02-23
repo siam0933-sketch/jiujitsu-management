@@ -42,7 +42,7 @@ export async function checkInByPhone(input: string, gymId: string): Promise<Chec
     // 2. Find Member(s) matching phone OR access_code
     const { data: members, error: searchError } = await supabase
         .from('gym_members')
-        .select('id, name, phone, user_id, access_code, attendance_count, remaining_sessions')
+        .select('id, name, phone, user_id, access_code, remaining_sessions')
         .eq('gym_id', gymId)
         .eq('status', 'active')
         .or(`phone.ilike.%${input},access_code.eq.${input}`)
@@ -156,20 +156,23 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
         return { success: false, message: '출석 처리 중 오류가 발생했습니다.' }
     }
 
-    // Increment Member Attendance Count
-    const newCount = (member.attendance_count || 0) + 1
-    let updateData: any = { attendance_count: newCount }
+    // Decrement Member Remaining Sessions if applicable
+    let updateData: any = {}
+    let shouldUpdate = false;
 
     if (member.remaining_sessions !== undefined && member.remaining_sessions !== null && member.remaining_sessions > 0) {
         updateData.remaining_sessions = member.remaining_sessions - 1
+        shouldUpdate = true;
     }
 
-    const { error: memberUpdateError } = await supabase
-        .from('gym_members')
-        .update(updateData)
-        .eq('id', member.id)
+    if (shouldUpdate) {
+        const { error: memberUpdateError } = await supabase
+            .from('gym_members')
+            .update(updateData)
+            .eq('id', member.id)
 
-    if (memberUpdateError) console.error('Failed to update member stats:', memberUpdateError)
+        if (memberUpdateError) console.error('Failed to update member stats:', memberUpdateError)
+    }
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')

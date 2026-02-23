@@ -41,23 +41,26 @@ export async function checkInMember(memberId: string, className?: string, date?:
             // Increment count logic (Same as new check-in)
             const { data: member } = await supabase
                 .from('gym_members')
-                .select('attendance_count, remaining_sessions')
+                .select('remaining_sessions')
                 .eq('id', memberId)
                 .single()
 
-            const newCount = (member?.attendance_count || 0) + 1
-            let updateData: any = { attendance_count: newCount }
+            let updateData: any = {}
+            let shouldUpdate = false;
 
             if (member && member.remaining_sessions > 0) {
                 updateData.remaining_sessions = member.remaining_sessions - 1
+                shouldUpdate = true;
             }
 
-            const { error: memberUpdateError } = await supabase
-                .from('gym_members')
-                .update(updateData)
-                .eq('id', memberId)
+            if (shouldUpdate) {
+                const { error: memberUpdateError } = await supabase
+                    .from('gym_members')
+                    .update(updateData)
+                    .eq('id', memberId)
 
-            if (memberUpdateError) console.error('Failed to update member stats:', memberUpdateError)
+                if (memberUpdateError) console.error('Failed to update member stats:', memberUpdateError)
+            }
 
             revalidatePath('/dashboard/attendance')
             revalidatePath('/dashboard/members')
@@ -81,23 +84,26 @@ export async function checkInMember(memberId: string, className?: string, date?:
     // 3. Increment Member Attendance Count
     const { data: member } = await supabase
         .from('gym_members')
-        .select('attendance_count, remaining_sessions')
+        .select('remaining_sessions')
         .eq('id', memberId)
         .single()
 
-    const newCount = (member?.attendance_count || 0) + 1
-    let updateData: any = { attendance_count: newCount }
+    let updateData: any = {}
+    let shouldUpdate = false;
 
     if (member && member.remaining_sessions > 0) {
         updateData.remaining_sessions = member.remaining_sessions - 1
+        shouldUpdate = true;
     }
 
-    const { error: updateError } = await supabase
-        .from('gym_members')
-        .update(updateData)
-        .eq('id', memberId)
+    if (shouldUpdate) {
+        const { error: updateError } = await supabase
+            .from('gym_members')
+            .update(updateData)
+            .eq('id', memberId)
 
-    if (updateError) console.error('Failed to update member stats:', updateError)
+        if (updateError) console.error('Failed to update member stats:', updateError)
+    }
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
@@ -175,18 +181,21 @@ export async function cancelAttendance(memberId: string, date: string, className
     // 2. Decrement Member Attendance Count
     const { data: member } = await supabase
         .from('gym_members')
-        .select('attendance_count, remaining_sessions')
+        .select('remaining_sessions')
         .eq('id', memberId)
         .single()
 
-    const newCount = Math.max(0, (member?.attendance_count || 0) - 1)
-    let updateData: any = { attendance_count: newCount }
+    let updateData: any = {}
+    let shouldUpdate = false;
 
     if (member && member.remaining_sessions !== undefined && member.remaining_sessions !== null) {
         updateData.remaining_sessions = member.remaining_sessions + 1
+        shouldUpdate = true;
     }
 
-    await supabase.from('gym_members').update(updateData).eq('id', memberId)
+    if (shouldUpdate) {
+        await supabase.from('gym_members').update(updateData).eq('id', memberId)
+    }
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
