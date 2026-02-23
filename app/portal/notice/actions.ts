@@ -87,7 +87,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     // 2. Fetch logs for the gym within the date range
     const { data: logs, error: fetchError } = await supabase
         .from('gym_attendance_logs')
-        .select('member_id, member:gym_members(name, belt)')
+        .select('member_id, member:gym_members(name, belt, birth_date)')
         .eq('gym_id', session.gymId)
         .eq('status', 'present')
         .gte('date', startDateStr)
@@ -102,7 +102,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     }
 
     // 3. Calculate ranking
-    const counts: Record<string, { count: number, name: string, belt: string }> = {}
+    const counts: Record<string, { count: number, name: string, belt: string, age?: number }> = {}
 
     logs.forEach(log => {
         const id = log.member_id
@@ -111,15 +111,29 @@ export async function getPortalRanking(year?: number, month?: number | null) {
             const memberData: any = log.member
             const memberName = memberData?.name || (Array.isArray(memberData) ? memberData[0]?.name : '알 수 없음')
             const memberBelt = memberData?.belt || (Array.isArray(memberData) ? memberData[0]?.belt : 'white')
-            counts[id] = { count: 0, name: memberName, belt: memberBelt }
+
+            let age: number | undefined;
+            const birthDateStr = memberData?.birth_date || (Array.isArray(memberData) ? memberData[0]?.birth_date : null)
+            if (birthDateStr) {
+                const birthDate = new Date(birthDateStr);
+                const today = new Date();
+                let calcAge = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    calcAge--;
+                }
+                age = calcAge;
+            }
+
+            counts[id] = { count: 0, name: memberName, belt: memberBelt, age }
         }
         counts[id].count++
     })
 
     const ranking = Object.entries(counts)
-        .map(([id, val]) => ({ memberId: id, name: val.name, belt: val.belt, count: val.count }))
+        .map(([id, val]) => ({ memberId: id, name: val.name, belt: val.belt, count: val.count, age: val.age }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 50) // Limit to top 50 
+    // No longer slicing to 50 so that client-side filtering works correctly across all members.
 
     return {
         ranking,

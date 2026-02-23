@@ -5,8 +5,10 @@ import { Flame, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getPortalRanking } from './actions'
 import { PORTAL_STYLES } from '../styles'
 
+type FilterType = 'all' | 'under16' | 'over16' | 'custom';
+
 interface RankingData {
-    ranking: { memberId: string, name: string, count: number, belt?: string }[];
+    ranking: { memberId: string, name: string, count: number, belt?: string, age?: number }[];
     currentMemberId: string | null;
     year: number;
     month: number | null;
@@ -21,6 +23,11 @@ export default function PortalRankingClient({ initialRanking }: Props) {
     const [mode, setMode] = useState<'month' | 'year'>('month')
     const [currentData, setCurrentData] = useState<RankingData>(initialRanking)
     const [isLoading, setIsLoading] = useState(false)
+
+    // Filter states
+    const [filter, setFilter] = useState<FilterType>('all')
+    const [customAgeStart, setCustomAgeStart] = useState<string>('')
+    const [customAgeEnd, setCustomAgeEnd] = useState<string>('')
 
     // Current viewing date
     const [viewYear, setViewYear] = useState(initialRanking.year)
@@ -105,6 +112,21 @@ export default function PortalRankingClient({ initialRanking }: Props) {
 
     const canGoNext = mode === 'month' ? !isFutureMonth(viewMonth === 12 ? viewYear + 1 : viewYear, viewMonth === 12 ? 1 : viewMonth + 1) : !isFutureYear(viewYear + 1)
 
+    const filteredRanking = currentData.ranking ? currentData.ranking.filter(item => {
+        if (filter === 'all') return true;
+        if (item.age === undefined) return false;
+
+        if (filter === 'under16') return item.age < 16;
+        if (filter === 'over16') return item.age >= 16;
+
+        if (filter === 'custom') {
+            const start = customAgeStart ? parseInt(customAgeStart, 10) : 0;
+            const end = customAgeEnd ? parseInt(customAgeEnd, 10) : 200;
+            return item.age >= start && item.age <= end;
+        }
+        return true;
+    }) : [];
+
     return (
         <div>
             {/* Header & Tabs */}
@@ -114,8 +136,46 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                         <Flame className="w-5 h-5 text-orange-500" />
                         출석 랭킹
                     </h2>
+                </div>
 
-                    <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
+                {/* Filter and Mode Control Row */}
+                <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center justify-between">
+                    {/* Left: Filter Controls */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value as FilterType)}
+                            className="bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-200 rounded-lg px-3 py-1.5 border-none outline-none cursor-pointer"
+                        >
+                            <option value="all">전체보기</option>
+                            <option value="under16">16세 미만 (키즈)</option>
+                            <option value="over16">16세 이상 (성인)</option>
+                            <option value="custom">나이 지정</option>
+                        </select>
+
+                        {filter === 'custom' && (
+                            <div className="flex items-center gap-1 animate-in fade-in slide-in-from-left-2">
+                                <input
+                                    type="number"
+                                    value={customAgeStart}
+                                    onChange={(e) => setCustomAgeStart(e.target.value)}
+                                    placeholder="0"
+                                    className="w-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm px-2 py-1.5 rounded-md border-none text-center"
+                                />
+                                <span className="text-zinc-500 text-sm">~</span>
+                                <input
+                                    type="number"
+                                    value={customAgeEnd}
+                                    onChange={(e) => setCustomAgeEnd(e.target.value)}
+                                    placeholder="100"
+                                    className="w-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm px-2 py-1.5 rounded-md border-none text-center"
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right: Date Nav Mode */}
+                    <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 shrink-0">
                         <button
                             onClick={() => handleModeChange('month')}
                             className={`text-xs font-medium px-3 py-1.5 rounded-md transition-all ${mode === 'month' ? 'bg-white dark:bg-zinc-700 text-black dark:text-white shadow-sm' : 'text-zinc-500'}`}
@@ -157,12 +217,12 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                     </div>
                 )}
 
-                {currentData.ranking && currentData.ranking.length > 0 ? (
+                {filteredRanking.length > 0 ? (
                     <div className="max-h-[700px] overflow-y-auto">
                         <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
                             {(() => {
                                 let currentRank = 1;
-                                return currentData.ranking.map((member: any, index: number, arr: any[]) => {
+                                return filteredRanking.map((member: any, index: number, arr: any[]) => {
                                     // Calculate tie rank (Dense Ranking)
                                     if (index > 0 && member.count < arr[index - 1].count) {
                                         currentRank++;
