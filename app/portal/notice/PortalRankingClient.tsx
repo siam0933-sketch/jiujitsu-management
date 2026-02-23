@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Flame, Trophy, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Flame, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getPortalRanking } from './actions'
 import { PORTAL_STYLES } from '../styles'
 
 interface RankingData {
-    ranking: { memberId: string, name: string, count: number }[];
+    ranking: { memberId: string, name: string, count: number, belt?: string }[];
     currentMemberId: string | null;
     year: number;
     month: number | null;
@@ -183,13 +183,18 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                                                         currentRank === 3 ? 'text-amber-600 text-lg' :
                                                             'text-zinc-400 text-base'
                                                     }`}>
-                                                    {isTop3 ? <Trophy className="w-5 h-5" /> : `${currentRank}`}
+                                                    {currentRank}
                                                 </span>
 
                                                 <div className="flex items-center gap-2">
                                                     <span className={`font-medium ${isMe ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
                                                         {member.name}
                                                     </span>
+                                                    {member.belt && (
+                                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                                                            {member.belt}
+                                                        </span>
+                                                    )}
                                                     {isMe && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">나</span>}
                                                 </div>
                                             </div>

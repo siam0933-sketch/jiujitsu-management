@@ -87,7 +87,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     // 2. Fetch logs for the gym within the date range
     const { data: logs, error: fetchError } = await supabase
         .from('gym_attendance_logs')
-        .select('member_id, member:gym_members(name)')
+        .select('member_id, member:gym_members(name, belt)')
         .eq('gym_id', session.gymId)
         .eq('status', 'present')
         .gte('date', startDateStr)
@@ -102,7 +102,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     }
 
     // 3. Calculate ranking
-    const counts: Record<string, { count: number, name: string }> = {}
+    const counts: Record<string, { count: number, name: string, belt: string }> = {}
 
     logs.forEach(log => {
         const id = log.member_id
@@ -110,13 +110,14 @@ export async function getPortalRanking(year?: number, month?: number | null) {
             // Since it's a one-to-one mapping in the query we can cast it if it comes as array
             const memberData: any = log.member
             const memberName = memberData?.name || (Array.isArray(memberData) ? memberData[0]?.name : '알 수 없음')
-            counts[id] = { count: 0, name: memberName }
+            const memberBelt = memberData?.belt || (Array.isArray(memberData) ? memberData[0]?.belt : 'white')
+            counts[id] = { count: 0, name: memberName, belt: memberBelt }
         }
         counts[id].count++
     })
 
     const ranking = Object.entries(counts)
-        .map(([id, val]) => ({ memberId: id, name: val.name, count: val.count }))
+        .map(([id, val]) => ({ memberId: id, name: val.name, belt: val.belt, count: val.count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 50) // Limit to top 50 
 
