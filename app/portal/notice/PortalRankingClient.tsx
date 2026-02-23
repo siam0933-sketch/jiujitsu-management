@@ -158,42 +158,52 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                 )}
 
                 {currentData.ranking && currentData.ranking.length > 0 ? (
-                    <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                        {currentData.ranking.map((member: any, index: number) => {
-                            const isMe = member.memberId === currentData.currentMemberId;
-                            const isTop3 = index < 3;
+                    <div className="max-h-[700px] overflow-y-auto">
+                        <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            {(() => {
+                                let currentRank = 1;
+                                return currentData.ranking.map((member: any, index: number, arr: any[]) => {
+                                    // Calculate tie rank
+                                    if (index > 0 && member.count < arr[index - 1].count) {
+                                        currentRank = index + 1;
+                                    }
 
-                            return (
-                                <li
-                                    key={member.memberId}
-                                    className={`flex items-center justify-between p-4 transition-colors ${isMe ? 'bg-orange-50/50 dark:bg-orange-950/20' : ''
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className={`w-8 text-center font-bold flex items-center justify-center ${index === 0 ? 'text-yellow-500 text-lg' :
-                                            index === 1 ? 'text-slate-400 text-lg' :
-                                                index === 2 ? 'text-amber-600 text-lg' :
-                                                    'text-zinc-400 text-base'
-                                            }`}>
-                                            {isTop3 ? <Trophy className="w-5 h-5" /> : `${index + 1}`}
-                                        </span>
+                                    const isMe = member.memberId === currentData.currentMemberId;
+                                    const isTop3 = currentRank <= 3;
 
-                                        <div className="flex items-center gap-2">
-                                            <span className={`font-medium ${isMe ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
-                                                {member.name}
-                                            </span>
-                                            {isMe && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">나</span>}
-                                        </div>
-                                    </div>
+                                    return (
+                                        <li
+                                            key={member.memberId}
+                                            className={`flex items-center justify-between p-4 transition-colors ${isMe ? 'bg-orange-50/50 dark:bg-orange-950/20' : ''
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className={`w-8 text-center font-bold flex items-center justify-center ${currentRank === 1 ? 'text-yellow-500 text-lg' :
+                                                    currentRank === 2 ? 'text-slate-400 text-lg' :
+                                                        currentRank === 3 ? 'text-amber-600 text-lg' :
+                                                            'text-zinc-400 text-base'
+                                                    }`}>
+                                                    {isTop3 ? <Trophy className="w-5 h-5" /> : `${currentRank}`}
+                                                </span>
 
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{member.count}</span>
-                                        <span className="text-xs text-zinc-500 font-medium">회</span>
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`font-medium ${isMe ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                                                        {member.name}
+                                                    </span>
+                                                    {isMe && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">나</span>}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{member.count}</span>
+                                                <span className="text-xs text-zinc-500 font-medium">회</span>
+                                            </div>
+                                        </li>
+                                    );
+                                })
+                            })()}
+                        </ul>
+                    </div>
                 ) : (
                     <div className="p-10 text-center text-zinc-500 text-sm">
                         <p>해당 기간의 기록이 없습니다.</p>
