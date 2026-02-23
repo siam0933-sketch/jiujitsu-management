@@ -17,26 +17,33 @@ export type CheckInResult = {
     multipleMatches?: KioskMember[]
 }
 
-export async function checkInByPhone(input: string): Promise<CheckInResult> {
+export async function getKioskInitData() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return { success: false, message: '인증되지 않은 사용자입니다.' }
+    if (!user) return { error: '인증되지 않은 사용자입니다.' }
 
-    // 1. Get Gym ID
     const { data: gym } = await supabase
         .from('gyms')
         .select('id')
         .eq('owner_id', user.id)
         .single()
 
-    if (!gym) return { success: false, message: '도장 정보를 찾을 수 없습니다.' }
+    if (!gym) return { error: '도장 정보를 찾을 수 없습니다.' }
+
+    return { gymId: gym.id }
+}
+
+export async function checkInByPhone(input: string, gymId: string): Promise<CheckInResult> {
+    const supabase = await createClient()
+
+    // Skip auth and gym fetch since it's already done by init
 
     // 2. Find Member(s) matching phone OR access_code
     const { data: members, error: searchError } = await supabase
         .from('gym_members')
         .select('id, name, phone, user_id, access_code')
-        .eq('gym_id', gym.id)
+        .eq('gym_id', gymId)
         .eq('status', 'active')
         .or(`phone.ilike.%${input},access_code.eq.${input}`)
 
@@ -63,21 +70,15 @@ export async function checkInByPhone(input: string): Promise<CheckInResult> {
     }
 
     // 4. Single match -> Process Check-in
-    return await processCheckIn(supabase, gym.id, members[0])
+    return await processCheckIn(supabase, gymId, members[0])
 }
 
-export async function checkInById(memberId: string): Promise<CheckInResult> {
+export async function checkInById(memberId: string, gymId: string): Promise<CheckInResult> {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, message: 'Auth error' }
-
-    const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
-    if (!gym) return { success: false, message: 'Gym error' }
-
     const { data: member } = await supabase.from('gym_members').select('*').eq('id', memberId).single()
     if (!member) return { success: false, message: 'Member not found' }
 
-    return await processCheckIn(supabase, gym.id, member)
+    return await processCheckIn(supabase, gymId, member)
 }
 
 async function processCheckIn(supabase: any, gymId: string, member: any): Promise<CheckInResult> {

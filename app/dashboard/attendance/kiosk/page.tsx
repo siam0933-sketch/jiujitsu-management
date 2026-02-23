@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { checkInByPhone, checkInById, type CheckInResult, type KioskMember } from './actions'
+import { checkInByPhone, checkInById, getKioskInitData, type CheckInResult, type KioskMember } from './actions'
 import { useRouter } from 'next/navigation'
 
 export default function KioskPage() {
     const [phone, setPhone] = useState('')
+    const [isInit, setIsInit] = useState(false)
+    const [gymId, setGymId] = useState<string | null>(null)
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'selection'>('idle')
     const [message, setMessage] = useState('')
     const [candidates, setCandidates] = useState<KioskMember[]>([])
@@ -86,7 +88,7 @@ export default function KioskPage() {
             return
         }
 
-        if (status === 'loading' || status === 'success') return
+        if (status === 'loading' || status === 'success' || !isInit) return
         if (phone.length < 11) {
             setPhone(prev => prev + digit)
         }
@@ -112,6 +114,11 @@ export default function KioskPage() {
     }
 
     const handleSubmit = async () => {
+        if (!gymId) {
+            setMessage('초기화 중입니다. 잠시 후 시도해주세요.')
+            setStatus('error')
+            return
+        }
         if (phone.length < 4) {
             setMessage('전화번호 뒷 4자리 이상 입력해주세요.')
             setStatus('error')
@@ -122,7 +129,7 @@ export default function KioskPage() {
         setMessage('회원 정보를 조회 중입니다...')
 
         try {
-            const result = await checkInByPhone(phone)
+            const result = await checkInByPhone(phone, gymId)
             handleResult(result)
         } catch (e) {
             setStatus('error')
@@ -146,10 +153,11 @@ export default function KioskPage() {
     }
 
     const handleSelectCandidate = async (member: KioskMember) => {
+        if (!gymId) return
         setStatus('loading')
 
         try {
-            const result = await checkInById(member.id)
+            const result = await checkInById(member.id, gymId)
             handleResult(result)
         } catch (e) {
             setStatus('error')
@@ -161,6 +169,18 @@ export default function KioskPage() {
     const [isFullscreen, setIsFullscreen] = useState(false)
 
     useEffect(() => {
+        const initKiosk = async () => {
+            const data = await getKioskInitData()
+            if (data.gymId) {
+                setGymId(data.gymId)
+                setIsInit(true)
+            } else {
+                setMessage(data.error || '초기화 실패: 도장 정보를 찾을 수 없습니다.')
+                setStatus('error')
+            }
+        }
+        initKiosk()
+
         const checkFullscreen = () => setIsFullscreen(!!document.fullscreenElement)
         document.addEventListener('fullscreenchange', checkFullscreen)
 
@@ -294,52 +314,60 @@ export default function KioskPage() {
                 {/* Keypad */}
                 {status !== 'selection' && status !== 'success' && (
                     <div className="bg-gray-50 p-2 grid grid-cols-3 gap-2 flex-[0.65]">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                            <button
-                                key={num}
-                                onClick={() => handleDigit(num.toString())}
-                                className="h-full rounded-xl bg-white shadow-sm border border-gray-200 text-3xl font-semibold text-gray-800 active:bg-gray-100 active:scale-[0.98] transition-all"
-                            >
-                                {num}
-                            </button>
-                        ))}
-                        <button
-                            onClick={handleClear}
-                            className="h-full rounded-xl bg-red-50 text-red-600 font-medium active:bg-red-100 border border-red-100 text-xl"
-                        >
-                            초기화
-                        </button>
-                        <button
-                            onClick={() => handleDigit('0')}
-                            className="h-full rounded-xl bg-white shadow-sm border border-gray-200 text-3xl font-semibold text-gray-800 active:bg-gray-100 active:scale-[0.98]"
-                        >
-                            0
-                        </button>
-                        <button
-                            onClick={handleBackspace}
-                            className="h-full rounded-xl bg-gray-100 text-gray-700 active:bg-gray-200 flex items-center justify-center border border-gray-200"
-                        >
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
-                            </svg>
-                        </button>
+                        {!isInit && status !== 'error' ? (
+                            <div className="col-span-3 flex items-center justify-center text-gray-400 font-bold animate-pulse text-xl">
+                                상태를 초기화하고 있습니다...
+                            </div>
+                        ) : (
+                            <>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                                    <button
+                                        key={num}
+                                        onClick={() => handleDigit(num.toString())}
+                                        className="h-full rounded-xl bg-white text-3xl font-bold shadow-sm hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                    >
+                                        {num}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={handleClear}
+                                    className="h-full rounded-xl bg-gray-200 text-xl font-bold shadow-sm hover:bg-gray-300 active:bg-gray-400 transition-colors text-gray-600"
+                                >
+                                    전체 지움
+                                </button>
+                                <button
+                                    onClick={() => handleDigit('0')}
+                                    className="h-full rounded-xl bg-white text-3xl font-bold shadow-sm hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                >
+                                    0
+                                </button>
+                                <button
+                                    onClick={handleBackspace}
+                                    className="h-full rounded-xl bg-gray-200 text-xl font-bold shadow-sm hover:bg-gray-300 active:bg-gray-400 transition-colors flex items-center justify-center text-gray-600"
+                                >
+                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
+                                    </svg>
+                                </button>
 
-                        <button
-                            onClick={isExitModalOpen ? () => setIsExitModalOpen(false) : handleSubmit}
-                            disabled={!isExitModalOpen && phone.length < 4}
-                            className={`col-span-3 h-full rounded-xl text-white text-2xl font-bold transition-all flex items-center justify-center gap-2 mt-1 shadow-md
-                                ${isExitModalOpen
-                                    ? 'bg-gray-500 hover:bg-gray-600 active:bg-gray-700'
-                                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed'
-                                }`}
-                        >
-                            <span>{isExitModalOpen ? '취소' : '출석하기'}</span>
-                            {!isExitModalOpen && (
-                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            )}
-                        </button>
+                                <button
+                                    onClick={isExitModalOpen ? () => setIsExitModalOpen(false) : handleSubmit}
+                                    disabled={(!isExitModalOpen && phone.length < 4) || !isInit}
+                                    className={`col-span-3 h-full rounded-xl text-white text-2xl font-bold transition-all flex items-center justify-center gap-2 mt-1 shadow-md
+                                        ${isExitModalOpen
+                                            ? 'bg-gray-500 hover:bg-gray-600 active:bg-gray-700'
+                                            : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                                        }`}
+                                >
+                                    <span>{isExitModalOpen ? '취소' : '출석하기'}</span>
+                                    {!isExitModalOpen && (
+                                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    )}
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
