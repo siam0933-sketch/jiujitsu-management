@@ -158,6 +158,21 @@ export default function KioskPage() {
     }
 
     const router = useRouter()
+    const [isFullscreen, setIsFullscreen] = useState(false)
+
+    useEffect(() => {
+        const checkFullscreen = () => setIsFullscreen(!!document.fullscreenElement)
+        document.addEventListener('fullscreenchange', checkFullscreen)
+
+        // Attempt auto fullscreen on load
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log('Auto-fullscreen blocked by browser:', err)
+            })
+        }
+
+        return () => document.removeEventListener('fullscreenchange', checkFullscreen)
+    }, [])
 
     const handleGlobalClick = () => {
         if (!document.fullscreenElement) {
@@ -172,19 +187,14 @@ export default function KioskPage() {
             onClick={handleGlobalClick}
             className="fixed inset-0 z-50 bg-gray-900 flex flex-col overflow-hidden overscroll-none h-[100dvh] w-screen"
         >
-            {/* Exit Button (Hidden or discreet) */}
-            <button
-                onClick={(e) => {
-                    e.stopPropagation()
-                    setIsExitModalOpen(true)
-                }}
-                className="absolute top-4 right-4 text-gray-400/50 hover:text-gray-600 p-2 z-[60]"
-                aria-label="Exit Kiosk"
-            >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            {/* Exit Button Removed per user request */}
+
+            {/* Initial Fullscreen Prompt Overlay */}
+            {!isFullscreen && (
+                <div className="absolute inset-x-0 top-0 bg-blue-600 text-white text-center py-2 text-sm font-bold z-[60] animate-pulse cursor-pointer shadow-md" onClick={handleGlobalClick}>
+                    전체 화면으로 전환하려면 화면을 한 번 터치해주세요 (필수)
+                </div>
+            )}
 
             <div className="bg-white w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
 
