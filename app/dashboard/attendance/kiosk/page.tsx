@@ -9,6 +9,8 @@ export default function KioskPage() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'selection'>('idle')
     const [message, setMessage] = useState('')
     const [candidates, setCandidates] = useState<KioskMember[]>([])
+    const [isExitModalOpen, setIsExitModalOpen] = useState(false)
+    const [exitPin, setExitPin] = useState('')
     const wakeLockRef = useRef<any>(null)
 
     // Screen Wake Lock to prevent screen from turning off
@@ -62,6 +64,28 @@ export default function KioskPage() {
     }, [status])
 
     const handleDigit = (digit: string) => {
+        if (isExitModalOpen) {
+            if (exitPin.length < 4) {
+                const newPin = exitPin + digit
+                setExitPin(newPin)
+                // Auto verify PIN when 4 digits are entered
+                if (newPin.length === 4) {
+                    if (newPin === '0000') {
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen()
+                        }
+                        router.back()
+                    } else {
+                        // Error handling: Shake effect via timeout or just clear
+                        setTimeout(() => {
+                            setExitPin('')
+                        }, 500)
+                    }
+                }
+            }
+            return
+        }
+
         if (status === 'loading' || status === 'success') return
         if (phone.length < 11) {
             setPhone(prev => prev + digit)
@@ -69,14 +93,22 @@ export default function KioskPage() {
     }
 
     const handleClear = () => {
-        setPhone('')
-        setStatus('idle')
-        setMessage('')
+        if (isExitModalOpen) {
+            setExitPin('')
+        } else {
+            setPhone('')
+            setStatus('idle')
+            setMessage('')
+        }
     }
 
     const handleBackspace = () => {
-        setPhone(prev => prev.slice(0, -1))
-        setStatus('idle')
+        if (isExitModalOpen) {
+            setExitPin(prev => prev.slice(0, -1))
+        } else {
+            setPhone(prev => prev.slice(0, -1))
+            setStatus('idle')
+        }
     }
 
     const handleSubmit = async () => {
@@ -144,10 +176,7 @@ export default function KioskPage() {
             <button
                 onClick={(e) => {
                     e.stopPropagation()
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen()
-                    }
-                    router.back()
+                    setIsExitModalOpen(true)
                 }}
                 className="absolute top-4 right-4 text-gray-400/50 hover:text-gray-600 p-2 z-[60]"
                 aria-label="Exit Kiosk"
@@ -221,6 +250,37 @@ export default function KioskPage() {
                     </div>
                 )}
 
+                {/* Exit PIN Modal Overlay */}
+                {isExitModalOpen && (
+                    <div className="absolute inset-x-0 bottom-0 top-0 bg-gray-900/90 backdrop-blur-md flex flex-col items-center justify-center z-[70]" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center mx-4 border border-red-100 flex flex-col items-center">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center -mt-12 mb-4 shadow-sm border border-red-50">
+                                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">관리자 인증</h2>
+                            <p className="text-gray-500 mb-8 min-h-[48px] flex items-center justify-center">
+                                {exitPin.length === 4 && exitPin !== '0000'
+                                    ? <span className="text-red-500 font-bold animate-pulse">비밀번호가 틀렸습니다.</span>
+                                    : "대시보드로 돌아가려면 4자리 관리자 비밀번호를 입력해주세요."
+                                }
+                            </p>
+
+                            {/* PIN Display Dots */}
+                            <div className="flex gap-4 mb-4 justify-center">
+                                {[1, 2, 3, 4].map((index) => (
+                                    <div
+                                        key={index}
+                                        className={`w-5 h-5 rounded-full transition-all duration-200 border-2 ${exitPin.length >= index ? 'bg-gray-800 border-gray-800 scale-110' : 'bg-transparent border-gray-300'
+                                            }`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Keypad */}
                 {status !== 'selection' && status !== 'success' && (
                     <div className="bg-gray-50 p-2 grid grid-cols-3 gap-2 flex-[0.65]">
@@ -255,14 +315,20 @@ export default function KioskPage() {
                         </button>
 
                         <button
-                            onClick={handleSubmit}
-                            disabled={phone.length < 4}
-                            className="col-span-3 h-full rounded-xl bg-blue-600 text-white text-2xl font-bold hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 mt-1"
+                            onClick={isExitModalOpen ? () => setIsExitModalOpen(false) : handleSubmit}
+                            disabled={!isExitModalOpen && phone.length < 4}
+                            className={`col-span-3 h-full rounded-xl text-white text-2xl font-bold transition-all flex items-center justify-center gap-2 mt-1 shadow-md
+                                ${isExitModalOpen
+                                    ? 'bg-gray-500 hover:bg-gray-600 active:bg-gray-700'
+                                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                                }`}
                         >
-                            <span>출석하기</span>
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                            <span>{isExitModalOpen ? '취소' : '출석하기'}</span>
+                            {!isExitModalOpen && (
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            )}
                         </button>
                     </div>
                 )}
