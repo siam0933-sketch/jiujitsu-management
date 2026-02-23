@@ -1,41 +1,47 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
+
+async function getMemberSession() {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('member_session')
+    if (!sessionCookie) return null
+    try {
+        return JSON.parse(sessionCookie.value)
+    } catch (e) {
+        return null
+    }
+}
 
 export async function getPortalNotices(page = 1, limit = 10) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { notices: [], total: 0 }
+    const session = await getMemberSession()
+    if (!session || !session.gymId) return { notices: [], total: 0 }
 
-    // Get member's gym_id
-    const { data: member } = await supabase
-        .from('gym_members')
-        .select('gym_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('joined_at', { ascending: false })
-        .limit(1)
-        .single()
-
-    if (!member) return { notices: [], total: 0 }
+    const supabase = await createAdminClient()
 
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    const { data: notices, count } = await supabase
+    const { data: notices, count, error } = await supabase
         .from('gym_notices')
         .select('*, profiles(full_name)', { count: 'exact' })
-        .eq('gym_id', member.gym_id)
+        .eq('gym_id', session.gymId)
         .order('created_at', { ascending: false })
         .range(from, to)
+
+    if (error) {
+        console.error('getPortalNotices error:', error);
+    }
 
     return { notices: notices || [], total: count || 0 }
 }
 
 export async function getPortalNoticeById(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { notice: null }
+    const session = await getMemberSession()
+    if (!session || !session.gymId) return { notice: null }
+
+    const supabase = await createAdminClient()
 
     const { data: notice } = await supabase
         .from('gym_notices')
@@ -47,33 +53,24 @@ export async function getPortalNoticeById(id: string) {
 }
 
 export async function getPortalRanking() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { ranking: [], currentMemberId: null, error: 'Unauthorized' }
+    const session = await getMemberSession()
+    if (!session || !session.memberId || !session.gymId) {
+        return { ranking: [], currentMemberId: null, error: 'Unauthorized' }
+    }
 
-    // 1. Get member's gym_id and member_id
-    const { data: member } = await supabase
-        .from('gym_members')
-        .select('id, gym_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('joined_at', { ascending: false })
-        .limit(1)
-        .single()
+    const supabase = await createAdminClient()
 
-    if (!member) return { ranking: [], currentMemberId: null, error: 'Member not found' }
-
-    // 2. Define Date Range (This month)
+    // 1. Define Date Range (This month)
     const now = new Date()
     const targetYear = now.getFullYear()
     const targetMonth = now.getMonth() + 1
     const startOfMonth = `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`
 
-    // 3. Fetch this month's logs for the gym
+    // 2. Fetch this month's logs for the gym
     const { data: logs, error: fetchError } = await supabase
         .from('gym_attendance_logs')
         .select('member_id, member:gym_members(name)')
-        .eq('gym_id', member.gym_id)
+        .eq('gym_id', session.gymId)
         .eq('status', 'present')
         .gte('date', startOfMonth)
 
@@ -82,10 +79,10 @@ export async function getPortalRanking() {
     }
 
     if (!logs || logs.length === 0) {
-        return { ranking: [], currentMemberId: member.id, year: targetYear, month: targetMonth }
+        return { ranking: [], currentMemberId: session.memberId, year: targetYear, month: targetMonth }
     }
 
-    // 4. Calculate ranking
+    // 3. Calculate ranking
     const counts: Record<string, { count: number, name: string }> = {}
 
     logs.forEach(log => {
@@ -106,7 +103,7 @@ export async function getPortalRanking() {
 
     return {
         ranking,
-        currentMemberId: member.id,
+        currentMemberId: session.memberId,
         year: targetYear,
         month: targetMonth
     }
