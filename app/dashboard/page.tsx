@@ -49,7 +49,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
             {/* Promotion Notification Widget */}
             <PromotionWidget candidates={candidates} />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Card 1: Total Members */}
                 <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="p-5">
@@ -114,13 +114,45 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                     </div>
                 </div>
 
-                {/* Card 3: Gym Info */}
+                {/* Card 3: Notice Management */}
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                        <div className="flex items-center">
+                            <div className="flex-shrink-0 bg-orange-500 rounded-md p-3">
+                                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt className="text-sm font-medium text-gray-500 truncate">
+                                        도장 소식
+                                    </dt>
+                                    <dd>
+                                        <div className="text-sm text-gray-900">
+                                            공지사항 작성
+                                        </div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-5 py-3">
+                        <div className="text-sm">
+                            <a href="/dashboard/notice" className="font-medium text-orange-700 hover:text-orange-900">
+                                공지사항 관리
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Card 4: Gym Info */}
                 <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="p-5">
                         <div className="flex items-center">
                             <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
                                 <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011 1h2a1 1 0 011 1v3m-4 0h4" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v3m-4 0h4" />
                                 </svg>
                             </div>
                             <div className="ml-5 w-0 flex-1">
