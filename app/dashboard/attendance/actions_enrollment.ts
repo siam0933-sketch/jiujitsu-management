@@ -104,3 +104,41 @@ export async function getMemberEnrollments(memberId: string): Promise<EnrolledCl
         start_time: item.gym_schedules?.start_time || ''
     }))
 }
+
+export async function enrollMemberInClass(scheduleId: string, memberId: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('gym_class_enrollments')
+        .insert({
+            schedule_id: scheduleId,
+            member_id: memberId
+        })
+
+    if (error) {
+        // Handle duplicate gracefully if it happens
+        if (error.code === '23505') return { success: true }
+        return { error: '수업 등록 중 오류가 발생했습니다: ' + error.message }
+    }
+
+    revalidatePath('/dashboard/members')
+    revalidatePath(`/dashboard/members/${memberId}`)
+    return { success: true }
+}
+
+export async function unenrollMemberFromClass(scheduleId: string, memberId: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('gym_class_enrollments')
+        .delete()
+        .match({ schedule_id: scheduleId, member_id: memberId })
+
+    if (error) {
+        return { error: '수강 취소 중 오류가 발생했습니다: ' + error.message }
+    }
+
+    revalidatePath('/dashboard/members')
+    revalidatePath(`/dashboard/members/${memberId}`)
+    return { success: true }
+}

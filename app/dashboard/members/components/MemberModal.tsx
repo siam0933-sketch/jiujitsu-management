@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword, updateMemberPaymentEndDate } from '../actions'
+import { enrollMemberInClass, unenrollMemberFromClass } from '../../attendance/actions_enrollment'
 import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseController } from './MemberComponents'
 import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
@@ -73,6 +74,8 @@ export default function MemberModal({ member }: { member: any }) {
     // History
     const [attendanceLogs, setAttendanceLogs] = useState<any[]>([])
     const [enrolledClasses, setEnrolledClasses] = useState<any[]>([])
+    const [allSchedules, setAllSchedules] = useState<any[]>([]) // [NEW] All available gym classes
+    const [popoverDay, setPopoverDay] = useState<string | null>(null) // [NEW] Current day for class enrollment popover
     const [promotionLogs, setPromotionLogs] = useState<any[]>([])
 
     // Pause Modal State
@@ -85,12 +88,13 @@ export default function MemberModal({ member }: { member: any }) {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [pricing, history, attLogs, promos, enrolls] = await Promise.all([
+                const [pricing, history, attLogs, promos, enrolls, schedules] = await Promise.all([
                     getPricingData(),
                     getPaymentHistory(member.id),
                     getMemberAttendanceLogs(member.id),
                     supabase.from('gym_promotion_logs').select('*').eq('member_id', member.id).order('promoted_at', { ascending: false }),
-                    supabase.from('gym_class_enrollments').select('*, gym_schedules(*)').eq('member_id', member.id)
+                    supabase.from('gym_class_enrollments').select('*, gym_schedules(*)').eq('member_id', member.id),
+                    supabase.from('gym_schedules').select('*').eq('gym_id', member.gym_id).order('start_time') // Fetch all classes
                 ])
 
                 // Sort plans: Period tickets first, then by price descending
@@ -119,11 +123,16 @@ export default function MemberModal({ member }: { member: any }) {
                 // Format enrollments
                 if (enrolls.data) {
                     const formatted = enrolls.data.map((e: any) => ({
+                        id: e.schedule_id, // Need schedule_id to identify enrollment for unenroll
                         class_name: e.gym_schedules?.class_name || 'Unknown',
                         day_of_week: e.gym_schedules?.day_of_week,
                         start_time: e.gym_schedules?.start_time
                     }))
                     setEnrolledClasses(formatted)
+                }
+
+                if (schedules.data) {
+                    setAllSchedules(schedules.data)
                 }
             } catch (err) {
                 console.error('Data Loading Error:', err)
@@ -133,6 +142,39 @@ export default function MemberModal({ member }: { member: any }) {
         loadData()
     }, [member.id])
 
+
+    const handleEnrollToggle = async (scheduleId: string, isEnrolled: boolean) => {
+        setIsSubmitting(true)
+        if (isEnrolled) {
+            if (!confirm('이 수업 수강을 취소하시겠습니까?')) {
+                setIsSubmitting(false)
+                return
+            }
+            const res = await unenrollMemberFromClass(scheduleId, member.id)
+            if (res?.error) alert(res.error)
+            else {
+                setEnrolledClasses(prev => prev.filter(c => c.id !== scheduleId))
+            }
+        } else {
+            const res = await enrollMemberInClass(scheduleId, member.id)
+            if (res?.error) alert(res.error)
+            else {
+                // Optimistic UI update
+                const schedule = allSchedules.find(s => s.id === scheduleId)
+                if (schedule) {
+                    setEnrolledClasses(prev => [...prev, {
+                        id: schedule.id,
+                        class_name: schedule.class_name,
+                        day_of_week: schedule.day_of_week,
+                        start_time: schedule.start_time
+                    }])
+                }
+            }
+        }
+        setIsSubmitting(false)
+        setPopoverDay(null)
+        router.refresh()
+    }
 
     // Helpers
     const calculateAge = (birthDate?: string) => {
@@ -845,26 +887,69 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     {/* Weekly Schedule */}
                                     <div>
-                                        <h5 className="text-sm font-bold text-gray-500 mb-2">수강 중인 수업 (주간 시간표)</h5>
-                                        <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 rounded-lg p-2 border border-gray-100">
+                                        <h5 className="text-sm font-bold text-gray-500 mb-2">수강 중인 수업 (주간 시간표) <span className="text-xs font-normal text-gray-400 ml-1">요일 칸을 눌러 편집</span></h5>
+                                        <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 rounded-lg p-2 border border-gray-100 relative">
                                             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
                                                 const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
                                                 const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
+                                                // Sort by start_time
+                                                classesOnDay.sort((a: any, b: any) => a.start_time.localeCompare(b.start_time))
+
+                                                const isPopoverOpen = popoverDay === day
+                                                const availableClasses = allSchedules.filter(s => s.day_of_week === day)
+                                                const hasClassesForDay = availableClasses.length > 0
 
                                                 return (
-                                                    <div key={day} className="flex flex-col gap-1">
+                                                    <div key={day} className="flex flex-col gap-1 relative">
                                                         <span className={`text-xs font-bold ${day === 'Sun' ? 'text-red-400' : day === 'Sat' ? 'text-blue-400' : 'text-gray-400'}`}>
                                                             {dayMap[day]}
                                                         </span>
-                                                        <div className="min-h-[40px] bg-white rounded border border-gray-100 p-1 flex flex-col gap-1 items-center justify-center">
+                                                        <div
+                                                            className="min-h-[50px] bg-white rounded border border-gray-100 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all relative z-10"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                if (hasClassesForDay) setPopoverDay(isPopoverOpen ? null : day)
+                                                            }}
+                                                        >
                                                             {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
-                                                                <span key={i} className="text-xs leading-tight text-blue-600 font-normal block">
-                                                                    {c.class_name}<br />{c.start_time}
+                                                                <span key={i} className="text-xs leading-tight text-blue-600 font-normal block bg-blue-50 px-1 py-0.5 rounded w-full border border-blue-100">
+                                                                    {c.class_name}
                                                                 </span>
                                                             )) : (
-                                                                <span className="text-xs text-gray-200">-</span>
+                                                                <div className="h-full w-full flex items-center justify-center flex-1">
+                                                                    <span className="text-xs text-gray-200 block mt-1">+ 추가</span>
+                                                                </div>
                                                             )}
                                                         </div>
+
+                                                        {/* Popup Menu */}
+                                                        {isPopoverOpen && (
+                                                            <>
+                                                                <div className="fixed inset-0 z-20" onClick={() => setPopoverDay(null)} />
+                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-40 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-xl z-30 p-1 text-left">
+                                                                    <div className="px-2 py-1 mb-1 bg-gray-50 border-b border-gray-100">
+                                                                        <span className="text-xs font-bold text-gray-500">{dayMap[day]}요일 전체 수업</span>
+                                                                    </div>
+                                                                    {availableClasses.length > 0 ? availableClasses.map((ac: any) => {
+                                                                        const isEnrolled = enrolledClasses.some(ec => ec.id === ac.id)
+                                                                        return (
+                                                                            <button
+                                                                                key={ac.id}
+                                                                                onClick={() => handleEnrollToggle(ac.id, isEnrolled)}
+                                                                                disabled={isSubmitting}
+                                                                                className={`w-full text-left px-2 py-1.5 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 'hover:bg-gray-50 text-gray-700'}`}
+                                                                            >
+                                                                                <span className="truncate pr-2">{ac.class_name}</span>
+                                                                                {isEnrolled && <span className="text-[10px] bg-white border border-blue-200 px-1 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
+                                                                                {!isEnrolled && <span className="text-[10px] text-gray-400 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
+                                                                            </button>
+                                                                        )
+                                                                    }) : (
+                                                                        <div className="px-2 py-3 text-center text-xs text-gray-400">등록된 수업 없음</div>
+                                                                    )}
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )
                                             })}
