@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { checkInByPhone, checkInById, type CheckInResult, type KioskMember } from './actions'
 import { useRouter } from 'next/navigation'
 
@@ -9,6 +9,43 @@ export default function KioskPage() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'selection'>('idle')
     const [message, setMessage] = useState('')
     const [candidates, setCandidates] = useState<KioskMember[]>([])
+    const wakeLockRef = useRef<any>(null)
+
+    // Screen Wake Lock to prevent screen from turning off
+    useEffect(() => {
+        const requestWakeLock = async () => {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLockRef.current = await (navigator as any).wakeLock.request('screen')
+                    console.log('Screen Wake Lock is active')
+
+                    wakeLockRef.current.addEventListener('release', () => {
+                        console.log('Screen Wake Lock released')
+                    })
+                }
+            } catch (err: any) {
+                console.error(`Wake Lock error: ${err.name}, ${err.message}`)
+            }
+        }
+
+        requestWakeLock()
+
+        const handleVisibilityChange = () => {
+            if (wakeLockRef.current !== null && document.visibilityState === 'visible') {
+                requestWakeLock()
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+            if (wakeLockRef.current !== null) {
+                wakeLockRef.current.release()
+                wakeLockRef.current = null
+            }
+        }
+    }, [])
 
     // Auto clear after success
     useEffect(() => {
