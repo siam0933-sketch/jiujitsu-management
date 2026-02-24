@@ -400,7 +400,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                 />
                                             ) : 'No.'}
                                         </th>
-                                        <th className="px-2 sm:px-3 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 w-full sm:w-auto min-w-[60px]"><SortLink column="name" label="이름" /></th>
+                                        <th className="px-2 sm:px-3 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[60px]"><SortLink column="name" label="이름" /></th>
                                         <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="birth_date" label="나이" /></th>
                                         <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="attendance" label="출석" /></th>
                                         <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="belt" label="등급" /></th>
@@ -432,7 +432,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                             />
                                                         ) : (count || 0) - index}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm font-medium text-gray-900 dark:text-zinc-100 w-full sm:w-auto">
+                                                    <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-gray-900 dark:text-zinc-100 font-bold sm:font-semibold select-none group-hover:text-blue-600 transition-colors text-xs sm:text-sm">
                                                                 {member.name || '이름 없음'}
