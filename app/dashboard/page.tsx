@@ -42,7 +42,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
 
     return (
         <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-8">
                 안녕하세요, {gym ? gym.name : '관장님'}! 👋
             </h2>
 
@@ -51,7 +51,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Card 1: Total Members */}
-                <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="bg-white dark:bg-zinc-900 overflow-hidden shadow rounded-lg">
                     <div className="p-5">
                         <div className="flex items-center">
                             <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
@@ -61,11 +61,11 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                             <div className="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 truncate">
                                         전체 관원 수
                                     </dt>
                                     <dd>
-                                        <div className="text-lg font-medium text-gray-900">
+                                        <div className="text-lg font-medium text-gray-900 dark:text-zinc-100">
                                             {memberCount || 0} 명
                                         </div>
                                     </dd>
@@ -73,7 +73,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                         </div>
                     </div>
-                    <div className="bg-gray-50 px-5 py-3">
+                    <div className="bg-gray-50 dark:bg-zinc-800/50 px-5 py-3">
                         <div className="text-sm">
                             <a href="/dashboard/members" className="font-medium text-blue-700 hover:text-blue-900">
                                 회원 관리 바로가기
@@ -83,7 +83,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                 </div>
 
                 {/* Card 2: Today's Attendance */}
-                <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="bg-white dark:bg-zinc-900 overflow-hidden shadow rounded-lg">
                     <div className="p-5">
                         <div className="flex items-center">
                             <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
@@ -93,11 +93,11 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                             <div className="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 truncate">
                                         오늘 출석
                                     </dt>
                                     <dd>
-                                        <div className="text-lg font-medium text-gray-900">
+                                        <div className="text-lg font-medium text-gray-900 dark:text-zinc-100">
                                             {todayLogs.length} 명
                                         </div>
                                     </dd>
@@ -105,7 +105,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                         </div>
                     </div>
-                    <div className="bg-gray-50 px-5 py-3">
+                    <div className="bg-gray-50 dark:bg-zinc-800/50 px-5 py-3">
                         <div className="text-sm">
                             <a href="/dashboard/attendance" className="font-medium text-green-700 hover:text-green-900">
                                 출석부 확인
@@ -115,7 +115,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                 </div>
 
                 {/* Card 3: Notice Management */}
-                <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="bg-white dark:bg-zinc-900 overflow-hidden shadow rounded-lg">
                     <div className="p-5">
                         <div className="flex items-center">
                             <div className="flex-shrink-0 bg-orange-500 rounded-md p-3">
@@ -125,11 +125,11 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                             <div className="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 truncate">
                                         도장 소식
                                     </dt>
                                     <dd>
-                                        <div className="text-sm text-gray-900">
+                                        <div className="text-sm text-gray-900 dark:text-zinc-100">
                                             공지사항 작성
                                         </div>
                                     </dd>
@@ -137,7 +137,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                         </div>
                     </div>
-                    <div className="bg-gray-50 px-5 py-3">
+                    <div className="bg-gray-50 dark:bg-zinc-800/50 px-5 py-3">
                         <div className="text-sm">
                             <a href="/dashboard/notice" className="font-medium text-orange-700 hover:text-orange-900">
                                 공지사항 관리
@@ -147,7 +147,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                 </div>
 
                 {/* Card 4: Gym Info */}
-                <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="bg-white dark:bg-zinc-900 overflow-hidden shadow rounded-lg">
                     <div className="p-5">
                         <div className="flex items-center">
                             <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
@@ -157,14 +157,14 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                             </div>
                             <div className="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 truncate">
                                         내 도장 정보
                                     </dt>
                                     <dd>
-                                        <div className="text-sm text-gray-900">
+                                        <div className="text-sm text-gray-900 dark:text-zinc-100">
                                             {gym?.address || '주소 미등록'}
                                         </div>
-                                        <div className="text-xs text-gray-500">
+                                        <div className="text-xs text-gray-500 dark:text-zinc-400">
                                             {gym?.phone}
                                         </div>
                                     </dd>

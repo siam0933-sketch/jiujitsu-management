@@ -35,7 +35,7 @@ export default function Error({
                         </button>
                         <button
                             onClick={() => window.location.reload()}
-                            className="px-4 py-2 bg-white text-gray-700 text-sm font-semibold border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                            className="px-4 py-2 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 text-sm font-semibold border border-gray-300 dark:border-zinc-700 rounded hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 transition-colors"
                         >
                             페이지 새로고침
                         </button>

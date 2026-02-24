@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 export function MemberStatusBadge({ isPaused }: { isPaused: boolean }) {
     return (
         <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${isPaused
-            ? 'bg-gray-50 text-gray-600 ring-gray-500/10'
+            ? 'bg-gray-50 dark:bg-zinc-800/50 text-gray-600 dark:text-zinc-400 ring-gray-500/10'
             : 'bg-green-50 text-green-700 ring-green-600/20'
             }`}>
             {isPaused ? '휴관 중 (Paused)' : '수련 중 (Active)'}
@@ -19,8 +19,8 @@ export function MemberStatusBadge({ isPaused }: { isPaused: boolean }) {
 export function MemberStatusBadgeSimple({ isPaused }: { isPaused: boolean }) {
     return (
         <span className={`ml-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-medium border ${isPaused
-            ? 'bg-gray-100 text-gray-500 border-gray-200'
-            : 'bg-white text-gray-600 border-gray-300'
+            ? 'bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 border-gray-200 dark:border-zinc-800'
+            : 'bg-white dark:bg-zinc-900 text-gray-600 dark:text-zinc-400 border-gray-300 dark:border-zinc-700'
             }`}>
             {isPaused ? '휴관' : '활동'}
         </span>
@@ -53,7 +53,7 @@ function MemberDateEditor({ memberId, label, dateValue, onSave }: MemberDateEdit
 
     return (
         <div>
-            <p className="text-gray-400 text-xs mb-1">{label}</p>
+            <p className="text-gray-400 dark:text-zinc-500 text-xs mb-1">{label}</p>
             <div className="flex items-center gap-2 h-5">
                 {isEditing ? (
                     <>
@@ -61,23 +61,23 @@ function MemberDateEditor({ memberId, label, dateValue, onSave }: MemberDateEdit
                             type="date"
                             value={currentDate}
                             onChange={(e) => setCurrentDate(e.target.value)}
-                            className="p-0 text-sm border-gray-300 rounded focus:ring-0 border-b w-32"
+                            className="p-0 text-sm border-gray-300 dark:border-zinc-700 rounded focus:ring-0 border-b w-32"
                         />
                         <button onClick={handleSave} disabled={isLoading} className="text-xs text-blue-600 hover:text-blue-800">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                         </button>
-                        <button onClick={() => setIsEditing(false)} className="text-xs text-gray-400 hover:text-gray-600">
+                        <button onClick={() => setIsEditing(false)} className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:text-zinc-400">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </>
                 ) : (
                     <>
-                        <p className="font-medium text-gray-900 text-sm">
+                        <p className="font-medium text-gray-900 dark:text-zinc-100 text-sm">
                             {currentDate ? new Date(currentDate).toLocaleDateString() : '-'}
                         </p>
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                            className="text-gray-400 dark:text-zinc-500 hover:text-blue-600 transition-colors"
                             title={`${label} 수정`}
                         >
                             {/* Calendar Icon */}
@@ -172,7 +172,7 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
                 <button
                     onClick={() => setIsPauseModalOpen(true)}
                     disabled={isLoading}
-                    className="ml-auto text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-400 whitespace-nowrap"
+                    className="ml-auto text-xs bg-gray-50 dark:bg-zinc-800/500 text-white px-2 py-1 rounded hover:bg-gray-400 whitespace-nowrap"
                 >
                     ⏸ 휴관 (Pause)
                 </button>
@@ -181,31 +181,31 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
             {/* Modal Overlay */}
             {isPauseModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={(e) => { e.stopPropagation(); setIsPauseModalOpen(false); }}>
-                    <div className="bg-white rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <h4 className="font-bold text-gray-900 mb-4">휴관 설정 (Pause)</h4>
+                    <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <h4 className="font-bold text-gray-900 dark:text-zinc-100 mb-4">휴관 설정 (Pause)</h4>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs text-gray-500 mb-1">시작일</label>
+                                <label className="block text-xs text-gray-500 dark:text-zinc-400 mb-1">시작일</label>
                                 <input
                                     type="date"
                                     value={pauseStartDate}
                                     onChange={e => setPauseStartDate(e.target.value)}
-                                    className="w-full text-sm border-gray-300 rounded"
+                                    className="w-full text-sm border-gray-300 dark:border-zinc-700 rounded"
                                 />
                             </div>
 
                             <div>
                                 <div className="flex justify-between items-center mb-1">
-                                    <label className="block text-xs text-gray-500">종료일</label>
+                                    <label className="block text-xs text-gray-500 dark:text-zinc-400">종료일</label>
                                     <label className="flex items-center gap-1 cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-gray-300 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
+                                            className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                             checked={isIndefinitePause}
                                             onChange={e => setIsIndefinitePause(e.target.checked)}
                                         />
-                                        <span className="text-xs text-gray-500">무기한</span>
+                                        <span className="text-xs text-gray-500 dark:text-zinc-400">무기한</span>
                                     </label>
                                 </div>
                                 <input
@@ -216,7 +216,7 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
                                         setIsIndefinitePause(false)
                                     }}
                                     disabled={isIndefinitePause}
-                                    className="w-full text-sm border-gray-300 rounded disabled:bg-gray-100 disabled:text-gray-400"
+                                    className="w-full text-sm border-gray-300 dark:border-zinc-700 rounded disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-gray-400 dark:text-zinc-500"
                                 />
                             </div>
 
@@ -231,7 +231,7 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
                             <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={() => setIsPauseModalOpen(false)}
-                                    className="flex-1 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+                                    className="flex-1 py-2 text-sm text-gray-600 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800 rounded hover:bg-gray-200"
                                 >
                                     취소
                                 </button>

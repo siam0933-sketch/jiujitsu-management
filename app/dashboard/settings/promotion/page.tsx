@@ -5,7 +5,7 @@ import { getPromotionCriteria, savePromotionCriteria, AdultBeltConfig, KidsBeltC
 
 // --- Constants & Types ---
 const ADULT_BELTS = [
-    { name: '화이트 (성인)', color: 'bg-white border-gray-200' },
+    { name: '화이트 (성인)', color: 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800' },
     { name: '블루', color: 'bg-blue-600 text-white' },
     { name: '퍼플', color: 'bg-purple-600 text-white' },
     { name: '브라운', color: 'bg-yellow-800 text-white' },
@@ -13,8 +13,8 @@ const ADULT_BELTS = [
 ];
 
 const KIDS_BELTS = [
-    { name: '화이트 (유소년)', color: 'bg-white border border-gray-200' },
-    { name: '그레이-화이트', color: 'border border-gray-300', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
+    { name: '화이트 (유소년)', color: 'bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800' },
+    { name: '그레이-화이트', color: 'border border-gray-300 dark:border-zinc-700', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
     { name: '그레이', color: 'bg-gray-400 text-white border border-gray-400' },
     { name: '그레이-블랙', color: 'border border-gray-400', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #1f2937 35%, #1f2937 65%, #9ca3af 65%)' } },
     { name: '옐로우-화이트', color: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #ffffff 35%, #ffffff 65%, #facc15 65%)' } },
@@ -131,20 +131,20 @@ export default function PromotionSettingsPage() {
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-8">승급 기준 설정</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-8">승급 기준 설정</h1>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-200 mb-6">
+            <div className="flex border-b border-gray-200 dark:border-zinc-800 mb-6">
                 <button
                     onClick={() => setActiveTab('adult')}
-                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'adult' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'adult' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300'
                         }`}
                 >
                     16세 이상 (성인)
                 </button>
                 <button
                     onClick={() => setActiveTab('kids')}
-                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'kids' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'kids' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300'
                         }`}
                 >
                     16세 미만 (유소년)
@@ -163,18 +163,18 @@ export default function PromotionSettingsPage() {
                         const beltColorClass = ADULT_BELTS.find(b => b.name === belt.name)?.color || 'bg-gray-200';
 
                         return (
-                            <div key={belt.name} className="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm">
+                            <div key={belt.name} className="border border-gray-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
                                 <button
                                     onClick={() => toggleAccordion(belt.name)}
-                                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                                    className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 transition-colors text-left"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={`w-8 h-8 rounded shadow-sm flex items-center justify-center font-bold text-xs ${beltColorClass}`}>
                                             {/* Belt Icon Placeholder */}
                                         </div>
-                                        <span className="font-bold text-gray-900">{belt.name} Belt</span>
+                                        <span className="font-bold text-gray-900 dark:text-zinc-100">{belt.name} Belt</span>
                                     </div>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
                                         <span>4단계 설정됨</span>
                                         <svg className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -183,8 +183,8 @@ export default function PromotionSettingsPage() {
                                 </button>
 
                                 {isOpen && (
-                                    <div className="p-4 border-t border-gray-200 bg-white">
-                                        <div className="grid grid-cols-[1fr_1fr_1fr] gap-4 mb-2 text-xs font-medium text-gray-500 text-center bg-gray-50 py-2 rounded">
+                                    <div className="p-4 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                                        <div className="grid grid-cols-[1fr_1fr_1fr] gap-4 mb-2 text-xs font-medium text-gray-500 dark:text-zinc-400 text-center bg-gray-50 dark:bg-zinc-800/50 py-2 rounded">
                                             <div>현재 단계 → 다음 단계</div>
                                             <div>최소 수련 기간 (개월)</div>
                                             <div>최소 출석 (회)</div>
@@ -192,9 +192,9 @@ export default function PromotionSettingsPage() {
                                         <div className="space-y-2">
                                             {belt.stripes.map((req, sIdx) => (
                                                 <div key={sIdx} className="grid grid-cols-[1fr_1fr_1fr] gap-4 items-center">
-                                                    <div className="text-sm text-gray-700 text-center font-medium flex items-center justify-center gap-2">
+                                                    <div className="text-sm text-gray-700 dark:text-zinc-300 text-center font-medium flex items-center justify-center gap-2">
                                                         <span>{sIdx} 그랄</span>
-                                                        <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                                        <svg className="w-3 h-3 text-gray-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                                                         <span>{sIdx + 1} 그랄</span>
                                                     </div>
                                                     <div>
@@ -202,7 +202,7 @@ export default function PromotionSettingsPage() {
                                                             type="number"
                                                             value={req.months}
                                                             onChange={(e) => handleAdultChange(bIdx, sIdx, 'months', e.target.value)}
-                                                            className="w-full text-center border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                            className="w-full text-center border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                                         />
                                                     </div>
                                                     <div>
@@ -210,13 +210,13 @@ export default function PromotionSettingsPage() {
                                                             type="number"
                                                             value={req.attendance}
                                                             onChange={(e) => handleAdultChange(bIdx, sIdx, 'attendance', e.target.value)}
-                                                            className="w-full text-center border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                            className="w-full text-center border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                                         />
                                                     </div>
                                                 </div>
                                             ))}
                                             {/* Belt Promotion Row (4 stripe -> Next Belt) */}
-                                            <div className="mt-4 pt-3 border-t border-dashed border-gray-200 grid grid-cols-[1fr_1fr_1fr] gap-4 items-center bg-blue-50/50 p-2 rounded">
+                                            <div className="mt-4 pt-3 border-t border-dashed border-gray-200 dark:border-zinc-800 grid grid-cols-[1fr_1fr_1fr] gap-4 items-center bg-blue-50/50 p-2 rounded">
                                                 <div className="text-sm text-blue-800 text-center font-bold">
                                                     승급 심사 (Next Belt)
                                                 </div>
@@ -248,7 +248,7 @@ export default function PromotionSettingsPage() {
                         </h3>
                         <div className="flex gap-4 items-end">
                             <div className="flex-1">
-                                <label className="block text-sm text-gray-300 mb-1">기본 단계(그랄) 수</label>
+                                <label className="block text-sm text-gray-300 dark:text-zinc-600 mb-1">기본 단계(그랄) 수</label>
                                 <input
                                     type="number"
                                     value={batchStripes}
@@ -257,7 +257,7 @@ export default function PromotionSettingsPage() {
                                 />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-sm text-gray-300 mb-1">한 단계당 필요 개월</label>
+                                <label className="block text-sm text-gray-300 dark:text-zinc-600 mb-1">한 단계당 필요 개월</label>
                                 <input
                                     type="number"
                                     value={batchMonths}
@@ -266,7 +266,7 @@ export default function PromotionSettingsPage() {
                                 />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-sm text-gray-300 mb-1">한 단계당 필요 출석</label>
+                                <label className="block text-sm text-gray-300 dark:text-zinc-600 mb-1">한 단계당 필요 출석</label>
                                 <input
                                     type="number"
                                     value={batchAttendance}
@@ -284,14 +284,14 @@ export default function PromotionSettingsPage() {
                     </div>
 
                     {/* Kids Belt Table */}
-                    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                    <div className="border border-gray-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-sm">
                         <table className="w-full text-sm">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                            <thead className="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
                                 <tr>
-                                    <th className="py-3 px-4 text-left font-bold text-gray-700">벨트 (Belt)</th>
-                                    <th className="py-3 px-4 text-center font-bold text-gray-700 w-32">총 단계(Stripes)</th>
-                                    <th className="py-3 px-4 text-center font-bold text-gray-700">단계별 기준 (기간/출석)</th>
-                                    <th className="py-3 px-4 text-right font-bold text-gray-700">총 소요 예상</th>
+                                    <th className="py-3 px-4 text-left font-bold text-gray-700 dark:text-zinc-300">벨트 (Belt)</th>
+                                    <th className="py-3 px-4 text-center font-bold text-gray-700 dark:text-zinc-300 w-32">총 단계(Stripes)</th>
+                                    <th className="py-3 px-4 text-center font-bold text-gray-700 dark:text-zinc-300">단계별 기준 (기간/출석)</th>
+                                    <th className="py-3 px-4 text-right font-bold text-gray-700 dark:text-zinc-300">총 소요 예상</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -302,14 +302,14 @@ export default function PromotionSettingsPage() {
                                     const totalAttendance = belt.totalStripes * belt.reqPerStripe.attendance;
 
                                     return (
-                                        <tr key={belt.name} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={belt.name} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 transition-colors">
                                             <td className="py-3 px-4">
                                                 <div className="flex items-center gap-3">
                                                     <div
                                                         className={`w-6 h-6 rounded shadow-sm ${beltInfo?.color || 'bg-gray-200'}`}
                                                         style={(beltInfo as any)?.style}
                                                     ></div>
-                                                    <span className="font-medium text-gray-900">{belt.name}</span>
+                                                    <span className="font-medium text-gray-900 dark:text-zinc-100">{belt.name}</span>
                                                 </div>
                                             </td>
                                             <td className="py-3 px-4 text-center">
@@ -318,7 +318,7 @@ export default function PromotionSettingsPage() {
                                                     min="4" max="11"
                                                     value={belt.totalStripes}
                                                     onChange={(e) => handleKidsChange(idx, 'totalStripes', e.target.value)}
-                                                    className="w-20 text-center border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+                                                    className="w-20 text-center border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
                                                 />
                                             </td>
                                             <td className="py-3 px-4">
@@ -328,24 +328,24 @@ export default function PromotionSettingsPage() {
                                                             type="number"
                                                             value={belt.reqPerStripe.months}
                                                             onChange={(e) => handleKidsChange(idx, 'months', e.target.value)}
-                                                            className="w-16 pl-2 pr-6 text-right border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+                                                            className="w-16 pl-2 pr-6 text-right border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
                                                         />
-                                                        <span className="absolute right-2 top-1.5 text-xs text-gray-400">월</span>
+                                                        <span className="absolute right-2 top-1.5 text-xs text-gray-400 dark:text-zinc-500">월</span>
                                                     </div>
-                                                    <span className="text-gray-300">/</span>
+                                                    <span className="text-gray-300 dark:text-zinc-600">/</span>
                                                     <div className="relative">
                                                         <input
                                                             type="number"
                                                             value={belt.reqPerStripe.attendance}
                                                             onChange={(e) => handleKidsChange(idx, 'attendance', e.target.value)}
-                                                            className="w-16 pl-2 pr-6 text-right border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+                                                            className="w-16 pl-2 pr-6 text-right border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
                                                         />
-                                                        <span className="absolute right-2 top-1.5 text-xs text-gray-400">회</span>
+                                                        <span className="absolute right-2 top-1.5 text-xs text-gray-400 dark:text-zinc-500">회</span>
                                                     </div>
                                                 </div>
-                                                <p className="text-[10px] text-gray-400 text-center mt-1">* 모든 단계 동일 적용</p>
+                                                <p className="text-[10px] text-gray-400 dark:text-zinc-500 text-center mt-1">* 모든 단계 동일 적용</p>
                                             </td>
-                                            <td className="py-3 px-4 text-right text-gray-500 text-xs">
+                                            <td className="py-3 px-4 text-right text-gray-500 dark:text-zinc-400 text-xs">
                                                 <div>약 {totalMonths}개월</div>
                                                 <div>(총 {totalAttendance}회)</div>
                                             </td>

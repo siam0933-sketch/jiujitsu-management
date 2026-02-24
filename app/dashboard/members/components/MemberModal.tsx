@@ -391,15 +391,15 @@ export default function MemberModal({ member }: { member: any }) {
 
             <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                    <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl" onClick={e => e.stopPropagation()}>
+                    <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl" onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
-                        <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 flex justify-between items-start">
+                        <div className="bg-white dark:bg-zinc-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 dark:border-zinc-800/50 flex justify-between items-start">
                             <div className="flex-1">
-                                <p className="text-2xl font-bold text-gray-900 mb-1">회원 상세 정보</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-1">회원 상세 정보</p>
                                 {/* Header content removed as per request */}
                             </div>
-                            <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
+                            <button onClick={closeModal} className="text-gray-400 dark:text-zinc-500 hover:text-gray-500 dark:text-zinc-400">
                                 <span className="sr-only">Close</span>
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
@@ -408,31 +408,31 @@ export default function MemberModal({ member }: { member: any }) {
                         {/* Simplified Pause Modal */}
                         {isPauseModalOpen && (
                             <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={(e) => { e.stopPropagation(); setIsPauseModalOpen(false); }}>
-                                <div className="bg-white rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
-                                    <h4 className="font-bold text-gray-900 mb-4">휴관 설정</h4>
+                                <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+                                    <h4 className="font-bold text-gray-900 dark:text-zinc-100 mb-4">휴관 설정</h4>
 
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-xs text-gray-500 mb-1">시작일</label>
+                                            <label className="block text-xs text-gray-500 dark:text-zinc-400 mb-1">시작일</label>
                                             <input
                                                 type="date"
                                                 value={pauseStartDate}
                                                 onChange={e => setPauseStartDate(e.target.value)}
-                                                className="w-full text-sm border-gray-300 rounded"
+                                                className="w-full text-sm border-gray-300 dark:border-zinc-700 rounded"
                                             />
                                         </div>
 
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
-                                                <label className="block text-xs text-gray-500">종료일</label>
+                                                <label className="block text-xs text-gray-500 dark:text-zinc-400">종료일</label>
                                                 <label className="flex items-center gap-1 cursor-pointer">
                                                     <input
                                                         type="checkbox"
-                                                        className="rounded border-gray-300 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
+                                                        className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                                         checked={isIndefinitePause}
                                                         onChange={e => setIsIndefinitePause(e.target.checked)}
                                                     />
-                                                    <span className="text-xs text-gray-500">무기한</span>
+                                                    <span className="text-xs text-gray-500 dark:text-zinc-400">무기한</span>
                                                 </label>
                                             </div>
                                             <input
@@ -443,7 +443,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                     setIsIndefinitePause(false)
                                                 }}
                                                 disabled={isIndefinitePause}
-                                                className="w-full text-sm border-gray-300 rounded disabled:bg-gray-100 disabled:text-gray-400"
+                                                className="w-full text-sm border-gray-300 dark:border-zinc-700 rounded disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-gray-400 dark:text-zinc-500"
                                             />
                                         </div>
 
@@ -458,7 +458,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         <div className="flex gap-2 pt-2">
                                             <button
                                                 onClick={() => setIsPauseModalOpen(false)}
-                                                className="flex-1 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+                                                className="flex-1 py-2 text-sm text-gray-600 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800 rounded hover:bg-gray-200"
                                             >
                                                 취소
                                             </button>
@@ -475,12 +475,12 @@ export default function MemberModal({ member }: { member: any }) {
                             </div>
                         )}
 
-                        <div className="bg-gray-50 px-4 py-6 sm:p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                        <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-6 sm:p-6 space-y-6 max-h-[80vh] overflow-y-auto">
 
                             {/* Section 1: Basic Info */}
                             <section>
                                 <div className="flex justify-between items-center w-full mb-3">
-                                    <h4 className="text-lg font-bold text-gray-900 uppercase tracking-wider">기본 정보</h4>
+                                    <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider">기본 정보</h4>
                                     <div className="flex items-center gap-2">
                                         {isPaused ? (
                                             <button
@@ -499,64 +499,64 @@ export default function MemberModal({ member }: { member: any }) {
                                         )}
                                         <div className="h-4 w-[1px] bg-gray-300 mx-2"></div>
                                         {!isEditingBasicInfo ? (
-                                            <button onClick={startEditingBasicInfo} className="text-sm text-gray-500 hover:text-blue-600 underline font-medium">편집</button>
+                                            <button onClick={startEditingBasicInfo} className="text-sm text-gray-500 dark:text-zinc-400 hover:text-blue-600 underline font-medium">편집</button>
                                         ) : (
                                             <div className="flex gap-2">
-                                                <button onClick={cancelEditingBasicInfo} className="text-sm text-gray-500 hover:text-gray-700 underline font-medium">취소</button>
+                                                <button onClick={cancelEditingBasicInfo} className="text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 underline font-medium">취소</button>
                                                 <button onClick={saveBasicInfo} className="text-sm text-blue-600 hover:text-blue-800 font-bold underline">저장</button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className={`bg-white rounded-xl border border-gray-200 shadow-sm p-6 grid grid-cols-2 sm:grid-cols-4 gap-6 ${isEditingBasicInfo ? 'ring-2 ring-blue-100' : ''}`}>
+                                <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 grid grid-cols-2 sm:grid-cols-4 gap-6 ${isEditingBasicInfo ? 'ring-2 ring-blue-100' : ''}`}>
                                     {/* Simplified View/Edit Fields */}
                                     {/* Row 1: Name, Gender, Birth Date, ID */}
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">이름</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">이름</p>
                                         {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.name} onChange={e => setBasicInfoForm({ ...basicInfoForm, name: e.target.value })} className="w-full text-base border-gray-300 rounded p-2" />
+                                            <input value={basicInfoForm.name} onChange={e => setBasicInfoForm({ ...basicInfoForm, name: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
                                         ) : (
                                             <div className="flex items-baseline gap-1">
-                                                <p className="font-bold text-xl text-gray-900 leading-none">{member.name}</p>
-                                                <span className="text-sm text-gray-500 ml-1">({calculateAge(member.birth_date)})</span>
+                                                <p className="font-bold text-xl text-gray-900 dark:text-zinc-100 leading-none">{member.name}</p>
+                                                <span className="text-sm text-gray-500 dark:text-zinc-400 ml-1">({calculateAge(member.birth_date)})</span>
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">성별</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">성별</p>
                                         {isEditingBasicInfo ? (
-                                            <select value={basicInfoForm.gender || 'male'} onChange={e => setBasicInfoForm({ ...basicInfoForm, gender: e.target.value })} className="w-full text-base border-gray-300 rounded p-2">
+                                            <select value={basicInfoForm.gender || 'male'} onChange={e => setBasicInfoForm({ ...basicInfoForm, gender: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2">
                                                 <option value="male">남성</option>
                                                 <option value="female">여성</option>
                                             </select>
                                         ) : (
-                                            <p className="font-medium text-lg text-gray-900">{member.gender === 'male' ? '남성' : '여성'}</p>
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.gender === 'male' ? '남성' : '여성'}</p>
                                         )}
                                     </div>
 
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">생년월일</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">생년월일</p>
                                         {isEditingBasicInfo ? (
-                                            <input type="date" value={basicInfoForm.birth_date || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, birth_date: e.target.value })} className="w-full text-base border-gray-300 rounded p-2" />
+                                            <input type="date" value={basicInfoForm.birth_date || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, birth_date: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
                                         ) : (
-                                            <p className="font-medium text-lg text-gray-900">{member.birth_date || '-'}</p>
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.birth_date || '-'}</p>
                                         )}
                                     </div>
 
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">출석번호</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">출석번호</p>
                                         {isEditingBasicInfo ? (
                                             <input
                                                 value={basicInfoForm.access_code || ''}
                                                 onChange={e => setBasicInfoForm({ ...basicInfoForm, access_code: e.target.value })}
-                                                className="w-full text-base border-gray-300 rounded font-mono p-2"
+                                                className="w-full text-base border-gray-300 dark:border-zinc-700 rounded font-mono p-2"
                                                 placeholder="출석번호"
                                             />
                                         ) : (
                                             <div className="flex items-center gap-2">
-                                                <code className="text-lg bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                <code className="text-lg bg-gray-50 dark:bg-zinc-800/50 px-2 py-1 rounded text-gray-900 dark:text-zinc-100 font-bold font-mono tracking-wider">
                                                     {member.access_code || (member.phone ? member.phone.slice(-4) : '-')}
                                                 </code>
                                             </div>
@@ -564,10 +564,10 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
 
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">로그인 비밀번호</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">로그인 비밀번호</p>
                                         <div className="flex items-center gap-2">
                                             {member.login_password ? (
-                                                <code className="text-lg bg-gray-50 px-2 py-1 rounded text-gray-900 font-bold font-mono tracking-wider">
+                                                <code className="text-lg bg-gray-50 dark:bg-zinc-800/50 px-2 py-1 rounded text-gray-900 dark:text-zinc-100 font-bold font-mono tracking-wider">
                                                     {member.login_password}
                                                 </code>
                                             ) : (
@@ -598,29 +598,29 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     {/* Row 2: Phone, Guardian Phone, Address */}
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">전화번호</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">전화번호</p>
                                         {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-base border-gray-300 rounded p-2" />
+                                            <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
                                         ) : (
-                                            <p className="font-medium text-lg text-gray-900">{member.phone}</p>
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.phone}</p>
                                         )}
                                     </div>
 
                                     <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">보호자 전화번호</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">보호자 전화번호</p>
                                         {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-base border-gray-300 rounded p-2" />
+                                            <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
                                         ) : (
-                                            <p className="font-medium text-lg text-gray-900">{member.guardian_phone || '-'}</p>
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.guardian_phone || '-'}</p>
                                         )}
                                     </div>
 
                                     <div className="col-span-2">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">주소</p>
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">주소</p>
                                         {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-base border-gray-300 rounded p-2" />
+                                            <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
                                         ) : (
-                                            <p className="font-medium text-lg text-gray-900 truncate">{member.address || '-'}</p>
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100 truncate">{member.address || '-'}</p>
                                         )}
                                     </div>
 
@@ -630,30 +630,30 @@ export default function MemberModal({ member }: { member: any }) {
 
                             {/* Section 2: Payment */}
                             <section>
-                                <h4 className="text-lg font-bold text-gray-900 uppercase tracking-wider mb-3">이용권 및 결제</h4>
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider mb-3">이용권 및 결제</h4>
+                                <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
                                     {/* Status */}
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
-                                                <p className="text-gray-500 text-sm font-bold">만료일</p>
+                                                <p className="text-gray-500 dark:text-zinc-400 text-sm font-bold">만료일</p>
                                                 {!isEditingExpiryDate ? (
                                                     <button onClick={() => setIsEditingExpiryDate(true)} className="text-xs text-blue-500 hover:text-blue-700 underline px-1 py-0.5 rounded focus:outline-none focus:bg-blue-50">수정</button>
                                                 ) : (
                                                     <div className="flex gap-1 ml-2">
                                                         <button onClick={handleSaveExpiryDate} disabled={isSubmitting} className="text-xs text-white bg-blue-600 px-2 py-1 rounded shadow-sm hover:bg-blue-700 transition">저장</button>
-                                                        <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded border border-gray-300 shadow-sm hover:bg-gray-200 transition">취소</button>
+                                                        <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-xs text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded border border-gray-300 dark:border-zinc-700 shadow-sm hover:bg-gray-200 transition">취소</button>
                                                     </div>
                                                 )}
                                             </div>
                                             {!isEditingExpiryDate ? (
-                                                <p className="text-2xl font-bold text-gray-900">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
+                                                <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
                                             ) : (
                                                 <input
                                                     type="date"
                                                     value={tempExpiryDate}
                                                     onChange={e => setTempExpiryDate(e.target.value)}
-                                                    className="block w-full text-xl font-bold border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                                                    className="block w-full text-xl font-bold border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
                                                 />
                                             )}
                                         </div>
@@ -661,16 +661,16 @@ export default function MemberModal({ member }: { member: any }) {
 
                                     {/* Payment Form Toggle */}
                                     <div className="border rounded-lg mb-6 overflow-hidden">
-                                        <button onClick={togglePaymentForm} className="w-full flex items-center justify-between p-4 bg-gray-50 text-sm font-bold text-gray-600 hover:bg-gray-100">
+                                        <button onClick={togglePaymentForm} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 text-sm font-bold text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800">
                                             <span>결제하기</span>
                                             <span>{isPaymentFormOpen ? '▲' : '▼'}</span>
                                         </button>
                                         {isPaymentFormOpen && (
-                                            <div className="p-6 bg-white border-t">
+                                            <div className="p-6 bg-white dark:bg-zinc-900 border-t">
                                                 {/* Simple Payment Form */}
                                                 <div className="space-y-4">
                                                     <div>
-                                                        <label className="block text-sm text-gray-500 mb-1 font-bold">이용권 선택</label>
+                                                        <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1 font-bold">이용권 선택</label>
                                                         <select
                                                             value={selectedPlanId}
                                                             onChange={e => setSelectedPlanId(e.target.value)}
@@ -684,7 +684,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                     {selectedPlan?.type === 'period' && (
                                                         <div className="flex gap-4 items-center">
                                                             <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 mb-1">개월 수</label>
+                                                                <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1">개월 수</label>
                                                                 <input
                                                                     type="number"
                                                                     min="1"
@@ -694,7 +694,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 />
                                                             </div>
                                                             <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 mb-1">결제일</label>
+                                                                <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1">결제일</label>
                                                                 <input
                                                                     type="date"
                                                                     value={paymentDate}
@@ -703,7 +703,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 />
                                                             </div>
                                                             <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 mb-1">만료 예정일</label>
+                                                                <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1">만료 예정일</label>
                                                                 <input
                                                                     type="date"
                                                                     value={newExpiryDate}
@@ -726,19 +726,19 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 }, {} as Record<string, any[]>)
                                                             ).map(([groupName, groupOptions]: [string, any]) => (
                                                                 <div key={groupName} className="space-y-2">
-                                                                    <p className="text-sm text-gray-500 font-bold">{groupName}</p>
+                                                                    <p className="text-sm text-gray-500 dark:text-zinc-400 font-bold">{groupName}</p>
                                                                     {groupOptions.map((opt: any) => (
-                                                                        <label key={opt.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50">
+                                                                        <label key={opt.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
                                                                             <div className="flex items-center gap-2">
                                                                                 <input
                                                                                     type="checkbox"
                                                                                     checked={selectedOptionIds.has(opt.id)}
                                                                                     onChange={() => handleToggleOption(opt.id)}
-                                                                                    className="rounded border-gray-300 text-blue-600 w-5 h-5"
+                                                                                    className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-5 h-5"
                                                                                 />
-                                                                                <span className="text-base text-gray-700">{opt.name}</span>
+                                                                                <span className="text-base text-gray-700 dark:text-zinc-300">{opt.name}</span>
                                                                             </div>
-                                                                            <span className="text-base font-medium text-gray-900">
+                                                                            <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
                                                                                 {(() => {
                                                                                     const price = selectedPlan?.type === 'period' ? opt.price * durationMonths : opt.price
                                                                                     return `${price > 0 ? '+' : ''}${price.toLocaleString()}원`
@@ -752,21 +752,21 @@ export default function MemberModal({ member }: { member: any }) {
                                                     )}
                                                     {/* Product List */}
                                                     {products.length > 0 && (
-                                                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                                                        <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50">
                                                             <div className="space-y-2">
-                                                                <p className="text-sm text-gray-500 font-bold">상품 (일회성 구매)</p>
+                                                                <p className="text-sm text-gray-500 dark:text-zinc-400 font-bold">상품 (일회성 구매)</p>
                                                                 {products.map((prod: any) => (
-                                                                    <label key={prod.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50">
+                                                                    <label key={prod.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
                                                                         <div className="flex items-center gap-2">
                                                                             <input
                                                                                 type="checkbox"
                                                                                 checked={selectedProductIds.has(prod.id)}
                                                                                 onChange={() => handleToggleProduct(prod.id)}
-                                                                                className="rounded border-gray-300 text-blue-600 w-5 h-5"
+                                                                                className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-5 h-5"
                                                                             />
-                                                                            <span className="text-base text-gray-700">{prod.name}</span>
+                                                                            <span className="text-base text-gray-700 dark:text-zinc-300">{prod.name}</span>
                                                                         </div>
-                                                                        <span className="text-base font-medium text-gray-900">
+                                                                        <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
                                                                             +{prod.price.toLocaleString()}원
                                                                         </span>
                                                                     </label>
@@ -775,12 +775,12 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </div>
                                                     )}
 
-                                                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded mb-2 border border-gray-100">
-                                                        <span className="text-base font-bold text-gray-700">결제 수단</span>
+                                                    <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded mb-2 border border-gray-100 dark:border-zinc-800/50">
+                                                        <span className="text-base font-bold text-gray-700 dark:text-zinc-300">결제 수단</span>
                                                         <select
                                                             value={paymentMethod}
                                                             onChange={(e) => setPaymentMethod(e.target.value)}
-                                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                                            className="px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900"
                                                         >
                                                             <option value="card">카드</option>
                                                             <option value="cash">현금</option>
@@ -789,7 +789,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                         </select>
                                                     </div>
 
-                                                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded border border-gray-100 mb-4">
+                                                    <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded border border-gray-100 dark:border-zinc-800/50 mb-4">
                                                         <span className="text-base font-bold">총 결제금액</span>
                                                         <div className="flex items-center gap-2">
                                                             <input
@@ -799,7 +799,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     const val = Number(e.target.value.replace(/[^0-9]/g, ''))
                                                                     setManualAmount(val)
                                                                 }}
-                                                                className="text-2xl font-bold text-blue-600 bg-transparent text-right border-0 border-b border-gray-300 focus:ring-0 focus:border-blue-500 w-40 p-0"
+                                                                className="text-2xl font-bold text-blue-600 bg-transparent text-right border-0 border-b border-gray-300 dark:border-zinc-700 focus:ring-0 focus:border-blue-500 w-40 p-0"
                                                             />
                                                             <span className="text-2xl font-bold text-blue-600">원</span>
                                                         </div>
@@ -814,7 +814,7 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
 
                                     {/* History */}
-                                    <h5 className="text-sm font-bold text-gray-500 mb-2">최근 결제 내역</h5>
+                                    <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">최근 결제 내역</h5>
                                     <div className="space-y-2">
                                         {payments.map(pay => (
                                             <div key={pay.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 last:border-0">
@@ -841,9 +841,9 @@ export default function MemberModal({ member }: { member: any }) {
                                                 ) : (
                                                     <>
                                                         <div className="flex items-center gap-3 w-full">
-                                                            <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">{pay.payment_date}</span>
+                                                            <span className="text-xs text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{pay.payment_date}</span>
                                                             <div className="flex justify-between items-center flex-1 min-w-0">
-                                                                <span className="text-gray-700 text-base truncate pr-2">
+                                                                <span className="text-gray-700 dark:text-zinc-300 text-base truncate pr-2">
                                                                     {(() => {
                                                                         const snap = pay.plan_snapshot
                                                                         if (!snap) return '결제 내역'
@@ -870,25 +870,25 @@ export default function MemberModal({ member }: { member: any }) {
                                                 )}
                                             </div>
                                         ))}
-                                        {payments.length === 0 && <p className="text-xs text-gray-300 text-center py-2">내역 없음</p>}
+                                        {payments.length === 0 && <p className="text-xs text-gray-300 dark:text-zinc-600 text-center py-2">내역 없음</p>}
                                     </div>
                                 </div>
                             </section>
 
                             {/* Section 3: History */}
                             <section>
-                                <h4 className="text-lg font-bold text-gray-900 uppercase tracking-wider mb-3">활동 기록</h4>
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider mb-3">활동 기록</h4>
+                                <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 space-y-6">
                                     <div className="grid grid-cols-2 gap-4">
                                         <MemberJoinedDate memberId={member.id} joinedAt={member.joined_at} />
                                         <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
                                     </div>
-                                    <hr className="border-gray-100" />
+                                    <hr className="border-gray-100 dark:border-zinc-800/50" />
 
                                     {/* Weekly Schedule */}
                                     <div>
-                                        <h5 className="text-sm font-bold text-gray-500 mb-2">수강 중인 수업 (주간 시간표) <span className="text-xs font-normal text-gray-400 ml-1">요일 칸을 눌러 편집</span></h5>
-                                        <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 rounded-lg p-2 border border-gray-100 relative">
+                                        <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">수강 중인 수업 (주간 시간표) <span className="text-xs font-normal text-gray-400 dark:text-zinc-500 ml-1">요일 칸을 눌러 편집</span></h5>
+                                        <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-2 border border-gray-100 dark:border-zinc-800/50 relative">
                                             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
                                                 const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
                                                 const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
@@ -901,11 +901,11 @@ export default function MemberModal({ member }: { member: any }) {
 
                                                 return (
                                                     <div key={day} className="flex flex-col gap-1 relative">
-                                                        <span className={`text-xs font-bold ${day === 'Sun' ? 'text-red-400' : day === 'Sat' ? 'text-blue-400' : 'text-gray-400'}`}>
+                                                        <span className={`text-xs font-bold ${day === 'Sun' ? 'text-red-400' : day === 'Sat' ? 'text-blue-400' : 'text-gray-400 dark:text-zinc-500'}`}>
                                                             {dayMap[day]}
                                                         </span>
                                                         <div
-                                                            className="min-h-[50px] bg-white rounded border border-gray-100 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all relative z-10"
+                                                            className="min-h-[50px] bg-white dark:bg-zinc-900 rounded border border-gray-100 dark:border-zinc-800/50 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all relative z-10"
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
                                                                 if (hasClassesForDay) setPopoverDay(isPopoverOpen ? null : day)
@@ -926,9 +926,9 @@ export default function MemberModal({ member }: { member: any }) {
                                                         {isPopoverOpen && (
                                                             <>
                                                                 <div className="fixed inset-0 z-20" onClick={() => setPopoverDay(null)} />
-                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-40 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-xl z-30 p-1 text-left">
-                                                                    <div className="px-2 py-1 mb-1 bg-gray-50 border-b border-gray-100">
-                                                                        <span className="text-xs font-bold text-gray-500">{dayMap[day]}요일 전체 수업</span>
+                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-40 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-xl z-30 p-1 text-left">
+                                                                    <div className="px-2 py-1 mb-1 bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800/50">
+                                                                        <span className="text-xs font-bold text-gray-500 dark:text-zinc-400">{dayMap[day]}요일 전체 수업</span>
                                                                     </div>
                                                                     {availableClasses.length > 0 ? availableClasses.map((ac: any) => {
                                                                         const isEnrolled = enrolledClasses.some(ec => ec.id === ac.id)
@@ -937,15 +937,15 @@ export default function MemberModal({ member }: { member: any }) {
                                                                                 key={ac.id}
                                                                                 onClick={() => handleEnrollToggle(ac.id, isEnrolled)}
                                                                                 disabled={isSubmitting}
-                                                                                className={`w-full text-left px-2 py-1.5 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 'hover:bg-gray-50 text-gray-700'}`}
+                                                                                className={`w-full text-left px-2 py-1.5 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-300'}`}
                                                                             >
                                                                                 <span className="truncate pr-2">{ac.class_name}</span>
-                                                                                {isEnrolled && <span className="text-[10px] bg-white border border-blue-200 px-1 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
-                                                                                {!isEnrolled && <span className="text-[10px] text-gray-400 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
+                                                                                {isEnrolled && <span className="text-[10px] bg-white dark:bg-zinc-900 border border-blue-200 px-1 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
+                                                                                {!isEnrolled && <span className="text-[10px] text-gray-400 dark:text-zinc-500 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
                                                                             </button>
                                                                         )
                                                                     }) : (
-                                                                        <div className="px-2 py-3 text-center text-xs text-gray-400">등록된 수업 없음</div>
+                                                                        <div className="px-2 py-3 text-center text-xs text-gray-400 dark:text-zinc-500">등록된 수업 없음</div>
                                                                     )}
                                                                 </div>
                                                             </>
@@ -966,7 +966,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         }}
                                     />
 
-                                    <hr className="border-gray-100" />
+                                    <hr className="border-gray-100 dark:border-zinc-800/50" />
 
                                     <PromotionHistory
                                         memberId={member.id}
@@ -979,8 +979,8 @@ export default function MemberModal({ member }: { member: any }) {
                                 </div>
                             </section>
 
-                            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-100">
-                                <button type="button" onClick={closeModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                            <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-100 dark:border-zinc-800/50">
+                                <button type="button" onClick={closeModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 sm:mt-0 sm:w-auto">
                                     닫기
                                 </button>
                             </div>

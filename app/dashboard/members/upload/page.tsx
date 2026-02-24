@@ -129,8 +129,8 @@ export default function BulkUploadPage() {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">회원 일괄 등록 (엑셀)</h1>
-                <p className="mt-2 text-sm text-gray-600">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">회원 일괄 등록 (엑셀)</h1>
+                <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
                     가지고 계신 엑셀 파일을 업로드하면 자동으로 등록됩니다.
                 </p>
                 <div className="mt-2 bg-blue-50 p-4 rounded-md text-sm text-blue-800">
@@ -138,15 +138,15 @@ export default function BulkUploadPage() {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg p-6 mb-8">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white dark:bg-zinc-900 shadow rounded-lg p-6 mb-8">
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
                     엑셀 파일 선택 (.xlsx, .xls)
                 </label>
                 <input
                     type="file"
                     accept=".xlsx, .xls"
                     onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-500
+                    className="block w-full text-sm text-gray-500 dark:text-zinc-400
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
@@ -164,7 +164,7 @@ export default function BulkUploadPage() {
             {previewData.length > 0 && (
                 <div>
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold text-gray-900">미리보기 ({previewData.length}명)</h2>
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">미리보기 ({previewData.length}명)</h2>
                         <button
                             onClick={handleUpload}
                             disabled={isUploading}
@@ -174,35 +174,35 @@ export default function BulkUploadPage() {
                         </button>
                     </div>
 
-                    <div className="bg-white shadow overflow-hidden border-b border-gray-200 sm:rounded-lg overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                    <div className="bg-white dark:bg-zinc-900 shadow overflow-hidden border-b border-gray-200 dark:border-zinc-800 sm:rounded-lg overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-zinc-800">
+                            <thead className="bg-gray-50 dark:bg-zinc-800/50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">전화번호</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">성별</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">생년월일</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">주소 (확인용)</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">핀번호</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">청구일</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">이름</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">전화번호</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">성별</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">생년월일</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">주소 (확인용)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">핀번호</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">청구일</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white dark:bg-zinc-900 divide-y divide-gray-200 dark:divide-zinc-800">
                                 {previewData.map((row, idx) => (
                                     <tr key={idx}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{row.name}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.phone}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-zinc-100">{row.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">{row.phone}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                             {row.gender === 'male' ? '남' : row.gender === 'female' ? '여' : row.gender}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                             {row.birth_date instanceof Date ? row.birth_date.toLocaleDateString() : row.birth_date}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={row.address}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400 max-w-xs truncate" title={row.address}>
                                             {row.address || <span className="text-red-300">미인식</span>}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.access_code}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.payment_due_day}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">{row.access_code}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">{row.payment_due_day}</td>
                                     </tr>
                                 ))}
                             </tbody>

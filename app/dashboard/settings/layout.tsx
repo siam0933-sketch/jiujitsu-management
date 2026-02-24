@@ -8,17 +8,17 @@ export default function SettingsLayout({
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight">
                     설정
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                     체육관 운영에 필요한 기준과 옵션을 설정합니다.
                 </p>
             </div>
 
             <SettingsTabs />
 
-            <div className="bg-white shadow sm:rounded-lg p-6">
+            <div className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg p-6">
                 {children}
             </div>
         </div>

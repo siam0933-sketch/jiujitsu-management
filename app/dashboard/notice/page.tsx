@@ -75,7 +75,7 @@ export default async function NoticeListPage({ searchParams }: { searchParams: P
                             <Link
                                 key={p}
                                 href={`/dashboard/notice?page=${p}`}
-                                className={`px-4 py-2 border border-gray-200 dark:border-zinc-800 rounded-md ${page === p ? 'bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-medium' : 'hover:bg-gray-50 dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-300'}`}
+                                className={`px-4 py-2 border border-gray-200 dark:border-zinc-800 rounded-md ${page === p ? 'bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-medium' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-300'}`}
                             >
                                 {p}
                             </Link>

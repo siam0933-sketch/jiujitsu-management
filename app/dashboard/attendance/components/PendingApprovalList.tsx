@@ -93,22 +93,22 @@ export default function PendingApprovalList({ todayKST }: Props) {
                 {pendingLogs.map(log => (
                     <div
                         key={log.id}
-                        className="bg-white border border-red-100 rounded-lg p-3 flex justify-between items-center shadow-sm"
+                        className="bg-white dark:bg-zinc-900 border border-red-100 rounded-lg p-3 flex justify-between items-center shadow-sm"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold border border-gray-200">
+                            <div className="h-10 w-10 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-gray-500 dark:text-zinc-400 font-bold border border-gray-200 dark:border-zinc-800">
                                 {log.gym_members.name.charAt(0)}
                             </div>
                             <div>
-                                <p className="font-bold text-gray-800">
+                                <p className="font-bold text-gray-800 dark:text-zinc-200">
                                     {log.gym_members.name}
-                                    <span className="text-xs text-gray-500 font-normal ml-1">({log.gym_members.belt})</span>
+                                    <span className="text-xs text-gray-500 dark:text-zinc-400 font-normal ml-1">({log.gym_members.belt})</span>
                                 </p>
                                 <p className="text-xs text-red-500 mt-0.5">
-                                    <span className="font-semibold text-gray-700">출석:</span> {new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                    <span className="font-semibold text-gray-700 dark:text-zinc-300">출석:</span> {new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                                     {log.checked_out_at && (
                                         <span className="ml-2 text-blue-500">
-                                            <span className="font-semibold text-gray-700">하원:</span> {new Date(log.checked_out_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                            <span className="font-semibold text-gray-700 dark:text-zinc-300">하원:</span> {new Date(log.checked_out_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     )}
                                 </p>
@@ -121,7 +121,7 @@ export default function PendingApprovalList({ todayKST }: Props) {
                             className={`
                                 px-4 py-2 rounded-lg text-sm font-bold transition-all
                                 ${processingIds.has(log.member_id)
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    ? 'bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 cursor-not-allowed'
                                     : 'bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg'}
                             `}
                         >

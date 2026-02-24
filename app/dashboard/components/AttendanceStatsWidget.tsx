@@ -25,7 +25,7 @@ export default async function AttendanceStatsWidget({ monthStr }: AttendanceStat
     return (
         <div className="space-y-6 mt-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-zinc-100">
                     출석 통계
                 </h3>
                 <MonthSelector currentMonthStr={targetMonthStr} />
@@ -34,27 +34,27 @@ export default async function AttendanceStatsWidget({ monthStr }: AttendanceStat
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Monthly Rate */}
-                <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6">
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                <div className="bg-white dark:bg-zinc-900 overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6">
+                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 truncate">
                         {month}월 출석률 (일평균 참여율)
                     </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-zinc-100">
                         {stats.month.rate}%
                     </dd>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
                         일평균 {stats.month.avgDaily}명 출석
                     </p>
                 </div>
 
                 {/* Yearly Rate */}
-                <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6">
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                <div className="bg-white dark:bg-zinc-900 overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6">
+                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 truncate">
                         {year}년 전체 출석률 (일평균 참여율)
                     </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-zinc-100">
                         {stats.year.rate}%
                     </dd>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
                         일평균 {stats.year.avgDaily}명 출석
                     </p>
                 </div>

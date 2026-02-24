@@ -20,7 +20,7 @@ export default async function AttendancePage() {
         <div className="min-h-[calc(100vh-100px)] p-6 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-bold text-gray-800">출석부</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-200">출석부</h1>
                     {pendingCount > 0 && (
                         <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-red-600 text-white text-xs font-bold rounded-full shadow-sm animate-pulse">
                             {pendingCount}

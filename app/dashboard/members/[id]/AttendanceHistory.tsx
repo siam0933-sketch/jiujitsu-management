@@ -74,11 +74,11 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
     }
 
     return (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200">
+        <div className="bg-white dark:bg-zinc-900 shadow overflow-hidden sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200 dark:border-zinc-800">
                 <div>
-                    <h3 className="text-base font-semibold leading-6 text-gray-900">출석 기록</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                    <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">출석 기록</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-zinc-400">
                         총 {totalAttendance}회 출석 (건)
                     </p>
                 </div>
@@ -88,31 +88,31 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                     </span>
                     <button
                         onClick={() => setShowCalendar(!showCalendar)}
-                        className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-md bg-white dark:bg-zinc-900 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 transition-colors"
                     >
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <svg className="w-4 h-4 text-gray-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         {showCalendar ? '달력 닫기' : '달력 보기'}
                     </button>
                 </div>
             </div>
 
             {showCalendar && (
-                <div className="p-6 border-b border-gray-100 transition-all">
+                <div className="p-6 border-b border-gray-100 dark:border-zinc-800/50 transition-all">
                     {/* Calendar Header */}
                     <div className="flex justify-between items-center mb-6">
-                        <h4 className="text-lg font-bold text-gray-900">
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100">
                             {year}년 {month + 1}월
                         </h4>
                         <div className="flex gap-2">
                             <button
                                 onClick={prevMonth}
-                                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
+                                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-colors"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
                             </button>
                             <button
                                 onClick={nextMonth}
-                                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
+                                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-colors"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                             </button>
@@ -122,7 +122,7 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                     {/* Calendar Grid */}
                     <div className="grid grid-cols-7 gap-1 text-center mb-2">
                         {['일', '월', '화', '수', '목', '금', '토'].map((d, i) => (
-                            <div key={d} className={`text-xs font-medium ${i === 0 ? 'text-red-500' : 'text-gray-500'}`}>{d}</div>
+                            <div key={d} className={`text-xs font-medium ${i === 0 ? 'text-red-500' : 'text-gray-500 dark:text-zinc-400'}`}>{d}</div>
                         ))}
                     </div>
 
@@ -145,7 +145,7 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                                     aspect-square rounded-full flex items-center justify-center text-sm relative group cursor-pointer transition-all
                                     ${isAttended
                                             ? 'bg-green-500 text-white font-bold shadow-sm hover:bg-green-600'
-                                            : 'text-gray-700 hover:bg-gray-100'}
+                                            : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800'}
                                     ${isToday && !isAttended ? 'ring-1 ring-blue-500 text-blue-600' : ''}
                                     ${isLoading ? 'opacity-50 pointer-events-none' : ''}
                                 `}
@@ -169,20 +169,20 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
             )}
 
             {/* Recent Logs List */}
-            <div className="border-t border-gray-200 px-4 py-4 bg-gray-50 sm:px-6">
-                <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">최근 활동</h5>
+            <div className="border-t border-gray-200 dark:border-zinc-800 px-4 py-4 bg-gray-50 dark:bg-zinc-800/50 sm:px-6">
+                <h5 className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-3">최근 활동</h5>
                 {logs.length > 0 ? (
                     <div className="max-h-[220px] overflow-y-auto pr-2">
-                        <ul role="list" className="divide-y divide-gray-200">
+                        <ul role="list" className="divide-y divide-gray-200 dark:divide-zinc-800">
                             {logs.map((log) => (
                                 <li key={log.id} className="py-3 mt-0">
                                     <div className="flex min-w-0 flex-1 justify-between space-x-4">
                                         <div>
-                                            <p className="text-sm text-gray-500">
-                                                <span className="font-medium text-gray-900">{log.class_name || '일반 출석'}</span>
+                                            <p className="text-sm text-gray-500 dark:text-zinc-400">
+                                                <span className="font-medium text-gray-900 dark:text-zinc-100">{log.class_name || '일반 출석'}</span>
                                             </p>
                                         </div>
-                                        <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                                        <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-zinc-400">
                                             <time dateTime={log.date}>{log.date}</time>
                                         </div>
                                     </div>
@@ -191,7 +191,7 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                         </ul>
                     </div>
                 ) : (
-                    <p className="text-sm text-gray-500 text-center py-2">출석 기록이 없습니다.</p>
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 text-center py-2">출석 기록이 없습니다.</p>
                 )}
             </div>
         </div>

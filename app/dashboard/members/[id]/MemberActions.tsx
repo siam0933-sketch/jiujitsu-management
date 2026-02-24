@@ -74,18 +74,18 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
     }
 
     return (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8 border-l-4 border-l-indigo-500 relative">
+        <div className="bg-white dark:bg-zinc-900 shadow overflow-hidden sm:rounded-lg mb-8 border-l-4 border-l-indigo-500 relative">
             <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                 <div>
-                    <h3 className="text-base font-semibold leading-6 text-gray-900">회원 관리 액션</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">입문일 관리 및 휴관 처리를 할 수 있습니다.</p>
+                    <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">회원 관리 액션</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-zinc-400">입문일 관리 및 휴관 처리를 할 수 있습니다.</p>
                 </div>
             </div>
-            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <div className="border-t border-gray-200 dark:border-zinc-800 px-4 py-5 sm:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Start Date */}
                     <div>
-                        <dt className="text-sm font-medium text-gray-500 mb-1">입문일 (수련 시작일)</dt>
+                        <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 mb-1">입문일 (수련 시작일)</dt>
                         <dd className="flex items-center gap-2">
                             {isEditingStart ? (
                                 <>
@@ -93,7 +93,7 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
                                         type="date"
                                         value={currentStartDate}
                                         onChange={(e) => setCurrentStartDate(e.target.value)}
-                                        className="border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="border-gray-300 dark:border-zinc-700 rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500"
                                     />
                                     <button
                                         onClick={handleStartDateSave}
@@ -104,17 +104,17 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
                                     </button>
                                     <button
                                         onClick={() => setIsEditingStart(false)}
-                                        className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
+                                        className="text-xs bg-gray-200 text-gray-700 dark:text-zinc-300 px-2 py-1 rounded hover:bg-gray-300"
                                     >
                                         취소
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <span className="text-gray-900 font-medium">{currentStartDate}</span>
+                                    <span className="text-gray-900 dark:text-zinc-100 font-medium">{currentStartDate}</span>
                                     <button
                                         onClick={() => setIsEditingStart(true)}
-                                        className="text-gray-400 hover:text-indigo-600"
+                                        className="text-gray-400 dark:text-zinc-500 hover:text-indigo-600"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -123,12 +123,12 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
                                 </>
                             )}
                         </dd>
-                        <p className="text-xs text-gray-400 mt-1">* 가입일: {new Date(joinedAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1">* 가입일: {new Date(joinedAt).toLocaleDateString()}</p>
                     </div>
 
                     {/* Pause Status */}
                     <div>
-                        <dt className="text-sm font-medium text-gray-500 mb-1">회원 상태</dt>
+                        <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 mb-1">회원 상태</dt>
                         <dd className="flex items-center gap-4">
                             <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${isPaused
                                 ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20'
@@ -162,31 +162,31 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
             {/* Pause Modal Overlay */}
             {isPauseModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={(e) => { e.stopPropagation(); setIsPauseModalOpen(false); }}>
-                    <div className="bg-white rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <h4 className="font-bold text-gray-900 mb-4">휴관 설정</h4>
+                    <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <h4 className="font-bold text-gray-900 dark:text-zinc-100 mb-4">휴관 설정</h4>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs text-gray-500 mb-1">시작일</label>
+                                <label className="block text-xs text-gray-500 dark:text-zinc-400 mb-1">시작일</label>
                                 <input
                                     type="date"
                                     value={pauseStartDate}
                                     onChange={e => setPauseStartDate(e.target.value)}
-                                    className="w-full text-sm border-gray-300 rounded"
+                                    className="w-full text-sm border-gray-300 dark:border-zinc-700 rounded"
                                 />
                             </div>
 
                             <div>
                                 <div className="flex justify-between items-center mb-1">
-                                    <label className="block text-xs text-gray-500">종료일</label>
+                                    <label className="block text-xs text-gray-500 dark:text-zinc-400">종료일</label>
                                     <label className="flex items-center gap-1 cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-gray-300 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
+                                            className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                             checked={isIndefinitePause}
                                             onChange={e => setIsIndefinitePause(e.target.checked)}
                                         />
-                                        <span className="text-xs text-gray-500">무기한</span>
+                                        <span className="text-xs text-gray-500 dark:text-zinc-400">무기한</span>
                                     </label>
                                 </div>
                                 <input
@@ -197,7 +197,7 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
                                         setIsIndefinitePause(false)
                                     }}
                                     disabled={isIndefinitePause}
-                                    className="w-full text-sm border-gray-300 rounded disabled:bg-gray-100 disabled:text-gray-400"
+                                    className="w-full text-sm border-gray-300 dark:border-zinc-700 rounded disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-gray-400 dark:text-zinc-500"
                                 />
                             </div>
 
@@ -212,7 +212,7 @@ export default function MemberActions({ memberId, startDate, joinedAt, isPaused,
                             <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={() => setIsPauseModalOpen(false)}
-                                    className="flex-1 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+                                    className="flex-1 py-2 text-sm text-gray-600 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800 rounded hover:bg-gray-200"
                                 >
                                     취소
                                 </button>

@@ -10,19 +10,19 @@ export default function NewMemberPage() {
         <div className="max-w-2xl mx-auto">
             <div className="md:flex md:items-center md:justify-between mb-8">
                 <div className="min-w-0 flex-1">
-                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight">
                         신규 회원 등록
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                         앱에 가입하지 않은 회원도 여기서 직접 등록할 수 있습니다.
                     </p>
                 </div>
                 <div className="mt-4 flex md:ml-4 md:mt-0">
                     <a
                         href="/dashboard/members/upload"
-                        className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        className="inline-flex items-center rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50"
                     >
-                        <svg className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 dark:text-zinc-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fillRule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clipRule="evenodd" />
                         </svg>
                         엑셀로 일괄 등록하기
@@ -30,7 +30,7 @@ export default function NewMemberPage() {
                 </div>
             </div>
 
-            <form action={formAction} className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+            <form action={formAction} className="bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
                 <div className="px-4 py-6 sm:p-8">
                     {/* Error Display */}
                     {state?.error && (
@@ -55,7 +55,7 @@ export default function NewMemberPage() {
 
                         {/* 이름 */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 이름 *
                             </label>
                             <div className="mt-2">
@@ -64,14 +64,14 @@ export default function NewMemberPage() {
                                     name="name"
                                     id="name"
                                     required
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
                         {/* 연락처 */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="phone" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="phone" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 연락처 *
                             </label>
                             <div className="mt-2">
@@ -81,14 +81,14 @@ export default function NewMemberPage() {
                                     id="phone"
                                     required
                                     placeholder="010-0000-0000"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
                         {/* 성별 */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="gender" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="gender" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 성별
                             </label>
                             <div className="mt-2">
@@ -105,7 +105,7 @@ export default function NewMemberPage() {
 
                         {/* 생년월일 & 나이 */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="birth_date" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="birth_date" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 생년월일 (나이는 자동 계산됨)
                             </label>
                             <div className="mt-2 flex gap-4">
@@ -113,7 +113,7 @@ export default function NewMemberPage() {
                                     type="date"
                                     name="birth_date"
                                     id="birth_date"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                     onChange={(e) => {
                                         const birthDate = new Date(e.target.value);
                                         const today = new Date();
@@ -132,7 +132,7 @@ export default function NewMemberPage() {
 
                         {/* 주소 */}
                         <div className="col-span-full">
-                            <label htmlFor="address" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="address" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 주소
                             </label>
                             <div className="mt-2">
@@ -140,14 +140,14 @@ export default function NewMemberPage() {
                                     type="text"
                                     name="address"
                                     id="address"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
                         {/* 학교/학년 */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="school" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="school" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 학교
                             </label>
                             <div className="mt-2">
@@ -156,13 +156,13 @@ export default function NewMemberPage() {
                                     name="school"
                                     id="school"
                                     placeholder="예: 서울초등학교"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
                         <div className="sm:col-span-3">
-                            <label htmlFor="grade" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="grade" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 학년
                             </label>
                             <div className="mt-2">
@@ -171,14 +171,14 @@ export default function NewMemberPage() {
                                     name="grade"
                                     id="grade"
                                     placeholder="예: 3학년"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
                         {/* 보호자 연락처 (선택) */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="guardian_phone" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="guardian_phone" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 보호자 연락처 (선택)
                             </label>
                             <div className="mt-2">
@@ -187,14 +187,14 @@ export default function NewMemberPage() {
                                     name="guardian_phone"
                                     id="guardian_phone"
                                     placeholder="010-0000-0000"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
                         {/* 등록일 */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="joined_at" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="joined_at" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 입관일 (등록 날짜)
                             </label>
                             <div className="mt-2">
@@ -203,19 +203,19 @@ export default function NewMemberPage() {
                                     name="joined_at"
                                     id="joined_at"
                                     defaultValue={new Date().toISOString().split('T')[0]}
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                 />
                             </div>
                         </div>
 
-                        <div className="col-span-full pt-4 border-t border-gray-200">
-                            <h3 className="text-base font-semibold leading-7 text-gray-900">회원 접속용 정보</h3>
-                            <p className="mt-1 text-sm leading-6 text-gray-600">회원이 나중에 '내 정보'에 접속할 때 사용할 비밀번호입니다.</p>
+                        <div className="col-span-full pt-4 border-t border-gray-200 dark:border-zinc-800">
+                            <h3 className="text-base font-semibold leading-7 text-gray-900 dark:text-zinc-100">회원 접속용 정보</h3>
+                            <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-zinc-400">회원이 나중에 '내 정보'에 접속할 때 사용할 비밀번호입니다.</p>
                         </div>
 
                         {/* 고유번호 (PIN) */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="access_code" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="access_code" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 고유번호 (4자리) *
                             </label>
                             <div className="mt-2">
@@ -226,14 +226,14 @@ export default function NewMemberPage() {
                                     required
                                     maxLength={4}
                                     placeholder="예: 1234"
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 tracking-widest appearance-none"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 tracking-widest appearance-none"
                                 />
                             </div>
                         </div>
 
                         {/* 로그인 비밀번호 (자동생성) */}
                         <div className="sm:col-span-3">
-                            <label htmlFor="login_password" className="block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="login_password" className="block text-sm font-medium leading-6 text-gray-900 dark:text-zinc-100">
                                 로그인 비밀번호 (초기값 자동생성)
                             </label>
                             <div className="mt-2 flex gap-2">
@@ -257,12 +257,12 @@ export default function NewMemberPage() {
                                         const el = document.getElementById('login_password') as HTMLInputElement;
                                         if (el) el.value = pwd;
                                     }}
-                                    className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                    className="rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50"
                                 >
                                     재생성
                                 </button>
                             </div>
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
                                 * 4자리 숫자 + 2자리 영문 조합 (자동 생성됨)
                                 <script dangerouslySetInnerHTML={{
                                     __html: `
@@ -284,7 +284,7 @@ export default function NewMemberPage() {
                     </div>
                 </div>
                 <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
-                    <a href="/dashboard/members" className="text-sm font-semibold leading-6 text-gray-900">
+                    <a href="/dashboard/members" className="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-100">
                         취소
                     </a>
                     <button

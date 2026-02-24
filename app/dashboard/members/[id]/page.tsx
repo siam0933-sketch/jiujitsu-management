@@ -44,12 +44,12 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
-            <div className="md:flex md:items-center md:justify-between border-b border-gray-200 pb-6 mb-6">
+            <div className="md:flex md:items-center md:justify-between border-b border-gray-200 dark:border-zinc-800 pb-6 mb-6">
                 <div className="min-w-0 flex-1">
-                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight">
                         {member.name}
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                         {member.grade} {member.school} | {member.gender === 'male' ? '남성' : '여성'}
                     </p>
                 </div>
@@ -79,40 +79,40 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                         startDate={member.start_date}
                     />
 
-                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div className="bg-white dark:bg-zinc-900 shadow overflow-hidden sm:rounded-lg">
                         <div className="px-4 py-5 sm:px-6">
-                            <h3 className="text-base font-semibold leading-6 text-gray-900">신상 정보</h3>
-                            <p className="mt-1 max-w-2xl text-sm text-gray-500">개인 및 연락처 정보입니다.</p>
+                            <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">신상 정보</h3>
+                            <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-zinc-400">개인 및 연락처 정보입니다.</p>
                         </div>
-                        <div className="border-t border-gray-200">
+                        <div className="border-t border-gray-200 dark:border-zinc-800">
                             <dl>
-                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">이름</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.name}</dd>
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">이름</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">{member.name}</dd>
                                 </div>
-                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">생년월일 (나이)</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                                        {member.birth_date} <span className="text-gray-400">({calculateAge(member.birth_date)})</span>
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">생년월일 (나이)</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">
+                                        {member.birth_date} <span className="text-gray-400 dark:text-zinc-500">({calculateAge(member.birth_date)})</span>
                                     </dd>
                                 </div>
-                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">연락처</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.phone}</dd>
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">연락처</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">{member.phone}</dd>
                                 </div>
-                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">성별</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">성별</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">
                                         {member.gender === 'male' ? '남성' : '여성'}
                                     </dd>
                                 </div>
-                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">주소</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.address}</dd>
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">주소</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">{member.address}</dd>
                                 </div>
-                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">시스템 ID</dt>
-                                    <dd className="mt-1 text-xs font-mono text-gray-500 sm:col-span-2 sm:mt-0 flex items-center">
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">시스템 ID</dt>
+                                    <dd className="mt-1 text-xs font-mono text-gray-500 dark:text-zinc-400 sm:col-span-2 sm:mt-0 flex items-center">
                                         {member.id}
                                     </dd>
                                 </div>
@@ -120,21 +120,21 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                         </div>
                     </div>
 
-                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div className="bg-white dark:bg-zinc-900 shadow overflow-hidden sm:rounded-lg">
                         <div className="px-4 py-5 sm:px-6">
-                            <h3 className="text-base font-semibold leading-6 text-gray-900">학교 및 보호자</h3>
+                            <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">학교 및 보호자</h3>
                         </div>
-                        <div className="border-t border-gray-200">
+                        <div className="border-t border-gray-200 dark:border-zinc-800">
                             <dl>
-                                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">학교 / 학년</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">학교 / 학년</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">
                                         {member.school} {member.grade}
                                     </dd>
                                 </div>
-                                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">보호자 연락처</dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{member.guardian_phone}</dd>
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">보호자 연락처</dt>
+                                    <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">{member.guardian_phone}</dd>
                                 </div>
                             </dl>
                         </div>
@@ -143,25 +143,25 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
 
                 {/* Right Column: System Info */}
                 <div className="space-y-8">
-                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                            <h3 className="text-base font-semibold leading-6 text-gray-900">도장 관리 정보</h3>
+                    <div className="bg-white dark:bg-zinc-900 shadow overflow-hidden sm:rounded-lg">
+                        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 flex justify-between items-center">
+                            <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">도장 관리 정보</h3>
                             {/* Pause Controller in Header */}
                         </div>
-                        <div className="border-t border-gray-200">
+                        <div className="border-t border-gray-200 dark:border-zinc-800">
                             <dl>
                                 {/* Attendance Number */}
-                                <div className="bg-white px-4 py-5">
-                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">출석번호</dt>
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-5">
+                                    <dt className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">출석번호</dt>
                                     <dd className="text-2xl font-mono font-bold text-blue-600 tracking-widest text-center py-2 bg-blue-50 rounded-lg border border-blue-100">
                                         {member.access_code}
                                     </dd>
                                 </div>
 
                                 {/* Login Password */}
-                                <div className="bg-white px-4 py-5 border-t border-gray-100">
-                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">로그인 비밀번호</dt>
-                                    <dd className="text-xl font-mono font-bold text-gray-700 tracking-widest text-center py-2 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-5 border-t border-gray-100 dark:border-zinc-800/50">
+                                    <dt className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">로그인 비밀번호</dt>
+                                    <dd className="text-xl font-mono font-bold text-gray-700 dark:text-zinc-300 tracking-widest text-center py-2 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-800">
                                         {member.login_password || '미설정'}
                                     </dd>
                                 </div>
@@ -169,8 +169,8 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
 
 
                                 {/* Status / Pause */}
-                                <div className="bg-gray-50 px-4 py-4 border-t border-gray-200">
-                                    <dt className="text-xs font-medium text-gray-500 mb-1">회원 상태</dt>
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-4 border-t border-gray-200 dark:border-zinc-800">
+                                    <dt className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">회원 상태</dt>
                                     <dd>
                                         <MemberPauseController
                                             memberId={id}
@@ -181,24 +181,24 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                 </div>
 
                                 {/* Start Date / Joined Date */}
-                                <div className="bg-white px-4 py-4 border-t border-gray-200">
+                                <div className="bg-white dark:bg-zinc-900 px-4 py-4 border-t border-gray-200 dark:border-zinc-800">
                                     <div className="mb-2">
                                         <MemberStartDate memberId={id} startDate={member.start_date || member.joined_at} joinedAt={member.joined_at} />
                                     </div>
-                                    <div className="flex justify-between text-xs text-gray-400">
+                                    <div className="flex justify-between text-xs text-gray-400 dark:text-zinc-500">
                                         <span>가입일:</span>
                                         <span>{new Date(member.joined_at).toLocaleDateString()}</span>
                                     </div>
                                 </div>
 
                                 {/* Billing Info */}
-                                <div className="bg-gray-50 px-4 py-4 border-t border-gray-200">
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-4 border-t border-gray-200 dark:border-zinc-800">
                                     <div className="flex justify-between items-center mb-2">
-                                        <dt className="text-sm font-medium text-gray-500">수납 청구일</dt>
-                                        <dd className="text-sm font-bold text-gray-900">매월 {member.payment_due_day ? `${member.payment_due_day}일` : '-'}</dd>
+                                        <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">수납 청구일</dt>
+                                        <dd className="text-sm font-bold text-gray-900 dark:text-zinc-100">매월 {member.payment_due_day ? `${member.payment_due_day}일` : '-'}</dd>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <dt className="text-sm font-medium text-gray-500">회원권 만료일</dt>
+                                        <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">회원권 만료일</dt>
                                         <dd className="text-sm font-bold text-red-600">
                                             {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '-'}
                                         </dd>

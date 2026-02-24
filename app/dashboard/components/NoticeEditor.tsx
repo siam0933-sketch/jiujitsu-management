@@ -203,7 +203,7 @@ export default function NoticeEditor({ content, onChange }: NoticeEditorProps) {
     }
 
     return (
-        <div className="border border-zinc-200 dark:border-zinc-800 rounded-md overflow-hidden bg-white dark:bg-zinc-950">
+        <div className="border border-zinc-200 dark:border-zinc-800 rounded-md overflow-hidden bg-white dark:bg-zinc-900 dark:bg-zinc-950">
             <MenuBar editor={editor} onImageUpload={() => fileInputRef.current?.click()} isUploading={isUploading} />
             <div className="cursor-text">
                 <EditorContent editor={editor} />

@@ -16,17 +16,17 @@ const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6 h-[38px]"
+                className="relative w-full cursor-default rounded-md bg-white dark:bg-zinc-900 py-2 pl-3 pr-10 text-left text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6 h-[38px]"
             >
                 <div className="flex items-center gap-2">
                     <span
-                        className={`inline-block w-4 h-4 rounded-full border ${selectedOption.colorClass?.includes('border') ? '' : 'border-gray-200'} ${selectedOption.colorClass}`}
+                        className={`inline-block w-4 h-4 rounded-full border ${selectedOption.colorClass?.includes('border') ? '' : 'border-gray-200 dark:border-zinc-800'} ${selectedOption.colorClass}`}
                         style={selectedOption.style}
                     />
                     <span className="block truncate">{selectedOption.name}</span>
                 </div>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <svg className="h-5 w-5 text-gray-400 dark:text-zinc-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fillRule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clipRule="evenodd" />
                     </svg>
                 </span>
@@ -35,11 +35,11 @@ const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
-                    <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-zinc-900 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                         {BELT_OPTIONS_DATA.map((belt) => (
                             <li
                                 key={belt.name}
-                                className={`relative cursor-default select-none py-2 pl-3 pr-9 ${belt.name === value ? 'bg-indigo-600 text-white' : 'text-gray-900 hover:bg-indigo-50'}`}
+                                className={`relative cursor-default select-none py-2 pl-3 pr-9 ${belt.name === value ? 'bg-indigo-600 text-white' : 'text-gray-900 dark:text-zinc-100 hover:bg-indigo-50'}`}
                                 onClick={() => {
                                     onChange(belt.name)
                                     setIsOpen(false)
@@ -47,7 +47,7 @@ const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string
                             >
                                 <div className="flex items-center gap-2">
                                     <span
-                                        className={`inline-block w-4 h-4 rounded-full border ${belt.colorClass?.includes('border') ? '' : 'border-gray-200'} ${belt.colorClass}`}
+                                        className={`inline-block w-4 h-4 rounded-full border ${belt.colorClass?.includes('border') ? '' : 'border-gray-200 dark:border-zinc-800'} ${belt.colorClass}`}
                                         style={belt.style}
                                     />
                                     <span className={`block truncate ${belt.name === value ? 'font-semibold' : 'font-normal'}`}>
@@ -229,17 +229,17 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
     }
 
     // Helper for Belt Color of Current Belt Header
-    const currentBeltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayBeltName(memberBelt)) || { name: memberBelt, colorClass: 'bg-gray-100', style: undefined }
+    const currentBeltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayBeltName(memberBelt)) || { name: memberBelt, colorClass: 'bg-gray-100 dark:bg-zinc-800', style: undefined }
 
 
     return (
-        <div className="bg-white shadow sm:rounded-lg overflow-hidden">
-            <div className="px-4 py-3 sm:px-6 flex justify-between items-center bg-gray-50 border-b border-gray-200">
-                <h3 className="text-base font-semibold leading-6 text-gray-900">승급 이력 (Promotion Logs)</h3>
+        <div className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg overflow-hidden">
+            <div className="px-4 py-3 sm:px-6 flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
+                <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">승급 이력 (Promotion Logs)</h3>
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setIsEditMode(!isEditMode)}
-                        className={`text-sm font-medium px-3 py-1.5 rounded-md border ${isEditMode ? 'bg-gray-200 text-gray-800 border-gray-300' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                        className={`text-sm font-medium px-3 py-1.5 rounded-md border ${isEditMode ? 'bg-gray-200 text-gray-800 dark:text-zinc-200 border-gray-300 dark:border-zinc-700' : 'bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 border-gray-300 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50'}`}
                     >
                         {isEditMode ? '완료' : '편집'}
                     </button>
@@ -253,17 +253,17 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
             </div>
 
             <div className="flow-root">
-                <ul role="list" className="divide-y divide-gray-200">
+                <ul role="list" className="divide-y divide-gray-200 dark:divide-zinc-800">
                     {logs.length === 0 ? (
-                        <li className="px-4 py-5 text-sm text-gray-500 text-center">기록이 없습니다.</li>
+                        <li className="px-4 py-5 text-sm text-gray-500 dark:text-zinc-400 text-center">기록이 없습니다.</li>
                     ) : (
                         logs.map((log) => {
                             const displayName = displayBeltName(log.belt_name)
                             // Find color for display in list
-                            const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || { name: displayName, colorClass: 'bg-gray-100', style: undefined }
+                            const beltMeta = BELT_OPTIONS_DATA.find(b => b.name === displayName) || { name: displayName, colorClass: 'bg-gray-100 dark:bg-zinc-800', style: undefined }
 
                             return (
-                                <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50 group">
+                                <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 group">
                                     <div className="flex items-center justify-between">
                                         <div className="flex gap-4 items-center flex-1">
                                             {/* Belt Icon in History List - Using color from config (Simple Style) */}
@@ -273,17 +273,17 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                             ></div>
 
                                             <div>
-                                                <p className="text-sm font-bold text-gray-900 flex items-center gap-1">
+                                                <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-1">
                                                     {displayName} {log.stripe_level}그랄
                                                 </p>
-                                                <p className="text-xs text-gray-500">수여자: {log.awarded_by}</p>
+                                                <p className="text-xs text-gray-500 dark:text-zinc-400">수여자: {log.awarded_by}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <p className="text-sm font-medium text-gray-900">{new Date(log.promoted_at).toLocaleDateString()}</p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">{new Date(log.promoted_at).toLocaleDateString()}</p>
+                                                <p className="text-xs text-gray-500 dark:text-zinc-400">
                                                     수련 {log.training_days}일 / 출석 {log.attendance_count}회
                                                 </p>
                                             </div>
@@ -298,7 +298,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                                             e.stopPropagation()
                                                             openEditModal(log)
                                                         }}
-                                                        className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors"
+                                                        className="p-1 text-gray-400 dark:text-zinc-500 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors"
                                                         title="수정"
                                                     >
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,7 +312,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                                             e.stopPropagation()
                                                             handleDelete(log.id)
                                                         }}
-                                                        className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"
+                                                        className="p-1 text-gray-400 dark:text-zinc-500 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"
                                                         title="삭제"
                                                     >
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,7 +324,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                         </div>
                                     </div>
                                     {log.memo && (
-                                        <p className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                                        <p className="mt-2 text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-zinc-800/50 p-2 rounded">
                                             Memo: {log.memo}
                                         </p>
                                     )}
@@ -338,31 +338,31 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
             {/* Modal */}
             {isModalOpen && (
                 <div className="relative z-50">
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsModalOpen(false)}></div>
+                    <div className="fixed inset-0 bg-gray-50 dark:bg-zinc-800/500 bg-opacity-75 transition-opacity" onClick={() => setIsModalOpen(false)}></div>
                     <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                             <form
                                 onSubmit={handleSubmit}
-                                className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+                                className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-900 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
                                 onClick={e => e.stopPropagation()}
                             >
                                 <div>
                                     <div className="mt-3 text-center sm:mt-5">
-                                        <h3 className="text-xl font-bold leading-6 text-gray-900">
+                                        <h3 className="text-xl font-bold leading-6 text-gray-900 dark:text-zinc-100">
                                             {memberName}
                                         </h3>
-                                        <p className="text-sm font-medium text-gray-500 mt-1">
+                                        <p className="text-sm font-medium text-gray-500 dark:text-zinc-400 mt-1">
                                             현재: {displayBeltName(memberBelt)}
                                         </p>
 
-                                        <div className="mt-4 border-t border-gray-100 pt-4">
-                                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                                <div className="bg-gray-50 p-2 rounded">
-                                                    <span className="block text-xs text-gray-400">등록일</span>
+                                        <div className="mt-4 border-t border-gray-100 dark:border-zinc-800/50 pt-4">
+                                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-zinc-400">
+                                                <div className="bg-gray-50 dark:bg-zinc-800/50 p-2 rounded">
+                                                    <span className="block text-xs text-gray-400 dark:text-zinc-500">등록일</span>
                                                     <span className="font-semibold">{joinedAt ? new Date(joinedAt).toLocaleDateString() : '-'}</span>
                                                 </div>
-                                                <div className="bg-gray-50 p-2 rounded">
-                                                    <span className="block text-xs text-gray-400">입학일</span>
+                                                <div className="bg-gray-50 dark:bg-zinc-800/50 p-2 rounded">
+                                                    <span className="block text-xs text-gray-400 dark:text-zinc-500">입학일</span>
                                                     <span className="font-semibold">{startDate ? new Date(startDate).toLocaleDateString() : '-'}</span>
                                                 </div>
                                             </div>
@@ -372,19 +372,19 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                     <div className="mt-4 space-y-4">
                                         {/* Date */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">승급일</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">승급일</label>
                                             <input
                                                 type="date"
                                                 required
                                                 value={date}
                                                 onChange={(e) => setDate(e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                             />
                                         </div>
 
                                         {/* Belt Select */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">벨트 (Belt)</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">벨트 (Belt)</label>
                                             <BeltSelect
                                                 value={belt}
                                                 onChange={setBelt}
@@ -393,11 +393,11 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
 
                                         {/* Stripe Select */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">그랄 (Stripe)</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">그랄 (Stripe)</label>
                                             <select
                                                 value={stripe}
                                                 onChange={(e) => setStripe(e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                             >
                                                 {Array.from({ length: currentMaxStripes + 1 }).map((_, i) => (
                                                     <option key={i} value={i}>{i} 그랄</option>
@@ -406,38 +406,38 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                         </div>
 
                                         {/* Stats (Auto-calc / Manual overwrite) */}
-                                        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-md">
+                                        <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-zinc-800/50 p-3 rounded-md">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-500">누적 수련일 (자동계산)</label>
+                                                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400">누적 수련일 (자동계산)</label>
                                                 <input
                                                     type="number"
                                                     value={trainingDays}
                                                     onChange={(e) => setTrainingDays(Number(e.target.value))}
-                                                    className="mt-1 block w-full rounded-md border-gray-300 text-sm"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 text-sm"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-500">누적 출석수 (자동계산)</label>
+                                                <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400">누적 출석수 (자동계산)</label>
                                                 <input
                                                     type="number"
                                                     value={attendanceCount}
                                                     onChange={(e) => setAttendanceCount(Number(e.target.value))}
-                                                    className="mt-1 block w-full rounded-md border-gray-300 text-sm"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 text-sm"
                                                 />
                                             </div>
-                                            <p className="col-span-2 text-[10px] text-gray-400 text-center">
+                                            <p className="col-span-2 text-[10px] text-gray-400 dark:text-zinc-500 text-center">
                                                 * 승급일 기준, 이전 승급/가입일로부터 계산된 수치입니다.
                                             </p>
                                         </div>
 
                                         {/* Memo */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">메모</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">메모</label>
                                             <textarea
                                                 rows={3}
                                                 value={memo}
                                                 onChange={(e) => setMemo(e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 placeholder="특이사항이나 승급 심사 내용 등"
                                             />
                                         </div>
@@ -453,7 +453,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                     </button>
                                     <button
                                         type="button"
-                                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 sm:col-start-1 sm:mt-0"
                                         onClick={() => setIsModalOpen(false)}
                                     >
                                         취소

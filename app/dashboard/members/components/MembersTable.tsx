@@ -264,7 +264,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
             >
                 {label}
                 {isCurrent && (
-                    <span className="ml-2 flex-none rounded text-gray-900 font-bold">
+                    <span className="ml-2 flex-none rounded text-gray-900 dark:text-zinc-100 font-bold">
                         {order === 'desc' ? '↓' : '↑'}
                     </span>
                 )}
@@ -277,8 +277,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
-                        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">회원 관리</h1>
-                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-700 whitespace-nowrap">총 {count}명 등록</p>
+                        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-zinc-100">회원 관리</h1>
+                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-700 dark:text-zinc-300 whitespace-nowrap">총 {count}명 등록</p>
                     </div>
                     <div className="relative w-full max-w-[180px] sm:max-w-xs">
                         <input
@@ -286,10 +286,10 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             placeholder="이름/전화번호 검색"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-8 sm:pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-xs sm:text-sm sm:leading-6"
+                            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-8 sm:pr-10 text-gray-900 dark:text-zinc-100 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-xs sm:text-sm sm:leading-6"
                         />
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3">
-                            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-4 w-4 text-gray-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
@@ -297,7 +297,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                 </div>
             </div>
 
-            <div className="mt-6 sm:border-b sm:border-gray-200">
+            <div className="mt-6 sm:border-b sm:border-gray-200 dark:border-zinc-800">
                 <div className="flex flex-row justify-between items-center sm:items-end gap-2 sm:gap-4 pb-4 sm:pb-0">
                     <div className="flex-shrink-0">
                         <div className="sm:hidden">
@@ -305,7 +305,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <select
                                 id="status-tabs"
                                 name="status-tabs"
-                                className="block rounded-md border-gray-300 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
+                                className="block rounded-md border-gray-300 dark:border-zinc-700 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                 value={currentStatus}
                                 onChange={(e) => {
                                     router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)
@@ -324,7 +324,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                     <Link
                                         key={tab}
                                         href={`/dashboard/members?status=${tab}&sort=${sort}&order=${order}`}
-                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 hover:border-gray-300 dark:border-zinc-700'}`}
                                     >
                                         {label}
                                     </Link>
@@ -339,11 +339,11 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                 <button
                                     onClick={handleGeneratePasswords}
                                     disabled={isGenerating}
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
+                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 disabled:opacity-50 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
                                 >
                                     {isGenerating ? '생성 중...' : '미설정 PW생성'}
                                 </button>
-                                <span className="text-gray-300 mr-1 sm:mr-2">|</span>
+                                <span className="text-gray-300 dark:text-zinc-600 mr-1 sm:mr-2">|</span>
                                 <button
                                     onClick={handleDelete}
                                     disabled={selectedIds.size === 0 || isDeleting}
@@ -356,7 +356,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                         setIsEditMode(false)
                                         setSelectedIds(new Set())
                                     }}
-                                    className="block rounded-md bg-white px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 whitespace-nowrap"
+                                    className="block rounded-md bg-white dark:bg-zinc-900 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50 whitespace-nowrap"
                                 >
                                     취소
                                 </button>
@@ -365,14 +365,14 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <>
                                 <button
                                     onClick={() => setIsEditMode(true)}
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap"
+                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 transition-colors whitespace-nowrap"
                                 >
                                     일괄 편집
                                 </button>
-                                <span className="text-gray-300 mx-1">|</span>
+                                <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
                                 <Link
                                     href="/dashboard/members/new"
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap flex items-center"
+                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 transition-colors whitespace-nowrap flex items-center"
                                 >
                                     <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                                     신규 등록
@@ -387,28 +387,28 @@ export default function MembersTable({ initialMembers, count, status, attendance
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                         <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                            <table className="min-w-full divide-y divide-gray-300">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-gray-300 dark:divide-zinc-800">
+                                <thead className="bg-gray-50 dark:bg-zinc-800/50">
                                     <tr>
-                                        <th scope="col" className={`py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-16 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
+                                        <th scope="col" className={`py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100 sm:pl-6 w-16 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
                                             {isEditMode ? (
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedIds.size === filteredMembers.length && filteredMembers.length > 0}
                                                     onChange={toggleAll}
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                                                    className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-600"
                                                 />
                                             ) : 'No.'}
                                         </th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="name" label="이름" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="birth_date" label="나이" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="attendance" label="출석" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="belt" label="등급" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"><SortLink column="payment" label="결제일" /></th>
-                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="name" label="이름" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="birth_date" label="나이" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="attendance" label="출석" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="belt" label="등급" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="payment" label="결제일" /></th>
+                                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 bg-white">
+                                <tbody className="divide-y divide-gray-200 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
                                     {filteredMembers && filteredMembers.length > 0 ? (
                                         filteredMembers.map((member, index) => {
                                             const paymentInfo = getPaymentStatus(member)
@@ -420,27 +420,27 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                 <tr
                                                     key={member.id}
                                                     onClick={(e) => handleRowClick(e, member.id)}
-                                                    className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                                                    className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50 transition-colors cursor-pointer group"
                                                 >
-                                                    <td className={`whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
+                                                    <td className={`whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 dark:text-zinc-400 sm:pl-6 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
                                                         {isEditMode ? (
                                                             <input
                                                                 type="checkbox"
                                                                 checked={selectedIds.has(member.id)}
                                                                 onChange={() => toggleSelection(member.id)}
-                                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                                                                className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-600"
                                                             />
                                                         ) : (count || 0) - index}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-gray-900 font-semibold select-none group-hover:text-blue-600 transition-colors">
+                                                            <span className="text-gray-900 dark:text-zinc-100 font-semibold select-none group-hover:text-blue-600 transition-colors">
                                                                 {member.name || '이름 없음'}
                                                             </span>
                                                         </div>
-                                                        <div className="text-xs text-gray-400 mt-0.5">{member.phone || '-'}</div>
+                                                        <div className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">{member.phone || '-'}</div>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-zinc-400">
                                                         {calculateYearAge(member.birth_date)}
                                                     </td>
                                                     <td className="whitespace-nowrap px-3 py-4 text-sm">
@@ -451,7 +451,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                                 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
                                                                 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 ${!attendance
-                                                                    ? 'bg-gray-100 text-gray-600 ring-gray-500/10 hover:bg-gray-200' // Default: Wait (대기)
+                                                                    ? 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 ring-gray-500/10 hover:bg-gray-200' // Default: Wait (대기)
                                                                     : !attendance.checkedOut
                                                                         ? 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200' // Checked In: Present (출석)
                                                                         : 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200' // Checked Out: Left (하원)
@@ -461,8 +461,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                             {isProcessing ? '...' : !attendance ? '대기' : !attendance.checkedOut ? '출석' : '하원'}
                                                         </button>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-2 py-1 text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10">
                                                             {member.belt}
                                                         </span>
                                                     </td>
@@ -470,19 +470,19 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                         {paymentInfo.status === 'unpaid' && (
                                                             <div className="flex flex-col items-start">
                                                                 <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 mb-1">미납</span>
-                                                                <span className="text-xs text-gray-500">{paymentInfo.dateStr}</span>
+                                                                <span className="text-xs text-gray-500 dark:text-zinc-400">{paymentInfo.dateStr}</span>
                                                             </div>
                                                         )}
                                                         {paymentInfo.status === 'due' && (
                                                             <div className="flex flex-col items-start">
                                                                 <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 mb-1">결제예정</span>
-                                                                <span className="text-xs text-gray-500">{paymentInfo.dateStr}</span>
+                                                                <span className="text-xs text-gray-500 dark:text-zinc-400">{paymentInfo.dateStr}</span>
                                                             </div>
                                                         )}
-                                                        {paymentInfo.status === 'normal' && <span className="text-gray-500">{paymentInfo.dateStr}</span>}
-                                                        {paymentInfo.status === 'none' && <span className="text-gray-300">-</span>}
+                                                        {paymentInfo.status === 'normal' && <span className="text-gray-500 dark:text-zinc-400">{paymentInfo.dateStr}</span>}
+                                                        {paymentInfo.status === 'none' && <span className="text-gray-300 dark:text-zinc-600">-</span>}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 hidden sm:table-cell" suppressHydrationWarning>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-zinc-400 hidden sm:table-cell" suppressHydrationWarning>
                                                         {(() => {
                                                             const d = new Date(member.joined_at)
                                                             return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
@@ -492,7 +492,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             )
                                         })
                                     ) : (
-                                        <tr><td colSpan={6} className="py-10 text-center text-sm text-gray-500">등록된 회원이 없습니다. 신규 회원을 등록해주세요.</td></tr>
+                                        <tr><td colSpan={6} className="py-10 text-center text-sm text-gray-500 dark:text-zinc-400">등록된 회원이 없습니다. 신규 회원을 등록해주세요.</td></tr>
                                     )}
                                 </tbody>
                             </table>

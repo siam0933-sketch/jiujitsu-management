@@ -68,7 +68,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
     // Helper: Sort Icon
     const SortIcon = ({ colKey }: { colKey: 'name' | 'age' | 'belt' }) => {
-        if (sortConfig?.key !== colKey) return <span className="text-gray-300 ml-1">↕</span>
+        if (sortConfig?.key !== colKey) return <span className="text-gray-300 dark:text-zinc-600 ml-1">↕</span>
         return sortConfig.direction === 'asc' ? <span className="text-blue-600 ml-1">↑</span> : <span className="text-blue-600 ml-1">↓</span>
     }
 
@@ -350,15 +350,15 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
             {mode === 'weekly' && (
                 <div
                     onClick={handleWeeklyManageClick}
-                    className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 hover:shadow-md transition-all h-auto min-h-[100px] flex flex-col cursor-pointer"
+                    className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-sm p-3 mb-2 group relative hover:border-blue-300 hover:shadow-md transition-all h-auto min-h-[100px] flex flex-col cursor-pointer"
                 >
                     <div className="flex justify-between items-start mb-2">
                         <div>
-                            <h4 className="font-bold text-gray-800 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
+                            <h4 className="font-bold text-gray-800 dark:text-zinc-200 text-sm whitespace-normal break-words leading-tight">{schedule.class_name}</h4>
                             <p className="text-xs text-blue-600 font-bold mt-0.5">{schedule.start_time}</p>
                         </div>
                         {/* Show enrollment count badge */}
-                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
+                        <span className="text-[10px] bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
                             {schedule.enrollment_count ?? 0}명
                         </span>
                     </div>
@@ -370,23 +370,23 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                 {[...schedule.enrolled_members]
                                     .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
                                     .map((m, idx) => (
-                                        <span key={idx} className="text-[11px] text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                                        <span key={idx} className="text-[11px] text-gray-600 dark:text-zinc-400 bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 rounded border border-gray-100 dark:border-zinc-800/50">
                                             {m.name}
                                         </span>
                                     ))}
                             </div>
                         ) : (
-                            <p className="text-[10px] text-gray-300 text-center py-2">수강생 없음</p>
+                            <p className="text-[10px] text-gray-300 dark:text-zinc-600 text-center py-2">수강생 없음</p>
                         )}
                     </div>
 
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-full p-0.5">
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-zinc-900/80 rounded-full p-0.5">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation()
                                 handleDeleteClass()
                             }}
-                            className="text-gray-300 hover:text-red-500 p-0.5 rounded-full hover:bg-red-50"
+                            className="text-gray-300 dark:text-zinc-600 hover:text-red-500 p-0.5 rounded-full hover:bg-red-50"
                             title="수업 삭제"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -399,12 +399,12 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
             {/* Daily Mode View */}
             {mode === 'daily' && (
-                <div className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative min-w-[480px] ${isMenuOpen ? 'z-20' : 'z-0'}`}>
+                <div className={`bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative min-w-[480px] ${isMenuOpen ? 'z-20' : 'z-0'}`}>
                     {/* Header */}
                     <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
                             <button
-                                className="p-1 rounded-full text-gray-400 hover:bg-gray-200 transition-colors mr-1"
+                                className="p-1 rounded-full text-gray-400 dark:text-zinc-500 hover:bg-gray-200 transition-colors mr-1"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -417,14 +417,14 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                 </svg>
                             </button>
                             <p className="text-sm text-blue-600 font-bold">{schedule.start_time}</p>
-                            <h4 className="font-bold text-gray-800 text-lg">{schedule.class_name}</h4>
-                            <p className="text-xs text-gray-400">({enrolledMembers.length}명)</p>
+                            <h4 className="font-bold text-gray-800 dark:text-zinc-200 text-lg">{schedule.class_name}</h4>
+                            <p className="text-xs text-gray-400 dark:text-zinc-500">({enrolledMembers.length}명)</p>
                         </div>
 
                         <div className="relative" ref={menuRef}>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                                className="p-2 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -434,13 +434,13 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                             {/* Dropdown Menu */}
                             {isMenuOpen && (
-                                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animation-fade-in">
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 rounded-lg shadow-xl border border-gray-100 dark:border-zinc-800/50 z-50 overflow-hidden animation-fade-in">
                                     <button
                                         onClick={() => {
                                             setIsMenuOpen(false)
                                             openManageModal()
                                         }}
-                                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2"
+                                        className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50 border-b border-gray-50 flex items-center gap-2"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -466,7 +466,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                     {/* Enrolled List */}
                     {isExpanded && (
-                        <div className="border-t border-gray-100 bg-white p-3">
+                        <div className="border-t border-gray-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 p-3">
                             {enrolledMembers.length > 0 ? (
                                 <div className="flex flex-wrap gap-3 min-w-[452px]">
                                     {enrolledMembers.map((member, idx) => {
@@ -474,7 +474,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                         const isProcessing = processingIds.has(member.id)
 
                                         // Determine status text and basic style
-                                        let btnClass = 'bg-white text-gray-700 border border-gray-300'
+                                        let btnClass = 'bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 border border-gray-300 dark:border-zinc-700'
                                         let btnText = '대기' // Default: Not checked in
 
                                         if (status) {
@@ -499,7 +499,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                     }
                                                 }}
                                                 className={`
-                                                    bg-white border border-gray-200 rounded-lg shadow-sm transition-all
+                                                    bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-sm transition-all
                                                     flex flex-row items-center justify-between p-3 gap-3 w-[220px] flex-shrink-0
                                                     ${isToday && !isProcessing ? 'cursor-pointer hover:shadow-md hover:border-blue-300 active:scale-[0.99]' : ''}
                                                 `}
@@ -508,18 +508,18 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 <div className="flex flex-col justify-center min-w-0 flex-1 pointer-events-none">
                                                     {/* Row 1: Name + Age */}
                                                     <div className="flex items-baseline gap-1.5 mb-1 min-w-0">
-                                                        <span className="font-extrabold text-gray-900 text-lg leading-tight truncate">
+                                                        <span className="font-extrabold text-gray-900 dark:text-zinc-100 text-lg leading-tight truncate">
                                                             {member.name}
                                                         </span>
                                                         {member.birth_date && (
-                                                            <span className="text-sm text-gray-500 font-normal whitespace-nowrap">
+                                                            <span className="text-sm text-gray-500 dark:text-zinc-400 font-normal whitespace-nowrap">
                                                                 ({calculateAge(member.birth_date)})
                                                             </span>
                                                         )}
                                                     </div>
 
                                                     {/* Row 2: Belt */}
-                                                    <div className="text-sm font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md truncate w-fit">
+                                                    <div className="text-sm font-bold text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md truncate w-fit">
                                                         {member.belt}
                                                     </div>
                                                 </div>
@@ -547,7 +547,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                                 e.stopPropagation();
                                                                 openCalendar(member.id);
                                                             }}
-                                                            className="min-w-[4rem] py-2 px-3 rounded-lg text-sm font-medium text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 hover:text-blue-600 transition-all flex items-center justify-center gap-1"
+                                                            className="min-w-[4rem] py-2 px-3 rounded-lg text-sm font-medium text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50 hover:text-blue-600 transition-all flex items-center justify-center gap-1"
                                                         >
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -561,7 +561,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                     })}
                                 </div>
                             ) : (
-                                <div className="p-10 text-center text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                                <div className="p-10 text-center text-sm text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-dashed border-gray-200 dark:border-zinc-800">
                                     등록된 수강생이 없습니다.
                                 </div>
                             )}
@@ -573,9 +573,9 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
             {/* Member Management Modal */}
             {isManageModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setIsManageModalOpen(false)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
-                        <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 className="font-bold text-lg text-gray-800">수강생 관리</h3>
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+                        <div className="p-4 border-b border-gray-100 dark:border-zinc-800/50 bg-gray-50 dark:bg-zinc-800/50 flex justify-between items-center">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-zinc-200">수강생 관리</h3>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setIsCopyMode(!isCopyMode)}
@@ -583,7 +583,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                 >
                                     {isCopyMode ? '복사 취소' : '+ 수업 복사하기'}
                                 </button>
-                                <button onClick={() => setIsManageModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                                <button onClick={() => setIsManageModalOpen(false)} className="text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:text-zinc-400">✕</button>
                             </div>
                         </div>
 
@@ -608,7 +608,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 flex-1 h-9 rounded-lg text-sm font-bold transition-all
                                                 ${selectedCopyDays.has(day.id)
                                                     ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                                                    : 'bg-white text-gray-500 border border-blue-100 hover:border-blue-300'}
+                                                    : 'bg-white dark:bg-zinc-900 text-gray-500 dark:text-zinc-400 border border-blue-100 hover:border-blue-300'}
                                             `}
                                         >
                                             {day.label}
@@ -622,7 +622,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                         w-full py-2.5 rounded-lg font-bold text-sm shadow-sm transition-all flex justify-center items-center gap-2
                                         ${selectedCopyDays.size > 0
                                             ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                                            : 'bg-gray-200 text-gray-400 dark:text-zinc-500 cursor-not-allowed'}
                                     `}
                                 >
                                     {isCopying ? (
@@ -644,12 +644,12 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                         )}
                         {/* Member List (Omitted for brevity, logic remains same as before) */}
                         {/* Note: I am pasting the FULL content, so I must include the modal body */}
-                        <div className="p-2 border-b border-gray-100 bg-white">
-                            <p className="text-xs text-gray-500 px-2 mb-1">전체 회원 리스트</p>
+                        <div className="p-2 border-b border-gray-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900">
+                            <p className="text-xs text-gray-500 dark:text-zinc-400 px-2 mb-1">전체 회원 리스트</p>
                         </div>
 
                         {/* Column Headers */}
-                        <div className="px-4 py-2 border-b border-gray-100 bg-white grid grid-cols-[auto_1fr_0.4fr] gap-2 text-xs font-bold text-gray-500">
+                        <div className="px-4 py-2 border-b border-gray-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 grid grid-cols-[auto_1fr_0.4fr] gap-2 text-xs font-bold text-gray-500 dark:text-zinc-400">
                             <div className="w-5">{/* Checkbox spacer */}</div>
                             <button onClick={() => handleSort('name')} className="text-left flex items-center gap-1 hover:text-blue-600">
                                 이름 <SortIcon colKey="name" />
@@ -667,23 +667,23 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                         key={member.id}
                                         className={`
                                             grid grid-cols-[auto_1fr_0.4fr] gap-2 items-center p-3 rounded-lg border cursor-pointer transition-all
-                                            ${isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-gray-100 hover:bg-gray-50'}
+                                            ${isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white dark:bg-zinc-900 border-gray-100 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50'}
                                         `}
                                     >
                                         <input
                                             type="checkbox"
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                             checked={isSelected}
                                             onChange={() => handleToggleSelect(member.id)}
                                         />
-                                        <span className={`font-bold text-sm ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>{member.name}</span>
-                                        <span className="text-xs text-gray-400">{calculateAge(member.birth_date)}</span>
+                                        <span className={`font-bold text-sm ${isSelected ? 'text-blue-800' : 'text-gray-700 dark:text-zinc-300'}`}>{member.name}</span>
+                                        <span className="text-xs text-gray-400 dark:text-zinc-500">{calculateAge(member.birth_date)}</span>
                                     </label>
                                 )
                             })}
                         </div>
-                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-2">
-                            <button onClick={() => setIsManageModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-100">취소</button>
+                        <div className="p-4 border-t border-gray-100 dark:border-zinc-800/50 bg-gray-50 dark:bg-zinc-800/50 flex gap-2">
+                            <button onClick={() => setIsManageModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-gray-600 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800">취소</button>
                             <button onClick={handleSaveEnrollments} className="flex-1 py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md">저장하기 ({tempSelectedIds.size}명)</button>
                         </div>
                     </div>
@@ -693,17 +693,17 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
             {/* Calendar Modal */}
             {isCalendarOpen && selectedMemberForCalendar && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setIsCalendarOpen(false)}>
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-4 animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-sm p-4 animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg">{calendarMonth.getFullYear()}년 {calendarMonth.getMonth() + 1}월</h3>
                             <div className="flex gap-1">
-                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.setMonth(calendarMonth.getMonth() - 1)))} className="p-1 hover:bg-gray-100 rounded">◀</button>
-                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.setMonth(calendarMonth.getMonth() + 1)))} className="p-1 hover:bg-gray-100 rounded">▶</button>
+                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.setMonth(calendarMonth.getMonth() - 1)))} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800 rounded">◀</button>
+                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.setMonth(calendarMonth.getMonth() + 1)))} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800 rounded">▶</button>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                            {['일', '월', '화', '수', '목', '금', '토'].map(d => <div key={d} className="text-xs text-gray-500 font-medium">{d}</div>)}
+                            {['일', '월', '화', '수', '목', '금', '토'].map(d => <div key={d} className="text-xs text-gray-500 dark:text-zinc-400 font-medium">{d}</div>)}
                         </div>
 
                         <div className="grid grid-cols-7 gap-1">
@@ -729,7 +729,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 h-8 w-8 rounded-full text-sm flex items-center justify-center transition-colors
                                                 ${attended
                                                     ? 'bg-green-500 text-white font-bold shadow-sm'
-                                                    : 'hover:bg-gray-100 text-gray-700'}
+                                                    : 'hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300'}
                                             `}
                                         >
                                             {d}
@@ -741,7 +741,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                         </div>
 
                         <div className="mt-4 flex justify-end">
-                            <button onClick={() => setIsCalendarOpen(false)} className="text-sm text-gray-500 hover:text-gray-800 underline">닫기</button>
+                            <button onClick={() => setIsCalendarOpen(false)} className="text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:text-zinc-200 underline">닫기</button>
                         </div>
                     </div>
                 </div>
