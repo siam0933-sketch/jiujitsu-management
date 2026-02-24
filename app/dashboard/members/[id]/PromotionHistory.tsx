@@ -235,7 +235,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
     return (
         <div className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg overflow-hidden">
             <div className="px-4 py-3 sm:px-6 flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
-                <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">승급 이력 (Promotion Logs)</h3>
+                <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-zinc-100">승급 이력</h3>
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setIsEditMode(!isEditMode)}
