@@ -238,7 +238,7 @@ export default function KioskPage() {
                                 {status === 'selection' ? '회원을 선택해주세요' : '출석체크'}
                             </h1>
                             <div className="text-5xl font-bold text-gray-900 dark:text-zinc-100 tracking-widest min-h-[4rem] flex items-center justify-center pointer-events-none select-none">
-                                {phone.length > 0 ? phone : <span className="text-gray-200">01012345678</span>}
+                                {phone}
                             </div>
                             {message && status !== 'selection' && (
                                 <p className={`mt-2 text-lg ${status === 'error' ? 'text-red-500' : 'text-blue-500'}`}>
