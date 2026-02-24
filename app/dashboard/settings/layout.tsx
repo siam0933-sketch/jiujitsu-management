@@ -18,7 +18,8 @@ export default function SettingsLayout({
 
             <SettingsTabs />
 
-            <div className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg p-6">
+            {/* Pages will provide their own wrappers */}
+            <div className="mt-4">
                 {children}
             </div>
         </div>

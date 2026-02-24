@@ -182,7 +182,7 @@ export default function PricingSettingsPage() {
     const filteredPlans = plans.filter(p => p.type === activeTab)
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto px-0 sm:px-4 py-4 sm:py-8">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-8">가격 및 결제 설정</h1>
 
             {/* Tabs */}
@@ -219,7 +219,7 @@ export default function PricingSettingsPage() {
             </div>
 
             {/* Content */}
-            <div className="bg-white dark:bg-zinc-900 shadow rounded-lg p-6">
+            <div className="bg-white dark:bg-zinc-900 shadow rounded-lg p-4 sm:p-6">
 
                 {/* 1. Period Plans Tab */}
                 {activeTab === 'period' && (
@@ -235,17 +235,17 @@ export default function PricingSettingsPage() {
                             </h2>
                             <div className="mb-6 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-800">
                                 <h3 className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-3">새 기간권 만들기</h3>
-                                <form onSubmit={handleCreatePlan} className="flex gap-2 items-end">
+                                <form onSubmit={handleCreatePlan} className="flex flex-col sm:flex-row gap-3 sm:gap-2 items-start sm:items-end">
                                     <input type="hidden" name="type" value="period" />
                                     <div className="flex-1">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">이용권 이름</label>
                                         <input name="name" required placeholder="예: 주짓수 1개월" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                     </div>
-                                    <div className="w-32">
+                                    <div className="w-full sm:w-32">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">기본 금액 (원)</label>
                                         <input name="price" type="number" required placeholder="150000" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                     </div>
-                                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] min-w-[60px]">
+                                    <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto mt-2 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] sm:min-w-[60px]">
                                         추가
                                     </button>
                                 </form>
@@ -288,7 +288,7 @@ export default function PricingSettingsPage() {
 
                             <div className="mb-8 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-800">
                                 <h3 className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-3">새 옵션 그룹 만들기</h3>
-                                <form onSubmit={handleCreateOption} className="flex gap-2 items-end">
+                                <form onSubmit={handleCreateOption} className="flex flex-col sm:flex-row gap-3 sm:gap-2 items-start sm:items-end">
                                     <div className="flex-1">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">그룹명</label>
                                         <input name="group_name" required placeholder="예: 차량 운행" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
@@ -297,11 +297,11 @@ export default function PricingSettingsPage() {
                                         <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">첫번째 옵션명</label>
                                         <input name="name" required placeholder="예: 5km 이내" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                     </div>
-                                    <div className="w-24">
+                                    <div className="w-full sm:w-24">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">금액</label>
                                         <input name="price" type="number" required placeholder="0" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                     </div>
-                                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] min-w-[80px]">
+                                    <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto mt-2 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] sm:min-w-[80px]">
                                         그룹 생성
                                     </button>
                                 </form>
@@ -414,7 +414,7 @@ export default function PricingSettingsPage() {
                         <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-4">횟수권 관리</h2>
                         <div className="mb-8 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-800">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-3">새 횟수권 만들기</h3>
-                            <form onSubmit={handleCreatePlan} className="flex gap-2 items-end">
+                            <form onSubmit={handleCreatePlan} className="flex flex-col sm:flex-row gap-3 sm:gap-2 items-start sm:items-end">
                                 <input type="hidden" name="type" value="session" />
                                 <div className="flex-1">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">이용권 이름</label>
@@ -428,11 +428,11 @@ export default function PricingSettingsPage() {
                                     <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">횟수</label>
                                     <input name="session_count" type="number" required placeholder="10" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                 </div>
-                                <div className="w-20">
+                                <div className="w-full sm:w-20">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">유효(일)</label>
                                     <input name="duration_days" type="number" defaultValue="90" required className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                 </div>
-                                <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] min-w-[60px]">
+                                <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto mt-2 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] sm:min-w-[60px]">
                                     추가
                                 </button>
                             </form>
@@ -473,16 +473,16 @@ export default function PricingSettingsPage() {
 
                         <div className="mb-8 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-800">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-3">새 상품 만들기</h3>
-                            <form onSubmit={handleCreateProduct} className="flex gap-2 items-end">
+                            <form onSubmit={handleCreateProduct} className="flex flex-col sm:flex-row gap-3 sm:gap-2 items-start sm:items-end">
                                 <div className="flex-1">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">상품 이름</label>
                                     <input name="name" required placeholder="예: 도복 (블랙)" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                 </div>
-                                <div className="w-32">
+                                <div className="w-full sm:w-32">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">판매 금액 (원)</label>
                                     <input name="price" type="number" required placeholder="0" className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none" />
                                 </div>
-                                <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] min-w-[60px]">
+                                <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto mt-2 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-500 disabled:opacity-50 h-[38px] sm:min-w-[60px]">
                                     추가
                                 </button>
                             </form>

@@ -138,7 +138,7 @@ export default function ClassScheduleBoard({
                                 key={day.id}
                                 onClick={() => setSelectedDay(day.id)}
                                 className={`
-                                    flex-1 px-4 py-4 text-sm font-bold transition-all whitespace-nowrap border-r border-gray-100 dark:border-zinc-800/50 last:border-0
+                                    flex-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap border-r border-gray-100 dark:border-zinc-800/50 last:border-0
                                     ${selectedDay === day.id
                                         ? 'bg-white dark:bg-zinc-900 text-blue-600 shadow-[inset_0_2px_0_0_rgba(37,99,235,1)]'
                                         : 'text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800'}
@@ -150,8 +150,8 @@ export default function ClassScheduleBoard({
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/30 dark:bg-zinc-800/30">
-                        <div className="max-w-5xl mx-auto space-y-4">
+                    <div className="flex-1 overflow-y-auto p-2 sm:p-4 custom-scrollbar bg-gray-50/30 dark:bg-zinc-800/30">
+                        <div className="max-w-5xl mx-auto space-y-3 sm:space-y-4">
                             {/* Always show pending list here */}
                             <PendingApprovalList todayKST={todayKST} />
 

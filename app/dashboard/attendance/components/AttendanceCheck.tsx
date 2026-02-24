@@ -399,9 +399,9 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
             {/* Daily Mode View */}
             {mode === 'daily' && (
-                <div className={`bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative min-w-[480px] ${isMenuOpen ? 'z-20' : 'z-0'}`}>
+                <div className={`bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm hover:shadow-md transition-all mb-4 overflow-visible relative min-w-full sm:min-w-[480px] ${isMenuOpen ? 'z-20' : 'z-0'}`}>
                     {/* Header */}
-                    <div className="p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
+                    <div className="p-3 sm:p-4 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white relative">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
                             <button
                                 className="p-1 rounded-full text-gray-400 dark:text-zinc-500 hover:bg-gray-200 transition-colors mr-1"
@@ -466,9 +466,9 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                     {/* Enrolled List */}
                     {isExpanded && (
-                        <div className="border-t border-gray-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 p-3">
+                        <div className="border-t border-gray-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 p-2 sm:p-3">
                             {enrolledMembers.length > 0 ? (
-                                <div className="flex flex-wrap gap-3 min-w-[452px]">
+                                <div className="flex flex-wrap gap-2 sm:gap-3 min-w-full sm:min-w-[452px]">
                                     {enrolledMembers.map((member, idx) => {
                                         const status = attendanceStatus[member.id]
                                         const isProcessing = processingIds.has(member.id)
@@ -500,7 +500,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                                 }}
                                                 className={`
                                                     bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-sm transition-all
-                                                    flex flex-row items-center justify-between p-3 gap-3 w-[220px] flex-shrink-0
+                                                    flex flex-row items-center justify-between p-2 sm:p-3 gap-2 sm:gap-3 w-full sm:w-[220px] flex-shrink-0
                                                     ${isToday && !isProcessing ? 'cursor-pointer hover:shadow-md hover:border-blue-300 active:scale-[0.99]' : ''}
                                                 `}
                                             >
