@@ -52,7 +52,7 @@ export default function CreateNoticePage() {
                 >
                     <ArrowLeftIcon className="w-5 h-5" />
                 </Link>
-                <h2 className="text-2xl font-bold tracking-tight">새 공지사항 작성</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">새 공지사항 작성</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,7 +78,7 @@ export default function CreateNoticePage() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex items-center px-6 py-2 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="flex items-center px-6 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {isSubmitting ? (
                             <>

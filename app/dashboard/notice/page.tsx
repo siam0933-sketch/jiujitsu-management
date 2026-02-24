@@ -13,11 +13,11 @@ export default async function NoticeListPage({ searchParams }: { searchParams: P
     return (
         <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
             <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">공지사항 관리</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">공지사항 관리</h2>
                 <div className="flex items-center space-x-2">
                     <Link
                         href="/dashboard/notice/create"
-                        className="flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-zinc-200 transition-colors"
+                        className="flex items-center px-4 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     >
                         <PlusIcon className="w-4 h-4 mr-2" />
                         새 공지 작성
@@ -27,22 +27,22 @@ export default async function NoticeListPage({ searchParams }: { searchParams: P
 
             <div className="grid gap-4">
                 {notices && notices.length > 0 ? (
-                    <div className="border rounded-lg bg-card dark:border-zinc-800">
-                        <div className="divide-y dark:divide-zinc-800">
+                    <div className="border rounded-lg bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800">
+                        <div className="divide-y divide-gray-200 dark:divide-zinc-800">
                             {notices.map((notice: any) => (
                                 <Link
                                     key={notice.id}
                                     href={`/dashboard/notice/${notice.id}`}
-                                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                                    className="flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                                 >
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-lg">{notice.title}</span>
+                                            <span className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">{notice.title}</span>
                                             {notice.images && notice.images.length > 0 && (
                                                 <ImageIcon className="w-4 h-4 text-zinc-500" />
                                             )}
                                         </div>
-                                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                        <div className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
                                             <span>{notice.profiles?.full_name || '관리자'}</span>
                                             <span>•</span>
                                             <span>{new Date(notice.created_at).toLocaleDateString('ko-KR')}</span>
@@ -60,7 +60,7 @@ export default async function NoticeListPage({ searchParams }: { searchParams: P
                         <p className="text-sm text-zinc-500 mt-2">새로운 공지사항을 등록하여 회원들에게 소식을 알려주세요.</p>
                         <Link
                             href="/dashboard/notice/create"
-                            className="mt-4 px-4 py-2 bg-black text-white outline-none rounded-md hover:bg-zinc-800 dark:bg-white dark:text-black transition-colors"
+                            className="mt-4 px-4 py-2 bg-zinc-900 text-white outline-none rounded-md hover:bg-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                         >
                             첫 공지사항 작성하기
                         </Link>
@@ -75,7 +75,7 @@ export default async function NoticeListPage({ searchParams }: { searchParams: P
                             <Link
                                 key={p}
                                 href={`/dashboard/notice?page=${p}`}
-                                className={`px-4 py-2 border rounded-md ${page === p ? 'bg-black text-white dark:bg-white dark:text-black font-medium' : 'hover:bg-muted'}`}
+                                className={`px-4 py-2 border border-gray-200 dark:border-zinc-800 rounded-md ${page === p ? 'bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-medium' : 'hover:bg-gray-50 dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-300'}`}
                             >
                                 {p}
                             </Link>

@@ -63,7 +63,7 @@ export default function NoticeDetailClient({ initialData }: { initialData: any }
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm">
                 <div className="flex justify-between items-start mb-6 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                     <div>
-                        <h3 className="text-2xl font-bold mb-2">{title}</h3>
+                        <h3 className="text-2xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">{title}</h3>
                         <div className="text-sm text-zinc-500 flex gap-3">
                             <span>작성자: {initialData.profiles?.full_name || '관리자'}</span>
                             <span>작성일: {new Date(initialData.created_at).toLocaleString('ko-KR')}</span>
@@ -154,7 +154,7 @@ export default function NoticeDetailClient({ initialData }: { initialData: any }
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex items-center px-6 py-2 bg-black text-white dark:bg-white dark:text-black rounded-md disabled:opacity-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                    className="flex items-center px-6 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 rounded-md disabled:opacity-50 transition-colors"
                 >
                     {isSubmitting ? (
                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> 저장 중...</>
