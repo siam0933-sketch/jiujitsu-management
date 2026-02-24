@@ -225,17 +225,20 @@ export default function MemberModal({ member }: { member: any }) {
         setManualAmount(null)
     }
 
-    // Auto-calc Expiry Date when plan/months change
+    // Auto-calc Expiry Date when plan/months/paymentDate change
     useEffect(() => {
         if (!selectedPlan || selectedPlan.type !== 'period') {
             setNewExpiryDate('')
             return
         }
 
-        // Base Date: Max(Current Expiry, Today)
-        let baseDate = new Date()
+        // Base Date: Max(Current Expiry, Payment Date)
+        let baseDate = paymentDate ? new Date(paymentDate) : new Date()
+
         if (member.payment_end_date) {
             const currentEnd = new Date(member.payment_end_date)
+            // If the member's current expiry is later than the new payment date, 
+            // the new period should be appended to the current expiry
             if (currentEnd > baseDate) {
                 baseDate = currentEnd
             }
@@ -244,9 +247,15 @@ export default function MemberModal({ member }: { member: any }) {
         // Add Months
         const nextDate = new Date(baseDate)
         nextDate.setMonth(nextDate.getMonth() + durationMonths)
+
+        // Adjust for leap years/month end clipping if necessary (JS Date handles most of this intuitively but can overflow to next month if target month has fewer days)
+        if (nextDate.getDate() !== baseDate.getDate()) {
+            nextDate.setDate(0); // Go to last day of previous month if it overflowed
+        }
+
         setNewExpiryDate(nextDate.toISOString().split('T')[0])
 
-    }, [selectedPlanId, durationMonths, member.payment_end_date])
+    }, [selectedPlanId, durationMonths, member.payment_end_date, paymentDate])
 
     // Calculate Total
     const calculateTotal = () => {
