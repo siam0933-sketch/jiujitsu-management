@@ -273,7 +273,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                             ></div>
 
                                             <div>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-1">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-1">
                                                     {displayName} {log.stripe_level}그랄
                                                 </p>
                                                 <p className="text-xs text-gray-500 dark:text-zinc-400">수여자: {log.awarded_by}</p>
