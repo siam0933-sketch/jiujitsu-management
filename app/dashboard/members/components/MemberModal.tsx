@@ -660,13 +660,13 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
 
                                     {/* Payment Form Toggle */}
-                                    <div className="border rounded-lg mb-6 overflow-hidden">
-                                        <button onClick={togglePaymentForm} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 text-sm font-bold text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800">
+                                    <div className="border border-gray-200 dark:border-zinc-800 rounded-lg mb-4 sm:mb-6 overflow-hidden">
+                                        <button onClick={togglePaymentForm} className="w-full flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-zinc-800/50 text-sm font-bold text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800">
                                             <span>결제하기</span>
                                             <span>{isPaymentFormOpen ? '▲' : '▼'}</span>
                                         </button>
                                         {isPaymentFormOpen && (
-                                            <div className="p-6 bg-white dark:bg-zinc-900 border-t">
+                                            <div className="p-3 sm:p-6 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800">
                                                 {/* Simple Payment Form */}
                                                 <div className="space-y-4">
                                                     <div>
@@ -682,33 +682,33 @@ export default function MemberModal({ member }: { member: any }) {
                                                     </div>
 
                                                     {selectedPlan?.type === 'period' && (
-                                                        <div className="flex gap-4 items-center">
-                                                            <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1">개월 수</label>
+                                                        <div className="flex flex-wrap gap-2 sm:gap-4 items-start">
+                                                            <div className="w-16 sm:w-auto sm:flex-1">
+                                                                <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">개월 수</label>
                                                                 <input
                                                                     type="number"
                                                                     min="1"
                                                                     value={durationMonths}
                                                                     onChange={e => setDurationMonths(Number(e.target.value))}
-                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
+                                                                    className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
                                                                 />
                                                             </div>
-                                                            <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1">결제일</label>
+                                                            <div className="flex-1 min-w-[120px]">
+                                                                <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">결제일</label>
                                                                 <input
                                                                     type="date"
                                                                     value={paymentDate}
                                                                     onChange={e => setPaymentDate(e.target.value)}
-                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
+                                                                    className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
                                                                 />
                                                             </div>
-                                                            <div className="flex-1">
-                                                                <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1">만료 예정일</label>
+                                                            <div className="w-full sm:flex-1 sm:min-w-[120px]">
+                                                                <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">만료 예정일</label>
                                                                 <input
                                                                     type="date"
                                                                     value={newExpiryDate}
                                                                     onChange={e => setNewExpiryDate(e.target.value)}
-                                                                    className="w-full text-base border-2 border-gray-900 rounded p-2"
+                                                                    className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
                                                                 />
                                                             </div>
                                                         </div>
@@ -726,19 +726,19 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 }, {} as Record<string, any[]>)
                                                             ).map(([groupName, groupOptions]: [string, any]) => (
                                                                 <div key={groupName} className="space-y-2">
-                                                                    <p className="text-sm text-gray-500 dark:text-zinc-400 font-bold">{groupName}</p>
+                                                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 font-bold">{groupName}</p>
                                                                     {groupOptions.map((opt: any) => (
-                                                                        <label key={opt.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
+                                                                        <label key={opt.id} className="flex items-center justify-between p-2 sm:p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
                                                                             <div className="flex items-center gap-2">
                                                                                 <input
                                                                                     type="checkbox"
                                                                                     checked={selectedOptionIds.has(opt.id)}
                                                                                     onChange={() => handleToggleOption(opt.id)}
-                                                                                    className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-5 h-5"
+                                                                                    className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-4 h-4 sm:w-5 sm:h-5"
                                                                                 />
-                                                                                <span className="text-base text-gray-700 dark:text-zinc-300">{opt.name}</span>
+                                                                                <span className="text-sm sm:text-base text-gray-700 dark:text-zinc-300">{opt.name}</span>
                                                                             </div>
-                                                                            <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
+                                                                            <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-zinc-100">
                                                                                 {(() => {
                                                                                     const price = selectedPlan?.type === 'period' ? opt.price * durationMonths : opt.price
                                                                                     return `${price > 0 ? '+' : ''}${price.toLocaleString()}원`
