@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getPendingAttendanceCount } from './attendance/actions'
+import MobileMenuCloser from './components/MobileMenuCloser'
 
 export default async function DashboardLayout({
     children,
@@ -59,6 +60,9 @@ export default async function DashboardLayout({
 
                 {/* Invisible trigger area for mobile/small screens (keep for mouse edge-cases) */}
                 <div className="w-6 h-full bg-transparent pointer-events-auto md:hidden" />
+
+                {/* Mobile Menu Closer (Client Component) */}
+                <MobileMenuCloser />
 
                 {/* Sidebar */}
                 <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800">
