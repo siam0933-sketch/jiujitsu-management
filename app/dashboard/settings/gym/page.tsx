@@ -73,7 +73,7 @@ export default function GymSettingsPage() {
                             value={gymName}
                             onChange={e => setGymName(e.target.value)}
                             required
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none"
                         />
                         <p className="mt-1 text-xs text-gray-500">회원들에게 표시되는 도장 이름입니다.</p>
                     </div>
@@ -85,7 +85,7 @@ export default function GymSettingsPage() {
                             value={adminName}
                             onChange={e => setAdminName(e.target.value)}
                             required
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            className="block w-full rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-transparent placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 appearance-none"
                         />
                         <p className="mt-1 text-xs text-gray-500">시스템 상에 표시되는 관리자 이름입니다.</p>
                     </div>

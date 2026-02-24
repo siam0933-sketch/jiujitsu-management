@@ -57,7 +57,7 @@ export default function LoginForm() {
 
     return (
         <div className="w-full max-w-md mx-auto px-4">
-            <h1 className="text-2xl font-bold text-center mb-8 text-gray-900">
+            <h1 className="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-zinc-100">
                 {loginType === 'admin' ? '관리자 로그인' : (loginType === 'member' ? '회원 로그인' : '로그인')}
             </h1>
 
@@ -67,8 +67,8 @@ export default function LoginForm() {
                     type="button"
                     onClick={() => { setLoginType('admin'); setMessage(''); }}
                     className={`flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 transition-all duration-200 ${loginType === 'admin'
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-md transform scale-[1.02]'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-blue-300 hover:bg-gray-50'
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-md transform scale-[1.02]'
+                        : 'border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-500 dark:text-zinc-400 hover:border-blue-300 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'
                         }`}
                 >
                     <ShieldCheck size={40} strokeWidth={1.5} />
@@ -79,8 +79,8 @@ export default function LoginForm() {
                     type="button"
                     onClick={() => { setLoginType('member'); setMessage(''); }}
                     className={`flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 transition-all duration-200 ${loginType === 'member'
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-md transform scale-[1.02]'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-blue-300 hover:bg-gray-50'
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-md transform scale-[1.02]'
+                        : 'border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-500 dark:text-zinc-400 hover:border-blue-300 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'
                         }`}
                 >
                     <User size={40} strokeWidth={1.5} />
@@ -103,42 +103,39 @@ export default function LoginForm() {
 
                     {loginType === 'admin' ? (
                         <>
-                            <label className="text-md font-medium text-gray-800" htmlFor="email">
+                            <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="email">
                                 이메일
                             </label>
                             <input
-                                className="rounded-md px-4 py-3 bg-white border border-gray-300 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black text-lg"
+                                className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-6 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
                                 name="email"
                                 placeholder="admin@example.com"
                                 required
-                                style={{ colorScheme: 'light' }}
                             />
                         </>
                     ) : (
                         <>
-                            <label className="text-md font-medium text-gray-800" htmlFor="name">
+                            <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="name">
                                 이름
                             </label>
                             <input
-                                className="rounded-md px-4 py-3 bg-white border border-gray-300 mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black text-lg"
+                                className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-6 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
                                 name="name"
                                 placeholder="본인 성함"
                                 required
-                                style={{ colorScheme: 'light' }}
                             />
                         </>
                     )}
 
-                    <label className="text-md font-medium text-gray-800" htmlFor="password">
+                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="password">
                         비밀번호
                     </label>
                     <input
-                        className="rounded-md px-4 py-3 bg-white border border-gray-300 mb-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black text-lg"
+                        className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-8 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
                         type="password"
                         name="password"
                         placeholder={loginType === 'admin' ? "••••••••" : "6자리 비밀번호"}
                         required
-                        style={{ colorScheme: 'light' }}
                     />
 
                     <button

@@ -305,7 +305,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <select
                                 id="status-tabs"
                                 name="status-tabs"
-                                className="block rounded-md border-gray-300 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm"
+                                className="block rounded-md border-gray-300 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                 value={currentStatus}
                                 onChange={(e) => {
                                     router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)

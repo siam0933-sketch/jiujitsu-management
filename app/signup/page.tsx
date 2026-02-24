@@ -23,13 +23,13 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-black">
             <div className="w-full max-w-md space-y-8">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+                    <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">
                         도장 등록 및 회원가입
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
+                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-zinc-400">
                         관장님 전용 가입 페이지입니다. (* 표시는 필수입력)
                     </p>
                 </div>
@@ -37,10 +37,10 @@ export default function SignupPage() {
                 <form className="mt-8 space-y-6" action="/auth/sign-up" method="POST" onSubmit={handleSubmit}>
                     <input type="hidden" name="role" value="gym_master" />
 
-                    <div className="rounded-md shadow-sm space-y-4 bg-white p-6">
+                    <div className="rounded-md shadow-sm space-y-4 bg-white dark:bg-zinc-900 p-6">
                         {/* 개인 정보 섹션 */}
                         <div>
-                            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">관리자 정보</h3>
+                            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-zinc-100 mb-4">관리자 정보</h3>
                             <div className="grid grid-cols-1 gap-y-4">
                                 <div>
                                     <label htmlFor="email" className="sr-only">Email address</label>
@@ -50,7 +50,7 @@ export default function SignupPage() {
                                         type="email"
                                         autoComplete="email"
                                         required
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="이메일 주소 *"
                                     />
                                 </div>
@@ -64,7 +64,7 @@ export default function SignupPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="비밀번호 (6자 이상) *"
                                     />
                                 </div>
@@ -78,7 +78,7 @@ export default function SignupPage() {
                                         required
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="비밀번호 확인 *"
                                     />
                                 </div>
@@ -90,7 +90,7 @@ export default function SignupPage() {
                                         name="full_name"
                                         type="text"
                                         required
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="관장님 성함 *"
                                     />
                                 </div>
@@ -101,7 +101,7 @@ export default function SignupPage() {
                                         name="phone"
                                         type="tel"
                                         required
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="휴대폰 번호 (010-0000-0000) *"
                                     />
                                 </div>
@@ -112,7 +112,7 @@ export default function SignupPage() {
 
                         {/* 도장 정보 섹션 */}
                         <div>
-                            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">도장 정보</h3>
+                            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-zinc-100 mb-4">도장 정보</h3>
                             <div className="grid grid-cols-1 gap-y-4">
                                 <div>
                                     <label htmlFor="gym_name" className="sr-only">Gym Name</label>
@@ -121,7 +121,7 @@ export default function SignupPage() {
                                         name="gym_name"
                                         type="text"
                                         required
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="도장 이름 (예: 강남 주짓수) *"
                                     />
                                 </div>
@@ -131,7 +131,7 @@ export default function SignupPage() {
                                         id="business_registration_number"
                                         name="business_registration_number"
                                         type="text"
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="사업자 등록번호 (선택)"
                                     />
                                 </div>
@@ -141,7 +141,7 @@ export default function SignupPage() {
                                         id="gym_phone"
                                         name="gym_phone"
                                         type="tel"
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="도장 전화번호 (선택)"
                                     />
                                 </div>
@@ -151,7 +151,7 @@ export default function SignupPage() {
                                         id="gym_address"
                                         name="gym_address"
                                         type="text"
-                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3"
+                                        className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 appearance-none"
                                         placeholder="도장 주소 (선택)"
                                     />
                                 </div>

@@ -145,7 +145,7 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                         <select
                             value={filter}
                             onChange={(e) => setFilter(e.target.value as FilterType)}
-                            className="bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-200 rounded-lg px-3 py-1.5 border-none outline-none cursor-pointer"
+                            className="bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-200 rounded-lg px-3 py-1.5 border-none outline-none cursor-pointer appearance-none"
                         >
                             <option value="all">전체보기</option>
                             <option value="under16">16세 미만 (키즈)</option>
@@ -160,7 +160,7 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                                     value={customAgeStart}
                                     onChange={(e) => setCustomAgeStart(e.target.value)}
                                     placeholder="0"
-                                    className="w-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm px-2 py-1.5 rounded-md border-none text-center"
+                                    className="w-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 text-sm px-2 py-1.5 rounded-md border-none text-center appearance-none"
                                 />
                                 <span className="text-zinc-500 text-sm">~</span>
                                 <input
@@ -168,7 +168,7 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                                     value={customAgeEnd}
                                     onChange={(e) => setCustomAgeEnd(e.target.value)}
                                     placeholder="100"
-                                    className="w-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm px-2 py-1.5 rounded-md border-none text-center"
+                                    className="w-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 text-sm px-2 py-1.5 rounded-md border-none text-center appearance-none"
                                 />
                             </div>
                         )}

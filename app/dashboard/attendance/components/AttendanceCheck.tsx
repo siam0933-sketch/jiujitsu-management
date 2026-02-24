@@ -672,7 +672,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                     >
                                         <input
                                             type="checkbox"
-                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                             checked={isSelected}
                                             onChange={() => handleToggleSelect(member.id)}
                                         />

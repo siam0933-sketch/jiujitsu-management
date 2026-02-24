@@ -101,7 +101,7 @@ export default function CreateClassModal({ onClose, allMembers }: { onClose: () 
                                     type="text"
                                     required
                                     placeholder="예: 저녁 도복 클래스"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
@@ -111,7 +111,7 @@ export default function CreateClassModal({ onClose, allMembers }: { onClose: () 
                                 <input
                                     type="time"
                                     required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                     value={time}
                                     onChange={(e) => setTime(e.target.value)}
                                 />

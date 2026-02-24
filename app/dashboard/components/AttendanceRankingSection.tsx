@@ -60,7 +60,7 @@ export default function AttendanceRankingSection({ monthRanking, yearRanking, mo
                             value={customAgeStart}
                             onChange={(e) => setCustomAgeStart(e.target.value)}
                             placeholder="0"
-                            className="w-16 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border text-center"
+                            className="w-16 rounded-md border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border text-center appearance-none"
                         />
                         <span className="text-gray-500 text-sm">~</span>
                         <input
@@ -68,7 +68,7 @@ export default function AttendanceRankingSection({ monthRanking, yearRanking, mo
                             value={customAgeEnd}
                             onChange={(e) => setCustomAgeEnd(e.target.value)}
                             placeholder="100"
-                            className="w-16 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border text-center"
+                            className="w-16 rounded-md border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border text-center appearance-none"
                         />
                         <span className="text-gray-500 text-sm">세</span>
                     </div>
@@ -76,7 +76,7 @@ export default function AttendanceRankingSection({ monthRanking, yearRanking, mo
                 <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value as any)}
-                    className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                    className="block w-40 rounded-md border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border appearance-none"
                 >
                     <option value="all">전체 보기</option>
                     <option value="under16">16세 미만 (키즈)</option>

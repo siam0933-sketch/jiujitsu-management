@@ -69,7 +69,7 @@ export default function ChangePasswordForm() {
                                 required
                                 value={currentPw}
                                 onChange={(e) => setCurrentPw(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none"
                             />
                         </div>
 
@@ -82,7 +82,7 @@ export default function ChangePasswordForm() {
                                 required
                                 value={newPw}
                                 onChange={(e) => setNewPw(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none"
                             />
                         </div>
 
@@ -95,7 +95,7 @@ export default function ChangePasswordForm() {
                                 required
                                 value={confirmPw}
                                 onChange={(e) => setConfirmPw(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none"
                             />
                         </div>
 

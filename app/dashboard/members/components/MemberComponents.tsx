@@ -201,7 +201,7 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
                                     <label className="flex items-center gap-1 cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-gray-300 text-blue-600 w-3 h-3"
+                                            className="rounded border-gray-300 text-blue-600 w-3 h-3 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
                                             checked={isIndefinitePause}
                                             onChange={e => setIsIndefinitePause(e.target.checked)}
                                         />
