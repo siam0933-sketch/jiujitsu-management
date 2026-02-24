@@ -139,9 +139,9 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                 </div>
 
                 {/* Filter and Mode Control Row */}
-                <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center justify-between">
+                <div className="flex flex-row flex-wrap gap-2 sm:gap-3 items-center justify-between">
                     {/* Left: Filter Controls */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex flex-wrap items-center gap-2">
                         <select
                             value={filter}
                             onChange={(e) => setFilter(e.target.value as FilterType)}
