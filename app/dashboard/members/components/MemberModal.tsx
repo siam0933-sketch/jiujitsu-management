@@ -828,12 +828,12 @@ export default function MemberModal({ member }: { member: any }) {
                                         {payments.map(pay => (
                                             <div key={pay.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 last:border-0">
                                                 {editingPaymentId === pay.id ? (
-                                                    <div className="flex items-center gap-2 w-full">
+                                                    <div className="flex items-center gap-1 sm:gap-2 w-full">
                                                         <input
                                                             type="date"
                                                             value={editDate}
                                                             onChange={e => setEditDate(e.target.value)}
-                                                            className="text-xs border border-blue-300 rounded px-1 py-0.5"
+                                                            className="w-24 sm:w-auto text-xs border border-blue-300 rounded px-1 py-0.5"
                                                         />
                                                         <input
                                                             type="text"
@@ -842,10 +842,13 @@ export default function MemberModal({ member }: { member: any }) {
                                                                 const val = Number(e.target.value.replace(/[^0-9]/g, ''))
                                                                 setEditAmount(val)
                                                             }}
-                                                            className="flex-1 text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+                                                            className="w-20 sm:w-auto flex-1 text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
                                                         />
-                                                        <button onClick={() => handleUpdatePayment(pay)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
-                                                        <button onClick={cancelEditing} className="text-xs bg-gray-200 px-2 py-1 rounded">취소</button>
+                                                        <div className="flex gap-1 shrink-0">
+                                                            <button onClick={() => handleUpdatePayment(pay)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
+                                                            <button onClick={cancelEditing} className="text-xs bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-zinc-200 px-2 py-1 rounded">취소</button>
+                                                            <button onClick={() => handleDeletePayment(pay.id)} className="text-xs bg-red-500 text-white px-2 py-1 rounded">삭제</button>
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <>
@@ -865,12 +868,11 @@ export default function MemberModal({ member }: { member: any }) {
                                                                     })()}
                                                                 </span>
                                                                 <div className="flex gap-2 items-center">
-                                                                    <span className="font-bold cursor-pointer hover:text-blue-600 text-base" onClick={() => startEditing(pay)}>
+                                                                    <span className="font-bold cursor-pointer hover:text-blue-600 text-sm" onClick={() => startEditing(pay)}>
                                                                         {pay.amount.toLocaleString()}원
                                                                     </span>
                                                                     <div className="flex gap-1 ml-2">
                                                                         <button onClick={() => startEditing(pay)} className="text-xs text-blue-500 hover:underline">수정</button>
-                                                                        <button onClick={() => handleDeletePayment(pay.id)} className="text-xs text-red-500 hover:underline">삭제</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
