@@ -383,11 +383,11 @@ export default function MembersTable({ initialMembers, count, status, attendance
                 </div>
             </div>
 
-            <div className="mt-8 flow-root">
-                <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                            <table className="min-w-full divide-y divide-gray-300 dark:divide-zinc-800">
+            <div className="mt-4 sm:mt-8 flow-root">
+                <div className="overflow-x-auto">
+                    <div className="inline-block min-w-full align-middle">
+                        <div className="overflow-hidden border border-gray-200 dark:border-zinc-800 rounded-lg shadow-sm">
+                            <table className="min-w-full divide-y divide-gray-300 dark:border-zinc-800 dark:divide-zinc-800">
                                 <thead className="bg-gray-50 dark:bg-zinc-800/50">
                                     <tr>
                                         <th scope="col" className={`py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100 sm:pl-6 w-16 ${!isEditMode ? 'hidden sm:table-cell' : ''}`}>
@@ -400,12 +400,12 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                 />
                                             ) : 'No.'}
                                         </th>
-                                        <th className="px-1 sm:px-3 py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="name" label="이름" /></th>
-                                        <th className="px-1 sm:px-3 py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="birth_date" label="나이" /></th>
-                                        <th className="px-1 sm:px-3 py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="attendance" label="출석" /></th>
-                                        <th className="px-1 sm:px-3 py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="belt" label="등급" /></th>
-                                        <th className="px-1 sm:px-3 py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100"><SortLink column="payment" label="결제일" /></th>
-                                        <th className="px-1 sm:px-3 py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
+                                        <th className="px-2 sm:px-3 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 w-full sm:w-auto min-w-[60px]"><SortLink column="name" label="이름" /></th>
+                                        <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="birth_date" label="나이" /></th>
+                                        <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="attendance" label="출석" /></th>
+                                        <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="belt" label="등급" /></th>
+                                        <th className="px-2 sm:px-3 py-3 text-right sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[50px] whitespace-nowrap"><SortLink column="payment" label="결제일" /></th>
+                                        <th className="px-3 py-3 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
@@ -432,57 +432,59 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                             />
                                                         ) : (count || 0) - index}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-4 text-sm font-medium text-gray-900 dark:text-zinc-100">
+                                                    <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm font-medium text-gray-900 dark:text-zinc-100 w-full sm:w-auto">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-gray-900 dark:text-zinc-100 font-semibold select-none group-hover:text-blue-600 transition-colors">
+                                                            <span className="text-gray-900 dark:text-zinc-100 font-bold sm:font-semibold select-none group-hover:text-blue-600 transition-colors text-xs sm:text-sm">
                                                                 {member.name || '이름 없음'}
                                                             </span>
                                                         </div>
                                                         <div className="hidden sm:block text-xs text-gray-400 dark:text-zinc-500 mt-0.5">{member.phone || '-'}</div>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-4 text-xs sm:text-sm text-gray-500 dark:text-zinc-400">
+                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 dark:text-zinc-400 text-center sm:text-left">
                                                         {calculateYearAge(member.birth_date)}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-4 text-sm">
+                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-sm text-center sm:text-left">
                                                         <button
                                                             onClick={() => handleAttendanceToggle(member.id)}
                                                             disabled={isProcessing}
                                                             className={`
-                                                                rounded px-1.5 py-1 sm:px-2.5 sm:py-1.5 text-[11px] sm:text-xs font-semibold shadow-sm ring-1 ring-inset transition-all
+                                                                rounded px-1.5 py-1 sm:px-2.5 sm:py-1.5 text-[11px] sm:text-xs font-semibold shadow-sm ring-1 ring-inset transition-all whitespace-nowrap w-10 sm:w-auto
                                                                 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                                                                 ${!attendance
-                                                                    ? 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 ring-gray-500/10 hover:bg-gray-200' // Default: Wait (대기)
+                                                                    ? 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 ring-gray-500/10 hover:bg-gray-200'
                                                                     : !attendance.checkedOut
-                                                                        ? 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200' // Checked In: Present (출석)
-                                                                        : 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200' // Checked Out: Left (하원)
+                                                                        ? 'bg-green-100 text-green-700 ring-green-600/20 hover:bg-green-200'
+                                                                        : 'bg-amber-100 text-amber-800 ring-amber-600/20 hover:bg-amber-200'
                                                                 }
                                                             `}
                                                         >
                                                             {isProcessing ? '...' : !attendance ? '대기' : !attendance.checkedOut ? '출석' : '하원'}
                                                         </button>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-4 text-sm text-gray-500 dark:text-zinc-400">
-                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10">
+                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-sm text-gray-500 dark:text-zinc-400 text-center sm:text-left">
+                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[60px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block align-bottom" title={member.belt}>
                                                             {member.belt}
                                                         </span>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-4 text-sm">
-                                                        {paymentInfo.status === 'unpaid' && (
-                                                            <div className="flex flex-col items-start">
-                                                                <span className="inline-flex items-center rounded-md bg-red-50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 mb-0.5 sm:mb-1">미납</span>
-                                                                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400">{paymentInfo.dateStr}</span>
-                                                            </div>
-                                                        )}
-                                                        {paymentInfo.status === 'due' && (
-                                                            <div className="flex flex-col items-start">
-                                                                <span className="inline-flex items-center rounded-md bg-yellow-50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 mb-0.5 sm:mb-1">결제예정</span>
-                                                                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400">{paymentInfo.dateStr}</span>
-                                                            </div>
-                                                        )}
-                                                        {paymentInfo.status === 'normal' && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400">{paymentInfo.dateStr}</span>}
-                                                        {paymentInfo.status === 'none' && <span className="text-[10px] sm:text-xs text-gray-300 dark:text-zinc-600">-</span>}
+                                                    <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm text-right sm:text-left">
+                                                        <div className="flex flex-col items-end sm:items-start">
+                                                            {paymentInfo.status === 'unpaid' && (
+                                                                <>
+                                                                    <span className="inline-flex items-center rounded-md bg-red-50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 mb-0.5 sm:mb-1">미납</span>
+                                                                    <span className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 whitespace-nowrap">{paymentInfo.dateStr}</span>
+                                                                </>
+                                                            )}
+                                                            {paymentInfo.status === 'due' && (
+                                                                <>
+                                                                    <span className="inline-flex items-center rounded-md bg-yellow-50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 mb-0.5 sm:mb-1">결제예정</span>
+                                                                    <span className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 whitespace-nowrap">{paymentInfo.dateStr}</span>
+                                                                </>
+                                                            )}
+                                                            {paymentInfo.status === 'normal' && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 whitespace-nowrap">{paymentInfo.dateStr}</span>}
+                                                            {paymentInfo.status === 'none' && <span className="text-[10px] sm:text-xs text-gray-300 dark:text-zinc-600 whitespace-nowrap">-</span>}
+                                                        </div>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-1 sm:px-3 py-4 text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 hidden sm:table-cell" suppressHydrationWarning>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 hidden sm:table-cell" suppressHydrationWarning>
                                                         {(() => {
                                                             const d = new Date(member.joined_at)
                                                             return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
