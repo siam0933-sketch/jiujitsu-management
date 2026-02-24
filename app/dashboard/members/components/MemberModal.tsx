@@ -897,71 +897,78 @@ export default function MemberModal({ member }: { member: any }) {
                                     {/* Weekly Schedule */}
                                     <div>
                                         <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">수강 중인 수업 (주간 시간표) <span className="text-xs font-normal text-gray-400 dark:text-zinc-500 ml-1">요일 칸을 눌러 편집</span></h5>
-                                        <div className="grid grid-cols-7 gap-1 text-center bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-2 border border-gray-100 dark:border-zinc-800/50 relative">
-                                            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
-                                                const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
-                                                const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
-                                                // Sort by start_time
-                                                classesOnDay.sort((a: any, b: any) => a.start_time.localeCompare(b.start_time))
+                                        <div className="space-y-2 sm:space-y-3 relative">
+                                            {[
+                                                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                                                ['Sat', 'Sun']
+                                            ].map((weekPart, partIndex) => (
+                                                <div key={partIndex} className="grid grid-cols-5 gap-1.5 sm:gap-2 text-center">
+                                                    {weekPart.map(day => {
+                                                        const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
+                                                        const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
+                                                        // Sort by start_time
+                                                        classesOnDay.sort((a: any, b: any) => a.start_time.localeCompare(b.start_time))
 
-                                                const isPopoverOpen = popoverDay === day
-                                                const availableClasses = allSchedules.filter(s => s.day_of_week === day)
-                                                const hasClassesForDay = availableClasses.length > 0
+                                                        const isPopoverOpen = popoverDay === day
+                                                        const availableClasses = allSchedules.filter(s => s.day_of_week === day)
+                                                        const hasClassesForDay = availableClasses.length > 0
 
-                                                return (
-                                                    <div key={day} className="flex flex-col gap-1 relative">
-                                                        <span className={`text-xs font-bold ${day === 'Sun' ? 'text-red-400' : day === 'Sat' ? 'text-blue-400' : 'text-gray-400 dark:text-zinc-500'}`}>
-                                                            {dayMap[day]}
-                                                        </span>
-                                                        <div
-                                                            className="min-h-[50px] bg-white dark:bg-zinc-900 rounded border border-gray-100 dark:border-zinc-800/50 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all relative z-10"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                if (hasClassesForDay) setPopoverDay(isPopoverOpen ? null : day)
-                                                            }}
-                                                        >
-                                                            {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
-                                                                <span key={i} className="text-xs leading-tight text-blue-600 font-normal block bg-blue-50 px-1 py-0.5 rounded w-full border border-blue-100">
-                                                                    {c.class_name}
-                                                                </span>
-                                                            )) : (
-                                                                <div className="h-full w-full flex items-center justify-center flex-1">
-                                                                    <span className="text-xs text-gray-200 block mt-1">+ 추가</span>
+                                                        return (
+                                                            <div key={day} className="flex flex-col relative">
+                                                                <div className={`py-1 text-[11px] sm:text-xs font-bold ${day === 'Sun' ? 'text-red-500' : day === 'Sat' ? 'text-blue-500' : 'text-gray-500 dark:text-zinc-400'}`}>
+                                                                    {dayMap[day]}
                                                                 </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Popup Menu */}
-                                                        {isPopoverOpen && (
-                                                            <>
-                                                                <div className="fixed inset-0 z-20" onClick={() => setPopoverDay(null)} />
-                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-40 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-xl z-30 p-1 text-left">
-                                                                    <div className="px-2 py-1 mb-1 bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800/50">
-                                                                        <span className="text-xs font-bold text-gray-500 dark:text-zinc-400">{dayMap[day]}요일 전체 수업</span>
-                                                                    </div>
-                                                                    {availableClasses.length > 0 ? availableClasses.map((ac: any) => {
-                                                                        const isEnrolled = enrolledClasses.some(ec => ec.id === ac.id)
-                                                                        return (
-                                                                            <button
-                                                                                key={ac.id}
-                                                                                onClick={() => handleEnrollToggle(ac.id, isEnrolled)}
-                                                                                disabled={isSubmitting}
-                                                                                className={`w-full text-left px-2 py-1.5 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-300'}`}
-                                                                            >
-                                                                                <span className="truncate pr-2">{ac.class_name}</span>
-                                                                                {isEnrolled && <span className="text-[10px] bg-white dark:bg-zinc-900 border border-blue-200 px-1 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
-                                                                                {!isEnrolled && <span className="text-[10px] text-gray-400 dark:text-zinc-500 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
-                                                                            </button>
-                                                                        )
-                                                                    }) : (
-                                                                        <div className="px-2 py-3 text-center text-xs text-gray-400 dark:text-zinc-500">등록된 수업 없음</div>
+                                                                <div
+                                                                    className="min-h-[50px] sm:min-h-[60px] bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-700 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all relative z-10"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        if (hasClassesForDay) setPopoverDay(isPopoverOpen ? null : day)
+                                                                    }}
+                                                                >
+                                                                    {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
+                                                                        <span key={i} className="text-[10px] sm:text-xs leading-tight text-blue-700 font-medium block bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-0.5 sm:px-1 py-1 rounded w-full truncate">
+                                                                            {c.class_name}
+                                                                        </span>
+                                                                    )) : (
+                                                                        <div className="h-full w-full flex items-center justify-center flex-1">
+                                                                            <span className="text-[10px] sm:text-xs text-gray-300 dark:text-zinc-600 block mt-1">+ 추가</span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
+
+                                                                {/* Popup Menu */}
+                                                                {isPopoverOpen && (
+                                                                    <>
+                                                                        <div className="fixed inset-0 z-20" onClick={() => setPopoverDay(null)} />
+                                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-xl z-30 p-1 text-left">
+                                                                            <div className="px-2 py-1.5 mb-1 bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800/50">
+                                                                                <span className="text-xs font-bold text-gray-600 dark:text-zinc-300">{dayMap[day]}요일 전체 수업</span>
+                                                                            </div>
+                                                                            {availableClasses.length > 0 ? availableClasses.map((ac: any) => {
+                                                                                const isEnrolled = enrolledClasses.some(ec => ec.id === ac.id)
+                                                                                return (
+                                                                                    <button
+                                                                                        key={ac.id}
+                                                                                        onClick={() => handleEnrollToggle(ac.id, isEnrolled)}
+                                                                                        disabled={isSubmitting}
+                                                                                        className={`w-full text-left px-2 py-2 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold border border-blue-100 dark:border-blue-800' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-300'}`}
+                                                                                    >
+                                                                                        <span className="truncate pr-2">{ac.class_name}</span>
+                                                                                        {isEnrolled && <span className="text-[10px] bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
+                                                                                        {!isEnrolled && <span className="text-[10px] text-gray-400 dark:text-zinc-500 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
+                                                                                    </button>
+                                                                                )
+                                                                            }) : (
+                                                                                <div className="px-2 py-3 text-center text-xs text-gray-400 dark:text-zinc-500">등록된 수업 없음</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 
