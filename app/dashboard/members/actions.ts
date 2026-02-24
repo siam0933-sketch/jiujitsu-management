@@ -60,7 +60,17 @@ export async function registerMember(prevState: any, formData: FormData) {
         return { error: '이미 등록된 전화번호입니다.' }
     }
 
-
+    // Determine default belt based on Korean Age (Current Year - Birth Year + 1)
+    let defaultBelt = 'White' // Adult White (Maps to '화이트 (성인)' in UI)
+    if (birth_date) {
+        const bDate = new Date(birth_date)
+        if (!isNaN(bDate.getTime())) {
+            const age = new Date().getFullYear() - bDate.getFullYear() + 1
+            if (age < 16) {
+                defaultBelt = '화이트 (유소년)'
+            }
+        }
+    }
 
     const { error } = await supabase.from('gym_members').insert({
         gym_id: gym.id,
@@ -77,7 +87,7 @@ export async function registerMember(prevState: any, formData: FormData) {
         access_code: access_code || null,
         login_password: login_password,
         status: 'active',
-        belt: 'white', // Default
+        belt: defaultBelt, // Auto-promoted based on age
     })
 
     if (error) {
@@ -120,6 +130,17 @@ export async function registerBatch(members: any[]) {
             const joinedAtIso = safeIsoString(member.joined_at) || new Date().toISOString()
             const startDateIso = joinedAtIso // [NEW] Default start_date to joined_at
 
+            let defaultBelt = 'White'
+            if (birthDateIso) {
+                const bDate = new Date(birthDateIso)
+                if (!isNaN(bDate.getTime())) {
+                    const age = new Date().getFullYear() - bDate.getFullYear() + 1
+                    if (age < 16) {
+                        defaultBelt = '화이트 (유소년)'
+                    }
+                }
+            }
+
             return {
                 gym_id: gym.id,
                 name: member.name,
@@ -135,7 +156,7 @@ export async function registerBatch(members: any[]) {
                 access_code: member.access_code ? String(member.access_code) : '1234',
                 payment_due_day: member.payment_due_day ? parseInt(String(member.payment_due_day).replace(/[^0-9]/g, '')) : null,
                 status: 'active',
-                belt: 'white'
+                belt: defaultBelt
             }
         })
 
