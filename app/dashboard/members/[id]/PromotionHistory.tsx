@@ -346,6 +346,31 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                 className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-900 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
                                 onClick={e => e.stopPropagation()}
                             >
+                                {/* Close button */}
+                                <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="rounded-md bg-white dark:bg-zinc-900 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    >
+                                        <span className="sr-only">닫기</span>
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="absolute right-0 top-0 block pr-4 pt-4 sm:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="text-gray-400 hover:text-gray-500"
+                                    >
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
                                 <div>
                                     <div className="mt-3 text-center sm:mt-5">
                                         <h3 className="text-xl font-bold leading-6 text-gray-900 dark:text-zinc-100">
