@@ -378,7 +378,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                                 required
                                                 value={date}
                                                 onChange={(e) => setDate(e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-[38px] py-1.5"
                                             />
                                         </div>
 
@@ -397,7 +397,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                             <select
                                                 value={stripe}
                                                 onChange={(e) => setStripe(e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-[38px] py-1.5"
                                             >
                                                 {Array.from({ length: currentMaxStripes + 1 }).map((_, i) => (
                                                     <option key={i} value={i}>{i} 그랄</option>
