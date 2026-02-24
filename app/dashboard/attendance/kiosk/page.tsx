@@ -205,7 +205,7 @@ export default function KioskPage() {
     return (
         <div
             onClick={handleGlobalClick}
-            className="fixed inset-0 z-50 bg-gray-900 flex flex-col overflow-hidden overscroll-none h-[100dvh] w-screen"
+            className="fixed inset-0 z-50 bg-gray-900 flex flex-col overflow-hidden overscroll-none h-[100dvh] w-screen select-none touch-manipulation"
         >
             {/* Exit Button Removed per user request */}
 
@@ -237,7 +237,7 @@ export default function KioskPage() {
                             <h1 className="text-xl font-medium text-gray-500 dark:text-zinc-400 mb-2">
                                 {status === 'selection' ? '회원을 선택해주세요' : '출석체크'}
                             </h1>
-                            <div className="text-5xl font-bold text-gray-900 dark:text-zinc-100 tracking-widest min-h-[4rem] flex items-center justify-center">
+                            <div className="text-5xl font-bold text-gray-900 dark:text-zinc-100 tracking-widest min-h-[4rem] flex items-center justify-center pointer-events-none select-none">
                                 {phone.length > 0 ? phone : <span className="text-gray-200">01012345678</span>}
                             </div>
                             {message && status !== 'selection' && (
@@ -324,26 +324,26 @@ export default function KioskPage() {
                                     <button
                                         key={num}
                                         onClick={() => handleDigit(num.toString())}
-                                        className="h-full rounded-xl bg-white dark:bg-zinc-900 text-3xl font-bold shadow-sm hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 active:bg-gray-200 transition-colors"
+                                        className="h-full rounded-xl bg-white dark:bg-zinc-900 text-3xl font-bold shadow-sm hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 active:bg-gray-200 transition-colors select-none"
                                     >
                                         {num}
                                     </button>
                                 ))}
                                 <button
                                     onClick={handleClear}
-                                    className="h-full rounded-xl bg-gray-200 text-xl font-bold shadow-sm hover:bg-gray-300 active:bg-gray-400 transition-colors text-gray-600 dark:text-zinc-400"
+                                    className="h-full rounded-xl bg-gray-200 text-xl font-bold shadow-sm hover:bg-gray-300 active:bg-gray-400 transition-colors text-gray-600 dark:text-zinc-400 select-none"
                                 >
                                     전체 지움
                                 </button>
                                 <button
                                     onClick={() => handleDigit('0')}
-                                    className="h-full rounded-xl bg-white dark:bg-zinc-900 text-3xl font-bold shadow-sm hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 active:bg-gray-200 transition-colors"
+                                    className="h-full rounded-xl bg-white dark:bg-zinc-900 text-3xl font-bold shadow-sm hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 active:bg-gray-200 transition-colors select-none"
                                 >
                                     0
                                 </button>
                                 <button
                                     onClick={handleBackspace}
-                                    className="h-full rounded-xl bg-gray-200 text-xl font-bold shadow-sm hover:bg-gray-300 active:bg-gray-400 transition-colors flex items-center justify-center text-gray-600 dark:text-zinc-400"
+                                    className="h-full rounded-xl bg-gray-200 text-xl font-bold shadow-sm hover:bg-gray-300 active:bg-gray-400 transition-colors flex items-center justify-center text-gray-600 dark:text-zinc-400 select-none"
                                 >
                                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
@@ -353,7 +353,7 @@ export default function KioskPage() {
                                 <button
                                     onClick={isExitModalOpen ? () => setIsExitModalOpen(false) : handleSubmit}
                                     disabled={(!isExitModalOpen && phone.length < 4) || !isInit}
-                                    className={`col-span-3 h-full rounded-xl text-white text-2xl font-bold transition-all flex items-center justify-center gap-2 mt-1 shadow-md
+                                    className={`col-span-3 h-full rounded-xl text-white text-2xl font-bold transition-all flex items-center justify-center gap-2 mt-1 shadow-md select-none touch-manipulation
                                         ${isExitModalOpen
                                             ? 'bg-gray-50 dark:bg-zinc-800/500 hover:bg-gray-600 active:bg-gray-700'
                                             : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed'
