@@ -5,9 +5,9 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
-import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword, updateMemberPaymentEndDate } from '../actions'
+import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword, updateMemberPaymentEndDate, updatePaymentBillingDay } from '../actions'
 import { enrollMemberInClass, unenrollMemberFromClass } from '../../attendance/actions_enrollment'
-import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseController } from './MemberComponents'
+import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseController, PaymentBillingDay } from './MemberComponents'
 import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
 import PromotionHistory from '../[id]/PromotionHistory'
@@ -665,6 +665,15 @@ export default function MemberModal({ member }: { member: any }) {
                                                     className="block w-full text-xl font-bold border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
                                                 />
                                             )}
+                                        </div>
+                                        {/* 결제 기준일 */}
+                                        <div className="text-right">
+                                            <p className="text-xs text-gray-400 dark:text-zinc-500 mb-1">수납 청구일</p>
+                                            <PaymentBillingDay
+                                                memberId={member.id}
+                                                billingDay={member.payment_due_day ?? null}
+                                                joinedDay={new Date(member.joined_at).getDate()}
+                                            />
                                         </div>
                                     </div>
 
