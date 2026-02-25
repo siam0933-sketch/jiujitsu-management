@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { deleteMembers, generateMissingPasswords } from '../actions'
 import { checkInMember, checkOutMember, cancelAttendance } from '../../attendance/actions'
 import MemberModal from './MemberModal'
+import { displayBeltName } from '../constants'
 
 interface Member {
     id: string
@@ -462,8 +463,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                         </button>
                                                     </td>
                                                     <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-sm text-gray-500 dark:text-zinc-400 text-center sm:text-left">
-                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[60px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block align-bottom" title={member.belt}>
-                                                            {member.belt}
+                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[60px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block align-bottom" title={displayBeltName(member.belt || '')}>
+                                                            {displayBeltName(member.belt || '')}
                                                         </span>
                                                     </td>
                                                     <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm text-right sm:text-left">

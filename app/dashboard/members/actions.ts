@@ -397,6 +397,21 @@ export async function updateMemberPaymentEndDate(memberId: string, endDate: stri
 
 
 
+export async function updatePaymentBillingDay(memberId: string, day: number) {
+    const supabase = await createClient()
+    const parsed = Math.min(31, Math.max(1, Math.round(day)))
+    const { error } = await supabase
+        .from('gym_members')
+        .update({ payment_due_day: parsed })
+        .eq('id', memberId)
+
+    if (error) return { error: '결제 기준일 수정 실패: ' + error.message }
+
+    revalidatePath(`/dashboard/members`)
+    revalidatePath(`/dashboard/members/${memberId}`)
+    return { success: true }
+}
+
 export async function getMemberAttendanceLogs(memberId: string) {
     const supabase = await createClient()
     const { data, error } = await supabase

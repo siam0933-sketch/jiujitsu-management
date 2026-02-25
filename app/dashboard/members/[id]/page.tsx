@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 // import MemberActions from './MemberActions' // Deprecated
 import PromotionHistory from './PromotionHistory'
 import { getPromotionLogs } from './actions'
-import { MemberStartDate, MemberPauseController } from '../components/MemberComponents'
+import { MemberStartDate, MemberPauseController, PaymentBillingDay } from '../components/MemberComponents'
 
 export default async function MemberDetailsPage({ params }: { params: { id: string } }) {
     const { id } = await params
@@ -197,10 +197,17 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                         <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">수납 청구일</dt>
                                         <dd className="text-sm font-bold text-gray-900 dark:text-zinc-100">매월 {member.payment_due_day ? `${member.payment_due_day}일` : '-'}</dd>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">회원권 만료일</dt>
-                                        <dd className="text-sm font-bold text-red-600">
-                                            {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '-'}
+                                    <div className="flex justify-between items-center gap-2">
+                                        <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400 shrink-0">회원권 만료일</dt>
+                                        <dd className="flex items-center gap-3 flex-wrap justify-end">
+                                            <span className="text-sm font-bold text-red-600">
+                                                {member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '-'}
+                                            </span>
+                                            <PaymentBillingDay
+                                                memberId={id}
+                                                billingDay={member.payment_due_day ?? null}
+                                                joinedDay={new Date(member.joined_at).getDate()}
+                                            />
                                         </dd>
                                     </div>
                                 </div>

@@ -30,24 +30,28 @@ export const BELT_OPTIONS_DATA: BeltOption[] = [
 ]
 
 export const displayBeltName = (name: string) => {
+    if (!name) return '-'
+    const lowerName = name.toLowerCase().trim()
     const map: Record<string, string> = {
-        'White': '화이트 (성인)',
-        'Blue': '블루',
-        'Purple': '퍼플',
-        'Brown': '브라운',
-        'Black': '블랙',
-        'Gray-White': '그레이-화이트',
-        'Gray': '그레이',
-        'Gray-Black': '그레이-블랙',
-        'Yellow-White': '옐로우-화이트',
-        'Yellow': '옐로우',
-        'Yellow-Black': '옐로우-블랙',
-        'Orange-White': '오렌지-화이트',
-        'Orange': '오렌지',
-        'Orange-Black': '오렌지-블랙',
-        'Green-White': '그린-화이트',
-        'Green': '그린',
-        'Green-Black': '그린-블랙'
+        'white': '화이트 (성인)',
+        'white (adult)': '화이트 (성인)',
+        'white (kids)': '화이트 (유소년)',
+        'blue': '블루',
+        'purple': '퍼플',
+        'brown': '브라운',
+        'black': '블랙',
+        'gray-white': '그레이-화이트',
+        'gray': '그레이',
+        'gray-black': '그레이-블랙',
+        'yellow-white': '옐로우-화이트',
+        'yellow': '옐로우',
+        'yellow-black': '옐로우-블랙',
+        'orange-white': '오렌지-화이트',
+        'orange': '오렌지',
+        'orange-black': '오렌지-블랙',
+        'green-white': '그린-화이트',
+        'green': '그린',
+        'green-black': '그린-블랙'
     }
-    return map[name] || name
+    return map[lowerName] || name
 }

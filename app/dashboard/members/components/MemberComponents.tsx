@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateMemberStartDate, updateMemberJoinedDate, pauseMember, resumeMember } from '../actions'
+import { updateMemberStartDate, updateMemberJoinedDate, pauseMember, resumeMember, updatePaymentBillingDay } from '../actions'
 import { useRouter } from 'next/navigation'
 
 // --- 1. Status Badge ---
@@ -246,6 +246,96 @@ export function MemberPauseController({ memberId, isPaused, paymentEndDate }: Me
                         </div>
                     </div>
                 </div>
+            )}
+        </div>
+    )
+}
+
+// --- 4. Payment Billing Day Component ---
+type PaymentBillingDayProps = {
+    memberId: string
+    billingDay: number | null
+    joinedDay: number // fallback default from joined_at
+}
+
+export function PaymentBillingDay({ memberId, billingDay, joinedDay }: PaymentBillingDayProps) {
+    const defaultDay = billingDay ?? joinedDay
+    const [isEditing, setIsEditing] = useState(false)
+    const [currentDay, setCurrentDay] = useState<number>(defaultDay)
+    const [inputVal, setInputVal] = useState<string>(String(defaultDay))
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSave = async () => {
+        const parsed = parseInt(inputVal, 10)
+        if (isNaN(parsed) || parsed < 1 || parsed > 31) {
+            alert('1~31 사이의 숫자를 입력하세요.')
+            return
+        }
+        setIsLoading(true)
+        const res = await updatePaymentBillingDay(memberId, parsed)
+        if ('error' in res && res.error) {
+            alert(res.error)
+        } else {
+            setCurrentDay(parsed)
+            setIsEditing(false)
+        }
+        setIsLoading(false)
+    }
+
+    const handleCancel = () => {
+        setInputVal(String(currentDay))
+        setIsEditing(false)
+    }
+
+    return (
+        <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-500 dark:text-zinc-400 whitespace-nowrap">결제 기준일:</span>
+            {isEditing ? (
+                <>
+                    <input
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={inputVal}
+                        onChange={e => setInputVal(e.target.value)}
+                        className="w-14 text-center text-sm border border-gray-300 dark:border-zinc-600 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:bg-zinc-800 dark:text-zinc-100"
+                        autoFocus
+                        onKeyDown={e => e.key === 'Enter' && handleSave()}
+                    />
+                    <span className="text-sm text-gray-700 dark:text-zinc-300">일</span>
+                    <button
+                        onClick={handleSave}
+                        disabled={isLoading}
+                        className="text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        title="저장"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={handleCancel}
+                        className="text-gray-400 hover:text-gray-600"
+                        title="취소"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </>
+            ) : (
+                <>
+                    <span className="text-sm font-bold text-gray-800 dark:text-zinc-100">{currentDay}일</span>
+                    <button
+                        onClick={() => { setInputVal(String(currentDay)); setIsEditing(true) }}
+                        className="text-gray-400 dark:text-zinc-500 hover:text-indigo-600 transition-colors"
+                        title="결제 기준일 수정"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </button>
+                </>
             )}
         </div>
     )
