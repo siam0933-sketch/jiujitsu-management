@@ -397,7 +397,162 @@ export async function updateMemberPaymentEndDate(memberId: string, endDate: stri
 
 
 
+export async function bulkPromoteMembers(memberIds: string[]) {
+    if (!memberIds.length) return { error: '선택된 회원이 없습니다.' }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // Get Admin Name
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+    const adminName = profile?.full_name || 'Admin'
+
+    // Belt order definitions (must match constants.ts)
+    const ADULT_BELT_ORDER = ['화이트 (성인)', '블루', '퍼플', '브라운', '블랙']
+    const KIDS_BELT_ORDER = [
+        '화이트 (유소년)', '그레이-화이트', '그레이', '그레이-블랙',
+        '옐로우-화이트', '옐로우', '옐로우-블랙',
+        '오렌지-화이트', '오렌지', '오렌지-블랙',
+        '그린-화이트', '그린', '그린-블랙'
+    ]
+
+    // Belt display name normalization
+    const normalizeBelt = (belt: string): string => {
+        const map: Record<string, string> = {
+            'white': '화이트 (성인)', 'white (adult)': '화이트 (성인)',
+            'white (kids)': '화이트 (유소년)', 'blue': '블루', 'purple': '퍼플',
+            'brown': '브라운', 'black': '블랙', 'gray-white': '그레이-화이트',
+            'gray': '그레이', 'gray-black': '그레이-블랙',
+            'yellow-white': '옐로우-화이트', 'yellow': '옐로우', 'yellow-black': '옐로우-블랙',
+            'orange-white': '오렌지-화이트', 'orange': '오렌지', 'orange-black': '오렌지-블랙',
+            'green-white': '그린-화이트', 'green': '그린', 'green-black': '그린-블랙',
+        }
+        return map[belt.toLowerCase().trim()] || belt
+    }
+
+    // Fetch members
+    const { data: members } = await supabase
+        .from('gym_members')
+        .select('id, gym_id, belt, joined_at, start_date')
+        .in('id', memberIds)
+
+    if (!members?.length) return { error: '회원을 찾을 수 없습니다.' }
+
+    // Fetch latest promotion log per member
+    const { data: latestLogs } = await supabase
+        .from('gym_promotion_logs')
+        .select('member_id, belt_name, stripe_level, promoted_at')
+        .in('member_id', memberIds)
+        .order('promoted_at', { ascending: false })
+
+    const latestLogMap: Record<string, { belt: string, stripe: number }> = {}
+    latestLogs?.forEach((log: any) => {
+        if (!latestLogMap[log.member_id]) {
+            latestLogMap[log.member_id] = { belt: normalizeBelt(log.belt_name), stripe: log.stripe_level }
+        }
+    })
+
+    // Fetch promotion criteria for max stripes (kids belts)
+    const gymId = members[0].gym_id
+    const { data: criteriaRows } = await supabase
+        .from('gym_promotion_criteria')
+        .select('belt_name, total_stripes_count, type')
+        .eq('gym_id', gymId)
+
+    const maxStripesMap: Record<string, number> = {}
+    criteriaRows?.forEach((row: any) => {
+        const normalized = normalizeBelt(row.belt_name)
+        if (!maxStripesMap[normalized] && row.total_stripes_count) {
+            maxStripesMap[normalized] = row.total_stripes_count
+        }
+    })
+
+    const getMaxStripes = (beltName: string, isAdult: boolean) => {
+        if (maxStripesMap[beltName]) return maxStripesMap[beltName]
+        return isAdult ? 4 : 4
+    }
+
+    // Calculate next belt/stripe for each member
+    const today = new Date().toISOString().split('T')[0]
+    let successCount = 0
+    let failCount = 0
+    const errors: string[] = []
+
+    for (const member of members) {
+        const currentBeltRaw = normalizeBelt(member.belt || '화이트 (성인)')
+        const logEntry = latestLogMap[member.id]
+        const currentBelt = logEntry?.belt || currentBeltRaw
+        const currentStripe = logEntry?.stripe ?? 0
+
+        const isAdult = ADULT_BELT_ORDER.includes(currentBelt)
+        const beltOrder = isAdult ? ADULT_BELT_ORDER : KIDS_BELT_ORDER
+        const currentBeltIdx = beltOrder.indexOf(currentBelt)
+
+        if (currentBeltIdx === -1) {
+            errors.push(`${member.id}: 알 수 없는 벨트 (${currentBelt})`)
+            failCount++
+            continue
+        }
+
+        const maxStripes = getMaxStripes(currentBelt, isAdult)
+        let nextBelt = currentBelt
+        let nextStripe = currentStripe
+
+        if (currentStripe < maxStripes) {
+            // Stripe up
+            nextStripe = currentStripe + 1
+        } else if (currentBeltIdx < beltOrder.length - 1) {
+            // Belt up
+            nextBelt = beltOrder[currentBeltIdx + 1]
+            nextStripe = 0
+        } else {
+            // Already at max
+            errors.push(`${member.id}: 이미 최고 등급입니다.`)
+            failCount++
+            continue
+        }
+
+        // Insert promotion log
+        const { error: logError } = await supabase.from('gym_promotion_logs').insert({
+            gym_id: member.gym_id,
+            member_id: member.id,
+            belt_name: nextBelt,
+            stripe_level: nextStripe,
+            promoted_at: today,
+            training_days: 0,
+            attendance_count: 0,
+            awarded_by: adminName,
+            memo: '일괄승급'
+        })
+
+        if (logError) {
+            errors.push(`${member.id}: 로그 저장 실패`)
+            failCount++
+            continue
+        }
+
+        // Update member belt
+        const { error: updateError } = await supabase
+            .from('gym_members')
+            .update({ belt: nextBelt, last_promotion_date: today })
+            .eq('id', member.id)
+
+        if (updateError) {
+            errors.push(`${member.id}: 벨트 업데이트 실패`)
+            failCount++
+            continue
+        }
+
+        successCount++
+    }
+
+    revalidatePath('/dashboard/members')
+    return { success: true, successCount, failCount, errors }
+}
+
 export async function updatePaymentBillingDay(memberId: string, day: number) {
+
     const supabase = await createClient()
     const parsed = Math.min(31, Math.max(1, Math.round(day)))
     const { error } = await supabase

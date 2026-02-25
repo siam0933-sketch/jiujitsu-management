@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { deleteMembers, generateMissingPasswords } from '../actions'
+import { deleteMembers, generateMissingPasswords, bulkPromoteMembers } from '../actions'
 import { checkInMember, checkOutMember, cancelAttendance } from '../../attendance/actions'
 import MemberModal from './MemberModal'
 import { displayBeltName } from '../constants'
@@ -17,6 +17,7 @@ interface Member {
     gym_id: string
     birth_date?: string
     belt?: string
+    latest_stripe?: number
     payment_due_day?: number
     payment_end_date?: string
     [key: string]: any
@@ -45,6 +46,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
+    const [isPromoting, setIsPromoting] = useState(false)
     const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
 
     const [searchTerm, setSearchTerm] = useState('')
@@ -152,6 +154,27 @@ export default function MembersTable({ initialMembers, count, status, attendance
         if (res?.error) alert(res.error)
         else {
             alert(res.message)
+            router.refresh()
+        }
+    }
+
+    const handleBulkPromote = async () => {
+        if (selectedIds.size === 0) return
+        if (!confirm(`${selectedIds.size}명을 1단계 승급하시겠습니까?
+
+• 현재 벨트의 그랄이 최대이면 다음 벨트 0그랄로 승급됩니다.
+• 승급 이력에 자동으로 기록됩니다.`)) return
+        setIsPromoting(true)
+        const ids = Array.from(selectedIds)
+        const res = await bulkPromoteMembers(ids)
+        setIsPromoting(false)
+        if (res?.error) {
+            alert(res.error)
+        } else {
+            const msg = `${res.successCount}명 승급 완료.${res.failCount ? ` (실패: ${res.failCount}명)` : ''}`
+            alert(msg)
+            setSelectedIds(new Set())
+            setIsEditMode(false)
             router.refresh()
         }
     }
@@ -346,6 +369,14 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                 </button>
                                 <span className="text-gray-300 dark:text-zinc-600 mr-1 sm:mr-2">|</span>
                                 <button
+                                    onClick={handleBulkPromote}
+                                    disabled={selectedIds.size === 0 || isPromoting}
+                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-40 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
+                                >
+                                    {isPromoting ? '승급 중...' : `선택승급 (${selectedIds.size})`}
+                                </button>
+                                <span className="text-gray-300 dark:text-zinc-600 mr-1 sm:mr-2">|</span>
+                                <button
                                     onClick={handleDelete}
                                     disabled={selectedIds.size === 0 || isDeleting}
                                     className="block rounded-md bg-red-600 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 whitespace-nowrap"
@@ -404,7 +435,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                         <th className="px-2 sm:px-3 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[60px]"><SortLink column="name" label="이름" /></th>
                                         <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="birth_date" label="나이" /></th>
                                         <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="attendance" label="출석" /></th>
-                                        <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="belt" label="등급" /></th>
+                                        <th className="px-1 sm:px-3 py-3 text-center sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[40px]"><SortLink column="belt" label="벨트" /></th>
                                         <th className="px-2 sm:px-3 py-3 text-right sm:text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 min-w-[50px] whitespace-nowrap"><SortLink column="payment" label="결제일" /></th>
                                         <th className="px-3 py-3 text-left text-sm font-semibold text-gray-900 dark:text-zinc-100 hidden sm:table-cell"><SortLink column="joined_at" label="등록일" /></th>
                                     </tr>
@@ -463,8 +494,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                         </button>
                                                     </td>
                                                     <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-sm text-gray-500 dark:text-zinc-400 text-center sm:text-left">
-                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[60px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block align-bottom" title={displayBeltName(member.belt || '')}>
-                                                            {displayBeltName(member.belt || '')}
+                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[70px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block align-bottom" title={displayBeltName(member.belt || '')}>
+                                                            {displayBeltName(member.belt || '')}{member.latest_stripe !== undefined ? member.latest_stripe : ''}
                                                         </span>
                                                     </td>
                                                     <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm text-right sm:text-left">

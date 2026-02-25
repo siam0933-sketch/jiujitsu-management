@@ -68,21 +68,31 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
 
     const { data: members, count } = await query
 
-    // Helper for Tabs
-    const TabLink = ({ value, label }: { value: string, label: string }) => {
-        const isActive = status === value
-        return (
-            <Link
-                href={`/dashboard/members?status=${value}&sort=${sort}&order=${order}`}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${isActive
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 hover:border-gray-300 dark:border-zinc-700'
-                    }`}
-            >
-                {label}
-            </Link>
-        )
+    // 2-1. Fetch latest stripe_level per member from promotion logs
+    let stripeMap: Record<string, number> = {}
+    if (members && members.length > 0) {
+        const memberIds = members.map((m: any) => m.id)
+        const { data: latestLogs } = await supabase
+            .from('gym_promotion_logs')
+            .select('member_id, stripe_level, promoted_at')
+            .in('member_id', memberIds)
+            .order('promoted_at', { ascending: false })
+
+        // Keep only the most recent log per member
+        if (latestLogs) {
+            latestLogs.forEach((log: any) => {
+                if (stripeMap[log.member_id] === undefined) {
+                    stripeMap[log.member_id] = log.stripe_level
+                }
+            })
+        }
     }
+
+    // Attach latest_stripe to each member
+    const membersWithStripe = (members || []).map((m: any) => ({
+        ...m,
+        latest_stripe: stripeMap[m.id] ?? 0
+    }))
 
     // 3. Fetch Selected Member (if param exists)
     let selectedMember = null
@@ -118,7 +128,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
 
             {/* Client Component for Interactive Table & Bulk Actions */}
             <MembersTable
-                initialMembers={members || []}
+                initialMembers={membersWithStripe}
                 count={count || 0}
                 status={status}
                 attendanceStatusMap={Object.fromEntries(attendanceMap)}
