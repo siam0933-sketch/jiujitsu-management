@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export type KioskMember = {
@@ -35,7 +35,7 @@ export async function getKioskInitData() {
 }
 
 export async function checkInByPhone(input: string, gymId: string): Promise<CheckInResult> {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // Skip auth and gym fetch since it's already done by init
 
@@ -74,7 +74,7 @@ export async function checkInByPhone(input: string, gymId: string): Promise<Chec
 }
 
 export async function checkInById(memberId: string, gymId: string): Promise<CheckInResult> {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const { data: member } = await supabase.from('gym_members').select('*').eq('id', memberId).single()
     if (!member) return { success: false, message: 'Member not found' }
 
