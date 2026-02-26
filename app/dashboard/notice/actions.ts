@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function getNotices(page = 1, limit = 10) {
@@ -78,7 +78,28 @@ export async function updateNotice(id: string, data: { title: string, content: s
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
 
-    const { error } = await supabase
+    // 1. Verify Gym Ownership for the current user
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+    if (!gym) return { error: 'Gym not found' }
+
+    // 2. Verify the notice belongs to this gym
+    const { data: existingNotice } = await supabase
+        .from('gym_notices')
+        .select('gym_id')
+        .eq('id', id)
+        .single()
+
+    if (!existingNotice || existingNotice.gym_id !== gym.id) {
+        return { error: 'Unauthorized to edit this notice' }
+    }
+
+    // 3. Update using Admin Client to bypass RLS issues
+    const adminSupabase = await createAdminClient()
+    const { error } = await adminSupabase
         .from('gym_notices')
         .update({
             title: data.title,
@@ -88,7 +109,10 @@ export async function updateNotice(id: string, data: { title: string, content: s
         })
         .eq('id', id)
 
-    if (error) return { error: error.message }
+    if (error) {
+        console.error('updateNotice Error:', error)
+        return { error: error.message }
+    }
 
     revalidatePath('/dashboard/notice')
     revalidatePath(`/dashboard/notice/${id}`)
@@ -102,12 +126,36 @@ export async function deleteNotice(id: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
 
-    const { error } = await supabase
+    // 1. Verify Gym Ownership
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+    if (!gym) return { error: 'Gym not found' }
+
+    // 2. Verify the notice belongs to this gym
+    const { data: existingNotice } = await supabase
+        .from('gym_notices')
+        .select('gym_id')
+        .eq('id', id)
+        .single()
+
+    if (!existingNotice || existingNotice.gym_id !== gym.id) {
+        return { error: 'Unauthorized to delete this notice' }
+    }
+
+    // 3. Delete using Admin Client
+    const adminSupabase = await createAdminClient()
+    const { error } = await adminSupabase
         .from('gym_notices')
         .delete()
         .eq('id', id)
 
-    if (error) return { error: error.message }
+    if (error) {
+        console.error('deleteNotice Error:', error)
+        return { error: error.message }
+    }
 
     revalidatePath('/dashboard/notice')
     revalidatePath('/portal/notice')
