@@ -7,6 +7,7 @@ export default function SettingsTabs() {
     const pathname = usePathname()
 
     const tabs = [
+        { name: '도장/관리자 정보', href: '/dashboard/settings/gym' },
         { name: '이용권/결제 설정', href: '/dashboard/settings/pricing' },
         { name: '승급 기준 설정', href: '/dashboard/settings/promotion' },
     ]

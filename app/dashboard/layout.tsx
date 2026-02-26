@@ -131,7 +131,7 @@ export default async function DashboardLayout({
 
                     <div className="p-4 border-t border-gray-200 dark:border-zinc-800">
                         {/* Gym & Admin Info */}
-                        <Link href="/dashboard/settings/gym" className="block mb-4 p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors group">
+                        <Link href="/dashboard/account" className="block mb-4 p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors group">
                             <div className="flex items-center gap-3 mb-1">
                                 <div className="bg-white dark:bg-zinc-800 p-1.5 rounded-full border border-gray-200 dark:border-zinc-800 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:text-blue-600 transition-colors">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
