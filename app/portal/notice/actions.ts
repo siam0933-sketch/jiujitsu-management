@@ -87,7 +87,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     // 2. Fetch logs for the gym within the date range
     const { data: logs, error: fetchError } = await supabase
         .from('gym_attendance_logs')
-        .select('member_id, member:gym_members(name, belt, birth_date)')
+        .select('member_id, member:gym_members(name, belt, latest_stripe, birth_date)')
         .eq('gym_id', session.gymId)
         .eq('status', 'present')
         .gte('date', startDateStr)
@@ -102,7 +102,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     }
 
     // 3. Calculate ranking
-    const counts: Record<string, { count: number, name: string, belt: string, age?: number }> = {}
+    const counts: Record<string, { count: number, name: string, belt: string, stripe?: number, age?: number }> = {}
 
     logs.forEach(log => {
         const id = log.member_id
@@ -111,6 +111,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
             const memberData: any = log.member
             const memberName = memberData?.name || (Array.isArray(memberData) ? memberData[0]?.name : '알 수 없음')
             const memberBelt = memberData?.belt || (Array.isArray(memberData) ? memberData[0]?.belt : 'white')
+            const memberStripe = memberData?.latest_stripe ?? (Array.isArray(memberData) ? memberData[0]?.latest_stripe : undefined)
 
             let age: number | undefined;
             const birthDateStr = memberData?.birth_date || (Array.isArray(memberData) ? memberData[0]?.birth_date : null)
@@ -125,13 +126,13 @@ export async function getPortalRanking(year?: number, month?: number | null) {
                 age = calcAge;
             }
 
-            counts[id] = { count: 0, name: memberName, belt: memberBelt, age }
+            counts[id] = { count: 0, name: memberName, belt: memberBelt, stripe: memberStripe, age }
         }
         counts[id].count++
     })
 
     const ranking = Object.entries(counts)
-        .map(([id, val]) => ({ memberId: id, name: val.name, belt: val.belt, count: val.count, age: val.age }))
+        .map(([id, val]) => ({ memberId: id, name: val.name, belt: val.belt, stripe: val.stripe, count: val.count, age: val.age }))
         .sort((a, b) => b.count - a.count)
     // No longer slicing to 50 so that client-side filtering works correctly across all members.
 

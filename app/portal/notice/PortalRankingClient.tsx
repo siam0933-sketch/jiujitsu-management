@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { Flame, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getPortalRanking } from './actions'
 import { PORTAL_STYLES } from '../styles'
+import { displayBeltName } from '@/app/dashboard/members/constants'
 
 type FilterType = 'all' | 'under16' | 'over16' | 'custom';
 
 interface RankingData {
-    ranking: { memberId: string, name: string, count: number, belt?: string, age?: number }[];
+    ranking: { memberId: string, name: string, count: number, belt?: string, stripe?: number, age?: number }[];
     currentMemberId: string | null;
     year: number;
     month: number | null;
@@ -252,7 +253,7 @@ export default function PortalRankingClient({ initialRanking }: Props) {
                                                     </span>
                                                     {member.belt && (
                                                         <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                                                            {member.belt}
+                                                            {displayBeltName(member.belt)}{member.stripe !== undefined ? member.stripe : ''}
                                                         </span>
                                                     )}
                                                     {isMe && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">나</span>}
