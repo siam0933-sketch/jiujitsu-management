@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/utils/supabase/server';
 import BottomNav from './components/BottomNav';
 import PortalHeader from './components/PortalHeader';
@@ -53,6 +54,13 @@ export default async function PortalLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('member_session')
+
+    if (!sessionCookie) {
+        redirect('/login/member')
+    }
+
     const context = await getPortalContext()
 
     return (
