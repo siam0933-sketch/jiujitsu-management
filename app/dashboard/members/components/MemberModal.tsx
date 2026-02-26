@@ -999,6 +999,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         memberId={member.id}
                                         memberName={member.name}
                                         memberBelt={member.belt}
+                                        memberStripe={member.latest_stripe}
                                         initialLogs={promotionLogs}
                                         joinedAt={member.joined_at}
                                         startDate={member.start_date}

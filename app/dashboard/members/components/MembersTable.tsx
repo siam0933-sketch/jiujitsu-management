@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -494,9 +494,12 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                         </button>
                                                     </td>
                                                     <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-sm text-gray-500 dark:text-zinc-400 text-center sm:text-left">
-                                                        <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[70px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block align-bottom" title={displayBeltName(member.belt || '')}>
-                                                            {displayBeltName(member.belt || '')}{member.latest_stripe !== undefined ? member.latest_stripe : ''}
-                                                        </span>
+                                                        <div className="flex flex-col items-start gap-0.5">
+                                                            <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[70px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block" title={displayBeltName(member.belt || ')}>{displayBeltName(member.belt || ')}{member.latest_stripe !== undefined ? member.latest_stripe : '}</span>
+                                                            {member.last_promotion_date && (<span className="text-[9px] sm:text-[10px] text-gray-400 dark:text-zinc-500 whitespace-nowrap">{new Date(member.last_promotion_date).toLocaleDateString('ko-KR', {year:'2-digit',month:'2-digit',day:'2-digit'})}</span>)}
+
+
+                                                        </div>
                                                     </td>
                                                     <td className="whitespace-nowrap px-2 sm:px-3 py-3 sm:py-4 text-sm text-right sm:text-left">
                                                         <div className="flex flex-col items-end sm:items-start">

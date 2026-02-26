@@ -215,40 +215,23 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
 
     if (!member) return { trainingDays: 0, attendanceCount: 0 }
 
-    // 2. Find Last Promotion Date (before targetDate)
-    const { data: lastPromo } = await supabase
-        .from('gym_promotion_logs')
-        .select('promoted_at')
-        .eq('member_id', memberId)
-        .lt('promoted_at', targetDateStr) // strictly less than current promotion date
-        .order('promoted_at', { ascending: false })
-        .limit(1)
-        .single()
-
-    // Determine Start Date for Calculation
-    // If there is a previous promotion, start from there. Otherwise start from member start/join.
-    let startDateStr = member.start_date || member.joined_at
-    if (lastPromo && lastPromo.promoted_at) {
-        startDateStr = lastPromo.promoted_at
-    }
-
-    // Verify valid date
+    // 누적 수련일: 항상 등록일(joined_at)부터 승급일까지 계산
+    const startDateStr = member.joined_at
     if (!startDateStr) return { trainingDays: 0, attendanceCount: 0 }
 
     const startDate = new Date(startDateStr)
 
-    // Safety check if dates are inverted
     if (startDate > targetDate) {
         return { trainingDays: 0, attendanceCount: 0 }
     }
 
-    // 3. Fetch Pauses
+    // 2. Fetch Pauses
     const { data: pauses } = await supabase
         .from('gym_membership_pauses')
         .select('*')
         .eq('member_id', memberId)
 
-    // 4. Calculate Training Days (Start -> Target) - Pauses
+    // 3. Calculate Training Days (joined_at -> targetDate) - Pauses
     const totalDurationMs = targetDate.getTime() - startDate.getTime()
     let totalDays = Math.floor(totalDurationMs / (1000 * 60 * 60 * 24))
     if (totalDays < 0) totalDays = 0
@@ -273,19 +256,13 @@ export async function calculatePromotionStats(memberId: string, targetDateStr: s
 
     const netTrainingDays = Math.max(0, totalDays - pauseDays)
 
-    // 5. Calculate Attendance
-    // Count logs where date <= targetDate AND date > startDate
-    // Technically, if promoted on Jan 1, training for next belt starts Jan 2? 
-    // Usually inclusive or exclusive? Let's say > startDate to avoid double counting the promotion day itself if they trained?
-    // Or >=? If they trained on the day of last promotion, that likely counted for the *last* belt.
-    // So strictly > startDate is safer.
-
+    // 4. 누적 출석수: 가입일 이후 승급일까지 전체 출석 합산
     const { count } = await supabase
         .from('gym_attendance_logs')
         .select('*', { count: 'exact', head: true })
         .eq('member_id', memberId)
         .lte('date', targetDateStr)
-        .gt('date', startDateStr)
+        .gte('date', startDateStr)
 
     return { trainingDays: netTrainingDays, attendanceCount: count || 0 }
 }

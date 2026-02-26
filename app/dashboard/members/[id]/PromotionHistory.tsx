@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { PromotionLog, logPromotion, updatePromotionLog, deletePromotionLog, calculatePromotionStats } from './actions'
@@ -67,14 +67,15 @@ const BeltSelect = ({ value, onChange }: { value: string, onChange: (val: string
 
 type PromotionHistoryProps = {
     memberId: string
-    memberName: string // New Prop
-    memberBelt: string // New Prop
+    memberName: string
+    memberBelt: string
+    memberStripe?: number
     initialLogs: PromotionLog[]
     joinedAt: string
     startDate?: string | null
 }
 
-export default function PromotionHistory({ memberId, memberName, memberBelt, initialLogs, joinedAt, startDate }: PromotionHistoryProps) {
+export default function PromotionHistory({ memberId, memberName, memberBelt, memberStripe, initialLogs, joinedAt, startDate }: PromotionHistoryProps) {
     const [logs, setLogs] = useState<PromotionLog[]>(initialLogs)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -377,7 +378,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                             {memberName}
                                         </h3>
                                         <p className="text-sm font-medium text-gray-500 dark:text-zinc-400 mt-1">
-                                            현재: {displayBeltName(memberBelt)}
+                                            현재: {displayBeltName(memberBelt)}{memberStripe !== undefined ? ` ${memberStripe}그랄` : ''}
                                         </p>
 
                                         <div className="mt-4 border-t border-gray-100 dark:border-zinc-800/50 pt-4">
@@ -387,7 +388,7 @@ export default function PromotionHistory({ memberId, memberName, memberBelt, ini
                                                     <span className="font-semibold">{joinedAt ? new Date(joinedAt).toLocaleDateString() : '-'}</span>
                                                 </div>
                                                 <div className="bg-gray-50 dark:bg-zinc-800/50 p-2 rounded">
-                                                    <span className="block text-xs text-gray-400 dark:text-zinc-500">입학일</span>
+                                                    <span className="block text-xs text-gray-400 dark:text-zinc-500">입문일</span>
                                                     <span className="font-semibold">{startDate ? new Date(startDate).toLocaleDateString() : '-'}</span>
                                                 </div>
                                             </div>
