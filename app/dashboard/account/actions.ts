@@ -10,15 +10,67 @@ export async function getAccountInfo() {
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, phone')
         .eq('id', user.id)
+        .single()
+
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id, name, phone, address, business_registration_number')
+        .eq('owner_id', user.id)
         .single()
 
     return {
         email: user.email || '',
         fullName: profile?.full_name || '',
+        phone: profile?.phone || '',
         createdAt: user.created_at || '',
+        gymId: gym?.id || '',
+        gymName: gym?.name || '',
+        gymPhone: gym?.phone || '',
+        gymAddress: gym?.address || '',
+        businessNumber: gym?.business_registration_number || '',
     }
+}
+
+export async function updateAccountInfo(formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    const fullName = String(formData.get('full_name') || '')
+    const phone = String(formData.get('phone') || '')
+    const gymId = String(formData.get('gym_id') || '')
+    const gymName = String(formData.get('gym_name') || '')
+    const gymPhone = String(formData.get('gym_phone') || '')
+    const gymAddress = String(formData.get('gym_address') || '')
+    const businessNumber = String(formData.get('business_registration_number') || '')
+
+    // Update Profile
+    const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName, phone })
+        .eq('id', user.id)
+
+    if (profileError) return { error: '관리자 정보 수정 실패: ' + profileError.message }
+
+    // Update Gym
+    const { error: gymError } = await supabase
+        .from('gyms')
+        .update({
+            name: gymName,
+            phone: gymPhone,
+            address: gymAddress,
+            business_registration_number: businessNumber,
+        })
+        .eq('id', gymId)
+        .eq('owner_id', user.id)
+
+    if (gymError) return { error: '도장 정보 수정 실패: ' + gymError.message }
+
+    revalidatePath('/dashboard', 'layout')
+    revalidatePath('/dashboard/account')
+    return { success: true }
 }
 
 export async function updatePassword(formData: FormData) {
