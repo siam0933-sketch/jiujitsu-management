@@ -54,10 +54,19 @@ export default async function PortalLayout({
 }: {
     children: React.ReactNode;
 }) {
+    // If we're on the signup page, don't require member_session
+    // Unfortunately we can't easily read pathname in layout without headers,
+    // so we'll check it via middleware or we let the child pages handle auth if needed,
+    // OR a common trick is to use headers()
+    const { headers } = await import('next/headers');
+    const headersList = await headers();
+    const pathname = headersList.get('x-invoke-path') || headersList.get('next-url');
+    const isSignupUrl = pathname?.includes('/portal/signup');
+
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('member_session')
 
-    if (!sessionCookie) {
+    if (!sessionCookie && !isSignupUrl) {
         redirect('/login')
     }
 

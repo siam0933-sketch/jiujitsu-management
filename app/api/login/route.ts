@@ -20,16 +20,40 @@ export async function POST(request: Request) {
 
         const supabase = await createClient()
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         })
 
-        if (error) {
-            return NextResponse.json({ success: false, message: error.message }, { status: 401 })
+        if (error || !data?.user) {
+            return NextResponse.json({ success: false, message: error?.message || 'Login failed' }, { status: 401 })
         }
 
-        return NextResponse.json({ success: true, message: 'Login successful' })
+        // Fetch User Role
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', data.user.id)
+            .single()
+
+        let redirectUrl = '/dashboard'
+
+        if (profile?.role === 'super_admin') {
+            redirectUrl = '/super-admin'
+        } else if (profile?.role === 'gym_master') {
+            // Check Gym Status
+            const { data: gym } = await supabase
+                .from('gyms')
+                .select('status')
+                .eq('owner_id', data.user.id)
+                .single()
+
+            if (gym?.status === 'pending') {
+                redirectUrl = '/pending'
+            }
+        }
+
+        return NextResponse.json({ success: true, message: 'Login successful', redirectUrl })
     } catch (e: any) {
         console.error('API Error:', e)
         return NextResponse.json({ success: false, message: 'Server API Error: ' + e.message }, { status: 500 })

@@ -396,6 +396,22 @@ export default function MembersTable({ initialMembers, count, status, attendance
                         ) : (
                             <>
                                 <button
+                                    onClick={async () => {
+                                        const phone = prompt('초대 문자를 받을 분의 전화번호를 입력하세요 (예: 01012345678)')
+                                        if (!phone) return
+                                        // Dynamically import to avoid cluttering the top of the large file
+                                        const { sendSmsInvitation } = await import('../actions')
+                                        const res = await sendSmsInvitation(phone)
+                                        if (res.error) alert(res.error)
+                                        else alert(res.message)
+                                    }}
+                                    className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors whitespace-nowrap flex items-center"
+                                >
+                                    <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                    문자 초대
+                                </button>
+                                <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
+                                <button
                                     onClick={() => setIsEditMode(true)}
                                     className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 transition-colors whitespace-nowrap"
                                 >
@@ -495,8 +511,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                                     </td>
                                                     <td className="whitespace-nowrap px-1 sm:px-3 py-3 sm:py-4 text-sm text-gray-500 dark:text-zinc-400 text-center sm:text-left">
                                                         <div className="flex flex-col items-start gap-0.5">
-                                                            <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[70px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block" title={displayBeltName(member.belt || ')}>{displayBeltName(member.belt || ')}{member.latest_stripe !== undefined ? member.latest_stripe : '}</span>
-                                                            {member.last_promotion_date && (<span className="text-[9px] sm:text-[10px] text-gray-400 dark:text-zinc-500 whitespace-nowrap">{new Date(member.last_promotion_date).toLocaleDateString('ko-KR', {year:'2-digit',month:'2-digit',day:'2-digit'})}</span>)}
+                                                            <span className="inline-flex items-center rounded-md bg-gray-50 dark:bg-zinc-800/50 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium text-gray-600 dark:text-zinc-400 ring-1 ring-inset ring-gray-500/10 max-w-[70px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-nowrap inline-block" title={displayBeltName(member.belt || '')}>{displayBeltName(member.belt || '')}{member.latest_stripe !== undefined ? member.latest_stripe : ''}</span>
+                                                            {member.last_promotion_date && (<span className="text-[9px] sm:text-[10px] text-gray-400 dark:text-zinc-500 whitespace-nowrap">{new Date(member.last_promotion_date).toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}</span>)}
 
 
                                                         </div>

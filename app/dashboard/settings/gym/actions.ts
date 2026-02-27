@@ -15,17 +15,18 @@ export async function getGymSettings() {
         .eq('id', user.id)
         .single()
 
-    // Get Gym (for name)
+    // Get Gym (for name and invitation code)
     const { data: gym } = await supabase
         .from('gyms')
-        .select('id, name')
+        .select('id, name, invitation_code')
         .eq('owner_id', user.id)
         .single()
 
     return {
         gymName: gym?.name || '',
         adminName: profile?.full_name || '',
-        gymId: gym?.id
+        gymId: gym?.id,
+        invitationCode: gym?.invitation_code || ''
     }
 }
 

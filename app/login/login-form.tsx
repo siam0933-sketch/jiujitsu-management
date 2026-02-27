@@ -39,8 +39,10 @@ export default function LoginForm() {
 
             if (data.success) {
                 router.refresh()
-                // Redirect based on role
-                if (loginType === 'admin') {
+                // Redirect based on server response (handles super_admin, pending, dashboard)
+                if (data.redirectUrl) {
+                    router.push(data.redirectUrl)
+                } else if (loginType === 'admin') {
                     router.push('/dashboard')
                 } else {
                     router.push('/portal')

@@ -674,3 +674,62 @@ export async function generateMissingPasswords() {
 
     return { success: true, count, message }
 }
+
+export async function sendSmsInvitation(phone: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: '로그인이 필요합니다.' }
+
+    // Get Gym Invitation Code and Name
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('id, name, invitation_code')
+        .eq('owner_id', user.id)
+        .single()
+
+    if (!gym) return { error: '도장 정보를 찾을 수 없습니다.' }
+    if (!gym.invitation_code) return { error: '도장 초대 코드가 생성되지 않았습니다. 설정에서 먼저 확인해주세요.' }
+
+    // Format phone number to clean digits only string
+    const cleanPhone = phone.replace(/[^0-9]/g, '')
+    if (cleanPhone.length < 10) return { error: '유효하지 않은 전화번호 양식입니다.' }
+
+    const invitationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/portal/signup?code=${gym.invitation_code}`
+
+    // Construct the SMS message
+    const message = `[${gym.name}] 체육관 초대장\n\n안녕하세요! 아래 링크를 눌러 체육관 관원 가입을 진행해주세요.\n\n▶ 가입 링크: ${invitationUrl}\n\n감사합니다.`
+
+    try {
+        // [SMS Integration Placeholder]
+        // Currently, we don't have a real SMS provider API key (e.g., CoolSMS, Aligo, Solapi).
+        // For now, we simulate success and log to the console.
+        // User should replace this block with actual API calls in production.
+        console.log('--- SIMULATING SMS SEND ---')
+        console.log('To:', cleanPhone)
+        console.log('Message:', message)
+
+        // Example for future Solapi implementation:
+        /*
+        const response = await fetch('https://api.solapi.com/messages/v4/send', {
+             method: 'POST',
+             headers: {
+                 'Authorization': `HMAC-SHA256 apiKey=..., date=..., salt=..., signature=...`,
+                 'Content-Type': 'application/json'
+             },
+             body: JSON.stringify({
+                 message: {
+                     to: cleanPhone,
+                     from: 'YOUR_SENDER_NUMBER',
+                     text: message,
+                     type: 'SMS'
+                 }
+             })
+        })
+        */
+
+        return { success: true, message: `[가상발송] ${phone} 번호로 초대 링크 발송을 성공했습니다.` }
+    } catch (e: any) {
+        return { error: '문자 발송 중 오류가 발생했습니다: ' + e.message }
+    }
+}

@@ -12,10 +12,11 @@ export default function GymSettingsPage() {
     const [adminName, setAdminName] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [portalUrl, setPortalUrl] = useState('')
+    const [invitationUrl, setInvitationUrl] = useState('')
 
     useEffect(() => {
         loadData()
-        setPortalUrl(`${window.location.origin}/login`)
+        setPortalUrl(`${window.location.origin}/portal/login`)
     }, [])
 
     const loadData = async () => {
@@ -27,6 +28,9 @@ export default function GymSettingsPage() {
             setGymId(data.gymId || '')
             setGymName(data.gymName)
             setAdminName(data.adminName)
+            if (data.invitationCode) {
+                setInvitationUrl(`${window.location.origin}/portal/signup?code=${data.invitationCode}`)
+            }
         }
         setIsLoading(false)
     }
@@ -107,22 +111,55 @@ export default function GymSettingsPage() {
                     <QrCode className="w-5 h-5 text-gray-900 dark:text-zinc-100" />
                     회원 전용 포탈 접속 QR코드
                 </h2>
-                <div className="flex flex-col items-center justify-center space-y-6">
-                    <div className="p-4 bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800/50 rounded-xl shadow-sm">
-                        {portalUrl && <QRCodeSVG value={portalUrl} size={200} />}
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Portal Login QR */}
+                    <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+                        <div className="p-4 bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800/50 rounded-xl shadow-sm">
+                            {portalUrl && <QRCodeSVG value={portalUrl} size={150} />}
+                        </div>
+                        <div className="text-center w-full max-w-[250px]">
+                            <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-1">기존 회원 로그인 URL</label>
+                            <input
+                                type="text"
+                                value={portalUrl}
+                                readOnly
+                                className="block w-full text-center rounded-md border-gray-300 dark:border-zinc-700 shadow-sm bg-gray-50 dark:bg-zinc-800 sm:text-xs p-2 mb-2"
+                            />
+                            <p className="text-xs text-gray-500 dark:text-zinc-400">
+                                기존 회원이 출석체크/단증을 확인할 때 사용하는 로그인 주소입니다.
+                            </p>
+                        </div>
                     </div>
-                    <div className="text-center w-full max-w-md">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">접속 URL</label>
-                        <input
-                            type="text"
-                            value={portalUrl}
-                            onChange={(e) => setPortalUrl(e.target.value)}
-                            className="block w-full text-center rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border mb-2"
-                        />
-                        <p className="text-sm text-gray-500 dark:text-zinc-400">
-                            이 코드를 출력하여 체육관에 비치해주세요.<br />
-                            회원들이 스마트폰으로 스캔하면 로그인 페이지로 이동합니다.
-                        </p>
+
+                    {/* New Member Invitation Link */}
+                    <div className="flex-1 flex flex-col items-center justify-center space-y-4 border-t md:border-t-0 md:border-l border-gray-100 dark:border-zinc-800 pt-8 md:pt-0 md:pl-8">
+                        <div className="p-4 bg-white dark:bg-zinc-900 border-2 border-blue-100 dark:border-blue-900/30 rounded-xl shadow-sm">
+                            {invitationUrl && <QRCodeSVG value={invitationUrl} size={150} fgColor="#2563eb" />}
+                        </div>
+                        <div className="text-center w-full max-w-[250px]">
+                            <label className="block text-sm font-bold text-blue-700 dark:text-blue-400 mb-1">신규 회원 가입 초대 링크</label>
+                            <div className="flex gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    value={invitationUrl}
+                                    readOnly
+                                    className="block w-full text-center rounded-md border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-400 shadow-sm bg-blue-50/50 dark:bg-blue-900/10 sm:text-xs p-2"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(invitationUrl)
+                                        alert('초대 링크가 복사되었습니다.')
+                                    }}
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors"
+                                >
+                                    복사
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-zinc-400">
+                                신규 회원에게 이 링크를 보내면, 회원이 직접 스마트폰으로 체육관에 가입할 수 있습니다.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
