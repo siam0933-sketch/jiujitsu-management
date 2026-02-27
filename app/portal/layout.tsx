@@ -58,7 +58,7 @@ export default async function PortalLayout({
     const sessionCookie = cookieStore.get('member_session')
 
     if (!sessionCookie) {
-        redirect('/login/member')
+        redirect('/login')
     }
 
     const context = await getPortalContext()
