@@ -87,7 +87,7 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     // 2. Fetch logs for the gym within the date range
     const { data: logs, error: fetchError } = await supabase
         .from('gym_attendance_logs')
-        .select('member_id, member:gym_members(name, belt, latest_stripe, birth_date)')
+        .select('member_id, member:gym_members(name, belt, birth_date)')
         .eq('gym_id', session.gymId)
         .eq('status', 'present')
         .gte('date', startDateStr)
@@ -101,17 +101,38 @@ export async function getPortalRanking(year?: number, month?: number | null) {
         return { ranking: [], currentMemberId: session.memberId, year: targetYear, month: isYearly ? null : targetMonth }
     }
 
+    // 2-1. Fetch latest stripes for these members
+    const memberIds = Array.from(new Set(logs.map(log => log.member_id)))
+    const stripeMap: Record<string, number> = {}
+
+    if (memberIds.length > 0) {
+        const { data: latestLogs } = await supabase
+            .from('gym_promotion_logs')
+            .select('member_id, stripe_level, promoted_at')
+            .in('member_id', memberIds)
+            .order('promoted_at', { ascending: false })
+
+        if (latestLogs) {
+            latestLogs.forEach((log: any) => {
+                if (stripeMap[log.member_id] === undefined) {
+                    stripeMap[log.member_id] = log.stripe_level
+                }
+            })
+        }
+    }
+
     // 3. Calculate ranking
     const counts: Record<string, { count: number, name: string, belt: string, stripe?: number, age?: number }> = {}
 
     logs.forEach(log => {
         const id = log.member_id
         if (!counts[id]) {
-            // Since it's a one-to-one mapping in the query we can cast it if it comes as array
             const memberData: any = log.member
             const memberName = memberData?.name || (Array.isArray(memberData) ? memberData[0]?.name : '알 수 없음')
             const memberBelt = memberData?.belt || (Array.isArray(memberData) ? memberData[0]?.belt : 'white')
-            const memberStripe = memberData?.latest_stripe ?? (Array.isArray(memberData) ? memberData[0]?.latest_stripe : undefined)
+
+            // Get stripe from map
+            const memberStripe = stripeMap[id] ?? 0
 
             let age: number | undefined;
             const birthDateStr = memberData?.birth_date || (Array.isArray(memberData) ? memberData[0]?.birth_date : null)
@@ -134,7 +155,6 @@ export async function getPortalRanking(year?: number, month?: number | null) {
     const ranking = Object.entries(counts)
         .map(([id, val]) => ({ memberId: id, name: val.name, belt: val.belt, stripe: val.stripe, count: val.count, age: val.age }))
         .sort((a, b) => b.count - a.count)
-    // No longer slicing to 50 so that client-side filtering works correctly across all members.
 
     return {
         ranking,
