@@ -81,7 +81,7 @@ export async function registerPortalMember(data: {
                 }
             }
 
-            const { error: insertError } = await supabaseAdmin
+            const { data: newMember, error: insertError } = await supabaseAdmin
                 .from('gym_members')
                 .insert({
                     gym_id: data.gymId,
@@ -95,12 +95,36 @@ export async function registerPortalMember(data: {
                     status: 'active', // For now, auto-activate. Masters can change later.
                     belt: defaultBelt
                 })
+                .select('id')
+                .single()
 
             if (insertError) {
                 if (insertError.code === '23505') { // Unique violation usually
                     throw new Error('이미 등록된 전화번호입니다.')
                 }
                 throw new Error('가입 중 오류가 발생했습니다: ' + insertError.message)
+            }
+
+            // [NEW] Record initial promotion log for the newly created member
+            if (newMember) {
+                const { error: logError } = await supabaseAdmin
+                    .from('gym_promotion_logs')
+                    .insert({
+                        gym_id: data.gymId,
+                        member_id: newMember.id,
+                        belt_name: defaultBelt,
+                        stripe_level: 0,
+                        promoted_at: new Date().toISOString().split('T')[0],
+                        training_days: 0,
+                        attendance_count: 0,
+                        awarded_by: '시스템',
+                        memo: '신규 가입 자동 부여'
+                    })
+
+                if (logError) {
+                    console.error('Failed to log initial promotion for new member', logError)
+                    // Non-blocking error, user can still log in
+                }
             }
         }
 
@@ -111,3 +135,4 @@ export async function registerPortalMember(data: {
         return { error: err.message || '처리 중 알 수 없는 서버 오류가 발생했습니다.' }
     }
 }
+

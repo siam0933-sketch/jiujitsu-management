@@ -72,7 +72,7 @@ export async function registerMember(prevState: any, formData: FormData) {
         }
     }
 
-    const { error } = await supabase.from('gym_members').insert({
+    const { data: newMember, error } = await supabase.from('gym_members').insert({
         gym_id: gym.id,
         name,
         phone,
@@ -88,11 +88,30 @@ export async function registerMember(prevState: any, formData: FormData) {
         login_password: login_password,
         status: 'active',
         belt: defaultBelt, // Auto-promoted based on age
-    })
+    }).select('id').single()
 
     if (error) {
         console.error('Error registering member:', error)
         return { error: `회원 등록 실패: ${error.message} (${error.details || ''})` }
+    }
+
+    if (newMember) {
+        // Find admin's name
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+        const adminName = profile?.full_name || '관장님'
+
+        const { error: logError } = await supabase.from('gym_promotion_logs').insert({
+            gym_id: gym.id,
+            member_id: newMember.id,
+            belt_name: defaultBelt,
+            stripe_level: 0,
+            promoted_at: joined_at.split('T')[0],
+            training_days: 0,
+            attendance_count: 0,
+            awarded_by: adminName,
+            memo: '신규 등록 자동 부여'
+        })
+        if (logError) console.error('Error logging initial promotion:', logError)
     }
 
     redirect('/dashboard/members')
@@ -160,11 +179,33 @@ export async function registerBatch(members: any[]) {
             }
         })
 
-        const { error } = await supabase.from('gym_members').insert(batchData)
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+        const adminName = profile?.full_name || '관장님'
+
+        const { data: insertedMembers, error } = await supabase.from('gym_members').insert(batchData).select('id, belt, joined_at')
 
         if (error) {
             console.error('Batch insert error:', error)
             return { error: '일괄 등록 중 오류가 발생했습니다: ' + error.message }
+        }
+
+        if (insertedMembers && insertedMembers.length > 0) {
+            const promotionLogsData = insertedMembers.map(member => ({
+                gym_id: gym.id,
+                member_id: member.id,
+                belt_name: member.belt,
+                stripe_level: 0,
+                promoted_at: member.joined_at ? member.joined_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                training_days: 0,
+                attendance_count: 0,
+                awarded_by: adminName,
+                memo: '일괄 등록 자동 부여'
+            }))
+
+            const { error: logError } = await supabase.from('gym_promotion_logs').insert(promotionLogsData)
+            if (logError) {
+                console.error('Batch initial promotion log error:', logError)
+            }
         }
 
         return { success: true }
