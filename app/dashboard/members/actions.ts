@@ -682,13 +682,17 @@ export async function sendSmsInvitation(phone: string) {
     if (!user) return { error: '로그인이 필요합니다.' }
 
     // Get Gym Invitation Code and Name
-    const { data: gym } = await supabase
+    const { data: gym, error: dbError } = await supabase
         .from('gyms')
         .select('id, name, invitation_code')
         .eq('owner_id', user.id)
         .single()
 
-    if (!gym) return { error: '도장 정보를 찾을 수 없습니다.' }
+    if (dbError) {
+        console.error('sendSmsInvitation gym lookup error:', dbError)
+    }
+    if (!gym) return { error: `도장 정보를 찾을 수 없습니다. (에러: ${dbError?.message || '알 수 없음'})` }
+
     if (!gym.invitation_code) return { error: '도장 초대 코드가 생성되지 않았습니다. 설정에서 먼저 확인해주세요.' }
 
     // Format phone number to clean digits only string
