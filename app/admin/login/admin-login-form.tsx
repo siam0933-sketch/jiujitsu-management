@@ -95,17 +95,18 @@ export default function LoginForm() {
                     {loading ? '로그인 중...' : '로그인 하기'}
                 </button>
 
-                <div className="text-center text-sm mt-4">
-                    <span className="text-gray-500">계정이 없으신가요? </span>
-                    <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
-                        신규 도장 가입하기
-                    </Link>
-                </div>
-
-                <div className="text-center text-sm mt-4">
-                    <Link href="/login" className="text-gray-500 hover:text-gray-700 underline underline-offset-4">
-                        수강생 전용 로그인
-                    </Link>
+                <div className="text-center text-sm mt-5 flex flex-col gap-3">
+                    <div>
+                        <span className="text-gray-500">계정이 없으신가요? </span>
+                        <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
+                            신규 도장 가입하기
+                        </Link>
+                    </div>
+                    <div>
+                        <Link href="/login" className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-4 transition-colors">
+                            회원로그인
+                        </Link>
+                    </div>
                 </div>
             </form>
         </div>
