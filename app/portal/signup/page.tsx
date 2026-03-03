@@ -133,6 +133,13 @@ export default function MemberSignupPage() {
                                     {isLoading ? '확인 중...' : '확인'}
                                 </button>
                             </div>
+
+                            <div className="mt-4 text-center">
+                                <span className="text-sm text-gray-500">이미 가입하셨나요? </span>
+                                <a href="/portal/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                    수강생 로그인
+                                </a>
+                            </div>
                         </form>
                     )}
 

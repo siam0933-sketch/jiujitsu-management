@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShieldCheck } from 'lucide-react'
-import Link from 'next/link'
+import { User } from 'lucide-react'
 
-export default function LoginForm() {
+export default function MemberLoginForm() {
     const router = useRouter()
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
@@ -16,24 +15,20 @@ export default function LoginForm() {
         setMessage('')
 
         const formData = new FormData(e.currentTarget)
-        const email = formData.get('email')
-        const password = formData.get('password')
+        const name = formData.get('name')
+        const password = String(formData.get('password')).toLowerCase()
 
         try {
-            const res = await fetch('/api/login', {
+            const res = await fetch('/api/login/member', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ name, password }),
             })
             const data = await res.json()
 
             if (data.success) {
                 router.refresh()
-                if (data.redirectUrl) {
-                    router.push(data.redirectUrl)
-                } else {
-                    router.push('/dashboard')
-                }
+                router.push('/portal')
             } else {
                 setMessage(data.message)
             }
@@ -47,12 +42,12 @@ export default function LoginForm() {
     return (
         <div className="w-full max-w-md mx-auto px-4">
             <div className="flex flex-col items-center justify-center mb-8">
-                <ShieldCheck size={48} strokeWidth={1.5} className="text-blue-600 mb-4" />
+                <User size={48} strokeWidth={1.5} className="text-blue-600 mb-4" />
                 <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-zinc-100 mb-2">
-                    관장(관리자) 로그인
+                    수강생 로그인
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-zinc-400">
-                    체육관을 관리하려면 로그인해주세요.
+                    등록하신 이름과 비밀번호로 로그인하세요.
                 </p>
             </div>
 
@@ -66,14 +61,13 @@ export default function LoginForm() {
                     </div>
                 )}
 
-                <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="email">
-                    이메일
+                <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="name">
+                    이름
                 </label>
                 <input
                     className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-6 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
-                    name="email"
-                    type="email"
-                    placeholder="admin@example.com"
+                    name="name"
+                    placeholder="봉인 성함"
                     required
                 />
 
@@ -84,7 +78,7 @@ export default function LoginForm() {
                     className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-8 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
                     type="password"
                     name="password"
-                    placeholder="••••••••"
+                    placeholder="6자리 비밀번호"
                     required
                 />
 
@@ -96,10 +90,10 @@ export default function LoginForm() {
                 </button>
 
                 <div className="text-center text-sm mt-4">
-                    <span className="text-gray-500">계정이 없으신가요? </span>
-                    <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
-                        신규 도장 가입하기
-                    </Link>
+                    <p className="text-gray-400 text-xs">
+                        * 회원가입은 관장님이 보내주신 <b>초대 링크</b>를 통해서만 가능합니다.<br />
+                        비밀번호를 분실하신 경우 관장님께 문의해주세요.
+                    </p>
                 </div>
             </form>
         </div>

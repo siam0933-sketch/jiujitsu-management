@@ -33,12 +33,18 @@ export default async function Home() {
           Manage your members, track attendance, and run your dojo efficiently.
         </p>
 
-        <div className="flex flex-wrap items-center justify-around max-w-4xl mt-6 sm:w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 w-full">
           <Link
             href="/login"
-            className="px-8 py-4 text-xl font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition duration-150 ease-in-out shadow-lg"
+            className="px-8 py-4 w-full sm:w-auto text-xl font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition duration-150 ease-in-out shadow-lg"
           >
-            Go to Login
+            관장(관리자) 로그인
+          </Link>
+          <Link
+            href="/signup"
+            className="px-8 py-4 w-full sm:w-auto text-xl font-bold rounded-xl bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-50 transition duration-150 ease-in-out shadow-lg"
+          >
+            신규 도장 가입하기
           </Link>
         </div>
       </main>
