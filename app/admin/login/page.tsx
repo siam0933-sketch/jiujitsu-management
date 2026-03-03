@@ -1,9 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
-import MemberLoginForm from './member-login-form'
+import AdminLoginForm from './admin-login-form'
 
-export default async function MemberLoginPage() {
+export default async function AdminLoginPage() {
     const supabase = await createClient()
 
     const {
@@ -29,7 +29,7 @@ export default async function MemberLoginPage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center py-2">
             <div className="flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-                <MemberLoginForm />
+                <AdminLoginForm />
             </div>
         </div>
     )

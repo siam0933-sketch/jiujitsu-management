@@ -35,7 +35,7 @@ export default async function Home() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 w-full">
           <Link
-            href="/login"
+            href="/admin/login"
             className="px-8 py-4 w-full sm:w-auto text-xl font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition duration-150 ease-in-out shadow-lg"
           >
             관장(관리자) 로그인

@@ -68,7 +68,7 @@ export default function MemberSignupPage() {
             setStep('SUCCESS')
             // Delay and redirect to login
             setTimeout(() => {
-                router.push('/portal/login')
+                router.push('/login')
             }, 3000)
         }
     }
@@ -136,7 +136,7 @@ export default function MemberSignupPage() {
 
                             <div className="mt-4 text-center">
                                 <span className="text-sm text-gray-500">이미 가입하셨나요? </span>
-                                <a href="/portal/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                <a href="/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">
                                     수강생 로그인
                                 </a>
                             </div>
@@ -234,7 +234,7 @@ export default function MemberSignupPage() {
                                 성공적으로 가입(또는 연동)되었습니다.<br />잠시 후 로그인 페이지로 이동합니다.
                             </p>
                             <button
-                                onClick={() => router.push('/portal/login')}
+                                onClick={() => router.push('/login')}
                                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                             >
                                 로그인 화면으로
