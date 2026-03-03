@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { User } from 'lucide-react'
+import Link from 'next/link'
 
 export default function MemberLoginForm() {
     const router = useRouter()
@@ -94,6 +95,12 @@ export default function MemberLoginForm() {
                         * 회원가입은 관장님이 보내주신 <b>초대 링크</b>를 통해서만 가능합니다.<br />
                         비밀번호를 분실하신 경우 관장님께 문의해주세요.
                     </p>
+                </div>
+
+                <div className="text-center text-sm mt-4">
+                    <Link href="/admin/login" className="text-gray-500 hover:text-gray-700 underline underline-offset-4">
+                        관장(관리자) 로그인
+                    </Link>
                 </div>
             </form>
         </div>
