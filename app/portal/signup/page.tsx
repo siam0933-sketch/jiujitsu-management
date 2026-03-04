@@ -20,8 +20,16 @@ export default function MemberSignupPage() {
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
+    const [passwordConfirm, setPasswordConfirm] = useState('')
     const [birthDate, setBirthDate] = useState('')
     const [gender, setGender] = useState('M')
+
+    // Additional fields
+    const [accessCode, setAccessCode] = useState('')
+    const [guardianPhone, setGuardianPhone] = useState('')
+    const [address, setAddress] = useState('')
+    const [school, setSchool] = useState('')
+    const [grade, setGrade] = useState('')
 
     useEffect(() => {
         if (codeParam) {
@@ -48,6 +56,16 @@ export default function MemberSignupPage() {
         e.preventDefault()
         if (!gymInfo) return
 
+        if (password !== passwordConfirm) {
+            setErrorMsg('비밀번호가 일치하지 않습니다.')
+            return
+        }
+
+        if (accessCode.length !== 4) {
+            setErrorMsg('출석번호는 4자리 숫자로 입력해주세요.')
+            return
+        }
+
         setIsLoading(true)
         setErrorMsg('')
 
@@ -57,7 +75,12 @@ export default function MemberSignupPage() {
             phone,
             password,
             birthDate: birthDate || null,
-            gender
+            gender,
+            accessCode,
+            guardianPhone,
+            address,
+            school,
+            grade
         })
 
         setIsLoading(false)
@@ -164,24 +187,62 @@ export default function MemberSignupPage() {
                                     required
                                     type="tel"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                                    onChange={(e) => {
+                                        const newPhone = e.target.value.replace(/[^0-9]/g, '')
+                                        setPhone(newPhone)
+                                        // Phone number 변경 시 출석번호 자동 반영 (입력하지 않은 경우)
+                                        if (newPhone.length >= 4 && accessCode === '') {
+                                            // Optional: setAccessCode(newPhone.slice(-4)) -> 직접 입력 유도를 위해 주석처리
+                                        }
+                                    }}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="01012345678"
+                                    placeholder="01012345678 (숫자만 입력)"
                                     maxLength={11}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">출석/로그인 비밀번호 (4자리 이상) *</label>
+                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 (4자리 이상) *</label>
                                 <input
                                     required
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="출석기에 입력할 비밀번호"
+                                    placeholder="로그인 시 사용할 비밀번호"
                                     minLength={4}
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 확인 *</label>
+                                <input
+                                    required
+                                    type="password"
+                                    value={passwordConfirm}
+                                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${passwordConfirm && password !== passwordConfirm ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                                        }`}
+                                    placeholder="비밀번호를 다시 한 번 입력해주세요"
+                                    minLength={4}
+                                />
+                                {passwordConfirm && password !== passwordConfirm && (
+                                    <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">출석번호 (4자리) *</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={accessCode}
+                                    onChange={(e) => setAccessCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm tracking-widest"
+                                    placeholder="도장 출석기에 누를 번호 4자리"
+                                    maxLength={4}
+                                />
+                                <p className="mt-1 text-xs font-semibold text-blue-600">추천: 기억하기 쉽게 "전화번호 뒤 4자리" 를 사용하는 것을 권장합니다! {phone.length >= 4 ? `(${phone.slice(-4)})` : ''}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -203,6 +264,52 @@ export default function MemberSignupPage() {
                                         value={birthDate}
                                         onChange={(e) => setBirthDate(e.target.value)}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">보호자 연락처 (선택)</label>
+                                <input
+                                    type="tel"
+                                    value={guardianPhone}
+                                    onChange={(e) => setGuardianPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="01012345678"
+                                    maxLength={11}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">주소 (선택)</label>
+                                <input
+                                    type="text"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="주소를 입력해주세요"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">학교 (선택)</label>
+                                    <input
+                                        type="text"
+                                        value={school}
+                                        onChange={(e) => setSchool(e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        placeholder="예: 서울초"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">학년 (선택)</label>
+                                    <input
+                                        type="text"
+                                        value={grade}
+                                        onChange={(e) => setGrade(e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        placeholder="예: 3학년"
                                     />
                                 </div>
                             </div>

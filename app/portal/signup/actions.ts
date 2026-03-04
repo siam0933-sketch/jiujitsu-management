@@ -29,7 +29,12 @@ export async function registerPortalMember(data: {
     phone: string,
     password: string,
     birthDate: string | null,
-    gender: string
+    gender: string,
+    accessCode: string,
+    guardianPhone?: string,
+    address?: string,
+    school?: string,
+    grade?: string
 }) {
     // [CRITICAL] We must use the Admin Service Key to bypass RLS and create/update members
     // before they actually log in.
@@ -58,6 +63,11 @@ export async function registerPortalMember(data: {
                     login_password: data.password,
                     gender: data.gender,
                     birth_date: data.birthDate || null,
+                    access_code: data.accessCode || null,
+                    guardian_phone: data.guardianPhone || null,
+                    address: data.address || null,
+                    school: data.school || null,
+                    grade: data.grade || null
                 })
                 .eq('id', existingMember.id)
 
@@ -90,6 +100,11 @@ export async function registerPortalMember(data: {
                     login_password: data.password,
                     gender: data.gender,
                     birth_date: data.birthDate || null,
+                    access_code: data.accessCode || null,
+                    guardian_phone: data.guardianPhone || null,
+                    address: data.address || null,
+                    school: data.school || null,
+                    grade: data.grade || null,
                     joined_at: new Date().toISOString(),
                     start_date: new Date().toISOString(),
                     status: 'active', // For now, auto-activate. Masters can change later.
