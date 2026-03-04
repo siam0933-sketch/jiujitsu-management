@@ -98,3 +98,27 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- 6. System Notices Table
+create table system_notices (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,
+  content text not null,
+  is_active boolean default true,
+  author_id uuid references profiles(id) not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table system_notices enable row level security;
+
+create policy "System notices are viewable by everyone." on system_notices
+  for select using (is_active = true);
+
+create policy "Only super admins can manage system notices." on system_notices
+  for all using (
+    exists (
+      select 1 from profiles
+      where profiles.id = auth.uid()
+      and profiles.role = 'super_admin'
+    )
+  );

@@ -42,3 +42,63 @@ export async function rejectGym(formData: FormData) {
 
     revalidatePath('/super-admin')
 }
+
+export async function createSystemNotice(title: string, content: string, is_active: boolean = true) {
+    const supabase = await createAdminClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    const { error } = await supabase
+        .from('system_notices')
+        .insert({
+            title,
+            content,
+            is_active,
+            author_id: user.id
+        })
+
+    if (error) {
+        console.error('Failed to create notice:', error)
+        return { error: '공지사항 작성에 실패했습니다.' }
+    }
+
+    revalidatePath('/super-admin/notices')
+    revalidatePath('/dashboard') // Also invalidate dashboard so gyms see it
+    return { success: true }
+}
+
+export async function updateSystemNotice(id: string, title: string, content: string, is_active: boolean) {
+    const supabase = await createAdminClient()
+
+    const { error } = await supabase
+        .from('system_notices')
+        .update({ title, content, is_active })
+        .eq('id', id)
+
+    if (error) {
+        console.error('Failed to update notice:', error)
+        return { error: '공지사항 수정에 실패했습니다.' }
+    }
+
+    revalidatePath('/super-admin/notices')
+    revalidatePath('/dashboard')
+    return { success: true }
+}
+
+export async function deleteSystemNotice(id: string) {
+    const supabase = await createAdminClient()
+
+    const { error } = await supabase
+        .from('system_notices')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Failed to delete notice:', error)
+        return { error: '공지사항 삭제에 실패했습니다.' }
+    }
+
+    revalidatePath('/super-admin/notices')
+    revalidatePath('/dashboard')
+    return { success: true }
+}

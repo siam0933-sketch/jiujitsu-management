@@ -3,6 +3,7 @@ import { getPromotionCandidates } from './attendance/actions_promotion'
 import { getTodayAttendanceLogs } from './attendance/actions'
 import PromotionWidget from './components/PromotionWidget'
 import AttendanceStatsWidget from './components/AttendanceStatsWidget'
+import SystemNoticeWidget from './components/SystemNoticeWidget'
 
 export default async function DashboardPage(props: { searchParams: Promise<{ statsMonth?: string }> }) {
     const searchParamsObj = await props.searchParams
@@ -40,11 +41,24 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
         todayLogs = await getTodayAttendanceLogs()
     }
 
+    // 3. Fetch System Notices
+    const { data: systemNotices } = await supabase
+        .from('system_notices')
+        .select('id, title, content, created_at')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
     return (
         <div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-8">
                 안녕하세요, {gym ? gym.name : '관장님'}! 👋
             </h2>
+
+            {/* System Notices */}
+            {systemNotices && systemNotices.length > 0 && (
+                <SystemNoticeWidget notices={systemNotices} />
+            )}
 
             {/* Promotion Notification Widget */}
             <PromotionWidget candidates={candidates} />
