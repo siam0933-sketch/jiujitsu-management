@@ -74,11 +74,11 @@ export default async function PortalLayout({
 
     return (
         <div className={PORTAL_STYLES.PAGE_WRAPPER}>
-            <PortalHeader dojoName={context?.gymName || '체육관'} />
-            <main className="flex-1 pt-14"> {/* pt-14 matches header height */}
+            {!isSignupUrl && <PortalHeader dojoName={context?.gymName || '체육관'} />}
+            <main className={`flex-1 ${!isSignupUrl ? 'pt-14' : ''}`}> {/* pt-14 matches header height */}
                 {children}
             </main>
-            <BottomNav hasUnpaidDues={context?.hasUnpaidDues || false} />
+            {!isSignupUrl && <BottomNav hasUnpaidDues={context?.hasUnpaidDues || false} />}
         </div>
     );
 }
