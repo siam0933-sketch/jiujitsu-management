@@ -740,7 +740,12 @@ export async function sendSmsInvitation(phone: string) {
     const cleanPhone = phone.replace(/[^0-9]/g, '')
     if (cleanPhone.length < 10) return { error: '유효하지 않은 전화번호 양식입니다.' }
 
-    const invitationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/portal/signup?code=${gym.invitation_code}`
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jiujitsu-management.vercel.app'
+    const finalBaseUrl = baseUrl.includes('localhost') && process.env.NODE_ENV === 'production'
+        ? 'https://jiujitsu-management.vercel.app'
+        : baseUrl
+
+    const invitationUrl = `${finalBaseUrl}/portal/signup?code=${gym.invitation_code}`
 
     // Construct the SMS message
     const message = `[${gym.name}] 체육관 초대장\n\n안녕하세요! 아래 링크를 눌러 체육관 관원 가입을 진행해주세요.\n\n▶ 가입 링크: ${invitationUrl}\n\n감사합니다.`
@@ -794,10 +799,15 @@ export async function getInvitationUrl() {
     if (!gym) return { error: '도장 정보를 찾을 수 없습니다.' }
     if (!gym.invitation_code) return { error: '도장 초대 코드가 설정되지 않았습니다.' }
 
-    const invitationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/portal/signup?code=${gym.invitation_code}`
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jiujitsu-management.vercel.app'
+    const finalBaseUrl = baseUrl.includes('localhost') && process.env.NODE_ENV === 'production'
+        ? 'https://jiujitsu-management.vercel.app'
+        : baseUrl
 
-    // 포맷팅된 메시지 반환 (클립보드용)
-    const copyText = `[${gym.name}] 체육관 초대장\n\n안녕하세요! 아래 링크를 눌러 체육관 관원 가입을 진행해주세요.\n\n▶ 가입 링크: ${invitationUrl}\n\n감사합니다.`
+    const invitationUrl = `${finalBaseUrl}/portal/signup?code=${gym.invitation_code}`
+
+    // 사용자 요청사항: 앞뒤 안내 문구는 제외하고 오직 URL(초대 링크)만 복사되도록 변경
+    const copyText = invitationUrl
 
     return { success: true, url: invitationUrl, copyText }
 }
