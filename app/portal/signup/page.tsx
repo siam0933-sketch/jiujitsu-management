@@ -94,11 +94,11 @@ export default function MemberSignupPage() {
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    체육관 회원 가입
+                    {gymInfo?.name ? `${gymInfo.name} 회원 가입` : '체육관 회원 가입'}
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
                     {step === 'CODE' && '관장님께 받은 초대 코드를 입력해주세요.'}
-                    {step === 'FORM' && `${gymInfo?.name} 가입 정보 입력`}
+                    {step === 'FORM' && '가입 정보 입력'}
                     {step === 'SUCCESS' && '가입이 완료되었습니다!'}
                 </p>
             </div>
