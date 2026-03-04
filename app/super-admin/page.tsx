@@ -154,7 +154,7 @@ export default async function SuperAdminPage({ searchParams }: { searchParams: P
                                                 ) : currentTab === 'active' ? (
                                                     <form action={rejectGym}>
                                                         <input type="hidden" name="gymId" value={gym.id} />
-                                                        <button type="submit" onClick={(e) => { if (!confirm('정말 이 도장을 정지(거절 상태)로 변경하시겠습니까?')) e.preventDefault(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-900/50 text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                        <button type="submit" className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-900/50 text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                                                             <Ban size={16} /> 강제 정지
                                                         </button>
                                                     </form>
