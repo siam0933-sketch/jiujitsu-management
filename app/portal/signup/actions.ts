@@ -41,6 +41,18 @@ export async function registerPortalMember(data: {
     const supabaseAdmin = await createAdminClient()
 
     try {
+        // 출석번호 자동 생성 로직: 본인 전화번호 뒤 4자리 -> 없으면 보호자 번호 뒤 4자리 -> 없으면 랜덤 4자리
+        let finalAccessCode = data.accessCode;
+        if (!finalAccessCode) {
+            if (data.phone && data.phone.length >= 4) {
+                finalAccessCode = data.phone.slice(-4);
+            } else if (data.guardianPhone && data.guardianPhone.length >= 4) {
+                finalAccessCode = data.guardianPhone.slice(-4);
+            } else {
+                finalAccessCode = Math.floor(1000 + Math.random() * 9000).toString();
+            }
+        }
+
         // Step 1: Check if this member ALREADY exists in the gym based on name + phone
         const { data: existingMember } = await supabaseAdmin
             .from('gym_members')
@@ -63,7 +75,7 @@ export async function registerPortalMember(data: {
                     login_password: data.password,
                     gender: data.gender,
                     birth_date: data.birthDate || null,
-                    access_code: data.accessCode || null,
+                    access_code: finalAccessCode,
                     guardian_phone: data.guardianPhone || null,
                     address: data.address || null,
                     school: data.school || null,
@@ -100,7 +112,7 @@ export async function registerPortalMember(data: {
                     login_password: data.password,
                     gender: data.gender,
                     birth_date: data.birthDate || null,
-                    access_code: data.accessCode || null,
+                    access_code: finalAccessCode,
                     guardian_phone: data.guardianPhone || null,
                     address: data.address || null,
                     school: data.school || null,

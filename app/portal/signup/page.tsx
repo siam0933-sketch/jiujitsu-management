@@ -24,8 +24,7 @@ export default function MemberSignupPage() {
     const [birthDate, setBirthDate] = useState('')
     const [gender, setGender] = useState('M')
 
-    // Additional fields
-    const [accessCode, setAccessCode] = useState('')
+    // Additional fields (accessCode removed from state)
     const [guardianPhone, setGuardianPhone] = useState('')
     const [address, setAddress] = useState('')
     const [school, setSchool] = useState('')
@@ -61,11 +60,6 @@ export default function MemberSignupPage() {
             return
         }
 
-        if (accessCode.length !== 4) {
-            setErrorMsg('출석번호는 4자리 숫자로 입력해주세요.')
-            return
-        }
-
         setIsLoading(true)
         setErrorMsg('')
 
@@ -76,7 +70,7 @@ export default function MemberSignupPage() {
             password,
             birthDate: birthDate || null,
             gender,
-            accessCode,
+            accessCode: '', // 서버단에서 자동생성
             guardianPhone,
             address,
             school,
@@ -190,10 +184,6 @@ export default function MemberSignupPage() {
                                     onChange={(e) => {
                                         const newPhone = e.target.value.replace(/[^0-9]/g, '')
                                         setPhone(newPhone)
-                                        // Phone number 변경 시 출석번호 자동 반영 (입력하지 않은 경우)
-                                        if (newPhone.length >= 4 && accessCode === '') {
-                                            // Optional: setAccessCode(newPhone.slice(-4)) -> 직접 입력 유도를 위해 주석처리
-                                        }
                                     }}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     placeholder="01012345678 (숫자만 입력)"
@@ -229,20 +219,6 @@ export default function MemberSignupPage() {
                                 {passwordConfirm && password !== passwordConfirm && (
                                     <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
                                 )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">출석번호 (4자리) *</label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={accessCode}
-                                    onChange={(e) => setAccessCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm tracking-widest"
-                                    placeholder="도장 출석기에 누를 번호 4자리"
-                                    maxLength={4}
-                                />
-                                <p className="mt-1 text-xs font-semibold text-blue-600">추천: 기억하기 쉽게 "전화번호 뒤 4자리" 를 사용하는 것을 권장합니다! {phone.length >= 4 ? `(${phone.slice(-4)})` : ''}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
