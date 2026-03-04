@@ -778,3 +778,26 @@ export async function sendSmsInvitation(phone: string) {
         return { error: '문자 발송 중 오류가 발생했습니다: ' + e.message }
     }
 }
+
+export async function getInvitationUrl() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: '로그인이 필요합니다.' }
+
+    const { data: gym } = await supabase
+        .from('gyms')
+        .select('name, invitation_code')
+        .eq('owner_id', user.id)
+        .single()
+
+    if (!gym) return { error: '도장 정보를 찾을 수 없습니다.' }
+    if (!gym.invitation_code) return { error: '도장 초대 코드가 설정되지 않았습니다.' }
+
+    const invitationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/portal/signup?code=${gym.invitation_code}`
+
+    // 포맷팅된 메시지 반환 (클립보드용)
+    const copyText = `[${gym.name}] 체육관 초대장\n\n안녕하세요! 아래 링크를 눌러 체육관 관원 가입을 진행해주세요.\n\n▶ 가입 링크: ${invitationUrl}\n\n감사합니다.`
+
+    return { success: true, url: invitationUrl, copyText }
+}

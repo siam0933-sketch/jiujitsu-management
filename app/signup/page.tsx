@@ -168,10 +168,17 @@ export default function SignupPage() {
                         </button>
                     </div>
 
-                    <div className="text-sm text-center">
-                        <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                            이미 계정이 있으신가요? 로그인하기
-                        </Link>
+                    <div className="text-sm text-center flex flex-col gap-3">
+                        <div>
+                            <Link href="/admin/login" className="font-medium text-blue-600 hover:text-blue-500">
+                                이미 관리자 계정이 있으신가요? 로그인하기
+                            </Link>
+                        </div>
+                        <div>
+                            <Link href="/login" className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-4 transition-colors">
+                                일반회원 로그인
+                            </Link>
+                        </div>
                     </div>
                 </form>
             </div>

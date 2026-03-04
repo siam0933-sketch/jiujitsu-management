@@ -397,18 +397,42 @@ export default function MembersTable({ initialMembers, count, status, attendance
                             <>
                                 <button
                                     onClick={async () => {
-                                        const phone = prompt('초대 문자를 받을 분의 전화번호를 입력하세요 (예: 01012345678)')
+                                        try {
+                                            const { getInvitationUrl } = await import('../actions')
+                                            const res = await getInvitationUrl()
+                                            if (res.error) {
+                                                alert(res.error)
+                                                return
+                                            }
+                                            if (navigator.clipboard && res.copyText) {
+                                                await navigator.clipboard.writeText(res.copyText)
+                                                alert('초대 링크(문구 포함)가 클립보드에 복사되었습니다.\n\n카카오톡이나 문자 메시지에 붙여넣기 하여 전송해주세요!')
+                                            } else {
+                                                // Fallback for non-https/unsupported browsers
+                                                prompt('클립보드 복사를 지원하지 않는 환경입니다. 아래 내용을 직접 복사해주세요:', res.copyText)
+                                            }
+                                        } catch (e) {
+                                            alert('복사 중 오류가 발생했습니다.')
+                                        }
+                                    }}
+                                    className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors whitespace-nowrap flex items-center mr-1"
+                                >
+                                    <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    초대 링크 복사
+                                </button>
+                                <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
+                                <button
+                                    onClick={async () => {
+                                        const phone = prompt('추가: 문자 초대(가상)를 진행하시려면 전화번호를 입력하세요 (방금 복사하신 기능 사용을 더 권장합니다)')
                                         if (!phone) return
-                                        // Dynamically import to avoid cluttering the top of the large file
                                         const { sendSmsInvitation } = await import('../actions')
                                         const res = await sendSmsInvitation(phone)
                                         if (res.error) alert(res.error)
                                         else alert(res.message)
                                     }}
-                                    className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors whitespace-nowrap flex items-center"
+                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-300 transition-colors whitespace-nowrap flex items-center"
                                 >
-                                    <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                                    문자 초대
+                                    문자 발송(테스트)
                                 </button>
                                 <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
                                 <button
