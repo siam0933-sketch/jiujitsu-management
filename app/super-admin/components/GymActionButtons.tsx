@@ -8,18 +8,28 @@ export function GymActionButtons({ gymId, status }: { gymId: string, status: str
     const [isPending, startTransition] = useTransition();
 
     const handleApprove = () => {
-        startTransition(() => {
+        startTransition(async () => {
             const formData = new FormData();
             formData.append('gymId', gymId);
-            approveGym(formData);
+            const res = await approveGym(formData);
+            if (res?.error) {
+                alert(res.error);
+            } else if (res?.success) {
+                alert('승인되었습니다.');
+            }
         });
     }
 
     const handleReject = () => {
-        startTransition(() => {
+        startTransition(async () => {
             const formData = new FormData();
             formData.append('gymId', gymId);
-            rejectGym(formData);
+            const res = await rejectGym(formData);
+            if (res?.error) {
+                alert(res.error);
+            } else if (res?.success) {
+                alert('거절(정지)되었습니다.');
+            }
         });
     }
 

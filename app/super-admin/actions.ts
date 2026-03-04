@@ -5,42 +5,54 @@ import { revalidatePath } from 'next/cache'
 
 export async function approveGym(formData: FormData) {
     const gymId = formData.get('gymId')
-    if (!gymId) return
+    if (!gymId) return { error: 'No gym ID provided' }
 
-    const supabase = await createAdminClient()
+    try {
+        const supabase = await createAdminClient()
 
-    // Update the gym status to active
-    const { error } = await supabase
-        .from('gyms')
-        .update({ status: 'active' })
-        .eq('id', gymId)
+        // Update the gym status to active
+        const { error } = await supabase
+            .from('gyms')
+            .update({ status: 'active' })
+            .eq('id', gymId)
 
-    if (error) {
-        console.error('Failed to approve gym:', error)
-        throw new Error('Failed to approve gym')
+        if (error) {
+            console.error('Failed to approve gym:', error)
+            return { error: `DB Error: ${error.message}` }
+        }
+
+        revalidatePath('/super-admin')
+        return { success: true }
+    } catch (err: any) {
+        console.error('Server action catch error:', err)
+        return { error: `Server Error: ${err.message}` }
     }
-
-    revalidatePath('/super-admin')
 }
 
 export async function rejectGym(formData: FormData) {
     const gymId = formData.get('gymId')
-    if (!gymId) return
+    if (!gymId) return { error: 'No gym ID provided' }
 
-    const supabase = await createAdminClient()
+    try {
+        const supabase = await createAdminClient()
 
-    // Actually delete the gym or set it to 'rejected'. For now, let's set it to 'rejected' for record keeping.
-    const { error } = await supabase
-        .from('gyms')
-        .update({ status: 'rejected' })
-        .eq('id', gymId)
+        // Actually delete the gym or set it to 'rejected'. For now, let's set it to 'rejected' for record keeping.
+        const { error } = await supabase
+            .from('gyms')
+            .update({ status: 'rejected' })
+            .eq('id', gymId)
 
-    if (error) {
-        console.error('Failed to reject gym:', error)
-        throw new Error('Failed to reject gym')
+        if (error) {
+            console.error('Failed to reject gym:', error)
+            return { error: `DB Error: ${error.message}` }
+        }
+
+        revalidatePath('/super-admin')
+        return { success: true }
+    } catch (err: any) {
+        console.error('Server action catch error:', err)
+        return { error: `Server Error: ${err.message}` }
     }
-
-    revalidatePath('/super-admin')
 }
 
 export async function createSystemNotice(title: string, content: string, is_active: boolean = true) {
