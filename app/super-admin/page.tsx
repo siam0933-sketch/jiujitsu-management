@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/utils/supabase/server';
-import { approveGym, rejectGym } from './actions';
-import { CheckCircle, XCircle, Clock, Check, Ban } from 'lucide-react';
+import { Clock, Check, CheckCircle, Ban } from 'lucide-react';
 import Link from 'next/link';
+import { GymActionButtons } from './components/GymActionButtons';
 
 export default async function SuperAdminPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
     const supabase = await createAdminClient();
@@ -136,36 +136,9 @@ export default async function SuperAdminPage({ searchParams }: { searchParams: P
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-2">
-                                                {currentTab === 'pending' ? (
-                                                    <>
-                                                        <form action={approveGym}>
-                                                            <input type="hidden" name="gymId" value={gym.id} />
-                                                            <button type="submit" className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
-                                                                <CheckCircle size={16} /> 승인(Approve)
-                                                            </button>
-                                                        </form>
-                                                        <form action={rejectGym}>
-                                                            <input type="hidden" name="gymId" value={gym.id} />
-                                                            <button type="submit" className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-900/50 text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                                                                <XCircle size={16} /> 거절(Reject)
-                                                            </button>
-                                                        </form>
-                                                    </>
-                                                ) : currentTab === 'active' ? (
-                                                    <form action={rejectGym}>
-                                                        <input type="hidden" name="gymId" value={gym.id} />
-                                                        <button type="submit" className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-900/50 text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                                            <Ban size={16} /> 강제 정지
-                                                        </button>
-                                                    </form>
-                                                ) : (
-                                                    <form action={approveGym}>
-                                                        <input type="hidden" name="gymId" value={gym.id} />
-                                                        <button type="submit" className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-emerald-200 dark:border-emerald-900/50 text-sm leading-4 font-medium rounded-md text-emerald-700 dark:text-emerald-400 bg-white dark:bg-zinc-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors">
-                                                            <CheckCircle size={16} /> 다시 승인
-                                                        </button>
-                                                    </form>
-                                                )}
+                                                <div className="flex justify-end gap-2">
+                                                    <GymActionButtons gymId={gym.id} status={currentTab} />
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
