@@ -45,7 +45,7 @@ export default async function Home() {
             </div>
             <div className="flex flex-col flex-grow md:items-center text-left md:text-center">
               <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white md:mb-2">관장님 로그인</h2>
-              <p className="text-xs md:text-sm text-gray-500 dark:text-zinc-400 md:mb-6 hidden sm:block">
+              <p className="text-[11px] sm:text-xs md:text-sm text-gray-500 dark:text-zinc-400 md:mb-6 mt-0.5">
                 등록된 도장을 운영하고 수강생을 관리하세요
               </p>
             </div>
@@ -61,8 +61,8 @@ export default async function Home() {
             </div>
             <div className="flex flex-col flex-grow md:items-center text-left md:text-center">
               <h2 className="text-lg md:text-2xl font-bold text-white md:mb-2">신규 도장 가입</h2>
-              <p className="text-xs md:text-sm text-blue-100 md:mb-6 hidden sm:block">
-                아직 계정이 없으신가요?<br />새로운 도장을 등록해보세요
+              <p className="text-[11px] sm:text-xs md:text-sm text-blue-100 md:mb-6 mt-0.5">
+                아직 계정이 없으신가요? 새로운 도장을 등록해보세요
               </p>
             </div>
             <div className="flex items-center text-white font-medium group-hover:gap-2 transition-all ml-auto md:ml-0 md:bg-white/10 md:px-4 md:py-2 md:rounded-full">
@@ -77,7 +77,7 @@ export default async function Home() {
             </div>
             <div className="flex flex-col flex-grow md:items-center text-left md:text-center">
               <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white md:mb-2">수강생 로그인</h2>
-              <p className="text-xs md:text-sm text-gray-500 dark:text-zinc-400 md:mb-6 hidden sm:block">
+              <p className="text-[11px] sm:text-xs md:text-sm text-gray-500 dark:text-zinc-400 md:mb-6 mt-0.5">
                 나의 출석 현황과 등록 정보를 확인하세요
               </p>
             </div>
