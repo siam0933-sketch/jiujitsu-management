@@ -10,15 +10,21 @@ export async function approveGym(formData: FormData) {
     try {
         const supabase = await createAdminClient()
 
-        // Update the gym status to active
-        const { error } = await supabase
+        // Update the gym status to active and return the updated row
+        const { data, error } = await supabase
             .from('gyms')
             .update({ status: 'active' })
             .eq('id', gymId)
+            .select()
 
         if (error) {
             console.error('Failed to approve gym:', error)
             return { error: `DB Error: ${error.message}` }
+        }
+
+        if (!data || data.length === 0) {
+            console.error(`Gym update returned 0 rows for ID: ${gymId}`)
+            return { error: 'DB 업데이트가 0건입니다. (권한 문제이거나 Vercel 환경변수 누락 의심)' }
         }
 
         revalidatePath('/super-admin')
@@ -37,14 +43,20 @@ export async function rejectGym(formData: FormData) {
         const supabase = await createAdminClient()
 
         // Actually delete the gym or set it to 'rejected'. For now, let's set it to 'rejected' for record keeping.
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('gyms')
             .update({ status: 'rejected' })
             .eq('id', gymId)
+            .select()
 
         if (error) {
             console.error('Failed to reject gym:', error)
             return { error: `DB Error: ${error.message}` }
+        }
+
+        if (!data || data.length === 0) {
+            console.error(`Gym update returned 0 rows for ID: ${gymId}`)
+            return { error: 'DB 업데이트가 0건입니다. (권한 문제이거나 Vercel 환경변수 누락 의심)' }
         }
 
         revalidatePath('/super-admin')
