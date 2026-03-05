@@ -58,21 +58,33 @@ export async function updateSession(request: NextRequest) {
         }
 
         // 2. Protect /dashboard
-        if (request.nextUrl.pathname.startsWith('/dashboard') && isGymMaster) {
-            // Gym masters can only access dashboard if their gym is active
-            const { data: gym } = await supabase.from('gyms').select('status').eq('owner_id', user.id).single()
-            if (gym?.status === 'pending') {
+        if (request.nextUrl.pathname.startsWith('/dashboard')) {
+            if (isSuperAdmin) {
                 const url = request.nextUrl.clone()
-                url.pathname = '/pending'
+                url.pathname = '/super-admin'
                 return NextResponse.redirect(url)
+            }
+            if (isGymMaster) {
+                // Gym masters can only access dashboard if their gym is active
+                const { data: gym } = await supabase.from('gyms').select('status').eq('owner_id', user.id).single()
+                if (gym?.status === 'pending') {
+                    const url = request.nextUrl.clone()
+                    url.pathname = '/pending'
+                    return NextResponse.redirect(url)
+                }
             }
         }
 
         // 3. Protect /pending
         if (request.nextUrl.pathname === '/pending') {
+            if (isSuperAdmin) {
+                const url = request.nextUrl.clone()
+                url.pathname = '/super-admin'
+                return NextResponse.redirect(url)
+            }
             if (!isGymMaster) {
                 const url = request.nextUrl.clone()
-                url.pathname = isSuperAdmin ? '/super-admin' : '/portal'
+                url.pathname = '/portal'
                 return NextResponse.redirect(url)
             }
             const { data: gym } = await supabase.from('gyms').select('status').eq('owner_id', user.id).single()
