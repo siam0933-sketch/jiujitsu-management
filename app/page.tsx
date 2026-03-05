@@ -1,7 +1,7 @@
-
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { Building2, UserCircle, LogIn, ArrowRight } from 'lucide-react'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -24,35 +24,67 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-50">
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-8">
-          Jiu-Jitsu Gym Management
-        </h1>
-        <p className="mt-3 text-2xl text-gray-700 max-w-2xl mb-12">
-          Manage your members, track attendance, and run your dojo efficiently.
-        </p>
+    <div className="flex min-h-screen flex-col items-center bg-gray-50 dark:bg-zinc-950 font-sans">
+      <main className="flex w-full flex-1 flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 w-full">
-          <Link
-            href="/admin/login"
-            className="px-8 py-4 w-full sm:w-auto text-xl font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition duration-150 ease-in-out shadow-lg"
-          >
-            관장(관리자) 로그인
+        <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-4">
+            주짓수 도장 관리 시스템
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-zinc-400 max-w-2xl mx-auto">
+            원활한 출석 관리와 스마트한 도장 운영의 시작
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
+
+          {/* Card 1: Gym Master Login */}
+          <Link href="/admin/login" className="group flex flex-col items-center justify-center p-8 bg-white dark:bg-zinc-900 rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 dark:border-zinc-800 hover:border-blue-500/30 transition-all duration-300">
+            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Building2 size={32} strokeWidth={1.5} />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">관장님 로그인</h2>
+            <p className="text-sm text-gray-500 dark:text-zinc-400 text-center mb-6">
+              등록된 도장을 운영하고<br />수강생을 관리하세요
+            </p>
+            <div className="flex items-center text-blue-600 font-medium group-hover:gap-2 transition-all">
+              입장하기 <ArrowRight size={18} className="ml-1" />
+            </div>
           </Link>
-          <Link
-            href="/signup"
-            className="px-8 py-4 w-full sm:w-auto text-xl font-bold rounded-xl bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-50 transition duration-150 ease-in-out shadow-lg"
-          >
-            신규 도장 가입하기
+
+          {/* Card 2: Gym Signup */}
+          <Link href="/signup" className="group flex flex-col items-center justify-center p-8 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl shadow-md hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 transform hover:-translate-y-1">
+            <div className="w-16 h-16 bg-white/10 text-white rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <UserCircle size={32} strokeWidth={1.5} />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">신규 도장 가입</h2>
+            <p className="text-sm text-blue-100 text-center mb-6">
+              아직 계정이 없으신가요?<br />새로운 도장을 등록해보세요
+            </p>
+            <div className="flex items-center text-white font-medium group-hover:gap-2 transition-all bg-white/10 px-4 py-2 rounded-full">
+              가입 시작하기 <ArrowRight size={18} className="ml-1" />
+            </div>
           </Link>
+
+          {/* Card 3: Member Login */}
+          <Link href="/login" className="group flex flex-col items-center justify-center p-8 bg-white dark:bg-zinc-900 rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 dark:border-zinc-800 hover:border-emerald-500/30 transition-all duration-300">
+            <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <LogIn size={32} strokeWidth={1.5} />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">수강생 로그인</h2>
+            <p className="text-sm text-gray-500 dark:text-zinc-400 text-center mb-6">
+              나의 출석 현황과<br />등록 정보를 확인하세요
+            </p>
+            <div className="flex items-center text-emerald-600 font-medium group-hover:gap-2 transition-all">
+              조회하기 <ArrowRight size={18} className="ml-1" />
+            </div>
+          </Link>
+
         </div>
       </main>
 
-      <footer className="flex items-center justify-center w-full h-24 border-t">
-        <p className="flex items-center justify-center">
-          Powered by Supabase & Next.js
-        </p>
+      <footer className="w-full py-8 text-center text-sm text-gray-500 dark:text-zinc-500 border-t border-gray-200 dark:border-zinc-800">
+        <p>© {new Date().getFullYear()} Jiu-Jitsu Management System. All rights reserved.</p>
       </footer>
     </div>
   )
