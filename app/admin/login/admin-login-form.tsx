@@ -94,17 +94,23 @@ export default function LoginForm() {
                 >
                     {loading ? '로그인 중...' : '로그인 하기'}
                 </button>
+                <Link
+                    href="/"
+                    className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 mb-2 transition-all text-lg"
+                >
+                    첫 화면으로
+                </Link>
 
-                <div className="text-center text-sm mt-5 flex flex-col gap-3">
-                    <div>
+                <div className="text-center text-sm mt-5 flex flex-col gap-4">
+                    <div className="text-sm md:text-base">
                         <span className="text-gray-500">계정이 없으신가요? </span>
                         <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
                             신규 도장 가입하기
                         </Link>
                     </div>
                     <div>
-                        <Link href="/login" className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-4 transition-colors">
-                            회원로그인
+                        <Link href="/login" className="text-sm md:text-base font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-4 transition-colors">
+                            일반 관원(수강생) 로그인으로 이동 &rarr;
                         </Link>
                     </div>
                 </div>
