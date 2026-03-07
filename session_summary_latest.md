@@ -21,13 +21,17 @@
     *   Clicking a class in the popup immediately enrolls or unenrolls the member in that class.
     *   Created `enrollMemberInClass` and `unenrollMemberFromClass` server actions to support this functionality.
 
+5.  **Unified Login Gateway UI Improvements**
+    *   Added a prominent "첫 화면으로" (Go to Home) button to both the Member Login (`app/login/member-login-form.tsx`) and Admin Login (`app/admin/login/admin-login-form.tsx`) pages.
+    *   Enlarged and highlighted the links that allow switching between Member and Admin login forms for better mobile accessibility.
+    *   Verified that the Gym Invitation Link correctly routes users to the signup page (`/portal/signup`), not the login page.
+
 ## Current State
 All changes have been successfully committed and pushed to the `main` branch. The working directory is clean.
 
 Recent Commits:
-*   `5009249` feat: 원장 대시보드 회원 상세창에서 주간 시간표 요일 클릭 시 팝업을 통해 수강 중인 수업을 등록 및 취소할 수 있는 인라인 기능 추가
-*   `bd0c0fe` feat: 결제 내역 상단의 만료일만 인라인으로 즉시 수정 가능하도록 변경 (이전 폼 내부 수정 기능은 롤백)
-*   `d96e251` feat: 원장이 수동으로 결제 만료일을 계산/수정할 수 있도록 지원 (개월 수 변경 시 자동화 대응 추가)
-*   `1511fcf` feat: 회원관리 테이블에서 이름뿐만 아니라 전체 행 카드를 클릭하여 상세 모달을 열 수 있도록 접근성 개선
+*   `0c1dffa` feat: 로그인 페이지 첫 화면 가기 버튼 추가 및 텍스트 확대
+*   `0a4ee0c` UI: keep homepage card descriptions visible on small mobile screens
+*   `f43b073` Feat: redesign homepage (/) as a unified gateway for master login, signup, and member login with modern mobile-responsive cards
 
-This document summarizes the work done up to `2026-02-23T11:18+09:00` before the agent session reset.
+This document summarizes the work done up to `2026-03-07T16:46+09:00`.
