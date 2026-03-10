@@ -6,6 +6,7 @@ import { createAdminClient } from '@/utils/supabase/server'
 // 1. Verify invitation code
 export async function lookupGymByCode(code: string) {
     const supabase = await createClient()
+    const supabaseAdmin = await createAdminClient()
 
     if (!code) return { error: '초대 코드를 입력해주세요.' }
 
@@ -19,8 +20,8 @@ export async function lookupGymByCode(code: string) {
         return { error: '유효하지 않은 초대 코드입니다. 다시 확인해주세요.' }
     }
 
-    // Also fetch promotion criteria for this gym (for dynamic stripe dropdowns)
-    const { data: criteriaRows } = await supabase
+    // Use Admin client to bypass RLS - unsigned users (signing up) can't read criteria otherwise
+    const { data: criteriaRows } = await supabaseAdmin
         .from('gym_promotion_criteria')
         .select('belt_name, type, total_stripes_count, stripe_level')
         .eq('gym_id', gym.id)
