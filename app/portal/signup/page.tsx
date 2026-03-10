@@ -251,24 +251,29 @@ export default function MemberSignupPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">성별 *</label>
+                                <select
+                                    value={gender}
+                                    onChange={(e) => setGender(e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                >
+                                    <option value="male">남성</option>
+                                    <option value="female">여성</option>
+                                </select>
+                            </div>
+
+                            {/* 현재 벨트 섹션 - 테두리로 구분 */}
+                            <div className="border border-blue-200 rounded-lg p-4 space-y-4 bg-blue-50/40">
+                                <p className="text-sm font-semibold text-blue-700">현재 벨트 정보 (선택)</p>
+
+                                {/* 벨트 선택 */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">성별 *</label>
-                                    <select
-                                        value={gender}
-                                        onChange={(e) => setGender(e.target.value)}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    >
-                                        <option value="male">남성</option>
-                                        <option value="female">여성</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">현재 벨트 *</label>
+                                    <label className="block text-sm font-medium text-gray-700">벨트 *</label>
                                     <select
                                         value={belt}
                                         onChange={(e) => { setBelt(e.target.value); setStripe(0) }}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                         required
                                     >
                                         <optgroup label="성인">
@@ -295,43 +300,86 @@ export default function MemberSignupPage() {
                                         </optgroup>
                                     </select>
                                 </div>
-                            </div>
 
-                            {/* 그랄(줄) 선택 - 관리자 설정 기준에 따라 동적 생성 */}
-                            {(() => {
-                                const beltKorMap: Record<string, string> = {
-                                    'White': '화이트 (성인)', 'Blue': '블루', 'Purple': '퍼플',
-                                    'Brown': '브라운', 'Black': '블랙'
-                                }
-                                const korName = beltKorMap[belt] || belt
-                                const maxStripes = stripeMap[korName] ?? stripeMap[belt] ?? null
-                                if (maxStripes === null) return null
-                                return (
-                                    <div className="grid grid-cols-2 gap-4">
+                                {/* 그랄 선택 - 항상 표시, 관리자 설정 있으면 그 최대값, 없으면 최대 4 */}
+                                {(() => {
+                                    const beltKorMap: Record<string, string> = {
+                                        'White': '화이트 (성인)', 'Blue': '블루', 'Purple': '퍼플',
+                                        'Brown': '브라운', 'Black': '블랙'
+                                    }
+                                    const korName = beltKorMap[belt] || belt
+                                    const maxStripes = stripeMap[korName] ?? stripeMap[belt] ?? 4
+                                    return (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">현재 그랄 수 (선택)</label>
+                                            <label className="block text-sm font-medium text-gray-700">그랄 수</label>
                                             <select
                                                 value={stripe}
                                                 onChange={(e) => setStripe(Number(e.target.value))}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                             >
                                                 {Array.from({ length: maxStripes + 1 }, (_, i) => (
                                                     <option key={i} value={i}>{i === 0 ? '0 (없음)' : `${i}그랄`}</option>
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="overflow-hidden">
-                                            <label className="block text-sm font-medium text-gray-700">현재 등급 취득일 (선택)</label>
-                                            <input
-                                                type="date"
-                                                value={promotionDate}
-                                                onChange={(e) => setPromotionDate(e.target.value)}
-                                                className="mt-1 block w-full max-w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm box-border"
-                                            />
-                                        </div>
+                                    )
+                                })()}
+
+                                {/* 현재 등급 취득일 - 3개 드롭다운 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">현재 등급 취득일</label>
+                                    <div className="mt-1 grid grid-cols-3 gap-2">
+                                        {(() => {
+                                            const [pdYear, pdMonth, pdDay] = promotionDate ? promotionDate.split('-') : ['', '', '']
+                                            return (
+                                                <>
+                                                    <select
+                                                        value={pdYear || ''}
+                                                        onChange={(e) => {
+                                                            const [, m, d] = promotionDate ? promotionDate.split('-') : ['', '', '']
+                                                            setPromotionDate(e.target.value ? `${e.target.value}-${m || '01'}-${d || '01'}` : '')
+                                                        }}
+                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                    >
+                                                        <option value="">년도</option>
+                                                        {Array.from({ length: 40 }, (_, i) => {
+                                                            const yr = new Date().getFullYear() - i
+                                                            return <option key={yr} value={String(yr)}>{yr}</option>
+                                                        })}
+                                                    </select>
+                                                    <select
+                                                        value={pdMonth || ''}
+                                                        onChange={(e) => {
+                                                            const [y, , d] = promotionDate ? promotionDate.split('-') : ['', '', '']
+                                                            setPromotionDate(y ? `${y}-${e.target.value.padStart(2, '0')}-${d || '01'}` : '')
+                                                        }}
+                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                    >
+                                                        <option value="">월</option>
+                                                        {Array.from({ length: 12 }, (_, i) => (
+                                                            <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}월</option>
+                                                        ))}
+                                                    </select>
+                                                    <select
+                                                        value={pdDay || ''}
+                                                        onChange={(e) => {
+                                                            const [y, m] = promotionDate ? promotionDate.split('-') : ['', '']
+                                                            setPromotionDate(y ? `${y}-${m || '01'}-${e.target.value.padStart(2, '0')}` : '')
+                                                        }}
+                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                    >
+                                                        <option value="">일</option>
+                                                        {Array.from({ length: 31 }, (_, i) => (
+                                                            <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>
+                                                        ))}
+                                                    </select>
+                                                </>
+                                            )
+                                        })()}
                                     </div>
-                                )
-                            })()}
+                                </div>
+                            </div>
+
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
