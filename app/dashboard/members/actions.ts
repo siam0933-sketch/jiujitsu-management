@@ -440,7 +440,7 @@ export async function updateMemberPaymentEndDate(memberId: string, endDate: stri
 // Pending Members Approval/Rejection
 // -------------------------------------------------------------------------------------------------
 
-export async function approvePendingMember(memberId: string, belt: string) {
+export async function approvePendingMember(memberId: string, belt: string, stripe: number = 0, promotionDate: string | null = null) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -450,10 +450,10 @@ export async function approvePendingMember(memberId: string, belt: string) {
     if (!gym) return { success: false, error: '도장 정보를 찾을 수 없습니다.' }
 
     try {
-        // 1. Update status to active
+        // 1. Update status to active and clear pending_ columns
         const { error: updateError } = await supabase
             .from('gym_members')
-            .update({ status: 'active', belt })
+            .update({ status: 'active', belt, pending_stripe: null, pending_promotion_date: null })
             .eq('id', memberId)
             .eq('gym_id', gym.id)
 
@@ -462,15 +462,17 @@ export async function approvePendingMember(memberId: string, belt: string) {
         const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
         const adminName = profile?.full_name || '관장님'
 
-        // 2. Insert initial promotion log
+        const promotedAt = promotionDate || new Date().toISOString().split('T')[0]
+
+        // 2. Insert initial promotion log using member-provided stripe and date
         const { error: logError } = await supabase
             .from('gym_promotion_logs')
             .insert({
                 gym_id: gym.id,
                 member_id: memberId,
                 belt_name: belt,
-                stripe_level: 0,
-                promoted_at: new Date().toISOString().split('T')[0],
+                stripe_level: stripe,
+                promoted_at: promotedAt,
                 training_days: 0,
                 attendance_count: 0,
                 awarded_by: adminName,

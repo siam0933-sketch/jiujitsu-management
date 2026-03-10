@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { KioskMember } from '../../attendance/kiosk/actions' // Adjust imports if necessary
 import { displayBeltName } from '../constants'
 
 interface PendingMember {
@@ -15,11 +14,13 @@ interface PendingMember {
     school: string | null
     grade: string | null
     guardian_phone: string | null
+    pending_stripe: number | null
+    pending_promotion_date: string | null
 }
 
 interface Props {
     members: PendingMember[]
-    onApprove: (id: string, belt: string) => Promise<{ success: boolean; error?: string }>
+    onApprove: (id: string, belt: string, stripe: number, promotionDate: string | null) => Promise<{ success: boolean; error?: string }>
     onReject: (id: string) => Promise<{ success: boolean; error?: string }>
 }
 
@@ -31,7 +32,12 @@ export default function PendingMembersList({ members, onApprove, onReject }: Pro
     const handleApprove = async (member: PendingMember) => {
         if (!confirm(`${member.name} 회원의 가입을 승인하시겠습니까?`)) return
         setLoadingId(member.id)
-        const res = await onApprove(member.id, member.belt || 'White')
+        const res = await onApprove(
+            member.id,
+            member.belt || 'White',
+            member.pending_stripe ?? 0,
+            member.pending_promotion_date || null
+        )
         setLoadingId(null)
         if (res.error) alert(res.error)
     }
@@ -67,7 +73,7 @@ export default function PendingMembersList({ members, onApprove, onReject }: Pro
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
                                         {member.name}
                                         <span className="text-xs font-normal text-gray-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
-                                            {member.gender === 'M' ? '남성' : '여성'}
+                                            {member.gender === 'male' ? '남성' : member.gender === 'female' ? '여성' : member.gender}
                                         </span>
                                     </h3>
                                     <p className="text-gray-600 dark:text-zinc-400 font-medium">{member.phone}</p>
@@ -76,6 +82,12 @@ export default function PendingMembersList({ members, onApprove, onReject }: Pro
                                     <div className="inline-block bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold px-3 py-1 rounded-lg text-sm border border-blue-100 dark:border-blue-800">
                                         {displayBeltName(member.belt || 'White')}
                                     </div>
+                                    {(member.pending_stripe !== null && member.pending_stripe !== undefined) && (
+                                        <div className="mt-1 text-xs text-gray-500 dark:text-zinc-500">
+                                            {member.pending_stripe === 0 ? '그랄 없음' : `${member.pending_stripe}그랄`}
+                                            {member.pending_promotion_date && ` · ${member.pending_promotion_date}`}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

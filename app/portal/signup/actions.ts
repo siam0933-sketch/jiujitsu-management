@@ -19,7 +19,22 @@ export async function lookupGymByCode(code: string) {
         return { error: '유효하지 않은 초대 코드입니다. 다시 확인해주세요.' }
     }
 
-    return { success: true, gym }
+    // Also fetch promotion criteria for this gym (for dynamic stripe dropdowns)
+    const { data: criteriaRows } = await supabase
+        .from('gym_promotion_criteria')
+        .select('belt_name, type, total_stripes_count, stripe_level')
+        .eq('gym_id', gym.id)
+
+    // Build a map: belt_name -> max stripe count
+    const stripeMap: Record<string, number> = {}
+    criteriaRows?.forEach((row: any) => {
+        const existing = stripeMap[row.belt_name]
+        if (existing === undefined || row.total_stripes_count > existing) {
+            stripeMap[row.belt_name] = row.total_stripes_count
+        }
+    })
+
+    return { success: true, gym, stripeMap }
 }
 
 // 2. Handle actual registration
@@ -31,6 +46,8 @@ export async function registerPortalMember(data: {
     birthDate: string | null,
     gender: string,
     belt: string,
+    stripe: number | null,
+    promotionDate: string | null,
     accessCode: string,
     guardianPhone?: string,
     address?: string,
@@ -76,6 +93,8 @@ export async function registerPortalMember(data: {
                     login_password: data.password,
                     gender: data.gender,
                     belt: data.belt,
+                    pending_stripe: data.stripe ?? null,
+                    pending_promotion_date: data.promotionDate || null,
                     birth_date: data.birthDate || null,
                     access_code: finalAccessCode,
                     guardian_phone: data.guardianPhone || null,
@@ -110,7 +129,9 @@ export async function registerPortalMember(data: {
                     joined_at: new Date().toISOString(),
                     start_date: new Date().toISOString(),
                     status: 'pending', // Awaiting Gym Master approval
-                    belt: data.belt
+                    belt: data.belt,
+                    pending_stripe: data.stripe ?? null,
+                    pending_promotion_date: data.promotionDate || null,
                 })
                 .select('id')
                 .single()

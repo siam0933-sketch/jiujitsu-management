@@ -13,6 +13,7 @@ export default function MemberSignupPage() {
     const [step, setStep] = useState<'CODE' | 'FORM' | 'SUCCESS'>('CODE')
     const [invitationCode, setInvitationCode] = useState(codeParam)
     const [gymInfo, setGymInfo] = useState<{ id: string, name: string } | null>(null)
+    const [stripeMap, setStripeMap] = useState<Record<string, number>>({})
     const [errorMsg, setErrorMsg] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
@@ -24,9 +25,11 @@ export default function MemberSignupPage() {
     const [birthDate, setBirthDate] = useState('')
     const [gender, setGender] = useState('male')
     const [belt, setBelt] = useState('White')
+    const [stripe, setStripe] = useState<number>(0)
+    const [promotionDate, setPromotionDate] = useState('')
     const [accessCode, setAccessCode] = useState('')
 
-    // Additional fields (accessCode removed from state)
+    // Additional fields
     const [guardianPhone, setGuardianPhone] = useState('')
     const [address, setAddress] = useState('')
     const [school, setSchool] = useState('')
@@ -49,6 +52,7 @@ export default function MemberSignupPage() {
             setStep('CODE') // Stay on code step
         } else if (res.gym) {
             setGymInfo(res.gym)
+            setStripeMap(res.stripeMap || {})
             setStep('FORM')
         }
     }
@@ -72,8 +76,10 @@ export default function MemberSignupPage() {
             password,
             birthDate: birthDate || null,
             gender,
-            belt, // Send the selected belt
-            accessCode, // Send user's chosen PIN
+            belt,
+            stripe: stripe !== null ? stripe : null,
+            promotionDate: promotionDate || null,
+            accessCode,
             guardianPhone,
             address,
             school,
@@ -257,7 +263,7 @@ export default function MemberSignupPage() {
                                     <label className="block text-sm font-medium text-gray-700">현재 벨트 *</label>
                                     <select
                                         value={belt}
-                                        onChange={(e) => setBelt(e.target.value)}
+                                        onChange={(e) => { setBelt(e.target.value); setStripe(0) }}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                         required
                                     >
@@ -286,6 +292,42 @@ export default function MemberSignupPage() {
                                     </select>
                                 </div>
                             </div>
+
+                            {/* 그랄(줄) 선택 - 관리자 설정 기준에 따라 동적 생성 */}
+                            {(() => {
+                                const beltKorMap: Record<string, string> = {
+                                    'White': '화이트 (성인)', 'Blue': '블루', 'Purple': '퍼플',
+                                    'Brown': '브라운', 'Black': '블랙'
+                                }
+                                const korName = beltKorMap[belt] || belt
+                                const maxStripes = stripeMap[korName] ?? stripeMap[belt] ?? null
+                                if (maxStripes === null) return null
+                                return (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">현재 그랄 수 (선택)</label>
+                                            <select
+                                                value={stripe}
+                                                onChange={(e) => setStripe(Number(e.target.value))}
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            >
+                                                {Array.from({ length: maxStripes + 1 }, (_, i) => (
+                                                    <option key={i} value={i}>{i === 0 ? '0 (없음)' : `${i}그랄`}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="overflow-hidden">
+                                            <label className="block text-sm font-medium text-gray-700">현재 등급 취득일 (선택)</label>
+                                            <input
+                                                type="date"
+                                                value={promotionDate}
+                                                onChange={(e) => setPromotionDate(e.target.value)}
+                                                className="mt-1 block w-full max-w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm box-border"
+                                            />
+                                        </div>
+                                    </div>
+                                )
+                            })()}
 
                             <div className="overflow-hidden">
                                 <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
