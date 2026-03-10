@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import MemberModal from './components/MemberModal'
 import MembersTable from './components/MembersTable'
+import PendingMembersList from './components/PendingMembersList'
+import { approvePendingMember, rejectPendingMember } from './actions'
 
 // searchParams is a Promise in newer Next.js versions (15+)
 export default async function MembersPage({ searchParams }: { searchParams: Promise<{ id?: string, sort?: string, order?: string, status?: string }> }) {
@@ -121,10 +123,25 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         })
     })
 
+    // 5. Fetch Pending Members
+    const { data: pendingMembers } = await supabase
+        .from('gym_members')
+        .select('*')
+        .eq('gym_id', gym.id)
+        .eq('status', 'pending')
+        .order('joined_at', { ascending: false })
+
     return (
         <div className="max-w-7xl mx-auto">
             {/* Modal */}
             {selectedMember && <MemberModal member={selectedMember} />}
+
+            {/* Pending Members List (Approval Workflow) */}
+            <PendingMembersList
+                members={pendingMembers || []}
+                onApprove={approvePendingMember}
+                onReject={rejectPendingMember}
+            />
 
             {/* Client Component for Interactive Table & Bulk Actions */}
             <MembersTable

@@ -7,6 +7,9 @@ import { deleteMembers, generateMissingPasswords, bulkPromoteMembers } from '../
 import { checkInMember, checkOutMember, cancelAttendance } from '../../attendance/actions'
 import MemberModal from './MemberModal'
 import { displayBeltName } from '../constants'
+import { Menu, Transition } from '@headlessui/react'
+import { Fragment } from 'react'
+import { ChevronDownIcon, ClipboardDocumentIcon, ChatBubbleLeftIcon, PencilSquareIcon, UserPlusIcon } from '@heroicons/react/20/solid'
 
 interface Member {
     id: string
@@ -43,6 +46,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
     const currentStatus = status
 
     const [isEditMode, setIsEditMode] = useState(false)
+    const [bulkActionType, setBulkActionType] = useState<'delete' | 'promote' | 'password' | null>(null)
+    const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
@@ -141,6 +146,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
             alert('삭제되었습니다.')
             setSelectedIds(new Set())
             setIsEditMode(false)
+            setBulkActionType(null)
             router.refresh()
         }
         setIsDeleting(false)
@@ -154,6 +160,8 @@ export default function MembersTable({ initialMembers, count, status, attendance
         if (res?.error) alert(res.error)
         else {
             alert(res.message)
+            setIsEditMode(false)
+            setBulkActionType(null)
             router.refresh()
         }
     }
@@ -175,6 +183,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
             alert(msg)
             setSelectedIds(new Set())
             setIsEditMode(false)
+            setBulkActionType(null)
             router.refresh()
         }
     }
@@ -296,8 +305,82 @@ export default function MembersTable({ initialMembers, count, status, attendance
         )
     }
 
+    const startBulkAction = (type: 'delete' | 'promote' | 'password') => {
+        setBulkActionType(type)
+        setIsEditMode(true)
+        setIsBulkEditModalOpen(false)
+        setSelectedIds(new Set())
+    }
+
     return (
         <div>
+            {/* Bulk Edit Modal */}
+            <Transition appear show={isBulkEditModalOpen} as={Fragment}>
+                <div className="relative z-50">
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black bg-opacity-25" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-zinc-800">
+                                    <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-zinc-100 mb-4">
+                                        일괄 편집 작업 선택
+                                    </h3>
+                                    <div className="mt-2 space-y-3">
+                                        <button
+                                            onClick={() => startBulkAction('delete')}
+                                            className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-zinc-700 hover:bg-red-50 hover:text-red-700 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors flex items-center gap-3 text-gray-700 dark:text-zinc-300 font-medium"
+                                        >
+                                            선택 삭제
+                                        </button>
+                                        <button
+                                            onClick={() => startBulkAction('promote')}
+                                            className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-zinc-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 transition-colors flex items-center gap-3 text-gray-700 dark:text-zinc-300 font-medium"
+                                        >
+                                            선택 승급
+                                        </button>
+                                        <button
+                                            onClick={() => startBulkAction('password')}
+                                            className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-zinc-700 hover:bg-green-50 hover:text-green-700 hover:border-green-200 dark:hover:bg-green-900/20 dark:hover:text-green-400 transition-colors flex items-center gap-3 text-gray-700 dark:text-zinc-300 font-medium"
+                                        >
+                                            비밀번호 일괄 생성
+                                        </button>
+                                    </div>
+
+                                    <div className="mt-6 flex justify-end">
+                                        <button
+                                            type="button"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-gray-900 dark:text-zinc-100 hover:bg-gray-200 dark:hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                                            onClick={() => setIsBulkEditModalOpen(false)}
+                                        >
+                                            취소
+                                        </button>
+                                    </div>
+                                </div>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
@@ -321,71 +404,62 @@ export default function MembersTable({ initialMembers, count, status, attendance
                 </div>
             </div>
 
-            <div className="mt-6 sm:border-b sm:border-gray-200 dark:border-zinc-800">
-                <div className="flex flex-row justify-between items-center sm:items-end gap-2 sm:gap-4 pb-4 sm:pb-0">
+            <div className="mt-6">
+                <div className="flex flex-row justify-between items-center gap-2 sm:gap-4 pb-4 sm:pb-0">
                     <div className="flex-shrink-0">
-                        <div className="sm:hidden">
+                        <div>
                             <label htmlFor="status-tabs" className="sr-only">회원 상태 선택</label>
                             <select
                                 id="status-tabs"
                                 name="status-tabs"
-                                className="block rounded-md border-gray-300 dark:border-zinc-700 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none"
+                                className="block rounded-md border-gray-300 dark:border-zinc-700 py-1.5 pl-3 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 dark:border-zinc-700 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] dark:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:10px_10px] bg-[right_10px_top_50%] bg-no-repeat"
                                 value={currentStatus}
                                 onChange={(e) => {
                                     router.push(`/dashboard/members?status=${e.target.value}&sort=${sort}&order=${order}`)
                                 }}
                             >
-                                <option value="active">수련 중</option>
-                                <option value="paused">휴관 중</option>
+                                <option value="active">수련중</option>
+                                <option value="paused">휴관중</option>
                                 <option value="all">전체</option>
                             </select>
                         </div>
-                        <nav className="-mb-px hidden sm:flex space-x-6">
-                            {['active', 'paused', 'all'].map((tab) => {
-                                const label = tab === 'active' ? '수련 중 (Active)' : tab === 'paused' ? '휴관 중 (Paused)' : '전체 (All)'
-                                const isActive = currentStatus === tab
-                                return (
-                                    <Link
-                                        key={tab}
-                                        href={`/dashboard/members?status=${tab}&sort=${sort}&order=${order}`}
-                                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 hover:border-gray-300 dark:border-zinc-700'}`}
-                                    >
-                                        {label}
-                                    </Link>
-                                )
-                            })}
-                        </nav>
                     </div>
 
                     <div className="flex gap-2 items-center flex-shrink-0 justify-end">
                         {isEditMode ? (
                             <>
-                                <button
-                                    onClick={handleGeneratePasswords}
-                                    disabled={isGenerating}
-                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 disabled:opacity-50 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
-                                >
-                                    {isGenerating ? '생성 중...' : '미설정 PW생성'}
-                                </button>
-                                <span className="text-gray-300 dark:text-zinc-600 mr-1 sm:mr-2">|</span>
-                                <button
-                                    onClick={handleBulkPromote}
-                                    disabled={selectedIds.size === 0 || isPromoting}
-                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-40 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
-                                >
-                                    {isPromoting ? '승급 중...' : `선택승급 (${selectedIds.size})`}
-                                </button>
-                                <span className="text-gray-300 dark:text-zinc-600 mr-1 sm:mr-2">|</span>
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={selectedIds.size === 0 || isDeleting}
-                                    className="block rounded-md bg-red-600 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 whitespace-nowrap"
-                                >
-                                    {isDeleting ? '삭제 중...' : `선택 삭제 (${selectedIds.size})`}
-                                </button>
+                                {bulkActionType === 'password' && (
+                                    <button
+                                        onClick={handleGeneratePasswords}
+                                        disabled={isGenerating}
+                                        className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 disabled:opacity-50 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
+                                    >
+                                        {isGenerating ? '생성 중...' : '미설정 PW생성'}
+                                    </button>
+                                )}
+                                {bulkActionType === 'promote' && (
+                                    <button
+                                        onClick={handleBulkPromote}
+                                        disabled={selectedIds.size === 0 || isPromoting}
+                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-40 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
+                                    >
+                                        {isPromoting ? '승급 중...' : `선택승급 (${selectedIds.size})`}
+                                    </button>
+                                )}
+                                {bulkActionType === 'delete' && (
+                                    <button
+                                        onClick={handleDelete}
+                                        disabled={selectedIds.size === 0 || isDeleting}
+                                        className="block rounded-md bg-red-600 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                        {isDeleting ? '삭제 중...' : `선택 삭제 (${selectedIds.size})`}
+                                    </button>
+                                )}
+                                <span className="text-gray-300 dark:text-zinc-600 mr-1 sm:mr-2 ml-1 sm:ml-2">|</span>
                                 <button
                                     onClick={() => {
                                         setIsEditMode(false)
+                                        setBulkActionType(null)
                                         setSelectedIds(new Set())
                                     }}
                                     className="block rounded-md bg-white dark:bg-zinc-900 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:bg-zinc-800/50 whitespace-nowrap"
@@ -394,62 +468,129 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                 </button>
                             </>
                         ) : (
-                            <>
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            const { getInvitationUrl } = await import('../actions')
-                                            const res = await getInvitationUrl()
-                                            if (res.error) {
-                                                alert(res.error)
-                                                return
-                                            }
-                                            if (navigator.clipboard && res.copyText) {
-                                                await navigator.clipboard.writeText(res.copyText)
-                                                alert('초대 링크(문구 포함)가 클립보드에 복사되었습니다.\n\n카카오톡이나 문자 메시지에 붙여넣기 하여 전송해주세요!')
-                                            } else {
-                                                // Fallback for non-https/unsupported browsers
-                                                prompt('클립보드 복사를 지원하지 않는 환경입니다. 아래 내용을 직접 복사해주세요:', res.copyText)
-                                            }
-                                        } catch (e) {
-                                            alert('복사 중 오류가 발생했습니다.')
-                                        }
-                                    }}
-                                    className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors whitespace-nowrap flex items-center mr-1"
+                            <Menu as="div" className="relative inline-block text-left">
+                                <div>
+                                    <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-700 dark:hover:bg-zinc-800">
+                                        회원관리
+                                        <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+                                    </Menu.Button>
+                                </div>
+
+                                <Transition
+                                    as={Fragment}
+                                    enter="transition ease-out duration-100"
+                                    enterFrom="transform opacity-0 scale-95"
+                                    enterTo="transform opacity-100 scale-100"
+                                    leave="transition ease-in duration-75"
+                                    leaveFrom="transform opacity-100 scale-100"
+                                    leaveTo="transform opacity-0 scale-95"
                                 >
-                                    <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                    초대 링크 복사
-                                </button>
-                                <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
-                                <button
-                                    onClick={async () => {
-                                        const phone = prompt('추가: 문자 초대(가상)를 진행하시려면 전화번호를 입력하세요 (방금 복사하신 기능 사용을 더 권장합니다)')
-                                        if (!phone) return
-                                        const { sendSmsInvitation } = await import('../actions')
-                                        const res = await sendSmsInvitation(phone)
-                                        if (res.error) alert(res.error)
-                                        else alert(res.message)
-                                    }}
-                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-300 transition-colors whitespace-nowrap flex items-center"
-                                >
-                                    문자 발송(테스트)
-                                </button>
-                                <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
-                                <button
-                                    onClick={() => setIsEditMode(true)}
-                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 transition-colors whitespace-nowrap"
-                                >
-                                    일괄 편집
-                                </button>
-                                <span className="text-gray-300 dark:text-zinc-600 mx-1">|</span>
-                                <Link
-                                    href="/dashboard/members/new"
-                                    className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-zinc-100 transition-colors whitespace-nowrap flex items-center"
-                                >
-                                    <svg className="w-4 h-4 mr-1 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                                    신규 등록
-                                </Link>
-                            </>
+                                    <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-zinc-800 dark:ring-zinc-700">
+                                        <div className="py-1">
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                const { getInvitationUrl } = await import('../actions')
+                                                                const res = await getInvitationUrl()
+                                                                if (res.error) {
+                                                                    alert(res.error)
+                                                                    return
+                                                                }
+
+                                                                const copyToClipboard = async (text: string) => {
+                                                                    try {
+                                                                        if (navigator.clipboard && window.isSecureContext) {
+                                                                            await navigator.clipboard.writeText(text);
+                                                                            return true;
+                                                                        }
+                                                                    } catch (err) {
+                                                                        console.warn('Clipboard API failed, trying fallback', err);
+                                                                    }
+
+                                                                    // Fallback
+                                                                    try {
+                                                                        const textArea = document.createElement("textarea");
+                                                                        textArea.value = text;
+                                                                        // Avoid scrolling to bottom
+                                                                        textArea.style.top = "0";
+                                                                        textArea.style.left = "0";
+                                                                        textArea.style.position = "fixed";
+                                                                        document.body.appendChild(textArea);
+                                                                        textArea.focus();
+                                                                        textArea.select();
+                                                                        const successful = document.execCommand('copy');
+                                                                        document.body.removeChild(textArea);
+                                                                        return successful;
+                                                                    } catch (err) {
+                                                                        console.error('Fallback clipboard failed', err);
+                                                                        return false;
+                                                                    }
+                                                                }
+
+                                                                const success = await copyToClipboard(res.copyText || '')
+
+                                                                if (success) {
+                                                                    alert('초대 링크(문구 포함)가 클립보드에 복사되었습니다.\n\n카카오톡이나 문자 메시지에 붙여넣기 하여 전송해주세요!')
+                                                                } else {
+                                                                    prompt('클립보드 복사를 지원하지 않는 환경이거나 권한이 없습니다. 아래 내용을 직접 복사해주세요:', res.copyText)
+                                                                }
+                                                            } catch (e: any) {
+                                                                alert(`복사 중 오류가 발생했습니다: ${e?.message || '알 수 없는 오류'}`)
+                                                            }
+                                                        }}
+                                                        className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <ClipboardDocumentIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                                                        초대 링크 복사
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={async () => {
+                                                            const phone = prompt('추가: 문자 초대(가상)를 진행하시려면 전화번호를 입력하세요 (방금 복사하신 기능 사용을 더 권장합니다)')
+                                                            if (!phone) return
+                                                            const { sendSmsInvitation } = await import('../actions')
+                                                            const res = await sendSmsInvitation(phone)
+                                                            if (res.error) alert(res.error)
+                                                            else alert(res.message)
+                                                        }}
+                                                        className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <ChatBubbleLeftIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                                                        문자 발송(테스트)
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={() => setIsEditMode(true)}
+                                                        className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                                                        일괄 편집
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <Link
+                                                        href="/dashboard/members/new"
+                                                        className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm`}
+                                                    >
+                                                        <UserPlusIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                                                        신규 등록
+                                                    </Link>
+                                                )}
+                                            </Menu.Item>
+                                        </div>
+                                    </Menu.Items>
+                                </Transition>
+                            </Menu>
                         )}
                     </div>
                 </div>
@@ -569,7 +710,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             )
                                         })
                                     ) : (
-                                        <tr><td colSpan={6} className="py-10 text-center text-sm text-gray-500 dark:text-zinc-400">등록된 회원이 없습니다. 신규 회원을 등록해주세요.</td></tr>
+                                        <tr><td colSpan={7} className="py-10 text-center text-sm text-gray-500 dark:text-zinc-400">등록된 회원이 없습니다. 신규 회원을 등록해주세요.</td></tr>
                                     )}
                                 </tbody>
                             </table>

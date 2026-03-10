@@ -163,6 +163,31 @@ export default function GymSettingsPage() {
                     </div>
                 </div>
             </div>
+
+            <div className="bg-white dark:bg-zinc-900 shadow rounded-lg p-6 border border-gray-200 dark:border-zinc-800 mt-8">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gray-900 dark:text-zinc-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    출석 키오스크 단말기
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
+                    도장 입구에 거치용 공용 PC 또는 태블릿을 설치하여, 회원 본인이 직접 뒷번호 4자리를 입력하고 출석체크할 수 있도록 돕는 전체화면 전용 모드입니다.
+                </p>
+                <div className="flex justify-start">
+                    <a
+                        href="/dashboard/attendance/kiosk"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-semibold text-sm"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        키오스크 모드 실행하기 (새 창)
+                    </a>
+                </div>
+            </div>
         </div>
     )
 }

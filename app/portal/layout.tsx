@@ -60,8 +60,8 @@ export default async function PortalLayout({
     // OR a common trick is to use headers()
     const { headers } = await import('next/headers');
     const headersList = await headers();
-    const pathname = headersList.get('x-invoke-path') || headersList.get('next-url');
-    const isSignupUrl = pathname?.includes('/portal/signup');
+    const currentPath = headersList.get('x-pathname') || '';
+    const isSignupUrl = currentPath === '/portal/signup';
 
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('member_session')

@@ -30,6 +30,7 @@ export async function registerPortalMember(data: {
     password: string,
     birthDate: string | null,
     gender: string,
+    belt: string,
     accessCode: string,
     guardianPhone?: string,
     address?: string,
@@ -74,6 +75,7 @@ export async function registerPortalMember(data: {
                 .update({
                     login_password: data.password,
                     gender: data.gender,
+                    belt: data.belt,
                     birth_date: data.birthDate || null,
                     access_code: finalAccessCode,
                     guardian_phone: data.guardianPhone || null,
@@ -91,18 +93,6 @@ export async function registerPortalMember(data: {
             // Note: Since we don't have Supabase Auth 'users' for normal members yet,
             // we are entirely relying on the `gym_members` table for auth credentials.
 
-            // Determine default belt based on Korean Age
-            let defaultBelt = 'White'
-            if (data.birthDate) {
-                const bDate = new Date(data.birthDate)
-                if (!isNaN(bDate.getTime())) {
-                    const age = new Date().getFullYear() - bDate.getFullYear() + 1
-                    if (age < 16) {
-                        defaultBelt = '화이트 (유소년)'
-                    }
-                }
-            }
-
             const { data: newMember, error: insertError } = await supabaseAdmin
                 .from('gym_members')
                 .insert({
@@ -119,8 +109,8 @@ export async function registerPortalMember(data: {
                     grade: data.grade || null,
                     joined_at: new Date().toISOString(),
                     start_date: new Date().toISOString(),
-                    status: 'active', // For now, auto-activate. Masters can change later.
-                    belt: defaultBelt
+                    status: 'pending', // Awaiting Gym Master approval
+                    belt: data.belt
                 })
                 .select('id')
                 .single()
@@ -130,28 +120,6 @@ export async function registerPortalMember(data: {
                     throw new Error('이미 등록된 전화번호입니다.')
                 }
                 throw new Error('가입 중 오류가 발생했습니다: ' + insertError.message)
-            }
-
-            // [NEW] Record initial promotion log for the newly created member
-            if (newMember) {
-                const { error: logError } = await supabaseAdmin
-                    .from('gym_promotion_logs')
-                    .insert({
-                        gym_id: data.gymId,
-                        member_id: newMember.id,
-                        belt_name: defaultBelt,
-                        stripe_level: 0,
-                        promoted_at: new Date().toISOString().split('T')[0],
-                        training_days: 0,
-                        attendance_count: 0,
-                        awarded_by: '시스템',
-                        memo: '신규 가입 자동 부여'
-                    })
-
-                if (logError) {
-                    console.error('Failed to log initial promotion for new member', logError)
-                    // Non-blocking error, user can still log in
-                }
             }
         }
 

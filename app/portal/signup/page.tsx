@@ -23,6 +23,8 @@ export default function MemberSignupPage() {
     const [passwordConfirm, setPasswordConfirm] = useState('')
     const [birthDate, setBirthDate] = useState('')
     const [gender, setGender] = useState('M')
+    const [belt, setBelt] = useState('White')
+    const [accessCode, setAccessCode] = useState('')
 
     // Additional fields (accessCode removed from state)
     const [guardianPhone, setGuardianPhone] = useState('')
@@ -70,7 +72,8 @@ export default function MemberSignupPage() {
             password,
             birthDate: birthDate || null,
             gender,
-            accessCode: '', // 서버단에서 자동생성
+            belt, // Send the selected belt
+            accessCode, // Send user's chosen PIN
             guardianPhone,
             address,
             school,
@@ -221,6 +224,23 @@ export default function MemberSignupPage() {
                                 )}
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">출석체크 비밀번호 (숫자 4자리) *</label>
+                                <input
+                                    required
+                                    type="tel"
+                                    value={accessCode}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/[^0-9]/g, '')
+                                        setAccessCode(val)
+                                    }}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="출석 시 사용할 4자리 숫자 (예: 통화용 뒷자리)"
+                                    maxLength={4}
+                                    minLength={4}
+                                />
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">성별 *</label>
@@ -234,14 +254,47 @@ export default function MemberSignupPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
-                                    <input
-                                        type="date"
-                                        value={birthDate}
-                                        onChange={(e) => setBirthDate(e.target.value)}
+                                    <label className="block text-sm font-medium text-gray-700">현재 벨트 *</label>
+                                    <select
+                                        value={belt}
+                                        onChange={(e) => setBelt(e.target.value)}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    />
+                                        required
+                                    >
+                                        <optgroup label="성인">
+                                            <option value="White">화이트 (성인)</option>
+                                            <option value="Blue">블루</option>
+                                            <option value="Purple">퍼플</option>
+                                            <option value="Brown">브라운</option>
+                                            <option value="Black">블랙</option>
+                                        </optgroup>
+                                        <optgroup label="유소년">
+                                            <option value="화이트 (유소년)">화이트 (유소년)</option>
+                                            <option value="그레이-화이트">그레이-화이트</option>
+                                            <option value="그레이">그레이</option>
+                                            <option value="그레이-블랙">그레이-블랙</option>
+                                            <option value="옐로우-화이트">옐로우-화이트</option>
+                                            <option value="옐로우">옐로우</option>
+                                            <option value="옐로우-블랙">옐로우-블랙</option>
+                                            <option value="오렌지-화이트">오렌지-화이트</option>
+                                            <option value="오렌지">오렌지</option>
+                                            <option value="오렌지-블랙">오렌지-블랙</option>
+                                            <option value="그린-화이트">그린-화이트</option>
+                                            <option value="그린">그린</option>
+                                            <option value="그린-블랙">그린-블랙</option>
+                                        </optgroup>
+                                    </select>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
+                                <input
+                                    type="date"
+                                    value={birthDate}
+                                    onChange={(e) => setBirthDate(e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                />
                             </div>
 
                             <div>

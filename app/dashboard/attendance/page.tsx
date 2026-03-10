@@ -27,16 +27,6 @@ export default async function AttendancePage() {
                         </span>
                     )}
                 </div>
-                <a
-                    href="/dashboard/attendance/kiosk"
-                    className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
-                    title="키오스크 모드 (Full Screen)"
-                >
-                    <svg className="w-5 h-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span className="hidden sm:inline">키오스크 모드 (Full Screen)</span>
-                </a>
             </div>
             <ClassScheduleBoard
                 initialSchedules={schedules}

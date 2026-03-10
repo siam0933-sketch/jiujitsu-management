@@ -436,6 +436,82 @@ export async function updateMemberPaymentEndDate(memberId: string, endDate: stri
     return { success: true }
 }
 
+// -------------------------------------------------------------------------------------------------
+// Pending Members Approval/Rejection
+// -------------------------------------------------------------------------------------------------
+
+export async function approvePendingMember(memberId: string, belt: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { success: false, error: '인증되지 않은 사용자입니다.' }
+
+    const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
+    if (!gym) return { success: false, error: '도장 정보를 찾을 수 없습니다.' }
+
+    try {
+        // 1. Update status to active
+        const { error: updateError } = await supabase
+            .from('gym_members')
+            .update({ status: 'active', belt })
+            .eq('id', memberId)
+            .eq('gym_id', gym.id)
+
+        if (updateError) throw updateError
+
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+        const adminName = profile?.full_name || '관장님'
+
+        // 2. Insert initial promotion log
+        const { error: logError } = await supabase
+            .from('gym_promotion_logs')
+            .insert({
+                gym_id: gym.id,
+                member_id: memberId,
+                belt_name: belt,
+                stripe_level: 0,
+                promoted_at: new Date().toISOString().split('T')[0],
+                training_days: 0,
+                attendance_count: 0,
+                awarded_by: adminName,
+                memo: '가입 승인 (초기 벨트)'
+            })
+
+        if (logError) throw logError
+
+        revalidatePath('/dashboard/members')
+        return { success: true }
+    } catch (e: any) {
+        console.error('Approval error:', e)
+        return { success: false, error: typeof e.message === 'string' ? e.message : '승인 처리 중 오류 발생' }
+    }
+}
+
+export async function rejectPendingMember(memberId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { success: false, error: '인증되지 않은 사용자입니다.' }
+
+    const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
+    if (!gym) return { success: false, error: '도장 정보를 찾을 수 없습니다.' }
+
+    try {
+        const { error } = await supabase
+            .from('gym_members')
+            .delete()
+            .eq('id', memberId)
+            .eq('gym_id', gym.id)
+
+        if (error) throw error
+
+        revalidatePath('/dashboard/members')
+        return { success: true }
+    } catch (e: any) {
+        console.error('Rejection error:', e)
+        return { success: false, error: typeof e.message === 'string' ? e.message : '거절 처리 중 오류 발생' }
+    }
+}
 
 
 export async function bulkPromoteMembers(memberIds: string[]) {

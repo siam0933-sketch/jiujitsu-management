@@ -3,8 +3,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
     let supabaseResponse = NextResponse.next({
-        request,
+        request: {
+            headers: requestHeaders,
+        },
     })
 
     const supabase = createServerClient(
@@ -39,8 +44,10 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-        if (!request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/auth')) {
-            // Unauthenticated users are allowed only on login/auth routes (for now)
+        if (!request.nextUrl.pathname.startsWith('/login') &&
+            !request.nextUrl.pathname.startsWith('/auth') &&
+            !request.nextUrl.pathname.startsWith('/portal/signup')) {
+            // Unauthenticated users are allowed only on login/auth routes and member signup
             // Ideally redirect here.
         }
     } else {

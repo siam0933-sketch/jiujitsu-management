@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import NextTopLoader from 'nextjs-toploader';
+import SessionProvider from './components/SessionProvider';
 
 export default function RootLayout({
   children,
@@ -40,7 +41,9 @@ export default function RootLayout({
           speed={200}
           shadow="0 0 10px #2563EB,0 0 5px #2563EB"
         />
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );
