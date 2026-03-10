@@ -35,7 +35,18 @@ export async function lookupGymByCode(code: string) {
         }
     })
 
-    return { success: true, gym, stripeMap }
+    // Fetch active terms for this gym (shown during signup)
+    const { data: termsRows } = await supabaseAdmin
+        .from('gym_terms')
+        .select('id, title, content')
+        .eq('gym_id', gym.id)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true })
+
+    const activeTerms = termsRows || []
+
+    return { success: true, gym, stripeMap, activeTerms }
 }
 
 // 2. Handle actual registration

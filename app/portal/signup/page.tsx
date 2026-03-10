@@ -14,6 +14,9 @@ export default function MemberSignupPage() {
     const [invitationCode, setInvitationCode] = useState(codeParam)
     const [gymInfo, setGymInfo] = useState<{ id: string, name: string } | null>(null)
     const [stripeMap, setStripeMap] = useState<Record<string, number>>({})
+    const [activeTerms, setActiveTerms] = useState<{ id: string, title: string, content: string }[]>([])
+    const [agreedTerms, setAgreedTerms] = useState<Set<string>>(new Set())
+    const [viewingTerm, setViewingTerm] = useState<{ title: string, content: string } | null>(null)
     const [errorMsg, setErrorMsg] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
@@ -55,9 +58,13 @@ export default function MemberSignupPage() {
         } else if (res.gym) {
             setGymInfo(res.gym)
             setStripeMap(res.stripeMap || {})
+            setActiveTerms(res.activeTerms || [])
+            setAgreedTerms(new Set())
             setStep('FORM')
         }
     }
+
+    const allTermsAgreed = activeTerms.length === 0 || activeTerms.every(t => agreedTerms.has(t.id))
 
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -464,10 +471,37 @@ export default function MemberSignupPage() {
                                 </div>
                             </div>
 
+                            {/* 약관 동의 섹션 */}
+                            {activeTerms.length > 0 && (
+                                <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                                    <p className="text-sm font-semibold text-gray-700">약관 동의</p>
+                                    {activeTerms.map((term) => {
+                                        const agreed = agreedTerms.has(term.id)
+                                        return (
+                                            <div key={term.id} className="flex items-center justify-between gap-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-xs ${agreed ? 'text-green-600' : 'text-gray-500'}`}>
+                                                        {agreed ? '✓' : '○'}
+                                                    </span>
+                                                    <span className="text-sm text-gray-700">{term.title}</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setViewingTerm(term)}
+                                                    className="shrink-0 text-xs px-3 py-1.5 border border-blue-300 text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
+                                                >
+                                                    약관 확인
+                                                </button>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+
                             <div>
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isLoading || !allTermsAgreed}
                                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                                 >
                                     {isLoading ? '가입 처리 중...' : '가입하기'}
@@ -501,6 +535,43 @@ export default function MemberSignupPage() {
 
                 </div>
             </div>
+
+            {/* 약관 모달 */}
+            {viewingTerm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setViewingTerm(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <h3 className="text-base font-bold text-gray-900">{viewingTerm.title}</h3>
+                            <button
+                                onClick={() => setViewingTerm(null)}
+                                className="text-gray-400 hover:text-gray-600 text-xl font-light leading-none"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="px-6 py-4 overflow-y-auto flex-1">
+                            <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
+                                {viewingTerm.content}
+                            </pre>
+                        </div>
+                        <div className="px-6 py-4 border-t border-gray-100">
+                            <button
+                                onClick={() => {
+                                    const term = activeTerms.find(t => t.title === viewingTerm.title && t.content === viewingTerm.content)
+                                    if (term) {
+                                        setAgreedTerms(prev => new Set([...prev, term.id]))
+                                    }
+                                    setViewingTerm(null)
+                                }}
+                                className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors"
+                            >
+                                확인 및 동의
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
