@@ -287,13 +287,13 @@ export default function MemberSignupPage() {
                                 </div>
                             </div>
 
-                            <div>
+                            <div className="overflow-hidden">
                                 <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
                                 <input
                                     type="date"
                                     value={birthDate}
                                     onChange={(e) => setBirthDate(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full max-w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm box-border"
                                 />
                             </div>
 
