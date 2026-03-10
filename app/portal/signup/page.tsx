@@ -22,7 +22,9 @@ export default function MemberSignupPage() {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirm, setPasswordConfirm] = useState('')
-    const [birthDate, setBirthDate] = useState('')
+    const [birthYear, setBirthYear] = useState('')
+    const [birthMonth, setBirthMonth] = useState('')
+    const [birthDay, setBirthDay] = useState('')
     const [gender, setGender] = useState('male')
     const [belt, setBelt] = useState('White')
     const [stripe, setStripe] = useState<number>(0)
@@ -74,7 +76,9 @@ export default function MemberSignupPage() {
             name,
             phone,
             password,
-            birthDate: birthDate || null,
+            birthDate: (birthYear && birthMonth && birthDay)
+                ? `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`
+                : null,
             gender,
             belt,
             stripe: stripe !== null ? stripe : null,
@@ -329,14 +333,41 @@ export default function MemberSignupPage() {
                                 )
                             })()}
 
-                            <div className="overflow-hidden">
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
-                                <input
-                                    type="date"
-                                    value={birthDate}
-                                    onChange={(e) => setBirthDate(e.target.value)}
-                                    className="mt-1 block w-full max-w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm box-border"
-                                />
+                                <div className="mt-1 grid grid-cols-3 gap-2">
+                                    <select
+                                        value={birthYear}
+                                        onChange={(e) => setBirthYear(e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    >
+                                        <option value="">년도</option>
+                                        {Array.from({ length: 80 }, (_, i) => {
+                                            const yr = new Date().getFullYear() - i
+                                            return <option key={yr} value={String(yr)}>{yr}</option>
+                                        })}
+                                    </select>
+                                    <select
+                                        value={birthMonth}
+                                        onChange={(e) => setBirthMonth(e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    >
+                                        <option value="">월</option>
+                                        {Array.from({ length: 12 }, (_, i) => (
+                                            <option key={i + 1} value={String(i + 1)}>{i + 1}월</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={birthDay}
+                                        onChange={(e) => setBirthDay(e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    >
+                                        <option value="">일</option>
+                                        {Array.from({ length: 31 }, (_, i) => (
+                                            <option key={i + 1} value={String(i + 1)}>{i + 1}일</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
                             <div>
