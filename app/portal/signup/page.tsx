@@ -66,9 +66,15 @@ export default function MemberSignupPage() {
 
     const allTermsAgreed = activeTerms.length === 0 || activeTerms.every(t => agreedTerms.has(t.id))
 
+    const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
+
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!gymInfo) return
+        if (!PASSWORD_POLICY.test(password)) {
+            setErrorMsg('비밀번호는 영문과 숫자를 포함하여 6자리 이상이어야 합니다.')
+            return
+        }
         if (password !== passwordConfirm) {
             setErrorMsg('비밀번호가 일치하지 않습니다.')
             return
@@ -227,20 +233,28 @@ export default function MemberSignupPage() {
 
                             {/* 6. 로그인 비밀번호 */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 (4자리 이상) *</label>
+                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 *</label>
                                 <input required type="password" value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className={inputCls} placeholder="로그인 시 사용할 비밀번호" minLength={4} />
+                                    className={inputCls} placeholder="영문+숫자 혼합 6자리 이상" minLength={6} />
+                                <p className="mt-1 text-xs text-gray-500">영문과 숫자를 반드시 포함하여 6자리 이상으로 설정해주세요.</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 확인 *</label>
                                 <input required type="password" value={passwordConfirm}
                                     onChange={(e) => setPasswordConfirm(e.target.value)}
                                     className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${passwordConfirm && password !== passwordConfirm ? 'border-red-300' : 'border-gray-300'}`}
-                                    placeholder="비밀번호를 다시 입력해주세요" minLength={4} />
+                                    placeholder="비밀번호를 다시 입력해주세요" minLength={6} />
                                 {passwordConfirm && password !== passwordConfirm && (
                                     <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
                                 )}
+                                {/* 빨간 경고: 관리자 가시성 */}
+                                <div className="mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                    <p className="text-xs text-red-600 font-medium leading-relaxed">
+                                        ⚠️ 비밀번호는 관장/관리자가 확인할 수 있습니다.<br />
+                                        평소 사용하지 않는 비밀번호로 설정해주세요.
+                                    </p>
+                                </div>
                             </div>
 
                             {/* 7. 출석체크 번호 (자동 채움) */}

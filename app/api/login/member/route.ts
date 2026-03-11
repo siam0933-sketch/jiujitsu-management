@@ -1,6 +1,8 @@
-import { createClient } from '@/utils/supabase/server'
+import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+
+const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
 
 export async function POST(request: Request) {
     try {
@@ -17,8 +19,6 @@ export async function POST(request: Request) {
         const supabase = await createClient()
 
         // 1. Authenticate using RPC (Secure Bypassing of RLS)
-        // We use an RPC function 'authenticate_member' with SECURITY DEFINER
-        // to find the member even if RLS normally blocks access.
         const { data: members, error } = await supabase.rpc('authenticate_member', {
             p_name: name,
             p_password: password
@@ -26,14 +26,12 @@ export async function POST(request: Request) {
 
         if (error) {
             console.error('Member Login RPC Error:', error)
-            // Fallback for clearer error message if function is missing
-            if (error.code === '42883') { // undefined_function
+            if (error.code === '42883') {
                 return NextResponse.json({ success: false, message: 'System Error: Authentication function missing. Please ask admin to run db_member_login_rpc.sql' }, { status: 500 })
             }
             return NextResponse.json({ success: false, message: `인증 중 오류가 발생했습니다. (${error.message})` }, { status: 500 })
         }
 
-        // RPC returns an array (SETOF)
         const member = members && members.length > 0 ? members[0] : null
 
         if (!member) {
@@ -41,16 +39,29 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
         }
 
-        // Check if member belongs to an active gym? (Optional, schema doesn't strictly enforce gym status here yet)
-
         if (member.status !== 'active' && member.status !== 'paused') {
             console.log(`[Member Login Failure] Member status inactive: ${member.status}`)
             return NextResponse.json({ success: false, message: '활성 상태인 회원만 로그인할 수 있습니다.' }, { status: 403 })
         }
 
-        // 2. Create Session
-        const cookieStore = await cookies()
+        // 2. Check if stored password meets the new policy (weak password detection)
+        let weakPassword = false
+        try {
+            const supabaseAdmin = await createAdminClient()
+            const { data: memberRow } = await supabaseAdmin
+                .from('gym_members')
+                .select('password')
+                .eq('id', member.id)
+                .single()
+            if (memberRow?.password && !PASSWORD_POLICY.test(memberRow.password)) {
+                weakPassword = true
+            }
+        } catch (e) {
+            // Non-critical: if check fails, skip the weak password prompt
+        }
 
+        // 3. Create Session
+        const cookieStore = await cookies()
         const sessionData = JSON.stringify({ memberId: member.id, gymId: member.gym_id, name: member.name, role: 'member' })
 
         cookieStore.set('member_session', sessionData, {
@@ -61,8 +72,8 @@ export async function POST(request: Request) {
             maxAge: 60 * 60 * 24 * 7 // 1 week
         })
 
-        console.log(`[Member Login Success] Logged in as ${member.name} (${member.id})`)
-        return NextResponse.json({ success: true, message: 'Login successful' })
+        console.log(`[Member Login Success] Logged in as ${member.name} (${member.id}), weakPassword: ${weakPassword}`)
+        return NextResponse.json({ success: true, message: 'Login successful', weakPassword, memberId: member.id })
     } catch (e: any) {
         console.error('Member Login API Error:', e)
         return NextResponse.json({ success: false, message: 'Server Error: ' + e.message }, { status: 500 })
