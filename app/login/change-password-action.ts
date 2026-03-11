@@ -13,7 +13,7 @@ export async function changeMemberPassword(memberId: string, newPassword: string
 
     const { error } = await supabaseAdmin
         .from('gym_members')
-        .update({ password: newPassword.toLowerCase() })
+        .update({ login_password: newPassword.toLowerCase() })
         .eq('id', memberId)
 
     if (error) return { error: '비밀번호 변경 중 오류가 발생했습니다.' }

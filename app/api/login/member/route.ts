@@ -50,10 +50,10 @@ export async function POST(request: Request) {
             const supabaseAdmin = await createAdminClient()
             const { data: memberRow } = await supabaseAdmin
                 .from('gym_members')
-                .select('password')
+                .select('login_password')
                 .eq('id', member.id)
                 .single()
-            if (memberRow?.password && !PASSWORD_POLICY.test(memberRow.password)) {
+            if (memberRow?.login_password && !PASSWORD_POLICY.test(memberRow.login_password)) {
                 weakPassword = true
             }
         } catch (e) {

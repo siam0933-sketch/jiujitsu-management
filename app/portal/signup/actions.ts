@@ -3,8 +3,65 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/server'
 
-// 1. Verify invitation code
+// 0a. Search gyms by partial name (for signup search UI)
+export async function searchGyms(query: string) {
+    if (!query || query.trim().length < 1) return { gyms: [] }
+    const supabaseAdmin = await createAdminClient()
+    const { data, error } = await supabaseAdmin
+        .from('gyms')
+        .select('id, name')
+        .ilike('name', `%${query.trim()}%`)
+        .order('name', { ascending: true })
+        .limit(10)
+    if (error) return { gyms: [] }
+    return { gyms: data || [] }
+}
+
+// 0b. Look up gym by id and return stripe map + active terms (for signup form)
+export async function lookupGymById(gymId: string) {
+    const supabaseAdmin = await createAdminClient()
+
+    const { data: gym } = await supabaseAdmin
+        .from('gyms')
+        .select('id, name')
+        .eq('id', gymId)
+        .single()
+
+    if (!gym) return { error: '도장을 찾을 수 없습니다.' }
+
+    const { data: criteriaRows } = await supabaseAdmin
+        .from('gym_promotion_criteria')
+        .select('belt_name, type, total_stripes_count, stripe_level')
+        .eq('gym_id', gym.id)
+
+    const stripeMap: Record<string, number> = {}
+    criteriaRows?.forEach((row: any) => {
+        const existing = stripeMap[row.belt_name]
+        if (existing === undefined || row.total_stripes_count > existing) {
+            stripeMap[row.belt_name] = row.total_stripes_count
+        }
+    })
+
+    let activeTerms: any[] = []
+    try {
+        const { data: termsRows } = await supabaseAdmin
+            .from('gym_terms')
+            .select('id, title, content')
+            .eq('gym_id', gym.id)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: true })
+        activeTerms = termsRows || []
+    } catch (e) {
+        activeTerms = []
+    }
+
+    return { success: true, gym, stripeMap, activeTerms }
+}
+
+// 1. Verify invitation code (kept for backward compatibility with existing invite links)
 export async function lookupGymByCode(code: string) {
+
     const supabase = await createClient()
     const supabaseAdmin = await createAdminClient()
 

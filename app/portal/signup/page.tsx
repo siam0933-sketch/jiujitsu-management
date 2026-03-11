@@ -1,17 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { lookupGymByCode, registerPortalMember } from './actions'
-import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { lookupGymByCode, lookupGymById, registerPortalMember, searchGyms } from './actions'
+import { AlertCircle, CheckCircle2, Search } from 'lucide-react'
 
 export default function MemberSignupPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const codeParam = searchParams?.get('code') || ''
 
-    const [step, setStep] = useState<'CODE' | 'FORM' | 'SUCCESS'>('CODE')
-    const [invitationCode, setInvitationCode] = useState(codeParam)
+    const [step, setStep] = useState<'SEARCH' | 'FORM' | 'SUCCESS'>('SEARCH')
     const [gymInfo, setGymInfo] = useState<{ id: string, name: string } | null>(null)
     const [stripeMap, setStripeMap] = useState<Record<string, number>>({})
     const [activeTerms, setActiveTerms] = useState<{ id: string, title: string, content: string }[]>([])
@@ -19,6 +18,12 @@ export default function MemberSignupPage() {
     const [viewingTerm, setViewingTerm] = useState<{ id: string, title: string, content: string } | null>(null)
     const [errorMsg, setErrorMsg] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+
+    // Gym search state
+    const [gymQuery, setGymQuery] = useState('')
+    const [gymResults, setGymResults] = useState<{ id: string, name: string }[]>([])
+    const [searchLoading, setSearchLoading] = useState(false)
+    const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
     // Form fields
     const [name, setName] = useState('')
@@ -38,8 +43,11 @@ export default function MemberSignupPage() {
     const [school, setSchool] = useState('')
     const [grade, setGrade] = useState('')
 
+    // If invitation code is in URL, skip search and use code directly
     useEffect(() => {
-        if (codeParam) handleCheckCode(codeParam)
+        if (codeParam) {
+            handleCheckCode(codeParam)
+        }
     }, [codeParam])
 
     const handleCheckCode = async (codeToCheck: string) => {
@@ -49,7 +57,6 @@ export default function MemberSignupPage() {
             const res = await lookupGymByCode(codeToCheck)
             if (res.error) {
                 setErrorMsg(res.error)
-                setStep('CODE')
             } else if (res.gym) {
                 setGymInfo(res.gym)
                 setStripeMap(res.stripeMap || {})
@@ -64,8 +71,44 @@ export default function MemberSignupPage() {
         }
     }
 
-    const allTermsAgreed = activeTerms.length === 0 || activeTerms.every(t => agreedTerms.has(t.id))
+    const handleSelectGym = async (gym: { id: string, name: string }) => {
+        setIsLoading(true)
+        setErrorMsg('')
+        try {
+            const res = await lookupGymById(gym.id)
+            if (res.error) {
+                setErrorMsg(res.error)
+            } else if (res.gym) {
+                setGymInfo(res.gym)
+                setStripeMap(res.stripeMap || {})
+                setActiveTerms(res.activeTerms || [])
+                setAgreedTerms(new Set())
+                setGymResults([])
+                setGymQuery('')
+                setStep('FORM')
+            }
+        } catch (e) {
+            setErrorMsg('서버 오류가 발생했습니다.')
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
+    // Debounced gym search
+    const handleGymQueryChange = (val: string) => {
+        setGymQuery(val)
+        setGymResults([])
+        if (searchTimeout.current) clearTimeout(searchTimeout.current)
+        if (!val.trim()) return
+        setSearchLoading(true)
+        searchTimeout.current = setTimeout(async () => {
+            const res = await searchGyms(val)
+            setGymResults(res.gyms || [])
+            setSearchLoading(false)
+        }, 350)
+    }
+
+    const allTermsAgreed = activeTerms.length === 0 || activeTerms.every(t => agreedTerms.has(t.id))
     const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
 
     const handleSubmitForm = async (e: React.FormEvent) => {
@@ -82,30 +125,17 @@ export default function MemberSignupPage() {
         setIsLoading(true)
         setErrorMsg('')
         const res = await registerPortalMember({
-            gymId: gymInfo.id,
-            name,
-            phone,
-            password,
+            gymId: gymInfo.id, name, phone, password,
             birthDate: (birthYear && birthMonth && birthDay)
-                ? `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`
-                : null,
-            gender,
-            belt,
+                ? `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}` : null,
+            gender, belt,
             stripe: stripe !== null ? stripe : null,
             promotionDate: promotionDate || null,
-            accessCode,
-            guardianPhone,
-            address,
-            school,
-            grade
+            accessCode, guardianPhone, address, school, grade
         })
         setIsLoading(false)
-        if (res.error) {
-            setErrorMsg(res.error)
-        } else {
-            setStep('SUCCESS')
-            setTimeout(() => router.push('/login'), 3000)
-        }
+        if (res.error) setErrorMsg(res.error)
+        else { setStep('SUCCESS'); setTimeout(() => router.push('/login'), 3000) }
     }
 
     const inputCls = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
@@ -117,7 +147,7 @@ export default function MemberSignupPage() {
                     {gymInfo?.name ? `${gymInfo.name} 회원 가입` : '체육관 회원 가입'}
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
-                    {step === 'CODE' && '관장님께 받은 초대 코드를 입력해주세요.'}
+                    {step === 'SEARCH' && '소속 도장을 검색하여 선택해주세요.'}
                     {step === 'FORM' && '가입 정보 입력'}
                     {step === 'SUCCESS' && '가입이 완료되었습니다!'}
                 </p>
@@ -138,25 +168,59 @@ export default function MemberSignupPage() {
                         </div>
                     )}
 
-                    {/* ─── CODE STEP ─── */}
-                    {step === 'CODE' && (
-                        <form onSubmit={(e) => { e.preventDefault(); handleCheckCode(invitationCode) }} className="space-y-6">
-                            <div>
-                                <label htmlFor="code" className="block text-sm font-medium text-gray-700">체육관 초대 코드</label>
-                                <input id="code" type="text" required value={invitationCode}
-                                    onChange={(e) => setInvitationCode(e.target.value)}
-                                    className={`mt-1 ${inputCls} uppercase`}
-                                    placeholder="예: GYM12A" />
+                    {/* ─── SEARCH STEP ─── */}
+                    {step === 'SEARCH' && (
+                        <div className="space-y-4">
+                            <div className="relative">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">도장 이름 검색</label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={gymQuery}
+                                        onChange={(e) => handleGymQueryChange(e.target.value)}
+                                        className="block w-full pl-9 pr-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        placeholder="예: 트라이스톤 (일부만 입력해도 됩니다)"
+                                        autoFocus
+                                    />
+                                </div>
+
+                                {/* Search results */}
+                                {(searchLoading || gymResults.length > 0) && (
+                                    <div className="mt-1 border border-gray-200 rounded-lg shadow-lg bg-white overflow-hidden">
+                                        {searchLoading && (
+                                            <div className="px-4 py-3 text-sm text-gray-500 text-center">검색 중...</div>
+                                        )}
+                                        {!searchLoading && gymResults.length === 0 && gymQuery.trim() && (
+                                            <div className="px-4 py-3 text-sm text-gray-500 text-center">검색 결과가 없습니다.</div>
+                                        )}
+                                        {gymResults.map((gym) => (
+                                            <button
+                                                key={gym.id}
+                                                type="button"
+                                                onClick={() => handleSelectGym(gym)}
+                                                disabled={isLoading}
+                                                className="w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors font-medium"
+                                            >
+                                                {gym.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {!searchLoading && gymQuery.trim() && gymResults.length === 0 && (
+                                    <p className="mt-2 text-xs text-gray-500">도장 이름의 일부를 입력해보세요. (예: "트라이" → 트라이스톤 주짓수 검색)</p>
+                                )}
                             </div>
-                            <button type="submit" disabled={isLoading || !invitationCode}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
-                                {isLoading ? '확인 중...' : '확인'}
-                            </button>
+
+                            <div className="text-center mt-6">
+                                <p className="text-xs text-gray-400">초대 링크를 받으셨나요? 링크를 직접 클릭하면 도장 검색 없이 바로 가입할 수 있습니다.</p>
+                            </div>
+
                             <div className="text-center">
-                                <span className="text-sm text-gray-500">이미 가입하셨나요? </span>
-                                <a href="/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">수강생 로그인</a>
+                                <a href="/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">이미 가입하셨나요? 로그인</a>
                             </div>
-                        </form>
+                        </div>
                     )}
 
                     {/* ─── FORM STEP ─── */}
@@ -202,7 +266,7 @@ export default function MemberSignupPage() {
                                 </select>
                             </div>
 
-                            {/* 4. 회원 연락처 (선택) */}
+                            {/* 4. 회원 연락처 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">회원 연락처 (선택)</label>
                                 <input type="tel" value={phone}
@@ -216,7 +280,7 @@ export default function MemberSignupPage() {
                                     className={inputCls} placeholder="01012345678 (숫자만)" maxLength={11} />
                             </div>
 
-                            {/* 5. 보호자 연락처 (선택) */}
+                            {/* 5. 보호자 연락처 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">보호자 연락처 (선택)</label>
                                 <input type="tel" value={guardianPhone}
@@ -231,7 +295,7 @@ export default function MemberSignupPage() {
                                     className={inputCls} placeholder="01012345678 (숫자만)" maxLength={11} />
                             </div>
 
-                            {/* 6. 로그인 비밀번호 */}
+                            {/* 6. 비밀번호 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 *</label>
                                 <input required type="password" value={password}
@@ -248,7 +312,6 @@ export default function MemberSignupPage() {
                                 {passwordConfirm && password !== passwordConfirm && (
                                     <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
                                 )}
-                                {/* 빨간 경고: 관리자 가시성 */}
                                 <div className="mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                                     <p className="text-xs text-red-600 font-medium leading-relaxed">
                                         ⚠️ 비밀번호는 관장/관리자가 확인할 수 있습니다.<br />
@@ -257,13 +320,13 @@ export default function MemberSignupPage() {
                                 </div>
                             </div>
 
-                            {/* 7. 출석체크 번호 (자동 채움) */}
+                            {/* 7. 출석체크 번호 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">출석체크 번호 (숫자 4자리)</label>
                                 <input type="tel" value={accessCode}
                                     onChange={(e) => setAccessCode(e.target.value.replace(/[^0-9]/g, ''))}
                                     className={inputCls} placeholder="자동 입력됩니다 (수정 가능)" maxLength={4} />
-                                <p className="mt-1 text-xs text-gray-500">연락처 뒷 4자리로 자동 입력됩니다. 직접 변경할 수 있습니다.</p>
+                                <p className="mt-1 text-xs text-gray-500">연락처 뒷 4자리로 자동 입력됩니다.</p>
                             </div>
 
                             {/* 8. 학교/학년 */}
@@ -283,36 +346,14 @@ export default function MemberSignupPage() {
                             {/* 9. 벨트 정보 */}
                             <div className="border border-blue-200 rounded-lg p-4 space-y-4 bg-blue-50/40">
                                 <p className="text-sm font-semibold text-blue-700">현재 벨트 정보 (선택)</p>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">벨트</label>
                                     <select value={belt} onChange={(e) => { setBelt(e.target.value); setStripe(0) }}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                        <optgroup label="성인">
-                                            <option value="White">화이트 (성인)</option>
-                                            <option value="Blue">블루</option>
-                                            <option value="Purple">퍼플</option>
-                                            <option value="Brown">브라운</option>
-                                            <option value="Black">블랙</option>
-                                        </optgroup>
-                                        <optgroup label="유소년">
-                                            <option value="화이트 (유소년)">화이트 (유소년)</option>
-                                            <option value="그레이-화이트">그레이-화이트</option>
-                                            <option value="그레이">그레이</option>
-                                            <option value="그레이-블랙">그레이-블랙</option>
-                                            <option value="옐로우-화이트">옐로우-화이트</option>
-                                            <option value="옐로우">옐로우</option>
-                                            <option value="옐로우-블랙">옐로우-블랙</option>
-                                            <option value="오렌지-화이트">오렌지-화이트</option>
-                                            <option value="오렌지">오렌지</option>
-                                            <option value="오렌지-블랙">오렌지-블랙</option>
-                                            <option value="그린-화이트">그린-화이트</option>
-                                            <option value="그린">그린</option>
-                                            <option value="그린-블랙">그린-블랙</option>
-                                        </optgroup>
+                                        <optgroup label="성인"><option value="White">화이트 (성인)</option><option value="Blue">블루</option><option value="Purple">퍼플</option><option value="Brown">브라운</option><option value="Black">블랙</option></optgroup>
+                                        <optgroup label="유소년"><option value="화이트 (유소년)">화이트 (유소년)</option><option value="그레이-화이트">그레이-화이트</option><option value="그레이">그레이</option><option value="그레이-블랙">그레이-블랙</option><option value="옐로우-화이트">옐로우-화이트</option><option value="옐로우">옐로우</option><option value="옐로우-블랙">옐로우-블랙</option><option value="오렌지-화이트">오렌지-화이트</option><option value="오렌지">오렌지</option><option value="오렌지-블랙">오렌지-블랙</option><option value="그린-화이트">그린-화이트</option><option value="그린">그린</option><option value="그린-블랙">그린-블랙</option></optgroup>
                                     </select>
                                 </div>
-
                                 {(() => {
                                     const beltKorMap: Record<string, string> = { 'White': '화이트 (성인)', 'Blue': '블루', 'Purple': '퍼플', 'Brown': '브라운', 'Black': '블랙' }
                                     const korName = beltKorMap[belt] || belt
@@ -322,44 +363,27 @@ export default function MemberSignupPage() {
                                             <label className="block text-sm font-medium text-gray-700">그랄 수</label>
                                             <select value={stripe} onChange={(e) => setStripe(Number(e.target.value))}
                                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                                {Array.from({ length: maxStripes + 1 }, (_, i) => (
-                                                    <option key={i} value={i}>{i === 0 ? '0 (없음)' : `${i}그랄`}</option>
-                                                ))}
+                                                {Array.from({ length: maxStripes + 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? '0 (없음)' : `${i}그랄`}</option>)}
                                             </select>
                                         </div>
                                     )
                                 })()}
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">현재 등급 취득일</label>
                                     <div className="mt-1 grid grid-cols-3 gap-2">
                                         {(() => {
                                             const [pdYear, pdMonth, pdDay] = promotionDate ? promotionDate.split('-') : ['', '', '']
-                                            return (
-                                                <>
-                                                    <select value={pdYear || ''} onChange={(e) => { const [, m, d] = promotionDate ? promotionDate.split('-') : ['', '', '']; setPromotionDate(e.target.value ? `${e.target.value}-${m || '01'}-${d || '01'}` : '') }}
-                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                                        <option value="">년도</option>
-                                                        {Array.from({ length: 40 }, (_, i) => { const yr = new Date().getFullYear() - i; return <option key={yr} value={String(yr)}>{yr}</option> })}
-                                                    </select>
-                                                    <select value={pdMonth || ''} onChange={(e) => { const [y, , d] = promotionDate ? promotionDate.split('-') : ['', '', '']; setPromotionDate(y ? `${y}-${e.target.value.padStart(2, '0')}-${d || '01'}` : '') }}
-                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                                        <option value="">월</option>
-                                                        {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}월</option>)}
-                                                    </select>
-                                                    <select value={pdDay || ''} onChange={(e) => { const [y, m] = promotionDate ? promotionDate.split('-') : ['', '']; setPromotionDate(y ? `${y}-${m || '01'}-${e.target.value.padStart(2, '0')}` : '') }}
-                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                                        <option value="">일</option>
-                                                        {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>)}
-                                                    </select>
-                                                </>
-                                            )
+                                            return (<>
+                                                <select value={pdYear || ''} onChange={(e) => { const [, m, d] = promotionDate ? promotionDate.split('-') : ['', '', '']; setPromotionDate(e.target.value ? `${e.target.value}-${m || '01'}-${d || '01'}` : '') }} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">년도</option>{Array.from({ length: 40 }, (_, i) => { const yr = new Date().getFullYear() - i; return <option key={yr} value={String(yr)}>{yr}</option> })}</select>
+                                                <select value={pdMonth || ''} onChange={(e) => { const [y, , d] = promotionDate ? promotionDate.split('-') : ['', '', '']; setPromotionDate(y ? `${y}-${e.target.value.padStart(2, '0')}-${d || '01'}` : '') }} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">월</option>{Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}월</option>)}</select>
+                                                <select value={pdDay || ''} onChange={(e) => { const [y, m] = promotionDate ? promotionDate.split('-') : ['', '']; setPromotionDate(y ? `${y}-${m || '01'}-${e.target.value.padStart(2, '0')}` : '') }} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">일</option>{Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>)}</select>
+                                            </>)
                                         })()}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* 10. 약관 동의 (있을 경우 마지막) */}
+                            {/* 10. 약관 */}
                             {activeTerms.length > 0 && (
                                 <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                                     <p className="text-sm font-semibold text-gray-700">약관 동의</p>
@@ -372,30 +396,28 @@ export default function MemberSignupPage() {
                                                     <span className="text-sm text-gray-700">{term.title}</span>
                                                 </div>
                                                 <button type="button" onClick={() => setViewingTerm(term)}
-                                                    className="shrink-0 text-xs px-3 py-1.5 border border-blue-300 text-blue-600 rounded-full hover:bg-blue-50 transition-colors">
-                                                    약관 확인
-                                                </button>
+                                                    className="shrink-0 text-xs px-3 py-1.5 border border-blue-300 text-blue-600 rounded-full hover:bg-blue-50 transition-colors">약관 확인</button>
                                             </div>
                                         )
                                     })}
                                 </div>
                             )}
 
-                            {/* 가입 버튼 */}
+                            {/* 버튼 */}
                             <div>
                                 <button type="submit" disabled={isLoading || !allTermsAgreed}
                                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
                                     {isLoading ? '가입 처리 중...' : '가입하기'}
                                 </button>
-                                <button type="button" onClick={() => setStep('CODE')}
-                                    className="mt-3 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    초대 코드 다시 입력
+                                <button type="button" onClick={() => { setStep('SEARCH'); setGymInfo(null) }}
+                                    className="mt-3 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    도장 다시 선택
                                 </button>
                             </div>
                         </form>
                     )}
 
-                    {/* ─── SUCCESS STEP ─── */}
+                    {/* ─── SUCCESS ─── */}
                     {step === 'SUCCESS' && (
                         <div className="text-center py-8">
                             <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
@@ -409,7 +431,6 @@ export default function MemberSignupPage() {
                             </button>
                         </div>
                     )}
-
                 </div>
             </div>
 
@@ -420,22 +441,14 @@ export default function MemberSignupPage() {
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
                         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                             <h3 className="text-base font-bold text-gray-900">{viewingTerm.title}</h3>
-                            <button onClick={() => setViewingTerm(null)}
-                                className="text-gray-400 hover:text-gray-600 text-xl font-light leading-none">✕</button>
+                            <button onClick={() => setViewingTerm(null)} className="text-gray-400 hover:text-gray-600 text-xl font-light leading-none">✕</button>
                         </div>
                         <div className="px-6 py-4 overflow-y-auto flex-1">
-                            <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
-                                {viewingTerm.content}
-                            </pre>
+                            <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{viewingTerm.content}</pre>
                         </div>
                         <div className="px-6 py-4 border-t border-gray-100">
-                            <button
-                                onClick={() => {
-                                    setAgreedTerms(prev => new Set([...prev, viewingTerm.id]))
-                                    setViewingTerm(null)
-                                }}
-                                className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors"
-                            >
+                            <button onClick={() => { setAgreedTerms(prev => new Set([...prev, viewingTerm.id])); setViewingTerm(null) }}
+                                className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors">
                                 확인 및 동의
                             </button>
                         </div>
