@@ -16,7 +16,7 @@ export default function MemberSignupPage() {
     const [stripeMap, setStripeMap] = useState<Record<string, number>>({})
     const [activeTerms, setActiveTerms] = useState<{ id: string, title: string, content: string }[]>([])
     const [agreedTerms, setAgreedTerms] = useState<Set<string>>(new Set())
-    const [viewingTerm, setViewingTerm] = useState<{ title: string, content: string } | null>(null)
+    const [viewingTerm, setViewingTerm] = useState<{ id: string, title: string, content: string } | null>(null)
     const [errorMsg, setErrorMsg] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
@@ -33,17 +33,13 @@ export default function MemberSignupPage() {
     const [stripe, setStripe] = useState<number>(0)
     const [promotionDate, setPromotionDate] = useState('')
     const [accessCode, setAccessCode] = useState('')
-
-    // Additional fields
     const [guardianPhone, setGuardianPhone] = useState('')
     const [address, setAddress] = useState('')
     const [school, setSchool] = useState('')
     const [grade, setGrade] = useState('')
 
     useEffect(() => {
-        if (codeParam) {
-            handleCheckCode(codeParam)
-        }
+        if (codeParam) handleCheckCode(codeParam)
     }, [codeParam])
 
     const handleCheckCode = async (codeToCheck: string) => {
@@ -73,15 +69,12 @@ export default function MemberSignupPage() {
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!gymInfo) return
-
         if (password !== passwordConfirm) {
             setErrorMsg('비밀번호가 일치하지 않습니다.')
             return
         }
-
         setIsLoading(true)
         setErrorMsg('')
-
         const res = await registerPortalMember({
             gymId: gymInfo.id,
             name,
@@ -100,19 +93,16 @@ export default function MemberSignupPage() {
             school,
             grade
         })
-
         setIsLoading(false)
-
         if (res.error) {
             setErrorMsg(res.error)
         } else {
             setStep('SUCCESS')
-            // Delay and redirect to login
-            setTimeout(() => {
-                router.push('/login')
-            }, 3000)
+            setTimeout(() => router.push('/login'), 3000)
         }
     }
+
+    const inputCls = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -131,162 +121,159 @@ export default function MemberSignupPage() {
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
 
                     {errorMsg && (
-                        <div className="mb-4 rounded-md bg-red-50 p-4 relative overflow-hidden">
+                        <div className="mb-4 rounded-md bg-red-50 p-4">
                             <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
-                                </div>
+                                <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
                                 <div className="ml-3">
                                     <h3 className="text-sm font-medium text-red-800">오류가 발생했습니다</h3>
-                                    <div className="mt-2 text-sm text-red-700">
-                                        <p>{errorMsg}</p>
-                                    </div>
+                                    <p className="mt-2 text-sm text-red-700">{errorMsg}</p>
                                 </div>
                             </div>
                         </div>
                     )}
 
+                    {/* ─── CODE STEP ─── */}
                     {step === 'CODE' && (
-                        <form onSubmit={(e) => { e.preventDefault(); handleCheckCode(invitationCode); }} className="space-y-6">
+                        <form onSubmit={(e) => { e.preventDefault(); handleCheckCode(invitationCode) }} className="space-y-6">
                             <div>
-                                <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-                                    체육관 초대 코드
-                                </label>
-                                <div className="mt-1">
-                                    <input
-                                        id="code"
-                                        name="code"
-                                        type="text"
-                                        required
-                                        value={invitationCode}
-                                        onChange={(e) => setInvitationCode(e.target.value)}
-                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm uppercase"
-                                        placeholder="예: GYM12A"
-                                    />
-                                </div>
+                                <label htmlFor="code" className="block text-sm font-medium text-gray-700">체육관 초대 코드</label>
+                                <input id="code" type="text" required value={invitationCode}
+                                    onChange={(e) => setInvitationCode(e.target.value)}
+                                    className={`mt-1 ${inputCls} uppercase`}
+                                    placeholder="예: GYM12A" />
                             </div>
-                            <div>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading || !invitationCode}
-                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                                >
-                                    {isLoading ? '확인 중...' : '확인'}
-                                </button>
-                            </div>
-
-                            <div className="mt-4 text-center">
+                            <button type="submit" disabled={isLoading || !invitationCode}
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                                {isLoading ? '확인 중...' : '확인'}
+                            </button>
+                            <div className="text-center">
                                 <span className="text-sm text-gray-500">이미 가입하셨나요? </span>
-                                <a href="/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                                    수강생 로그인
-                                </a>
+                                <a href="/login" className="text-sm font-medium text-blue-600 hover:text-blue-500">수강생 로그인</a>
                             </div>
                         </form>
                     )}
 
+                    {/* ─── FORM STEP ─── */}
                     {step === 'FORM' && gymInfo && (
-                        <form onSubmit={handleSubmitForm} className="space-y-6">
+                        <form onSubmit={handleSubmitForm} className="space-y-5">
+
+                            {/* 1. 이름 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">이름 *</label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="홍길동"
-                                />
+                                <input required type="text" value={name} onChange={(e) => setName(e.target.value)}
+                                    className={inputCls} placeholder="홍길동" />
                                 <p className="mt-1 text-xs text-gray-500">기존 회원인 경우 예약했던 이름과 동일하게 적어주세요.</p>
                             </div>
 
+                            {/* 2. 생년월일 */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">전화번호 *</label>
-                                <input
-                                    required
-                                    type="tel"
-                                    value={phone}
-                                    onChange={(e) => {
-                                        const newPhone = e.target.value.replace(/[^0-9]/g, '')
-                                        setPhone(newPhone)
-                                    }}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="01012345678 (숫자만 입력)"
-                                    maxLength={11}
-                                />
+                                <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
+                                <div className="mt-1 grid grid-cols-3 gap-2">
+                                    <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">년도</option>
+                                        {Array.from({ length: 80 }, (_, i) => { const yr = new Date().getFullYear() - i; return <option key={yr} value={String(yr)}>{yr}</option> })}
+                                    </select>
+                                    <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">월</option>
+                                        {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={String(i + 1)}>{i + 1}월</option>)}
+                                    </select>
+                                    <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">일</option>
+                                        {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1)}>{i + 1}일</option>)}
+                                    </select>
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 (4자리 이상) *</label>
-                                <input
-                                    required
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="로그인 시 사용할 비밀번호"
-                                    minLength={4}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 확인 *</label>
-                                <input
-                                    required
-                                    type="password"
-                                    value={passwordConfirm}
-                                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${passwordConfirm && password !== passwordConfirm ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
-                                        }`}
-                                    placeholder="비밀번호를 다시 한 번 입력해주세요"
-                                    minLength={4}
-                                />
-                                {passwordConfirm && password !== passwordConfirm && (
-                                    <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">출석체크 비밀번호 (숫자 4자리) *</label>
-                                <input
-                                    required
-                                    type="tel"
-                                    value={accessCode}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/[^0-9]/g, '')
-                                        setAccessCode(val)
-                                    }}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="출석 시 사용할 4자리 숫자 (예: 통화용 뒷자리)"
-                                    maxLength={4}
-                                    minLength={4}
-                                />
-                            </div>
-
+                            {/* 3. 성별 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">성별 *</label>
-                                <select
-                                    value={gender}
-                                    onChange={(e) => setGender(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                >
+                                <select value={gender} onChange={(e) => setGender(e.target.value)} className={inputCls}>
                                     <option value="male">남성</option>
                                     <option value="female">여성</option>
                                 </select>
                             </div>
 
-                            {/* 현재 벨트 섹션 - 테두리로 구분 */}
+                            {/* 4. 회원 연락처 (선택) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">회원 연락처 (선택)</label>
+                                <input type="tel" value={phone}
+                                    onChange={(e) => {
+                                        const v = e.target.value.replace(/[^0-9]/g, '')
+                                        setPhone(v)
+                                        if (v.length >= 4) setAccessCode(v.slice(-4))
+                                        else if (guardianPhone.length >= 4) setAccessCode(guardianPhone.slice(-4))
+                                        else setAccessCode('')
+                                    }}
+                                    className={inputCls} placeholder="01012345678 (숫자만)" maxLength={11} />
+                            </div>
+
+                            {/* 5. 보호자 연락처 (선택) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">보호자 연락처 (선택)</label>
+                                <input type="tel" value={guardianPhone}
+                                    onChange={(e) => {
+                                        const v = e.target.value.replace(/[^0-9]/g, '')
+                                        setGuardianPhone(v)
+                                        if (!phone || phone.length < 4) {
+                                            if (v.length >= 4) setAccessCode(v.slice(-4))
+                                            else setAccessCode('')
+                                        }
+                                    }}
+                                    className={inputCls} placeholder="01012345678 (숫자만)" maxLength={11} />
+                            </div>
+
+                            {/* 6. 로그인 비밀번호 */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 (4자리 이상) *</label>
+                                <input required type="password" value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className={inputCls} placeholder="로그인 시 사용할 비밀번호" minLength={4} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 확인 *</label>
+                                <input required type="password" value={passwordConfirm}
+                                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${passwordConfirm && password !== passwordConfirm ? 'border-red-300' : 'border-gray-300'}`}
+                                    placeholder="비밀번호를 다시 입력해주세요" minLength={4} />
+                                {passwordConfirm && password !== passwordConfirm && (
+                                    <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
+                                )}
+                            </div>
+
+                            {/* 7. 출석체크 번호 (자동 채움) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">출석체크 번호 (숫자 4자리)</label>
+                                <input type="tel" value={accessCode}
+                                    onChange={(e) => setAccessCode(e.target.value.replace(/[^0-9]/g, ''))}
+                                    className={inputCls} placeholder="자동 입력됩니다 (수정 가능)" maxLength={4} />
+                                <p className="mt-1 text-xs text-gray-500">연락처 뒷 4자리로 자동 입력됩니다. 직접 변경할 수 있습니다.</p>
+                            </div>
+
+                            {/* 8. 학교/학년 */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">학교 (선택)</label>
+                                    <input type="text" value={school} onChange={(e) => setSchool(e.target.value)}
+                                        className={inputCls} placeholder="예: 서울초" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">학년 (선택)</label>
+                                    <input type="text" value={grade} onChange={(e) => setGrade(e.target.value)}
+                                        className={inputCls} placeholder="예: 3학년" />
+                                </div>
+                            </div>
+
+                            {/* 9. 벨트 정보 */}
                             <div className="border border-blue-200 rounded-lg p-4 space-y-4 bg-blue-50/40">
                                 <p className="text-sm font-semibold text-blue-700">현재 벨트 정보 (선택)</p>
 
-                                {/* 벨트 선택 */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">벨트 *</label>
-                                    <select
-                                        value={belt}
-                                        onChange={(e) => { setBelt(e.target.value); setStripe(0) }}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                        required
-                                    >
+                                    <label className="block text-sm font-medium text-gray-700">벨트</label>
+                                    <select value={belt} onChange={(e) => { setBelt(e.target.value); setStripe(0) }}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         <optgroup label="성인">
                                             <option value="White">화이트 (성인)</option>
                                             <option value="Blue">블루</option>
@@ -312,22 +299,15 @@ export default function MemberSignupPage() {
                                     </select>
                                 </div>
 
-                                {/* 그랄 선택 - 항상 표시, 관리자 설정 있으면 그 최대값, 없으면 최대 4 */}
                                 {(() => {
-                                    const beltKorMap: Record<string, string> = {
-                                        'White': '화이트 (성인)', 'Blue': '블루', 'Purple': '퍼플',
-                                        'Brown': '브라운', 'Black': '블랙'
-                                    }
+                                    const beltKorMap: Record<string, string> = { 'White': '화이트 (성인)', 'Blue': '블루', 'Purple': '퍼플', 'Brown': '브라운', 'Black': '블랙' }
                                     const korName = beltKorMap[belt] || belt
                                     const maxStripes = stripeMap[korName] ?? stripeMap[belt] ?? 4
                                     return (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">그랄 수</label>
-                                            <select
-                                                value={stripe}
-                                                onChange={(e) => setStripe(Number(e.target.value))}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                            >
+                                            <select value={stripe} onChange={(e) => setStripe(Number(e.target.value))}
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                                 {Array.from({ length: maxStripes + 1 }, (_, i) => (
                                                     <option key={i} value={i}>{i === 0 ? '0 (없음)' : `${i}그랄`}</option>
                                                 ))}
@@ -336,7 +316,6 @@ export default function MemberSignupPage() {
                                     )
                                 })()}
 
-                                {/* 현재 등급 취득일 - 3개 드롭다운 */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">현재 등급 취득일</label>
                                     <div className="mt-1 grid grid-cols-3 gap-2">
@@ -344,45 +323,20 @@ export default function MemberSignupPage() {
                                             const [pdYear, pdMonth, pdDay] = promotionDate ? promotionDate.split('-') : ['', '', '']
                                             return (
                                                 <>
-                                                    <select
-                                                        value={pdYear || ''}
-                                                        onChange={(e) => {
-                                                            const [, m, d] = promotionDate ? promotionDate.split('-') : ['', '', '']
-                                                            setPromotionDate(e.target.value ? `${e.target.value}-${m || '01'}-${d || '01'}` : '')
-                                                        }}
-                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                                    >
+                                                    <select value={pdYear || ''} onChange={(e) => { const [, m, d] = promotionDate ? promotionDate.split('-') : ['', '', '']; setPromotionDate(e.target.value ? `${e.target.value}-${m || '01'}-${d || '01'}` : '') }}
+                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                                         <option value="">년도</option>
-                                                        {Array.from({ length: 40 }, (_, i) => {
-                                                            const yr = new Date().getFullYear() - i
-                                                            return <option key={yr} value={String(yr)}>{yr}</option>
-                                                        })}
+                                                        {Array.from({ length: 40 }, (_, i) => { const yr = new Date().getFullYear() - i; return <option key={yr} value={String(yr)}>{yr}</option> })}
                                                     </select>
-                                                    <select
-                                                        value={pdMonth || ''}
-                                                        onChange={(e) => {
-                                                            const [y, , d] = promotionDate ? promotionDate.split('-') : ['', '', '']
-                                                            setPromotionDate(y ? `${y}-${e.target.value.padStart(2, '0')}-${d || '01'}` : '')
-                                                        }}
-                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                                    >
+                                                    <select value={pdMonth || ''} onChange={(e) => { const [y, , d] = promotionDate ? promotionDate.split('-') : ['', '', '']; setPromotionDate(y ? `${y}-${e.target.value.padStart(2, '0')}-${d || '01'}` : '') }}
+                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                                         <option value="">월</option>
-                                                        {Array.from({ length: 12 }, (_, i) => (
-                                                            <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}월</option>
-                                                        ))}
+                                                        {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}월</option>)}
                                                     </select>
-                                                    <select
-                                                        value={pdDay || ''}
-                                                        onChange={(e) => {
-                                                            const [y, m] = promotionDate ? promotionDate.split('-') : ['', '']
-                                                            setPromotionDate(y ? `${y}-${m || '01'}-${e.target.value.padStart(2, '0')}` : '')
-                                                        }}
-                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                                    >
+                                                    <select value={pdDay || ''} onChange={(e) => { const [y, m] = promotionDate ? promotionDate.split('-') : ['', '']; setPromotionDate(y ? `${y}-${m || '01'}-${e.target.value.padStart(2, '0')}` : '') }}
+                                                        className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                                         <option value="">일</option>
-                                                        {Array.from({ length: 31 }, (_, i) => (
-                                                            <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>
-                                                        ))}
+                                                        {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>)}
                                                     </select>
                                                 </>
                                             )
@@ -391,91 +345,7 @@ export default function MemberSignupPage() {
                                 </div>
                             </div>
 
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
-                                <div className="mt-1 grid grid-cols-3 gap-2">
-                                    <select
-                                        value={birthYear}
-                                        onChange={(e) => setBirthYear(e.target.value)}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    >
-                                        <option value="">년도</option>
-                                        {Array.from({ length: 80 }, (_, i) => {
-                                            const yr = new Date().getFullYear() - i
-                                            return <option key={yr} value={String(yr)}>{yr}</option>
-                                        })}
-                                    </select>
-                                    <select
-                                        value={birthMonth}
-                                        onChange={(e) => setBirthMonth(e.target.value)}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    >
-                                        <option value="">월</option>
-                                        {Array.from({ length: 12 }, (_, i) => (
-                                            <option key={i + 1} value={String(i + 1)}>{i + 1}월</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={birthDay}
-                                        onChange={(e) => setBirthDay(e.target.value)}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    >
-                                        <option value="">일</option>
-                                        {Array.from({ length: 31 }, (_, i) => (
-                                            <option key={i + 1} value={String(i + 1)}>{i + 1}일</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">보호자 연락처 (선택)</label>
-                                <input
-                                    type="tel"
-                                    value={guardianPhone}
-                                    onChange={(e) => setGuardianPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="01012345678"
-                                    maxLength={11}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">주소 (선택)</label>
-                                <input
-                                    type="text"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="주소를 입력해주세요"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">학교 (선택)</label>
-                                    <input
-                                        type="text"
-                                        value={school}
-                                        onChange={(e) => setSchool(e.target.value)}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                        placeholder="예: 서울초"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">학년 (선택)</label>
-                                    <input
-                                        type="text"
-                                        value={grade}
-                                        onChange={(e) => setGrade(e.target.value)}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                        placeholder="예: 3학년"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* 약관 동의 섹션 */}
+                            {/* 10. 약관 동의 (있을 경우 마지막) */}
                             {activeTerms.length > 0 && (
                                 <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                                     <p className="text-sm font-semibold text-gray-700">약관 동의</p>
@@ -484,16 +354,11 @@ export default function MemberSignupPage() {
                                         return (
                                             <div key={term.id} className="flex items-center justify-between gap-3">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`text-xs ${agreed ? 'text-green-600' : 'text-gray-500'}`}>
-                                                        {agreed ? '✓' : '○'}
-                                                    </span>
+                                                    <span className={`text-xs ${agreed ? 'text-green-600' : 'text-gray-500'}`}>{agreed ? '✓' : '○'}</span>
                                                     <span className="text-sm text-gray-700">{term.title}</span>
                                                 </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setViewingTerm(term)}
-                                                    className="shrink-0 text-xs px-3 py-1.5 border border-blue-300 text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
-                                                >
+                                                <button type="button" onClick={() => setViewingTerm(term)}
+                                                    className="shrink-0 text-xs px-3 py-1.5 border border-blue-300 text-blue-600 rounded-full hover:bg-blue-50 transition-colors">
                                                     약관 확인
                                                 </button>
                                             </div>
@@ -502,25 +367,21 @@ export default function MemberSignupPage() {
                                 </div>
                             )}
 
+                            {/* 가입 버튼 */}
                             <div>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading || !allTermsAgreed}
-                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                                >
+                                <button type="submit" disabled={isLoading || !allTermsAgreed}
+                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
                                     {isLoading ? '가입 처리 중...' : '가입하기'}
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setStep('CODE')}
-                                    className="mt-3 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                >
+                                <button type="button" onClick={() => setStep('CODE')}
+                                    className="mt-3 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     초대 코드 다시 입력
                                 </button>
                             </div>
                         </form>
                     )}
 
+                    {/* ─── SUCCESS STEP ─── */}
                     {step === 'SUCCESS' && (
                         <div className="text-center py-8">
                             <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
@@ -528,10 +389,8 @@ export default function MemberSignupPage() {
                             <p className="text-sm text-gray-600 mb-6">
                                 성공적으로 가입(또는 연동)되었습니다.<br />잠시 후 로그인 페이지로 이동합니다.
                             </p>
-                            <button
-                                onClick={() => router.push('/login')}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                            >
+                            <button onClick={() => router.push('/login')}
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
                                 로그인 화면으로
                             </button>
                         </div>
@@ -547,12 +406,8 @@ export default function MemberSignupPage() {
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
                         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                             <h3 className="text-base font-bold text-gray-900">{viewingTerm.title}</h3>
-                            <button
-                                onClick={() => setViewingTerm(null)}
-                                className="text-gray-400 hover:text-gray-600 text-xl font-light leading-none"
-                            >
-                                ✕
-                            </button>
+                            <button onClick={() => setViewingTerm(null)}
+                                className="text-gray-400 hover:text-gray-600 text-xl font-light leading-none">✕</button>
                         </div>
                         <div className="px-6 py-4 overflow-y-auto flex-1">
                             <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
@@ -562,10 +417,7 @@ export default function MemberSignupPage() {
                         <div className="px-6 py-4 border-t border-gray-100">
                             <button
                                 onClick={() => {
-                                    const term = activeTerms.find(t => t.title === viewingTerm.title && t.content === viewingTerm.content)
-                                    if (term) {
-                                        setAgreedTerms(prev => new Set([...prev, term.id]))
-                                    }
+                                    setAgreedTerms(prev => new Set([...prev, viewingTerm.id]))
                                     setViewingTerm(null)
                                 }}
                                 className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors"
