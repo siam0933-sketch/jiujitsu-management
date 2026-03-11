@@ -49,18 +49,22 @@ export default function MemberSignupPage() {
     const handleCheckCode = async (codeToCheck: string) => {
         setIsLoading(true)
         setErrorMsg('')
-        const res = await lookupGymByCode(codeToCheck)
-        setIsLoading(false)
-
-        if (res.error) {
-            setErrorMsg(res.error)
-            setStep('CODE') // Stay on code step
-        } else if (res.gym) {
-            setGymInfo(res.gym)
-            setStripeMap(res.stripeMap || {})
-            setActiveTerms(res.activeTerms || [])
-            setAgreedTerms(new Set())
-            setStep('FORM')
+        try {
+            const res = await lookupGymByCode(codeToCheck)
+            if (res.error) {
+                setErrorMsg(res.error)
+                setStep('CODE')
+            } else if (res.gym) {
+                setGymInfo(res.gym)
+                setStripeMap(res.stripeMap || {})
+                setActiveTerms(res.activeTerms || [])
+                setAgreedTerms(new Set())
+                setStep('FORM')
+            }
+        } catch (e) {
+            setErrorMsg('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+        } finally {
+            setIsLoading(false)
         }
     }
 

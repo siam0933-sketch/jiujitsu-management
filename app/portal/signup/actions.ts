@@ -36,15 +36,21 @@ export async function lookupGymByCode(code: string) {
     })
 
     // Fetch active terms for this gym (shown during signup)
-    const { data: termsRows } = await supabaseAdmin
-        .from('gym_terms')
-        .select('id, title, content')
-        .eq('gym_id', gym.id)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: true })
-
-    const activeTerms = termsRows || []
+    // Wrapped in try-catch in case the gym_terms table hasn't been created yet
+    let activeTerms: any[] = []
+    try {
+        const { data: termsRows } = await supabaseAdmin
+            .from('gym_terms')
+            .select('id, title, content')
+            .eq('gym_id', gym.id)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: true })
+        activeTerms = termsRows || []
+    } catch (e) {
+        // Table may not exist yet — gracefully skip
+        activeTerms = []
+    }
 
     return { success: true, gym, stripeMap, activeTerms }
 }
