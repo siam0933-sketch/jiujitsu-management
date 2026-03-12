@@ -162,7 +162,7 @@ export async function registerPortalMember(data: {
             // Member exists - they are linking their account!
             memberIdToUpdate = existingMember.id
 
-            const hashedPassword = bcrypt.hashSync(data.password, 10)
+            const hashedPassword = bcrypt.hashSync(data.password.toLowerCase(), 10)
 
             // Just update their password and missing profile data
             const { error: updateError } = await supabaseAdmin
@@ -190,7 +190,7 @@ export async function registerPortalMember(data: {
             // Note: Since we don't have Supabase Auth 'users' for normal members yet,
             // we are entirely relying on the `gym_members` table for auth credentials.
 
-            const hashedPassword = bcrypt.hashSync(data.password, 10)
+            const hashedPassword = bcrypt.hashSync(data.password.toLowerCase(), 10)
 
             const { data: newMember, error: insertError } = await supabaseAdmin
                 .from('gym_members')

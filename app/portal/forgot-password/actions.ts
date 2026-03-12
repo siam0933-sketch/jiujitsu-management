@@ -76,8 +76,8 @@ export async function verifyAndResetPassword(params: {
 
     matchedMemberId = validMembers[0].id
 
-    // Hash the new password and update
-    const hashedPassword = bcrypt.hashSync(newPassword, 10)
+    // Hash the new password and update (ensure it's saved as lowercase)
+    const hashedPassword = bcrypt.hashSync(newPassword.toLowerCase(), 10)
 
     const { error: updateError } = await supabaseAdmin
         .from('gym_members')

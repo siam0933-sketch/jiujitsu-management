@@ -11,6 +11,8 @@ export async function changeMemberPassword(memberId: string, newPassword: string
 
     const supabaseAdmin = await createAdminClient()
 
+    const hashedPassword = bcrypt.hashSync(newPassword.toLowerCase(), 10)
+
     const { error } = await supabaseAdmin
         .from('gym_members')
         .update({ login_password: newPassword.toLowerCase() })

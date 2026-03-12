@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     try {
         const json = await request.json()
         const name = json.name ? String(json.name).trim() : ''
-        const password = json.password ? String(json.password).trim() : ''
+        const password = json.password ? String(json.password).trim().toLowerCase() : ''
 
         console.log(`[Member Login Attempt] Name: '${name}', Password Length: ${password.length}`)
 
