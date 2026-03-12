@@ -56,8 +56,10 @@ export async function POST(request: Request) {
                     break
                 }
             } else {
-                // Legacy plaintext comparison
-                if (password === storedPassword) {
+                // Legacy plaintext comparison: since we force incoming `password` to lowercase,
+                // we must also lowercase `storedPassword` to correctly match existing mixed-case passwords.
+                // Otherwise, existing users who used uppercase letters will never be able to log in.
+                if (password === storedPassword.toLowerCase()) {
                     matchedMember = member
                     isBcryptMatch = false
                     break
