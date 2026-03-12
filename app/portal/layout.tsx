@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/utils/supabase/server';
 import BottomNav from './components/BottomNav';
 import PortalHeader from './components/PortalHeader';
+import InstallPrompt from './components/InstallPrompt';
 import { PORTAL_STYLES } from './styles';
 
 import { getPaymentStatus } from '@/utils/payment';
@@ -77,6 +78,7 @@ export default async function PortalLayout({
             {!isSignupUrl && <PortalHeader dojoName={context?.gymName || '체육관'} />}
             <main className={`flex-1 ${!isSignupUrl ? 'pt-14' : ''}`}> {/* pt-14 matches header height */}
                 {children}
+                {!isSignupUrl && <InstallPrompt />}
             </main>
             {!isSignupUrl && <BottomNav hasUnpaidDues={context?.hasUnpaidDues || false} />}
         </div>
