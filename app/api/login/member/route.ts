@@ -30,43 +30,55 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: '서버 오류가 발생했습니다.' }, { status: 500 })
         }
 
-        const member = members && members.length > 0 ? members[0] : null
-        if (!member) {
+        if (!members || members.length === 0) {
             console.log(`[Member Login Failure] No member found for name: '${name}'`)
             return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
         }
 
-        if (member.status !== 'active' && member.status !== 'paused') {
-            console.log(`[Member Login Failure] Member status inactive: ${member.status}`)
-            return NextResponse.json({ success: false, message: '활성 상태인 회원만 로그인할 수 있습니다.' }, { status: 403 })
-        }
+        // 2. Hash/Plain verification for all matching members (since names can be duplicated across gyms)
+        let matchedMember = null
+        let isBcryptMatch = false
 
-        // 2. Hash/Plain verification & Migration
-        const storedPassword = member.login_password || ''
-        let isMatch = false
-        const isBcrypt = storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')
+        for (const member of members) {
+            if (member.status !== 'active' && member.status !== 'paused') {
+                continue // Skip inactive accounts
+            }
 
-        if (isBcrypt) {
-            isMatch = bcrypt.compareSync(password, storedPassword)
-        } else {
-            // Legacy plaintext comparison
-            isMatch = (password === storedPassword)
+            const storedPassword = member.login_password || ''
+            const isBcrypt = storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')
 
-            if (isMatch) {
-                // MIGRATION: Auto-hash the plaintext password on successful first login
-                const newHash = bcrypt.hashSync(password, 10)
-                await supabaseAdmin
-                    .from('gym_members')
-                    .update({ login_password: newHash })
-                    .eq('id', member.id)
-                console.log(`[Migration] User '${name}' password hashed successfully.`)
+            if (isBcrypt) {
+                if (bcrypt.compareSync(password, storedPassword)) {
+                    matchedMember = member
+                    isBcryptMatch = true
+                    break
+                }
+            } else {
+                // Legacy plaintext comparison
+                if (password === storedPassword) {
+                    matchedMember = member
+                    isBcryptMatch = false
+                    break
+                }
             }
         }
 
-        if (!isMatch) {
-            console.log(`[Member Login Failure] Password mismatch for name: '${name}'`)
+        if (!matchedMember) {
+            console.log(`[Member Login Failure] Password mismatch or no active member for name: '${name}'`)
             return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
         }
+
+        // MIGRATION: Auto-hash the plaintext password on successful first login
+        if (!isBcryptMatch) {
+            const newHash = bcrypt.hashSync(password, 10)
+            await supabaseAdmin
+                .from('gym_members')
+                .update({ login_password: newHash })
+                .eq('id', matchedMember.id)
+            console.log(`[Migration] User '${name}' (${matchedMember.id}) password hashed successfully.`)
+        }
+
+        // (The password mismatch check was already handled by the `if (!matchedMember)` block above)
 
         // 3. Check if current password meets the new policy
         let weakPassword = false
@@ -77,7 +89,7 @@ export async function POST(request: Request) {
 
         // 3. Create Session
         const cookieStore = await cookies()
-        const sessionData = JSON.stringify({ memberId: member.id, gymId: member.gym_id, name: member.name, role: 'member' })
+        const sessionData = JSON.stringify({ memberId: matchedMember.id, gymId: matchedMember.gym_id, name: matchedMember.name, role: 'member' })
 
         cookieStore.set('member_session', sessionData, {
             httpOnly: true,
@@ -87,8 +99,8 @@ export async function POST(request: Request) {
             maxAge: 60 * 60 * 24 * 7 // 1 week
         })
 
-        console.log(`[Member Login Success] Logged in as ${member.name} (${member.id}), weakPassword: ${weakPassword}`)
-        return NextResponse.json({ success: true, message: 'Login successful', weakPassword, memberId: member.id })
+        console.log(`[Member Login Success] Logged in as ${matchedMember.name} (${matchedMember.id}), weakPassword: ${weakPassword}`)
+        return NextResponse.json({ success: true, message: 'Login successful', weakPassword, memberId: matchedMember.id })
     } catch (e: any) {
         console.error('Member Login API Error:', e)
         return NextResponse.json({ success: false, message: 'Server Error: ' + e.message }, { status: 500 })
