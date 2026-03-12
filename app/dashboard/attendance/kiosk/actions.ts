@@ -8,7 +8,7 @@ export type KioskMember = {
     name: string
     phone: string
     avatar?: string
-    payment_due_date?: string
+    payment_end_date?: string
 }
 
 export type CheckInResult = {
@@ -44,7 +44,7 @@ export async function checkInByPhone(input: string, gymId: string): Promise<Chec
     // 2. Find Member(s) matching phone OR access_code
     const { data: members, error: searchError } = await supabase
         .from('gym_members')
-        .select('id, name, phone, user_id, access_code, remaining_sessions, payment_due_date')
+        .select('id, name, phone, user_id, access_code, remaining_sessions, payment_end_date')
         .eq('gym_id', gymId)
         .eq('status', 'active')
         .or(`phone.ilike.%${input},access_code.eq.${input}`)
@@ -90,10 +90,10 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
 
     // Check payment due date logic
     let paymentWarning: string | undefined = undefined;
-    if (member.payment_due_date) {
+    if (member.payment_end_date) {
         // Assume 'YYYY-MM-DD' from DB. Compare with 'today' (Seoul date string)
         const dToday = new Date(today);
-        const dDue = new Date(member.payment_due_date);
+        const dDue = new Date(member.payment_end_date);
 
         // Calculate difference in days strictly by ignoring hours
         // Set both to midnight UTC to avoid daylight saving issues
