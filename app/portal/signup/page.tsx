@@ -312,12 +312,6 @@ export default function MemberSignupPage() {
                                 {passwordConfirm && password !== passwordConfirm && (
                                     <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
                                 )}
-                                <div className="mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                                    <p className="text-xs text-red-600 font-medium leading-relaxed">
-                                        ⚠️ 비밀번호는 관장/관리자가 확인할 수 있습니다.<br />
-                                        평소 사용하지 않는 비밀번호로 설정해주세요.
-                                    </p>
-                                </div>
                             </div>
 
                             {/* 7. 출석체크 번호 */}

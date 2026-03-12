@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import bcrypt from 'bcryptjs'
 
 const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
 
@@ -16,24 +17,20 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: '이름과 비밀번호를 입력해주세요.' }, { status: 400 })
         }
 
-        const supabase = await createClient()
+        const supabaseAdmin = await createAdminClient()
 
-        // 1. Authenticate using RPC (Secure Bypassing of RLS)
-        const { data: members, error } = await supabase.rpc('authenticate_member', {
-            p_name: name,
-            p_password: password
-        })
+        // 1. Fetch member directly securely bypassing RLS
+        const { data: members, error } = await supabaseAdmin
+            .from('gym_members')
+            .select('id, gym_id, name, status, login_password')
+            .eq('name', name)
 
         if (error) {
-            console.error('Member Login RPC Error:', error)
-            if (error.code === '42883') {
-                return NextResponse.json({ success: false, message: 'System Error: Authentication function missing. Please ask admin to run db_member_login_rpc.sql' }, { status: 500 })
-            }
-            return NextResponse.json({ success: false, message: `인증 중 오류가 발생했습니다. (${error.message})` }, { status: 500 })
+            console.error('Member lookup error:', error)
+            return NextResponse.json({ success: false, message: '서버 오류가 발생했습니다.' }, { status: 500 })
         }
 
         const member = members && members.length > 0 ? members[0] : null
-
         if (!member) {
             console.log(`[Member Login Failure] No member found for name: '${name}'`)
             return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
@@ -44,20 +41,38 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: '활성 상태인 회원만 로그인할 수 있습니다.' }, { status: 403 })
         }
 
-        // 2. Check if stored password meets the new policy (weak password detection)
-        let weakPassword = false
-        try {
-            const supabaseAdmin = await createAdminClient()
-            const { data: memberRow } = await supabaseAdmin
-                .from('gym_members')
-                .select('login_password')
-                .eq('id', member.id)
-                .single()
-            if (memberRow?.login_password && !PASSWORD_POLICY.test(memberRow.login_password)) {
-                weakPassword = true
+        // 2. Hash/Plain verification & Migration
+        const storedPassword = member.login_password || ''
+        let isMatch = false
+        const isBcrypt = storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')
+
+        if (isBcrypt) {
+            isMatch = bcrypt.compareSync(password, storedPassword)
+        } else {
+            // Legacy plaintext comparison
+            isMatch = (password === storedPassword)
+
+            if (isMatch) {
+                // MIGRATION: Auto-hash the plaintext password on successful first login
+                const newHash = bcrypt.hashSync(password, 10)
+                await supabaseAdmin
+                    .from('gym_members')
+                    .update({ login_password: newHash })
+                    .eq('id', member.id)
+                console.log(`[Migration] User '${name}' password hashed successfully.`)
             }
-        } catch (e) {
-            // Non-critical: if check fails, skip the weak password prompt
+        }
+
+        if (!isMatch) {
+            console.log(`[Member Login Failure] Password mismatch for name: '${name}'`)
+            return NextResponse.json({ success: false, message: '정보가 일치하지 않거나 존재하지 않는 회원입니다.' }, { status: 401 })
+        }
+
+        // 3. Check if current password meets the new policy
+        let weakPassword = false
+        // Notice we check against the raw 'password' input since storedPassword might be hashed!
+        if (!PASSWORD_POLICY.test(password)) {
+            weakPassword = true
         }
 
         // 3. Create Session

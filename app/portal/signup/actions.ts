@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/server'
+import bcrypt from 'bcryptjs'
 
 // 0a. Search gyms by partial name (for signup search UI)
 export async function searchGyms(query: string) {
@@ -161,11 +162,13 @@ export async function registerPortalMember(data: {
             // Member exists - they are linking their account!
             memberIdToUpdate = existingMember.id
 
+            const hashedPassword = bcrypt.hashSync(data.password, 10)
+
             // Just update their password and missing profile data
             const { error: updateError } = await supabaseAdmin
                 .from('gym_members')
                 .update({
-                    login_password: data.password,
+                    login_password: hashedPassword,
                     gender: data.gender,
                     belt: data.belt,
                     pending_stripe: data.stripe ?? null,
@@ -187,13 +190,15 @@ export async function registerPortalMember(data: {
             // Note: Since we don't have Supabase Auth 'users' for normal members yet,
             // we are entirely relying on the `gym_members` table for auth credentials.
 
+            const hashedPassword = bcrypt.hashSync(data.password, 10)
+
             const { data: newMember, error: insertError } = await supabaseAdmin
                 .from('gym_members')
                 .insert({
                     gym_id: data.gymId,
                     name: data.name,
                     phone: data.phone,
-                    login_password: data.password,
+                    login_password: hashedPassword,
                     gender: data.gender,
                     birth_date: data.birthDate || null,
                     access_code: finalAccessCode,

@@ -113,6 +113,14 @@ export default function MemberLoginForm() {
                     type="password" name="password" placeholder="비밀번호 입력" required
                 />
 
+                <div className="flex items-center justify-end">
+                    <div className="text-sm">
+                        <Link href="/portal/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                            비밀번호를 잊으셨나요?
+                        </Link>
+                    </div>
+                </div>
+
                 <button
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl px-4 py-4 mb-2 disabled:opacity-50 transition-all shadow-lg shadow-blue-200 text-lg"
                     disabled={loading}
@@ -152,14 +160,6 @@ export default function MemberLoginForm() {
                             <p className="text-sm text-gray-600">
                                 보안 강화를 위해 비밀번호를 <br />
                                 <span className="font-semibold">영문 + 숫자 혼합 6자리 이상</span>으로 변경해주세요.
-                            </p>
-                        </div>
-
-                        {/* 빨간 경고 */}
-                        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                            <p className="text-xs text-red-600 font-medium leading-relaxed">
-                                ⚠️ 비밀번호는 관장/관리자가 확인할 수 있습니다.<br />
-                                평소 사용하지 않는 비밀번호로 설정해주세요.
                             </p>
                         </div>
 
