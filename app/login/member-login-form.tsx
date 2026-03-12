@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, Search, Store } from 'lucide-react'
 import Link from 'next/link'
@@ -22,6 +22,16 @@ export default function MemberLoginForm() {
     const [searchLoading, setSearchLoading] = useState(false)
     const [selectedGym, setSelectedGym] = useState<{ id: string, name: string } | null>(null)
     const searchTimeout = useRef<NodeJS.Timeout | null>(null)
+
+    // Check localStorage on mount for cached gym
+    useEffect(() => {
+        const cachedId = localStorage.getItem('preferred_gym_id')
+        const cachedName = localStorage.getItem('preferred_gym_name')
+        if (cachedId && cachedName) {
+            setSelectedGym({ id: cachedId, name: cachedName })
+            setStep('LOGIN')
+        }
+    }, [])
 
     // Weak-password modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -46,6 +56,10 @@ export default function MemberLoginForm() {
     }
 
     const handleSelectGym = (gym: { id: string, name: string }) => {
+        // Save to localStorage
+        localStorage.setItem('preferred_gym_id', gym.id)
+        localStorage.setItem('preferred_gym_name', gym.name)
+
         setSelectedGym(gym)
         setGymResults([])
         setGymQuery('')
@@ -221,6 +235,9 @@ export default function MemberLoginForm() {
                     <button
                         type="button"
                         onClick={() => {
+                            // Clear from localStorage
+                            localStorage.removeItem('preferred_gym_id')
+                            localStorage.removeItem('preferred_gym_name')
                             setStep('SEARCH');
                             setSelectedGym(null);
                         }}
