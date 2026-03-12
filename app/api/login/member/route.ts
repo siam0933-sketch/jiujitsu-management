@@ -8,13 +8,14 @@ const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
 export async function POST(request: Request) {
     try {
         const json = await request.json()
+        const gymId = json.gymId ? String(json.gymId).trim() : ''
         const name = json.name ? String(json.name).trim() : ''
         const password = json.password ? String(json.password).trim().toLowerCase() : ''
 
-        console.log(`[Member Login Attempt] Name: '${name}', Password Length: ${password.length}`)
+        console.log(`[Member Login Attempt] GymID: '${gymId}', Name: '${name}', Password Length: ${password.length}`)
 
-        if (!name || !password) {
-            return NextResponse.json({ success: false, message: '이름과 비밀번호를 입력해주세요.' }, { status: 400 })
+        if (!gymId || !name || !password) {
+            return NextResponse.json({ success: false, message: '도장, 이름, 비밀번호를 모두 입력해주세요.' }, { status: 400 })
         }
 
         const supabaseAdmin = await createAdminClient()
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
         const { data: members, error } = await supabaseAdmin
             .from('gym_members')
             .select('id, gym_id, name, status, login_password')
+            .eq('gym_id', gymId)
             .eq('name', name)
 
         if (error) {
