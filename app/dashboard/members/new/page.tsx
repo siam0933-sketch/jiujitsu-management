@@ -242,28 +242,14 @@ export default function NewMemberPage() {
                                     name="login_password"
                                     id="login_password"
                                     readOnly
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 bg-gray-50 dark:bg-zinc-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 px-3 font-mono tracking-wider font-bold appearance-none"
+                                    value="*** (보안 처리됨)"
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-500 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 sm:text-sm sm:leading-6 px-3 font-mono tracking-wider font-bold appearance-none cursor-not-allowed"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const digits = '0123456789';
-                                        const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                                        let pwd = '';
-                                        for (let i = 0; i < 4; i++) pwd += digits.charAt(Math.floor(Math.random() * digits.length));
-                                        for (let i = 0; i < 2; i++) pwd += alphas.charAt(Math.floor(Math.random() * alphas.length));
-                                        pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
-
-                                        const el = document.getElementById('login_password') as HTMLInputElement;
-                                        if (el) el.value = pwd;
-                                    }}
-                                    className="rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50"
-                                >
-                                    재생성
-                                </button>
+                                {/* 숨겨진 실제 값 저장용 input */}
+                                <input type="hidden" id="login_password_hidden" name="login_password_hidden" />
                             </div>
                             <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
-                                * 4자리 숫자 + 2자리 영문 조합 (자동 생성됨)
+                                * 보안을 위해 초기 비밀번호는 시스템에서 자동 생성되며 관리자에게 노출되지 않습니다.
                                 <script dangerouslySetInnerHTML={{
                                     __html: `
                                     (function(){
@@ -274,7 +260,7 @@ export default function NewMemberPage() {
                                         for (let i = 0; i < 2; i++) pwd += alphas.charAt(Math.floor(Math.random() * alphas.length));
                                         pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
                                         setTimeout(() => {
-                                            const el = document.getElementById('login_password');
+                                            const el = document.getElementById('login_password_hidden');
                                             if(el && !el.value) el.value = pwd;
                                         }, 100);
                                     })();

@@ -577,7 +577,7 @@ export default function MemberModal({ member }: { member: any }) {
                                         <div className="flex items-center gap-2">
                                             {member.login_password ? (
                                                 <code className="text-lg bg-gray-50 dark:bg-zinc-800/50 px-2 py-1 rounded text-gray-900 dark:text-zinc-100 font-bold font-mono tracking-wider">
-                                                    {member.login_password}
+                                                    ***
                                                 </code>
                                             ) : (
                                                 <button

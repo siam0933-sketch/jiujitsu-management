@@ -43,7 +43,7 @@ export async function registerMember(prevState: any, formData: FormData) {
     const access_code = String(formData.get('access_code') || '')
 
     // Server-side fallback for password generation
-    let login_password = String(formData.get('login_password') || '')
+    let login_password = String(formData.get('login_password_hidden') || '')
     if (!login_password) {
         login_password = generateInitialPassword()
     }

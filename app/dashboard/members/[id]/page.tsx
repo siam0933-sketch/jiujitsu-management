@@ -163,7 +163,7 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                 <div className="bg-white dark:bg-zinc-900 px-4 py-5 border-t border-gray-100 dark:border-zinc-800/50">
                                     <dt className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">로그인 비밀번호</dt>
                                     <dd className="text-xl font-mono font-bold text-gray-700 dark:text-zinc-300 tracking-widest text-center py-2 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-800">
-                                        {member.login_password || '미설정'}
+                                        {member.login_password ? '***' : '미설정'}
                                     </dd>
                                 </div>
 
