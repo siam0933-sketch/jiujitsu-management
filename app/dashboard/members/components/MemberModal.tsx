@@ -572,450 +572,443 @@ export default function MemberModal({ member }: { member: any }) {
                                         )}
                                     </div>
 
-                                    <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">로그인 비밀번호</p>
-                                        <div className="flex items-center gap-2">
-                                            {member.login_password ? (
-                                                <code className="text-lg bg-gray-50 dark:bg-zinc-800/50 px-2 py-1 rounded text-gray-900 dark:text-zinc-100 font-bold font-mono tracking-wider">
-                                                    ***
-                                                </code>
-                                            ) : (
-                                                <button
-                                                    onClick={async () => {
-                                                        if (confirm(`비밀번호를 자동으로 생성하시겠습니까?`)) {
-                                                            setIsSubmitting(true)
-                                                            const res = await generateMemberPassword(member.id)
-                                                            setIsSubmitting(false)
 
-                                                            if (res?.error) alert(res.error)
-                                                            else {
-                                                                alert(`비밀번호가 생성되었습니다: [${res.password}]`)
-                                                                router.refresh()
-                                                            }
-                                                        }
-                                                    }}
-                                                    disabled={isSubmitting}
-                                                    className="text-xs border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-bold flex items-center gap-1 disabled:opacity-50"
-                                                >
-                                                    <span>⚠️ 미설정</span>
-                                                    <span className="text-[10px] font-normal text-blue-400">(클릭하여 자동생성)</span>
-                                                </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm(`비밀번호를 자동으로 생성하시겠습니까?`)) {
+                                                setIsSubmitting(true)
+                                                const res = await generateMemberPassword(member.id)
+                                                setIsSubmitting(false)
+
+                                                if (res?.error) alert(res.error)
+                                                else {
+                                                    alert(`비밀번호가 생성되었습니다: [${res.password}]`)
+                                                    router.refresh()
+                                                }
+                                            }
+                                        }}
+                                        disabled={isSubmitting}
+                                        className="text-xs border border-blue-200 bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-bold flex items-center gap-1 disabled:opacity-50"
+                                    >
+                                        <span>⚠️ 미설정</span>
+                                        <span className="text-[10px] font-normal text-blue-400">(클릭하여 자동생성)</span>
+                                    </button>
                                             )}
-                                            {/* 재발급 버튼 제거 (요청사항) */}
-                                        </div>
-                                    </div>
-
-                                    {/* Row 2: Phone, Guardian Phone, Address */}
-                                    <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">전화번호</p>
-                                        {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
-                                        ) : (
-                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.phone}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="col-span-1">
-                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">보호자 전화번호</p>
-                                        {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
-                                        ) : (
-                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.guardian_phone || '-'}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="col-span-2">
-                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">주소</p>
-                                        {isEditingBasicInfo ? (
-                                            <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
-                                        ) : (
-                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100 truncate">{member.address || '-'}</p>
-                                        )}
-                                    </div>
-
-
+                                    {/* 재발급 버튼 제거 (요청사항) */}
                                 </div>
-                            </section>
+                        </div>
 
-                            {/* Section 2: Payment */}
-                            <section>
-                                <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider mb-3">이용권 및 결제</h4>
-                                <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
-                                    {/* Status */}
-                                    <div className="flex justify-between items-start mb-6">
+                        {/* Row 2: Phone, Guardian Phone, Address */}
+                        <div className="col-span-1">
+                            <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">전화번호</p>
+                            {isEditingBasicInfo ? (
+                                <input value={basicInfoForm.phone} onChange={e => setBasicInfoForm({ ...basicInfoForm, phone: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
+                            ) : (
+                                <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.phone}</p>
+                            )}
+                        </div>
+
+                        <div className="col-span-1">
+                            <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">보호자 전화번호</p>
+                            {isEditingBasicInfo ? (
+                                <input value={basicInfoForm.guardian_phone || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, guardian_phone: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
+                            ) : (
+                                <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.guardian_phone || '-'}</p>
+                            )}
+                        </div>
+
+                        <div className="col-span-2">
+                            <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">주소</p>
+                            {isEditingBasicInfo ? (
+                                <input value={basicInfoForm.address || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, address: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" />
+                            ) : (
+                                <p className="font-medium text-lg text-gray-900 dark:text-zinc-100 truncate">{member.address || '-'}</p>
+                            )}
+                        </div>
+
+
+                    </div>
+                </section>
+
+                {/* Section 2: Payment */}
+                <section>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider mb-3">이용권 및 결제</h4>
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
+                        {/* Status */}
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <p className="text-gray-500 dark:text-zinc-400 text-sm font-bold">만료일</p>
+                                    {!isEditingExpiryDate ? (
+                                        <button onClick={() => setIsEditingExpiryDate(true)} className="text-xs text-blue-500 hover:text-blue-700 underline px-1 py-0.5 rounded focus:outline-none focus:bg-blue-50">수정</button>
+                                    ) : (
+                                        <div className="flex gap-1 ml-2">
+                                            <button onClick={handleSaveExpiryDate} disabled={isSubmitting} className="text-xs text-white bg-blue-600 px-2 py-1 rounded shadow-sm hover:bg-blue-700 transition">저장</button>
+                                            <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-xs text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded border border-gray-300 dark:border-zinc-700 shadow-sm hover:bg-gray-200 transition">취소</button>
+                                        </div>
+                                    )}
+                                </div>
+                                {!isEditingExpiryDate ? (
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
+                                ) : (
+                                    <input
+                                        type="date"
+                                        value={tempExpiryDate}
+                                        onChange={e => setTempExpiryDate(e.target.value)}
+                                        className="block w-full text-xl font-bold border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                                    />
+                                )}
+                            </div>
+                            {/* 결제 기준일 */}
+                            <div className="text-right">
+                                <p className="text-xs text-gray-400 dark:text-zinc-500 mb-1">수납 청구일</p>
+                                <PaymentBillingDay
+                                    memberId={member.id}
+                                    billingDay={member.payment_due_day ?? null}
+                                    joinedDay={new Date(member.joined_at).getDate()}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Payment Form Toggle */}
+                        <div className="border border-gray-200 dark:border-zinc-800 rounded-lg mb-4 sm:mb-6 overflow-hidden">
+                            <button onClick={togglePaymentForm} className="w-full flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-zinc-800/50 text-sm font-bold text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800">
+                                <span>결제하기</span>
+                                <span>{isPaymentFormOpen ? '▲' : '▼'}</span>
+                            </button>
+                            {isPaymentFormOpen && (
+                                <div className="p-3 sm:p-6 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800">
+                                    {/* Simple Payment Form */}
+                                    <div className="space-y-4">
                                         <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <p className="text-gray-500 dark:text-zinc-400 text-sm font-bold">만료일</p>
-                                                {!isEditingExpiryDate ? (
-                                                    <button onClick={() => setIsEditingExpiryDate(true)} className="text-xs text-blue-500 hover:text-blue-700 underline px-1 py-0.5 rounded focus:outline-none focus:bg-blue-50">수정</button>
-                                                ) : (
-                                                    <div className="flex gap-1 ml-2">
-                                                        <button onClick={handleSaveExpiryDate} disabled={isSubmitting} className="text-xs text-white bg-blue-600 px-2 py-1 rounded shadow-sm hover:bg-blue-700 transition">저장</button>
-                                                        <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-xs text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded border border-gray-300 dark:border-zinc-700 shadow-sm hover:bg-gray-200 transition">취소</button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {!isEditingExpiryDate ? (
-                                                <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
-                                            ) : (
-                                                <input
-                                                    type="date"
-                                                    value={tempExpiryDate}
-                                                    onChange={e => setTempExpiryDate(e.target.value)}
-                                                    className="block w-full text-xl font-bold border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
-                                                />
-                                            )}
+                                            <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1 font-bold">이용권 선택</label>
+                                            <select
+                                                value={selectedPlanId}
+                                                onChange={e => setSelectedPlanId(e.target.value)}
+                                                className="w-full text-base border-2 border-gray-900 rounded p-2"
+                                            >
+                                                <option value="">이용권 선택</option>
+                                                {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
+                                            </select>
                                         </div>
-                                        {/* 결제 기준일 */}
-                                        <div className="text-right">
-                                            <p className="text-xs text-gray-400 dark:text-zinc-500 mb-1">수납 청구일</p>
-                                            <PaymentBillingDay
-                                                memberId={member.id}
-                                                billingDay={member.payment_due_day ?? null}
-                                                joinedDay={new Date(member.joined_at).getDate()}
-                                            />
-                                        </div>
-                                    </div>
 
-                                    {/* Payment Form Toggle */}
-                                    <div className="border border-gray-200 dark:border-zinc-800 rounded-lg mb-4 sm:mb-6 overflow-hidden">
-                                        <button onClick={togglePaymentForm} className="w-full flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-zinc-800/50 text-sm font-bold text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800">
-                                            <span>결제하기</span>
-                                            <span>{isPaymentFormOpen ? '▲' : '▼'}</span>
-                                        </button>
-                                        {isPaymentFormOpen && (
-                                            <div className="p-3 sm:p-6 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800">
-                                                {/* Simple Payment Form */}
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <label className="block text-sm text-gray-500 dark:text-zinc-400 mb-1 font-bold">이용권 선택</label>
-                                                        <select
-                                                            value={selectedPlanId}
-                                                            onChange={e => setSelectedPlanId(e.target.value)}
-                                                            className="w-full text-base border-2 border-gray-900 rounded p-2"
-                                                        >
-                                                            <option value="">이용권 선택</option>
-                                                            {plans.map(p => <option key={p.id} value={p.id}>{p.name} ({p.price.toLocaleString()}원)</option>)}
-                                                        </select>
-                                                    </div>
-
-                                                    {selectedPlan?.type === 'period' && (
-                                                        <div className="flex flex-wrap gap-2 sm:gap-4 items-start">
-                                                            <div className="w-16 sm:w-auto sm:flex-1">
-                                                                <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">개월 수</label>
-                                                                <input
-                                                                    type="number"
-                                                                    min="1"
-                                                                    value={durationMonths}
-                                                                    onChange={e => setDurationMonths(Number(e.target.value))}
-                                                                    className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
-                                                                />
-                                                            </div>
-                                                            <div className="flex-1 min-w-[120px]">
-                                                                <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">결제일</label>
-                                                                <input
-                                                                    type="date"
-                                                                    value={paymentDate}
-                                                                    onChange={e => setPaymentDate(e.target.value)}
-                                                                    className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
-                                                                />
-                                                            </div>
-                                                            <div className="w-full sm:flex-1 sm:min-w-[120px]">
-                                                                <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">만료 예정일</label>
-                                                                <input
-                                                                    type="date"
-                                                                    value={newExpiryDate}
-                                                                    onChange={e => setNewExpiryDate(e.target.value)}
-                                                                    className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Options List Grouped by Group Name */}
-                                                    {options.length > 0 && (
-                                                        <div className="space-y-4 pt-2">
-                                                            {Object.entries(
-                                                                options.reduce((acc, opt) => {
-                                                                    const group = opt.group_name || '기타';
-                                                                    if (!acc[group]) acc[group] = [];
-                                                                    acc[group].push(opt);
-                                                                    return acc;
-                                                                }, {} as Record<string, any[]>)
-                                                            ).map(([groupName, groupOptions]: [string, any]) => (
-                                                                <div key={groupName} className="space-y-2">
-                                                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 font-bold">{groupName}</p>
-                                                                    {groupOptions.map((opt: any) => (
-                                                                        <label key={opt.id} className="flex items-center justify-between p-2 sm:p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <input
-                                                                                    type="checkbox"
-                                                                                    checked={selectedOptionIds.has(opt.id)}
-                                                                                    onChange={() => handleToggleOption(opt.id)}
-                                                                                    className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-4 h-4 sm:w-5 sm:h-5"
-                                                                                />
-                                                                                <span className="text-sm sm:text-base text-gray-700 dark:text-zinc-300">{opt.name}</span>
-                                                                            </div>
-                                                                            <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-zinc-100">
-                                                                                {(() => {
-                                                                                    const price = selectedPlan?.type === 'period' ? opt.price * durationMonths : opt.price
-                                                                                    return `${price > 0 ? '+' : ''}${price.toLocaleString()}원`
-                                                                                })()}
-                                                                            </span>
-                                                                        </label>
-                                                                    ))}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    {/* Product List */}
-                                                    {products.length > 0 && (
-                                                        <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50">
-                                                            <div className="space-y-2">
-                                                                <p className="text-sm text-gray-500 dark:text-zinc-400 font-bold">상품 (일회성 구매)</p>
-                                                                {products.map((prod: any) => (
-                                                                    <label key={prod.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={selectedProductIds.has(prod.id)}
-                                                                                onChange={() => handleToggleProduct(prod.id)}
-                                                                                className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-5 h-5"
-                                                                            />
-                                                                            <span className="text-base text-gray-700 dark:text-zinc-300">{prod.name}</span>
-                                                                        </div>
-                                                                        <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
-                                                                            +{prod.price.toLocaleString()}원
-                                                                        </span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded mb-2 border border-gray-100 dark:border-zinc-800/50">
-                                                        <span className="text-base font-bold text-gray-700 dark:text-zinc-300">결제 수단</span>
-                                                        <select
-                                                            value={paymentMethod}
-                                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                                            className="px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900"
-                                                        >
-                                                            <option value="card">카드</option>
-                                                            <option value="cash">현금</option>
-                                                            <option value="transfer">계좌이체</option>
-                                                            <option value="other">기타</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded border border-gray-100 dark:border-zinc-800/50 mb-4">
-                                                        <span className="text-base font-bold">총 결제금액</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <input
-                                                                type="text"
-                                                                value={(manualAmount !== null ? manualAmount : currentTotal).toLocaleString()}
-                                                                onChange={e => {
-                                                                    const val = Number(e.target.value.replace(/[^0-9]/g, ''))
-                                                                    setManualAmount(val)
-                                                                }}
-                                                                className="text-2xl font-bold text-blue-600 bg-transparent text-right border-0 border-b border-gray-300 dark:border-zinc-700 focus:ring-0 focus:border-blue-500 w-40 p-0"
-                                                            />
-                                                            <span className="text-2xl font-bold text-blue-600">원</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <button onClick={handleSubmitPayment} disabled={isSubmitting} className="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-bold hover:bg-blue-500">
-                                                        결제하기
-                                                    </button>
+                                        {selectedPlan?.type === 'period' && (
+                                            <div className="flex flex-wrap gap-2 sm:gap-4 items-start">
+                                                <div className="w-16 sm:w-auto sm:flex-1">
+                                                    <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">개월 수</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={durationMonths}
+                                                        onChange={e => setDurationMonths(Number(e.target.value))}
+                                                        className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-[120px]">
+                                                    <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">결제일</label>
+                                                    <input
+                                                        type="date"
+                                                        value={paymentDate}
+                                                        onChange={e => setPaymentDate(e.target.value)}
+                                                        className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
+                                                    />
+                                                </div>
+                                                <div className="w-full sm:flex-1 sm:min-w-[120px]">
+                                                    <label className="block text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mb-1 whitespace-nowrap">만료 예정일</label>
+                                                    <input
+                                                        type="date"
+                                                        value={newExpiryDate}
+                                                        onChange={e => setNewExpiryDate(e.target.value)}
+                                                        className="w-full text-sm sm:text-base border-2 border-gray-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-1.5 sm:p-2"
+                                                    />
                                                 </div>
                                             </div>
                                         )}
-                                    </div>
 
-                                    {/* History */}
-                                    <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">최근 결제 내역</h5>
-                                    <div className="space-y-2">
-                                        {payments.map(pay => (
-                                            <div key={pay.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 last:border-0">
-                                                {editingPaymentId === pay.id ? (
-                                                    <div className="flex items-center gap-1 sm:gap-2 w-full">
-                                                        <input
-                                                            type="date"
-                                                            value={editDate}
-                                                            onChange={e => setEditDate(e.target.value)}
-                                                            className="w-24 sm:w-auto text-xs border border-blue-300 rounded px-1 py-0.5"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            value={editAmount.toLocaleString()}
-                                                            onChange={e => {
-                                                                const val = Number(e.target.value.replace(/[^0-9]/g, ''))
-                                                                setEditAmount(val)
-                                                            }}
-                                                            className="w-20 sm:w-auto flex-1 text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
-                                                        />
-                                                        <div className="flex gap-1 shrink-0">
-                                                            <button onClick={() => handleUpdatePayment(pay)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
-                                                            <button onClick={cancelEditing} className="text-xs bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-zinc-200 px-2 py-1 rounded">취소</button>
-                                                            <button onClick={() => handleDeletePayment(pay.id)} className="text-xs bg-red-500 text-white px-2 py-1 rounded">삭제</button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="flex items-center gap-3 w-full">
-                                                            <span className="text-xs text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{pay.payment_date}</span>
-                                                            <div className="flex justify-between items-center flex-1 min-w-0">
-                                                                <span className="text-gray-700 dark:text-zinc-300 text-base truncate pr-2">
+                                        {/* Options List Grouped by Group Name */}
+                                        {options.length > 0 && (
+                                            <div className="space-y-4 pt-2">
+                                                {Object.entries(
+                                                    options.reduce((acc, opt) => {
+                                                        const group = opt.group_name || '기타';
+                                                        if (!acc[group]) acc[group] = [];
+                                                        acc[group].push(opt);
+                                                        return acc;
+                                                    }, {} as Record<string, any[]>)
+                                                ).map(([groupName, groupOptions]: [string, any]) => (
+                                                    <div key={groupName} className="space-y-2">
+                                                        <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 font-bold">{groupName}</p>
+                                                        {groupOptions.map((opt: any) => (
+                                                            <label key={opt.id} className="flex items-center justify-between p-2 sm:p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
+                                                                <div className="flex items-center gap-2">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={selectedOptionIds.has(opt.id)}
+                                                                        onChange={() => handleToggleOption(opt.id)}
+                                                                        className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-4 h-4 sm:w-5 sm:h-5"
+                                                                    />
+                                                                    <span className="text-sm sm:text-base text-gray-700 dark:text-zinc-300">{opt.name}</span>
+                                                                </div>
+                                                                <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-zinc-100">
                                                                     {(() => {
-                                                                        const snap = pay.plan_snapshot
-                                                                        if (!snap) return '결제 내역'
-                                                                        const parts = []
-                                                                        if (snap.plan_name) parts.push(snap.plan_name)
-                                                                        if (snap.type === 'period' && snap.duration_months) parts.push(`${snap.duration_months}개월`)
-                                                                        else if (snap.type === 'session' && snap.session_count) parts.push(`${snap.session_count}회`)
-                                                                        if (snap.options_summary) parts.push(snap.options_summary.replace(/, /g, '/'))
-                                                                        return parts.join('/')
+                                                                        const price = selectedPlan?.type === 'period' ? opt.price * durationMonths : opt.price
+                                                                        return `${price > 0 ? '+' : ''}${price.toLocaleString()}원`
                                                                     })()}
                                                                 </span>
-                                                                <div className="flex gap-2 items-center">
-                                                                    <span className="font-bold cursor-pointer hover:text-blue-600 text-sm" onClick={() => startEditing(pay)}>
-                                                                        {pay.amount.toLocaleString()}원
-                                                                    </span>
-                                                                    <div className="flex gap-1 ml-2">
-                                                                        <button onClick={() => startEditing(pay)} className="text-xs text-blue-500 hover:underline">수정</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )}
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                        {payments.length === 0 && <p className="text-xs text-gray-300 dark:text-zinc-600 text-center py-2">내역 없음</p>}
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* Section 3: History */}
-                            <section>
-                                <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider mb-3">활동 기록</h4>
-                                <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 space-y-6">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <MemberJoinedDate memberId={member.id} joinedAt={member.joined_at} />
-                                        <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
-                                    </div>
-                                    <hr className="border-gray-100 dark:border-zinc-800/50" />
-
-                                    {/* Weekly Schedule */}
-                                    <div>
-                                        <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">수강 중인 수업 (주간 시간표) <span className="text-xs font-normal text-gray-400 dark:text-zinc-500 ml-1">요일 칸을 눌러 편집</span></h5>
-                                        <div className="space-y-2 sm:space-y-3 relative">
-                                            {[
-                                                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                                                ['Sat', 'Sun']
-                                            ].map((weekPart, partIndex) => (
-                                                <div key={partIndex} className="grid grid-cols-5 gap-1.5 sm:gap-2 text-center">
-                                                    {weekPart.map(day => {
-                                                        const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
-                                                        const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
-                                                        // Sort by start_time
-                                                        classesOnDay.sort((a: any, b: any) => a.start_time.localeCompare(b.start_time))
-
-                                                        const isPopoverOpen = popoverDay === day
-                                                        const availableClasses = allSchedules.filter(s => s.day_of_week === day)
-                                                        const hasClassesForDay = availableClasses.length > 0
-
-                                                        return (
-                                                            <div key={day} className="flex flex-col relative">
-                                                                <div className={`py-1 text-[11px] sm:text-xs font-bold ${day === 'Sun' ? 'text-red-500' : day === 'Sat' ? 'text-blue-500' : 'text-gray-500 dark:text-zinc-400'}`}>
-                                                                    {dayMap[day]}
-                                                                </div>
-                                                                <div
-                                                                    className="min-h-[50px] sm:min-h-[60px] bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-700 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all relative z-10"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation()
-                                                                        if (hasClassesForDay) setPopoverDay(isPopoverOpen ? null : day)
-                                                                    }}
-                                                                >
-                                                                    {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
-                                                                        <span key={i} className="text-[10px] sm:text-xs leading-tight text-blue-700 font-medium block bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-0.5 sm:px-1 py-1 rounded w-full truncate">
-                                                                            {c.class_name}
-                                                                        </span>
-                                                                    )) : (
-                                                                        <div className="h-full w-full flex items-center justify-center flex-1">
-                                                                            <span className="text-[10px] sm:text-xs text-gray-300 dark:text-zinc-600 block mt-1">+ 추가</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* Popup Menu */}
-                                                                {isPopoverOpen && (
-                                                                    <>
-                                                                        <div className="fixed inset-0 z-20" onClick={() => setPopoverDay(null)} />
-                                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-xl z-30 p-1 text-left">
-                                                                            <div className="px-2 py-1.5 mb-1 bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800/50">
-                                                                                <span className="text-xs font-bold text-gray-600 dark:text-zinc-300">{dayMap[day]}요일 전체 수업</span>
-                                                                            </div>
-                                                                            {availableClasses.length > 0 ? availableClasses.map((ac: any) => {
-                                                                                const isEnrolled = enrolledClasses.some(ec => ec.id === ac.id)
-                                                                                return (
-                                                                                    <button
-                                                                                        key={ac.id}
-                                                                                        onClick={() => handleEnrollToggle(ac.id, isEnrolled)}
-                                                                                        disabled={isSubmitting}
-                                                                                        className={`w-full text-left px-2 py-2 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold border border-blue-100 dark:border-blue-800' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-300'}`}
-                                                                                    >
-                                                                                        <span className="truncate pr-2">{ac.class_name}</span>
-                                                                                        {isEnrolled && <span className="text-[10px] bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
-                                                                                        {!isEnrolled && <span className="text-[10px] text-gray-400 dark:text-zinc-500 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
-                                                                                    </button>
-                                                                                )
-                                                                            }) : (
-                                                                                <div className="px-2 py-3 text-center text-xs text-gray-400 dark:text-zinc-500">등록된 수업 없음</div>
-                                                                            )}
-                                                                        </div>
-                                                                    </>
-                                                                )}
+                                        )}
+                                        {/* Product List */}
+                                        {products.length > 0 && (
+                                            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50">
+                                                <div className="space-y-2">
+                                                    <p className="text-sm text-gray-500 dark:text-zinc-400 font-bold">상품 (일회성 구매)</p>
+                                                    {products.map((prod: any) => (
+                                                        <label key={prod.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedProductIds.has(prod.id)}
+                                                                    onChange={() => handleToggleProduct(prod.id)}
+                                                                    className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-5 h-5"
+                                                                />
+                                                                <span className="text-base text-gray-700 dark:text-zinc-300">{prod.name}</span>
                                                             </div>
-                                                        )
-                                                    })}
+                                                            <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
+                                                                +{prod.price.toLocaleString()}원
+                                                            </span>
+                                                        </label>
+                                                    ))}
                                                 </div>
-                                            ))}
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded mb-2 border border-gray-100 dark:border-zinc-800/50">
+                                            <span className="text-base font-bold text-gray-700 dark:text-zinc-300">결제 수단</span>
+                                            <select
+                                                value={paymentMethod}
+                                                onChange={(e) => setPaymentMethod(e.target.value)}
+                                                className="px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900"
+                                            >
+                                                <option value="card">카드</option>
+                                                <option value="cash">현금</option>
+                                                <option value="transfer">계좌이체</option>
+                                                <option value="other">기타</option>
+                                            </select>
                                         </div>
+
+                                        <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded border border-gray-100 dark:border-zinc-800/50 mb-4">
+                                            <span className="text-base font-bold">총 결제금액</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={(manualAmount !== null ? manualAmount : currentTotal).toLocaleString()}
+                                                    onChange={e => {
+                                                        const val = Number(e.target.value.replace(/[^0-9]/g, ''))
+                                                        setManualAmount(val)
+                                                    }}
+                                                    className="text-2xl font-bold text-blue-600 bg-transparent text-right border-0 border-b border-gray-300 dark:border-zinc-700 focus:ring-0 focus:border-blue-500 w-40 p-0"
+                                                />
+                                                <span className="text-2xl font-bold text-blue-600">원</span>
+                                            </div>
+                                        </div>
+
+                                        <button onClick={handleSubmitPayment} disabled={isSubmitting} className="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-bold hover:bg-blue-500">
+                                            결제하기
+                                        </button>
                                     </div>
-
-                                    <AttendanceHistory
-                                        logs={attendanceLogs}
-                                        memberId={member.id}
-                                        onUpdate={async () => {
-                                            const logs = await getMemberAttendanceLogs(member.id)
-                                            setAttendanceLogs(logs)
-                                            router.refresh()
-                                        }}
-                                    />
-
-                                    <hr className="border-gray-100 dark:border-zinc-800/50" />
-
-                                    <PromotionHistory
-                                        memberId={member.id}
-                                        memberName={member.name}
-                                        memberBelt={member.belt}
-                                        memberStripe={member.latest_stripe}
-                                        initialLogs={promotionLogs}
-                                        joinedAt={member.joined_at}
-                                        startDate={member.start_date}
-                                    />
                                 </div>
-                            </section>
+                            )}
+                        </div>
 
-                            <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-100 dark:border-zinc-800/50">
-                                <button type="button" onClick={closeModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 sm:mt-0 sm:w-auto">
-                                    닫기
-                                </button>
-                            </div>
-
+                        {/* History */}
+                        <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">최근 결제 내역</h5>
+                        <div className="space-y-2">
+                            {payments.map(pay => (
+                                <div key={pay.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-50 last:border-0">
+                                    {editingPaymentId === pay.id ? (
+                                        <div className="flex items-center gap-1 sm:gap-2 w-full">
+                                            <input
+                                                type="date"
+                                                value={editDate}
+                                                onChange={e => setEditDate(e.target.value)}
+                                                className="w-24 sm:w-auto text-xs border border-blue-300 rounded px-1 py-0.5"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={editAmount.toLocaleString()}
+                                                onChange={e => {
+                                                    const val = Number(e.target.value.replace(/[^0-9]/g, ''))
+                                                    setEditAmount(val)
+                                                }}
+                                                className="w-20 sm:w-auto flex-1 text-xs border border-blue-300 rounded px-1 py-0.5 text-right"
+                                            />
+                                            <div className="flex gap-1 shrink-0">
+                                                <button onClick={() => handleUpdatePayment(pay)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">저장</button>
+                                                <button onClick={cancelEditing} className="text-xs bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-zinc-200 px-2 py-1 rounded">취소</button>
+                                                <button onClick={() => handleDeletePayment(pay.id)} className="text-xs bg-red-500 text-white px-2 py-1 rounded">삭제</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-center gap-3 w-full">
+                                                <span className="text-xs text-gray-400 dark:text-zinc-500 whitespace-nowrap shrink-0">{pay.payment_date}</span>
+                                                <div className="flex justify-between items-center flex-1 min-w-0">
+                                                    <span className="text-gray-700 dark:text-zinc-300 text-base truncate pr-2">
+                                                        {(() => {
+                                                            const snap = pay.plan_snapshot
+                                                            if (!snap) return '결제 내역'
+                                                            const parts = []
+                                                            if (snap.plan_name) parts.push(snap.plan_name)
+                                                            if (snap.type === 'period' && snap.duration_months) parts.push(`${snap.duration_months}개월`)
+                                                            else if (snap.type === 'session' && snap.session_count) parts.push(`${snap.session_count}회`)
+                                                            if (snap.options_summary) parts.push(snap.options_summary.replace(/, /g, '/'))
+                                                            return parts.join('/')
+                                                        })()}
+                                                    </span>
+                                                    <div className="flex gap-2 items-center">
+                                                        <span className="font-bold cursor-pointer hover:text-blue-600 text-sm" onClick={() => startEditing(pay)}>
+                                                            {pay.amount.toLocaleString()}원
+                                                        </span>
+                                                        <div className="flex gap-1 ml-2">
+                                                            <button onClick={() => startEditing(pay)} className="text-xs text-blue-500 hover:underline">수정</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                            {payments.length === 0 && <p className="text-xs text-gray-300 dark:text-zinc-600 text-center py-2">내역 없음</p>}
                         </div>
                     </div>
+                </section>
+
+                {/* Section 3: History */}
+                <section>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-zinc-100 uppercase tracking-wider mb-3">활동 기록</h4>
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <MemberJoinedDate memberId={member.id} joinedAt={member.joined_at} />
+                            <MemberStartDate memberId={member.id} startDate={member.start_date} joinedAt={member.joined_at} />
+                        </div>
+                        <hr className="border-gray-100 dark:border-zinc-800/50" />
+
+                        {/* Weekly Schedule */}
+                        <div>
+                            <h5 className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-2">수강 중인 수업 (주간 시간표) <span className="text-xs font-normal text-gray-400 dark:text-zinc-500 ml-1">요일 칸을 눌러 편집</span></h5>
+                            <div className="space-y-2 sm:space-y-3 relative">
+                                {[
+                                    ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                                    ['Sat', 'Sun']
+                                ].map((weekPart, partIndex) => (
+                                    <div key={partIndex} className="grid grid-cols-5 gap-1.5 sm:gap-2 text-center">
+                                        {weekPart.map(day => {
+                                            const dayMap: Record<string, string> = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금', Sat: '토', Sun: '일' }
+                                            const classesOnDay = enrolledClasses.filter((e: any) => e.day_of_week === day)
+                                            // Sort by start_time
+                                            classesOnDay.sort((a: any, b: any) => a.start_time.localeCompare(b.start_time))
+
+                                            const isPopoverOpen = popoverDay === day
+                                            const availableClasses = allSchedules.filter(s => s.day_of_week === day)
+                                            const hasClassesForDay = availableClasses.length > 0
+
+                                            return (
+                                                <div key={day} className="flex flex-col relative">
+                                                    <div className={`py-1 text-[11px] sm:text-xs font-bold ${day === 'Sun' ? 'text-red-500' : day === 'Sat' ? 'text-blue-500' : 'text-gray-500 dark:text-zinc-400'}`}>
+                                                        {dayMap[day]}
+                                                    </div>
+                                                    <div
+                                                        className="min-h-[50px] sm:min-h-[60px] bg-white dark:bg-zinc-900 rounded-md border border-gray-200 dark:border-zinc-700 p-1 flex flex-col gap-1 items-center justify-start cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all relative z-10"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            if (hasClassesForDay) setPopoverDay(isPopoverOpen ? null : day)
+                                                        }}
+                                                    >
+                                                        {classesOnDay.length > 0 ? classesOnDay.map((c: any, i: number) => (
+                                                            <span key={i} className="text-[10px] sm:text-xs leading-tight text-blue-700 font-medium block bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-0.5 sm:px-1 py-1 rounded w-full truncate">
+                                                                {c.class_name}
+                                                            </span>
+                                                        )) : (
+                                                            <div className="h-full w-full flex items-center justify-center flex-1">
+                                                                <span className="text-[10px] sm:text-xs text-gray-300 dark:text-zinc-600 block mt-1">+ 추가</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Popup Menu */}
+                                                    {isPopoverOpen && (
+                                                        <>
+                                                            <div className="fixed inset-0 z-20" onClick={() => setPopoverDay(null)} />
+                                                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-xl z-30 p-1 text-left">
+                                                                <div className="px-2 py-1.5 mb-1 bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800/50">
+                                                                    <span className="text-xs font-bold text-gray-600 dark:text-zinc-300">{dayMap[day]}요일 전체 수업</span>
+                                                                </div>
+                                                                {availableClasses.length > 0 ? availableClasses.map((ac: any) => {
+                                                                    const isEnrolled = enrolledClasses.some(ec => ec.id === ac.id)
+                                                                    return (
+                                                                        <button
+                                                                            key={ac.id}
+                                                                            onClick={() => handleEnrollToggle(ac.id, isEnrolled)}
+                                                                            disabled={isSubmitting}
+                                                                            className={`w-full text-left px-2 py-2 text-xs rounded mb-1 flex justify-between items-center ${isEnrolled ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold border border-blue-100 dark:border-blue-800' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-300'}`}
+                                                                        >
+                                                                            <span className="truncate pr-2">{ac.class_name}</span>
+                                                                            {isEnrolled && <span className="text-[10px] bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded shadow-sm text-red-500 hover:bg-red-50 ml-1 shrink-0">취소</span>}
+                                                                            {!isEnrolled && <span className="text-[10px] text-gray-400 dark:text-zinc-500 align-middle shrink-0">{ac.start_time.slice(0, 5)}</span>}
+                                                                        </button>
+                                                                    )
+                                                                }) : (
+                                                                    <div className="px-2 py-3 text-center text-xs text-gray-400 dark:text-zinc-500">등록된 수업 없음</div>
+                                                                )}
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <AttendanceHistory
+                            logs={attendanceLogs}
+                            memberId={member.id}
+                            onUpdate={async () => {
+                                const logs = await getMemberAttendanceLogs(member.id)
+                                setAttendanceLogs(logs)
+                                router.refresh()
+                            }}
+                        />
+
+                        <hr className="border-gray-100 dark:border-zinc-800/50" />
+
+                        <PromotionHistory
+                            memberId={member.id}
+                            memberName={member.name}
+                            memberBelt={member.belt}
+                            memberStripe={member.latest_stripe}
+                            initialLogs={promotionLogs}
+                            joinedAt={member.joined_at}
+                            startDate={member.start_date}
+                        />
+                    </div>
+                </section>
+
+                <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-100 dark:border-zinc-800/50">
+                    <button type="button" onClick={closeModal} className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50 sm:mt-0 sm:w-auto">
+                        닫기
+                    </button>
                 </div>
+
+            </div>
+        </div>
+                </div >
             </div >
         </div >
     )
