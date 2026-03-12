@@ -8,6 +8,7 @@ export type KioskMember = {
     name: string
     phone: string
     avatar?: string
+    payment_due_date?: string
 }
 
 export type CheckInResult = {
@@ -15,6 +16,7 @@ export type CheckInResult = {
     message: string
     member?: KioskMember
     multipleMatches?: KioskMember[]
+    paymentWarning?: string
 }
 
 export async function getKioskInitData() {
@@ -42,7 +44,7 @@ export async function checkInByPhone(input: string, gymId: string): Promise<Chec
     // 2. Find Member(s) matching phone OR access_code
     const { data: members, error: searchError } = await supabase
         .from('gym_members')
-        .select('id, name, phone, user_id, access_code, remaining_sessions')
+        .select('id, name, phone, user_id, access_code, remaining_sessions, payment_due_date')
         .eq('gym_id', gymId)
         .eq('status', 'active')
         .or(`phone.ilike.%${input},access_code.eq.${input}`)
@@ -86,6 +88,28 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
     // Simple approach: Check if they already checked in today?
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
 
+    // Check payment due date logic
+    let paymentWarning: string | undefined = undefined;
+    if (member.payment_due_date) {
+        // Assume 'YYYY-MM-DD' from DB. Compare with 'today' (Seoul date string)
+        const dToday = new Date(today);
+        const dDue = new Date(member.payment_due_date);
+
+        // Calculate difference in days strictly by ignoring hours
+        // Set both to midnight UTC to avoid daylight saving issues
+        const utcToday = Date.UTC(dToday.getFullYear(), dToday.getMonth(), dToday.getDate());
+        const utcDue = Date.UTC(dDue.getFullYear(), dDue.getMonth(), dDue.getDate());
+        const diffDays = Math.floor((utcDue - utcToday) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            paymentWarning = "결제일이 지났습니다. 체육관에 문의해 주세요.";
+        } else if (diffDays === 0) {
+            paymentWarning = "오늘이 결제 예정일입니다.";
+        } else if (diffDays <= 5) {
+            paymentWarning = `결제 예정일이 D-${diffDays} 남았습니다.`;
+        }
+    }
+
     const { data: existingLog } = await supabase
         .from('gym_attendance_logs')
         .select('id, created_at, checked_out_at')
@@ -100,7 +124,8 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
             return {
                 success: true,
                 message: `${member.name}님, 이미 하원 처리되었습니다.`,
-                member: { id: member.id, name: member.name, phone: member.phone }
+                member: { id: member.id, name: member.name, phone: member.phone },
+                paymentWarning
             }
         }
 
@@ -114,7 +139,8 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
             return {
                 success: true,
                 message: `${member.name}님, 이미 등원 처리되었습니다.`,
-                member: { id: member.id, name: member.name, phone: member.phone }
+                member: { id: member.id, name: member.name, phone: member.phone },
+                paymentWarning
             }
         } else {
             // Condition 3: Sign Out (After 5 mins)
@@ -134,7 +160,8 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
             return {
                 success: true,
                 message: `${member.name}님, 하원 처리가 완료되었습니다.`,
-                member: { id: member.id, name: member.name, phone: member.phone }
+                member: { id: member.id, name: member.name, phone: member.phone },
+                paymentWarning
             }
         }
     }
@@ -180,6 +207,7 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
     return {
         success: true,
         message: `${member.name}님, 출석이 완료되었습니다!`,
-        member: { id: member.id, name: member.name, phone: member.phone }
+        member: { id: member.id, name: member.name, phone: member.phone },
+        paymentWarning
     }
 }

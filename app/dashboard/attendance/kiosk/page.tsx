@@ -10,6 +10,7 @@ export default function KioskPage() {
     const [gymId, setGymId] = useState<string | null>(null)
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'selection'>('idle')
     const [message, setMessage] = useState('')
+    const [paymentWarning, setPaymentWarning] = useState('')
     const [candidates, setCandidates] = useState<KioskMember[]>([])
     const [isExitModalOpen, setIsExitModalOpen] = useState(false)
     const [exitPin, setExitPin] = useState('')
@@ -58,6 +59,7 @@ export default function KioskPage() {
             timer = setTimeout(() => {
                 setStatus('idle')
                 setMessage('')
+                setPaymentWarning('')
                 setPhone('')
                 setCandidates([])
             }, 3000)
@@ -101,6 +103,7 @@ export default function KioskPage() {
             setPhone('')
             setStatus('idle')
             setMessage('')
+            setPaymentWarning('')
         }
     }
 
@@ -127,6 +130,7 @@ export default function KioskPage() {
 
         setStatus('loading')
         setMessage('회원 정보를 조회 중입니다...')
+        setPaymentWarning('')
 
         try {
             const result = await checkInByPhone(phone, gymId)
@@ -141,6 +145,9 @@ export default function KioskPage() {
         if (result.success) {
             setStatus('success')
             setMessage(result.message)
+            if (result.paymentWarning) {
+                setPaymentWarning(result.paymentWarning)
+            }
             // Optional: Play sound?
         } else if (result.multipleMatches) {
             setStatus('selection')
@@ -224,13 +231,18 @@ export default function KioskPage() {
                         'bg-white dark:bg-zinc-900'
                     }`}>
                     {status === 'success' ? (
-                        <div className="animate-bounce">
+                        <div className="animate-bounce flex flex-col items-center">
                             <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white">
                                 <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <h2 className="text-3xl font-bold text-green-800">{message}</h2>
+                            <h2 className="text-3xl font-bold text-green-800 text-center mb-4">{message}</h2>
+                            {paymentWarning && (
+                                <div className="mt-4 px-6 py-4 rounded-2xl bg-red-100 border-2 border-red-200 text-red-700 font-bold text-xl shadow-lg animate-pulse">
+                                    ⚠️ {paymentWarning}
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <>
