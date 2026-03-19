@@ -1,6 +1,6 @@
 {
-    "name": "Jiu-Jitsu Portal",
-    "short_name": "주짓수 포털",
+    "name": "My jiu-jitsu",
+    "short_name": "My jiu-jitsu",
     "description": "스마트한 주짓수 도장 회원 관리 및 출석 시스템",
     "start_url": "/login",
     "display": "standalone",
