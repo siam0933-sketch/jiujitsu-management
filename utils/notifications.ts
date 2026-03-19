@@ -57,6 +57,14 @@ export async function sendNotification({
         return
     }
 
+    // 2.5. 방해 금지 시간(Quiet Hours) 체크 (한국 시간 밤 10시 ~ 아침 8시 이전)
+    const nowKst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }))
+    const currentHour = nowKst.getHours()
+    if (currentHour >= 22 || currentHour < 8) {
+        console.log(`[sendNotification] Quiet hours active (Current KST Hour: ${currentHour}). Skipping push notification.`)
+        return
+    }
+
     webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey)
 
     const { data: subscriptions } = await supabase
