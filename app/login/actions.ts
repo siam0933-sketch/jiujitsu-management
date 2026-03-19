@@ -33,3 +33,23 @@ export async function login(prevState: any, formData: FormData) {
         return { message: 'Server crashed during login: ' + err.message, success: false }
     }
 }
+
+export async function searchGymsForLogin(query: string) {
+    if (!query || query.length < 2) return { gyms: [] }
+    const supabase = await createClient()
+
+    const { data: gyms, error } = await supabase
+        .from('gyms')
+        .select('id, name')
+        .ilike('name', `%${query}%`)
+        .eq('status', 'active')
+        .order('name')
+        .limit(10)
+
+    if (error) {
+        console.error('Error searching gyms:', error)
+        return { gyms: [] }
+    }
+
+    return { gyms: gyms || [] }
+}

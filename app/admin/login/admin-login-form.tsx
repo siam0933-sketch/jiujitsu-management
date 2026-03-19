@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginForm() {
     const router = useRouter()
@@ -47,7 +48,7 @@ export default function LoginForm() {
     return (
         <div className="w-full max-w-md mx-auto px-4">
             <div className="flex flex-col items-center justify-center mb-8">
-                <ShieldCheck size={48} strokeWidth={1.5} className="text-blue-600 mb-4" />
+                <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm" />
                 <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-zinc-100 mb-2">
                     관장(관리자) 로그인
                 </h1>

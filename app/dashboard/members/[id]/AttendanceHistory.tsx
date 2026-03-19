@@ -8,6 +8,7 @@ type AttendanceLog = {
     class_name: string | null
     method: string
     created_at: string
+    checked_out_at?: string | null
 }
 
 import { checkInMember, cancelAttendance } from '../../attendance/actions'
@@ -174,20 +175,28 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                 {logs.length > 0 ? (
                     <div className="max-h-[220px] overflow-y-auto pr-2">
                         <ul role="list" className="divide-y divide-gray-200 dark:divide-zinc-800">
-                            {logs.map((log) => (
-                                <li key={log.id} className="py-3 mt-0">
-                                    <div className="flex min-w-0 flex-1 justify-between space-x-4">
-                                        <div>
-                                            <p className="text-sm text-gray-500 dark:text-zinc-400">
-                                                <span className="font-medium text-gray-900 dark:text-zinc-100">{log.class_name || '일반 출석'}</span>
-                                            </p>
+                            {logs.map((log) => {
+                                const checkInTime = new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
+                                const checkOutTime = log.checked_out_at ? new Date(log.checked_out_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) : null
+
+                                return (
+                                    <li key={log.id} className="py-3 mt-0">
+                                        <div className="flex min-w-0 flex-1 justify-between space-x-4">
+                                            <div>
+                                                <p className="text-sm text-gray-500 dark:text-zinc-400">
+                                                    <span className="font-medium text-gray-900 dark:text-zinc-100">{log.class_name || '자율수련'}</span>
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-0.5">
+                                                    {checkInTime} 출석 {checkOutTime ? `/ ${checkOutTime} 하원` : ''}
+                                                </p>
+                                            </div>
+                                            <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-zinc-400">
+                                                <time dateTime={log.date}>{log.date}</time>
+                                            </div>
                                         </div>
-                                        <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-zinc-400">
-                                            <time dateTime={log.date}>{log.date}</time>
-                                        </div>
-                                    </div>
-                                </li>
-                            ))}
+                                    </li>
+                                )
+                            })}
                         </ul>
                     </div>
                 ) : (

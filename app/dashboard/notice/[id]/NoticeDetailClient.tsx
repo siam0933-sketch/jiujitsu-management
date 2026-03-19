@@ -92,7 +92,7 @@ export default function NoticeDetailClient({ initialData }: { initialData: any }
                 </div>
 
                 <div
-                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mb-8"
+                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mb-8 prose-p:my-1 prose-li:my-0.5"
                     dangerouslySetInnerHTML={{ __html: content }}
                 />
 

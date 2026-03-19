@@ -9,6 +9,7 @@ export default function MemberSignupPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const codeParam = searchParams?.get('code') || ''
+    const gymIdParam = searchParams?.get('gym_id') || ''
 
     const [step, setStep] = useState<'SEARCH' | 'FORM' | 'SUCCESS'>('SEARCH')
     const [gymInfo, setGymInfo] = useState<{ id: string, name: string } | null>(null)
@@ -41,14 +42,43 @@ export default function MemberSignupPage() {
     const [guardianPhone, setGuardianPhone] = useState('')
     const [address, setAddress] = useState('')
     const [school, setSchool] = useState('')
-    const [grade, setGrade] = useState('')
+    const [schoolType, setSchoolType] = useState('일반')
+    const [gradeNumber, setGradeNumber] = useState<number | null>(null)
 
-    // If invitation code is in URL, skip search and use code directly
+    // Auto-select belt based on age
+    useEffect(() => {
+        if (!birthYear || !birthMonth || !birthDay) return
+        const today = new Date()
+        const birth = new Date(
+            Number(birthYear),
+            Number(birthMonth) - 1,
+            Number(birthDay)
+        )
+        let age = today.getFullYear() - birth.getFullYear()
+        const monthDiff = today.getMonth() - birth.getMonth()
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--
+        }
+        if (age < 16) {
+            setBelt('화이트 (유소년)')
+        } else {
+            setBelt('White')
+        }
+        setStripe(0)
+    }, [birthYear, birthMonth, birthDay])
+
+    // Password validation state
+    const passwordInputRef = useRef<HTMLInputElement>(null)
+    const [passwordError, setPasswordError] = useState('')
+
+    // If invitation code or gym_id is in URL, skip search and go directly to form
     useEffect(() => {
         if (codeParam) {
             handleCheckCode(codeParam)
+        } else if (gymIdParam) {
+            handleSelectGym({ id: gymIdParam, name: '' })
         }
-    }, [codeParam])
+    }, [codeParam, gymIdParam])
 
     const handleCheckCode = async (codeToCheck: string) => {
         setIsLoading(true)
@@ -114,12 +144,16 @@ export default function MemberSignupPage() {
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!gymInfo) return
+
+        setPasswordError('')
         if (!PASSWORD_POLICY.test(password)) {
-            setErrorMsg('비밀번호는 영문과 숫자를 포함하여 6자리 이상이어야 합니다.')
+            setPasswordError('비밀번호는 영문과 숫자를 포함하여 6자리 이상이어야 합니다.')
+            passwordInputRef.current?.focus()
             return
         }
         if (password !== passwordConfirm) {
-            setErrorMsg('비밀번호가 일치하지 않습니다.')
+            setPasswordError('비밀번호가 일치하지 않습니다.')
+            passwordInputRef.current?.focus()
             return
         }
         setIsLoading(true)
@@ -131,7 +165,11 @@ export default function MemberSignupPage() {
             gender, belt,
             stripe: stripe !== null ? stripe : null,
             promotionDate: promotionDate || null,
-            accessCode, guardianPhone, address, school, grade
+            accessCode, guardianPhone, address,
+            school,
+            schoolType,
+            gradeNumber: schoolType !== '일반' ? gradeNumber : null,
+            gradeUpdatedYear: (schoolType !== '일반' && gradeNumber) ? new Date().getFullYear() : null
         })
         setIsLoading(false)
         if (res.error) setErrorMsg(res.error)
@@ -269,7 +307,7 @@ export default function MemberSignupPage() {
                             {/* 4. 회원 연락처 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">회원 연락처 (선택)</label>
-                                <input type="tel" value={phone}
+                                <input type="tel" value={phone} autoComplete="off"
                                     onChange={(e) => {
                                         const v = e.target.value.replace(/[^0-9]/g, '')
                                         setPhone(v)
@@ -283,7 +321,7 @@ export default function MemberSignupPage() {
                             {/* 5. 보호자 연락처 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">보호자 연락처 (선택)</label>
-                                <input type="tel" value={guardianPhone}
+                                <input type="tel" value={guardianPhone} autoComplete="off"
                                     onChange={(e) => {
                                         const v = e.target.value.replace(/[^0-9]/g, '')
                                         setGuardianPhone(v)
@@ -298,14 +336,22 @@ export default function MemberSignupPage() {
                             {/* 6. 비밀번호 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 *</label>
-                                <input required type="password" value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className={inputCls} placeholder="영문+숫자 혼합 6자리 이상" minLength={6} />
-                                <p className="mt-1 text-xs text-gray-500">영문과 숫자를 반드시 포함하여 6자리 이상으로 설정해주세요.</p>
+                                <input required type="password" value={password} autoComplete="new-password"
+                                    onChange={(e) => {
+                                        setPassword(e.target.value)
+                                        setPasswordError('')
+                                    }}
+                                    ref={passwordInputRef}
+                                    className={`${inputCls} ${passwordError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`} placeholder="영문+숫자 혼합 6자리 이상" minLength={6} />
+                                {passwordError ? (
+                                    <p className="mt-1 text-xs text-red-500">{passwordError}</p>
+                                ) : (
+                                    <p className="mt-1 text-xs text-gray-500">영문과 숫자를 반드시 포함하여 6자리 이상으로 설정해주세요.</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 확인 *</label>
-                                <input required type="password" value={passwordConfirm}
+                                <input required type="password" value={passwordConfirm} autoComplete="new-password"
                                     onChange={(e) => setPasswordConfirm(e.target.value)}
                                     className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${passwordConfirm && password !== passwordConfirm ? 'border-red-300' : 'border-gray-300'}`}
                                     placeholder="비밀번호를 다시 입력해주세요" minLength={6} />
@@ -324,16 +370,44 @@ export default function MemberSignupPage() {
                             </div>
 
                             {/* 8. 학교/학년 */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">학교 (선택)</label>
-                                    <input type="text" value={school} onChange={(e) => setSchool(e.target.value)}
-                                        className={inputCls} placeholder="예: 서울초" />
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">학교 구분 (선택)</label>
+                                        <select
+                                            value={schoolType}
+                                            onChange={(e) => { setSchoolType(e.target.value); setGradeNumber(null) }}
+                                            className={inputCls}
+                                        >
+                                            <option value="일반">일반</option>
+                                            <option value="초등학교">초등학교</option>
+                                            <option value="중학교">중학교</option>
+                                            <option value="고등학교">고등학교</option>
+                                        </select>
+                                    </div>
+                                    {schoolType !== '일반' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">학년 (선택)</label>
+                                            <select
+                                                value={gradeNumber ?? ''}
+                                                onChange={(e) => setGradeNumber(e.target.value ? Number(e.target.value) : null)}
+                                                className={inputCls}
+                                            >
+                                                <option value="">학년 선택</option>
+                                                {(schoolType === '초등학교'
+                                                    ? [1,2,3,4,5,6]
+                                                    : [1,2,3]
+                                                ).map(n => (
+                                                    <option key={n} value={n}>{n}학년</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">학년 (선택)</label>
-                                    <input type="text" value={grade} onChange={(e) => setGrade(e.target.value)}
-                                        className={inputCls} placeholder="예: 3학년" />
+                                    <label className="block text-sm font-medium text-gray-700">학교 이름 (선택)</label>
+                                    <input type="text" value={school} onChange={(e) => setSchool(e.target.value)}
+                                        className={inputCls} placeholder="예: 서울초등학교" />
                                 </div>
                             </div>
 

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Building2, UserCircle, LogIn, ArrowRight, UserPlus } from 'lucide-react'
@@ -27,12 +28,13 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col items-center bg-gray-50 dark:bg-zinc-950 font-sans">
       <main className="flex w-full flex-1 flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
 
-        <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col items-center">
+          <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={80} height={80} className="mb-6 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-800" />
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-4">
-            주짓수 도장 관리 시스템
+            My jiu-jitsu
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            원활한 출석 관리와 스마트한 도장 운영의 시작
+            스마트한 주짓수 도장 회원 관리 및 출석 시스템
           </p>
         </div>
 
@@ -96,7 +98,7 @@ export default async function Home() {
       </main>
 
       <footer className="w-full py-8 text-center text-sm text-gray-500 dark:text-zinc-500 border-t border-gray-200 dark:border-zinc-800">
-        <p>© {new Date().getFullYear()} Jiu-Jitsu Management System. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} My jiu-jitsu. All rights reserved.</p>
       </footer>
     </div>
   )

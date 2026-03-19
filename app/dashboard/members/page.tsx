@@ -149,6 +149,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                 count={count || 0}
                 status={status}
                 attendanceStatusMap={Object.fromEntries(attendanceMap)}
+                gymId={gym.id}
             />
         </div>
     )

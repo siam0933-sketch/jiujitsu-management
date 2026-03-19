@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Schedule, deleteSchedule, createSchedule } from '../actions_schedule'
 import { checkInMember, checkOutMember, cancelAttendance, getMemberAttendanceDates, getAttendanceLogsForDate } from '../actions'
 import { getEnrollments, updateEnrollments } from '../actions_enrollment'
+import { displayBeltName } from '../../members/constants'
 
 type Member = {
     id: string
@@ -520,7 +521,7 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
                                                     {/* Row 2: Belt */}
                                                     <div className="text-sm font-bold text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md truncate w-fit">
-                                                        {member.belt}
+                                                        {displayBeltName(member.belt)}
                                                     </div>
                                                 </div>
 

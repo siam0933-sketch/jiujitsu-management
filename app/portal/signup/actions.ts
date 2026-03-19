@@ -128,7 +128,9 @@ export async function registerPortalMember(data: {
     guardianPhone?: string,
     address?: string,
     school?: string,
-    grade?: string
+    schoolType?: string,
+    gradeNumber?: number | null,
+    gradeUpdatedYear?: number | null,
 }) {
     // [CRITICAL] We must use the Admin Service Key to bypass RLS and create/update members
     // before they actually log in.
@@ -178,7 +180,9 @@ export async function registerPortalMember(data: {
                     guardian_phone: data.guardianPhone || null,
                     address: data.address || null,
                     school: data.school || null,
-                    grade: data.grade || null
+                    school_type: data.schoolType || '일반',
+                    grade_number: data.gradeNumber ?? null,
+                    grade_updated_year: data.gradeUpdatedYear ?? null,
                 })
                 .eq('id', existingMember.id)
 
@@ -205,7 +209,9 @@ export async function registerPortalMember(data: {
                     guardian_phone: data.guardianPhone || null,
                     address: data.address || null,
                     school: data.school || null,
-                    grade: data.grade || null,
+                    school_type: data.schoolType || '일반',
+                    grade_number: data.gradeNumber ?? null,
+                    grade_updated_year: data.gradeUpdatedYear ?? null,
                     joined_at: new Date().toISOString(),
                     start_date: new Date().toISOString(),
                     status: 'pending', // Awaiting Gym Master approval

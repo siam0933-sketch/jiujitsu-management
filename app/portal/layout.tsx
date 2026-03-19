@@ -3,10 +3,9 @@ import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/utils/supabase/server';
 import BottomNav from './components/BottomNav';
 import PortalHeader from './components/PortalHeader';
-import InstallPrompt from './components/InstallPrompt';
 import { PORTAL_STYLES } from './styles';
-
 import { getPaymentStatus } from '@/utils/payment';
+import { getUnreadCount } from './notifications/actions';
 
 async function getPortalContext() {
     const cookieStore = await cookies()
@@ -41,9 +40,12 @@ async function getPortalContext() {
             }
         }
 
+        const unreadCount = await getUnreadCount()
+
         return {
             gymName: gym?.name || '체육관',
-            hasUnpaidDues
+            hasUnpaidDues,
+            unreadCount,
         }
     } catch (e) {
         return null
@@ -62,12 +64,12 @@ export default async function PortalLayout({
     const { headers } = await import('next/headers');
     const headersList = await headers();
     const currentPath = headersList.get('x-pathname') || '';
-    const isSignupUrl = currentPath === '/portal/signup';
+    const isPublicUrl = currentPath === '/portal/signup';
 
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('member_session')
 
-    if (!sessionCookie && !isSignupUrl) {
+    if (!sessionCookie && !isPublicUrl) {
         redirect('/login')
     }
 
@@ -75,12 +77,11 @@ export default async function PortalLayout({
 
     return (
         <div className={PORTAL_STYLES.PAGE_WRAPPER}>
-            {!isSignupUrl && <PortalHeader dojoName={context?.gymName || '체육관'} />}
-            <main className={`flex-1 ${!isSignupUrl ? 'pt-14' : ''}`}> {/* pt-14 matches header height */}
+            {!isPublicUrl && <PortalHeader dojoName={context?.gymName || '체육관'} unreadCount={context?.unreadCount || 0} />}
+            <main className={`flex-1 ${!isPublicUrl ? 'pt-14' : ''}`}> {/* pt-14 matches header height */}
                 {children}
-                {!isSignupUrl && <InstallPrompt />}
             </main>
-            {!isSignupUrl && <BottomNav hasUnpaidDues={context?.hasUnpaidDues || false} />}
+            {!isPublicUrl && <BottomNav hasUnpaidDues={context?.hasUnpaidDues || false} />}
         </div>
     );
 }

@@ -4,6 +4,7 @@ import ChangePasswordForm from './ChangePasswordForm';
 import { getMemberProfileData } from './actions';
 import { displayBeltName } from '@/app/dashboard/members/constants';
 import { getPaymentStatus } from '@/utils/payment';
+import PushSubscribeButton from '../components/PushSubscribeButton';
 
 export default async function ProfilePage() {
     const data = await getMemberProfileData();
@@ -46,6 +47,12 @@ export default async function ProfilePage() {
                             </span>
                         </li>
                     </ul>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-500">기기 알림 설정</span>
+                            <PushSubscribeButton />
+                        </div>
+                    </div>
                 </div>
             </div>
 

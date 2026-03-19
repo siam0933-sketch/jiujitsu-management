@@ -1,5 +1,6 @@
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getPendingAttendanceCount } from './attendance/actions'
@@ -39,7 +40,10 @@ export default async function DashboardLayout({
         <div className="flex flex-col md:flex-row h-screen bg-gray-100 dark:bg-black overflow-hidden">
             {/* Mobile Header */}
             <div className="md:hidden flex items-center justify-between bg-white dark:bg-zinc-900 px-5 py-3 border-b border-gray-200 dark:border-zinc-800 shadow-sm shrink-0 z-40">
-                <h1 className="text-xl font-extrabold text-gray-800 dark:text-zinc-200 dark:text-zinc-100 tracking-tight">Gym Manager</h1>
+                <div className="flex items-center gap-2">
+                    <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={32} height={32} className="rounded-md" />
+                    <h1 className="text-xl font-extrabold text-gray-800 dark:text-zinc-100 tracking-tight">My jiu-jitsu</h1>
+                </div>
                 <label htmlFor="mobile-menu" className="p-2 -mr-2 text-gray-600 dark:text-zinc-400 cursor-pointer rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors active:bg-gray-200 dark:active:bg-zinc-700">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -67,7 +71,10 @@ export default async function DashboardLayout({
                 {/* Sidebar */}
                 <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800">
                     <div className="p-6 md:block flex justify-between items-center">
-                        <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-200 dark:text-zinc-100">Gym Manager</h1>
+                        <div className="flex items-center gap-3">
+                            <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={40} height={40} className="rounded-xl shadow-sm" />
+                            <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 tracking-tight">My jiu-jitsu</h1>
+                        </div>
                         <label htmlFor="mobile-menu" className="md:hidden p-2 -mr-2 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:text-zinc-400 dark:hover:text-zinc-300 cursor-pointer">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -107,6 +114,15 @@ export default async function DashboardLayout({
                                     {pendingCount}
                                 </span>
                             )}
+                        </Link>
+                        <Link
+                            href="/dashboard/shuttle"
+                            className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h8M5 13a2 2 0 100 4 2 2 0 000-4zm14 0a2 2 0 100 4 2 2 0 000-4zM3 13V8a3 3 0 013-3h12a3 3 0 013 3v5" />
+                            </svg>
+                            차량 운행
                         </Link>
                         <Link
                             href="/dashboard/notice"

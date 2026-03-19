@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jiu-Jitsu Portal",
+  title: "My jiu-jitsu",
   description: "스마트한 주짓수 도장 회원 관리 및 출석 시스템",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "주짓수 포털",
+    title: "My jiu-jitsu",
   },
   themeColor: "#2563EB",
 };

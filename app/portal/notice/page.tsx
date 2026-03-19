@@ -3,6 +3,9 @@ import { getPortalNotices, getPortalRanking } from './actions';
 import Link from 'next/link';
 import { Bell, ImageIcon, ChevronRightIcon } from 'lucide-react';
 import PortalRankingClient from './PortalRankingClient';
+import PaymentAlert from '../components/PaymentAlert';
+import { createAdminClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
 
 export default async function PortalHome() {
     // 1. Fetching Notices and Rankings in parallel
@@ -17,8 +20,21 @@ export default async function PortalHome() {
     const currentYear = rankingResult.year || new Date().getFullYear();
     const currentMonth = rankingResult.month || new Date().getMonth() + 1;
 
+    // Fetch current member's payment info for the alert
+    let memberData = null;
+    if (currentMemberId) {
+        const supabase = await createAdminClient();
+        const { data: member } = await supabase
+            .from('gym_members')
+            .select('payment_end_date, payment_due_day')
+            .eq('id', currentMemberId)
+            .single();
+        memberData = member;
+    }
+
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
+            {memberData && <PaymentAlert member={memberData} />}
 
             {/* SECTION 1: Notice Board */}
             <div className="mb-8">
@@ -40,10 +56,17 @@ export default async function PortalHome() {
                             <Link
                                 href={`/portal/notice/${notice.id}`}
                                 key={notice.id}
-                                className={`${PORTAL_STYLES.CARD} hover:border-black dark:hover:border-white transition-colors flex items-center justify-between p-4`}
+                                className={`${PORTAL_STYLES.CARD} hover:border-black dark:hover:border-white transition-colors flex items-center justify-between p-4 ${
+                                    notice.is_read === false
+                                        ? 'border-yellow-200 dark:border-yellow-800 bg-yellow-50/80 dark:bg-yellow-900/20'
+                                        : ''
+                                }`}
                             >
                                 <div className="flex flex-col gap-1 flex-1 pr-4">
-                                    <h3 className="font-medium text-zinc-900 dark:text-zinc-100 line-clamp-1 flex items-center gap-2">
+                                    <h3 className={`font-medium line-clamp-1 flex items-center gap-2 ${notice.is_read === false ? 'font-bold text-zinc-900 dark:text-zinc-100' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                                        {notice.is_read === false && (
+                                            <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" />
+                                        )}
                                         <span>{notice.title}</span>
                                         {notice.images && notice.images.length > 0 && (
                                             <ImageIcon className="w-3.5 h-3.5 flex-shrink-0 text-zinc-400" />

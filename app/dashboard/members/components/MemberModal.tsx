@@ -84,7 +84,7 @@ export default function MemberModal({ member }: { member: any }) {
     const [pauseEndDate, setPauseEndDate] = useState('')
     const [isIndefinitePause, setIsIndefinitePause] = useState(true)
 
-    // Load Data
+    // Load Data + auto-advance school grade
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -134,6 +134,36 @@ export default function MemberModal({ member }: { member: any }) {
                 if (schedules.data) {
                     setAllSchedules(schedules.data)
                 }
+
+                // 자동 학년 갱신: 현재 연도와 grade_updated_year를 비교
+                const currentYear = new Date().getFullYear()
+                const schoolType = member.school_type
+                const gradeNumber = member.grade_number
+                const gradeUpdatedYear = member.grade_updated_year
+
+                if (
+                    schoolType && schoolType !== '일반' &&
+                    gradeNumber && gradeUpdatedYear &&
+                    gradeUpdatedYear < currentYear
+                ) {
+                    let newSchoolType = schoolType
+                    let newGradeNumber = gradeNumber + 1
+
+                    if (schoolType === '초등학교' && gradeNumber === 6) {
+                        newSchoolType = '중학교'; newGradeNumber = 1
+                    } else if (schoolType === '중학교' && gradeNumber === 3) {
+                        newSchoolType = '고등학교'; newGradeNumber = 1
+                    } else if (schoolType === '고등학교' && gradeNumber === 3) {
+                        newSchoolType = '일반'; newGradeNumber = 0
+                    }
+
+                    await supabase.from('gym_members').update({
+                        school_type: newSchoolType,
+                        grade_number: newSchoolType === '일반' ? null : newGradeNumber,
+                        grade_updated_year: currentYear
+                    }).eq('id', member.id)
+                }
+
             } catch (err) {
                 console.error('Data Loading Error:', err)
                 alert('데이터를 불러오는 중 오류가 발생했습니다.')
@@ -518,8 +548,9 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
                                 </div>
 
-                                <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 grid grid-cols-2 sm:grid-cols-4 gap-6 ${isEditingBasicInfo ? 'ring-2 ring-blue-100' : ''}`}>
-                                    {/* Simplified View/Edit Fields */}
+                                <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 flex flex-col gap-6 ${isEditingBasicInfo ? 'ring-2 ring-blue-100' : ''}`}>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                                        {/* Simplified View/Edit Fields */}
                                     {/* Row 1: Name, Gender, Birth Date, ID */}
                                     <div className="col-span-1">
                                         <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">이름</p>
@@ -573,10 +604,10 @@ export default function MemberModal({ member }: { member: any }) {
                                     </div>
 
 
-                                </div>
+                                    </div>
 
-                                <div className="grid grid-cols-4 gap-6 mt-6 pt-6 border-t border-gray-100 dark:border-zinc-800">
-                                    {/* Row 2: Phone, Guardian Phone, Address */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 pt-6 border-t border-gray-100 dark:border-zinc-800">
+                                        {/* Row 2: Phone, Guardian Phone, Address */}
                                     <div className="col-span-1">
                                         <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">전화번호</p>
                                         {isEditingBasicInfo ? (
@@ -604,7 +635,60 @@ export default function MemberModal({ member }: { member: any }) {
                                         )}
                                     </div>
 
+                                    </div>
 
+                                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 pt-6 border-t border-gray-100 dark:border-zinc-800">
+                                        {/* Row 3: School */}
+                                    <div className="col-span-1">
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">학교 구분</p>
+                                        {isEditingBasicInfo ? (
+                                            <select
+                                                value={basicInfoForm.school_type || '일반'}
+                                                onChange={e => setBasicInfoForm({ ...basicInfoForm, school_type: e.target.value, grade_number: null })}
+                                                className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2"
+                                            >
+                                                <option value="일반">일반</option>
+                                                <option value="초등학교">초등학교</option>
+                                                <option value="중학교">중학교</option>
+                                                <option value="고등학교">고등학교</option>
+                                            </select>
+                                        ) : (
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">{member.school_type || '일반'}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">학년</p>
+                                        {isEditingBasicInfo ? (
+                                            (basicInfoForm.school_type && basicInfoForm.school_type !== '일반') ? (
+                                                <select
+                                                    value={basicInfoForm.grade_number ?? ''}
+                                                    onChange={e => setBasicInfoForm({ ...basicInfoForm, grade_number: e.target.value ? Number(e.target.value) : null })}
+                                                    className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2"
+                                                >
+                                                    <option value="">선택</option>
+                                                    {(basicInfoForm.school_type === '초등학교' ? [1,2,3,4,5,6] : [1,2,3]).map(n => (
+                                                        <option key={n} value={n}>{n}학년</option>
+                                                    ))}
+                                                </select>
+                                            ) : <p className="text-sm text-gray-400 dark:text-zinc-500 mt-2">-</p>
+                                        ) : (
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100">
+                                                {member.grade_number ? `${member.grade_number}학년` : '-'}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <p className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1">학교 이름</p>
+                                        {isEditingBasicInfo ? (
+                                            <input value={basicInfoForm.school || ''} onChange={e => setBasicInfoForm({ ...basicInfoForm, school: e.target.value })} className="w-full text-base border-gray-300 dark:border-zinc-700 rounded p-2" placeholder="학교 이름 (선택)" />
+                                        ) : (
+                                            <p className="font-medium text-lg text-gray-900 dark:text-zinc-100 truncate">{member.school || '-'}</p>
+                                        )}
+                                    </div>
+
+                                    </div>
                                 </div>
                             </section>
 

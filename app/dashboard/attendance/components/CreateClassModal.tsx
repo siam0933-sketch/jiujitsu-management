@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createSchedule } from '../actions_schedule'
+import { displayBeltName } from '../../members/constants'
 
 const DAYS = [
     { id: 'Mon', label: '월' },
@@ -186,7 +187,7 @@ export default function CreateClassModal({ onClose, allMembers }: { onClose: () 
                                                     return <span className="text-gray-500 dark:text-zinc-400 font-normal ml-1">({age}세)</span>
                                                 })()}
                                             </span>
-                                            <span className="text-xs text-gray-400 dark:text-zinc-500 shrink-0">{member.belt}</span>
+                                            <span className="text-xs text-gray-400 dark:text-zinc-500 shrink-0">{displayBeltName(member.belt)}</span>
                                         </label>
                                     ))}
                                     {filteredMembers.length === 0 && (

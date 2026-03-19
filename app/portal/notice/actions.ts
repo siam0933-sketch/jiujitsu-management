@@ -34,7 +34,32 @@ export async function getPortalNotices(page = 1, limit = 10) {
         console.error('getPortalNotices error:', error);
     }
 
-    return { notices: notices || [], total: count || 0 }
+    // Fetch unread notice IDs for this member
+    let unreadNoticeIds = new Set<string>()
+    if (session.memberId && notices && notices.length > 0) {
+        const { data: unreadNotifs } = await supabase
+            .from('member_notifications')
+            .select('link')
+            .eq('member_id', session.memberId)
+            .eq('type', 'notice')
+            .eq('is_read', false)
+
+        if (unreadNotifs) {
+            unreadNotifs.forEach(n => {
+                if (n.link && n.link.startsWith('/portal/notice/')) {
+                    const id = n.link.replace('/portal/notice/', '')
+                    unreadNoticeIds.add(id)
+                }
+            })
+        }
+    }
+
+    const noticesWithReadStatus = notices?.map(n => ({
+        ...n,
+        is_read: !unreadNoticeIds.has(n.id)
+    })) || []
+
+    return { notices: noticesWithReadStatus, total: count || 0 }
 }
 
 export async function getPortalNoticeById(id: string) {

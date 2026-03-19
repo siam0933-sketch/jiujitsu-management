@@ -141,7 +141,7 @@ export default function NoticeEditor({ content, onChange }: NoticeEditorProps) {
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm sm:prose-base dark:prose-invert focus:outline-none min-h-[300px] p-4 max-w-none',
+                class: 'prose prose-sm sm:prose-base dark:prose-invert focus:outline-none min-h-[300px] p-4 max-w-none prose-p:my-1 prose-li:my-0.5',
             },
             handleDrop: (view, event, slice, moved) => {
                 if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {

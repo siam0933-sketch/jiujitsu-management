@@ -49,9 +49,14 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                     <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight">
                         {member.name}
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        {member.grade} {member.school} | {member.gender === 'male' ? '남성' : '여성'}
-                    </p>
+                    {(() => {
+                        const st = member.school_type
+                        const gn = member.grade_number
+                        const schoolDisplay = st && st !== '일반'
+                            ? `${st} ${gn ? gn + '학년' : ''}`.trim()
+                            : (member.school || '')
+                        return <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">{schoolDisplay} | {member.gender === 'male' ? '남성' : '여성'}</p>
+                    })()}
                 </div>
                 <div className="mt-4 flex md:ml-4 md:mt-0">
                     <button
@@ -130,7 +135,14 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                                 <div className="bg-gray-50 dark:bg-zinc-800/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500 dark:text-zinc-400">학교 / 학년</dt>
                                     <dd className="mt-1 text-sm text-gray-900 dark:text-zinc-100 sm:col-span-2 sm:mt-0">
-                                        {member.school} {member.grade}
+                                        {(() => {
+                                            const st = member.school_type
+                                            const gn = member.grade_number
+                                            if (st && st !== '일반') {
+                                                return `${st} ${gn ? gn + '학년' : ''}`.trim() + (member.school ? ` / ${member.school}` : '')
+                                            }
+                                            return member.school || '-'
+                                        })()}
                                     </dd>
                                 </div>
                                 <div className="bg-white dark:bg-zinc-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

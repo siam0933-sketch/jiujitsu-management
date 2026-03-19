@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendNotification } from '@/utils/notifications'
 
 export type KioskMember = {
     id: string
@@ -154,6 +155,18 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
                 return { success: false, message: '하원 처리 중 오류가 발생했습니다.' }
             }
 
+            // 하원 알림
+            try {
+                await sendNotification({
+                    gymId,
+                    memberIds: [member.id],
+                    type: 'attendance',
+                    title: '👋 하원 완료',
+                    body: `${member.name}님의 하원이 완료되었습니다.`,
+                    link: '/portal/attendance',
+                })
+            } catch (e) { /* 알림 오류가 출석 처리에 영향 없도록 */ }
+
             // Revalidate
             revalidatePath('/dashboard/attendance')
 
@@ -203,6 +216,18 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
+
+    // 출석 알림
+    try {
+        await sendNotification({
+            gymId,
+            memberIds: [member.id],
+            type: 'attendance',
+            title: '✅ 출석 완료',
+            body: `${member.name}님의 출석이 완료되었습니다.`,
+            link: '/portal/attendance',
+        })
+    } catch (e) { /* 알림 오류가 출석 처리에 영향 없도록 */ }
 
     return {
         success: true,

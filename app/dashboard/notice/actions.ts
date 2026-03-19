@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendNotification } from '@/utils/notifications'
 
 export async function getNotices(page = 1, limit = 10) {
     const supabase = await createClient()
@@ -56,7 +57,7 @@ export async function createNotice(data: { title: string, content: string, image
 
     if (!gym) return { error: 'Gym not found' }
 
-    const { error } = await supabase
+    const { data: notice, error } = await supabase
         .from('gym_notices')
         .insert({
             gym_id: gym.id,
@@ -65,8 +66,34 @@ export async function createNotice(data: { title: string, content: string, image
             images: data.images,
             created_by: user.id
         })
+        .select('id')
+        .single()
 
     if (error) return { error: error.message }
+
+    // 도장 전체 활성 회원에게 알림 전송 (비동기, 오류가 나도 공지 등록은 성공)
+    try {
+        const adminSupabase = await createAdminClient()
+        const { data: members } = await adminSupabase
+            .from('gym_members')
+            .select('id')
+            .eq('gym_id', gym.id)
+            .eq('status', 'active')
+
+        if (members && members.length > 0) {
+            const memberIds = members.map((m: any) => m.id)
+            await sendNotification({
+                gymId: gym.id,
+                memberIds,
+                type: 'notice',
+                title: `📢 새 공지: ${data.title}`,
+                body: data.content.slice(0, 80),
+                link: notice?.id ? `/portal/notice/${notice.id}` : '/portal/notice',
+            })
+        }
+    } catch (notifErr) {
+        console.error('[createNotice] Notification error:', notifErr)
+    }
 
     revalidatePath('/dashboard/notice')
     revalidatePath('/portal/notice')

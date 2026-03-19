@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -35,9 +35,10 @@ interface Props {
     count: number
     status: string
     attendanceStatusMap: Record<string, AttendanceStatus>
+    gymId: string
 }
 
-export default function MembersTable({ initialMembers, count, status, attendanceStatusMap }: Props) {
+export default function MembersTable({ initialMembers, count, status, attendanceStatusMap, gymId }: Props) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -441,9 +442,9 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                     <button
                                         onClick={handleBulkPromote}
                                         disabled={selectedIds.size === 0 || isPromoting}
-                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-40 transition-colors mr-1 sm:mr-2 whitespace-nowrap"
+                                        className="block rounded-md bg-blue-600 px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50 whitespace-nowrap"
                                     >
-                                        {isPromoting ? '승급 중...' : `선택승급 (${selectedIds.size})`}
+                                        {isPromoting ? '승급 중...' : `선택 승급 (${selectedIds.size})`}
                                     </button>
                                 )}
                                 {bulkActionType === 'delete' && (
@@ -568,7 +569,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <button
-                                                        onClick={() => setIsEditMode(true)}
+                                                        onClick={() => setIsBulkEditModalOpen(true)}
                                                         className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm`}
                                                     >
                                                         <PencilSquareIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
@@ -578,13 +579,13 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             </Menu.Item>
                                             <Menu.Item>
                                                 {({ active }) => (
-                                                    <Link
-                                                        href="/dashboard/members/new"
-                                                        className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm`}
+                                                    <button
+                                                        onClick={() => window.open(`/portal/signup?gym_id=${gymId}`, '_blank')}
+                                                        className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm text-left`}
                                                     >
                                                         <UserPlusIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
                                                         신규 등록
-                                                    </Link>
+                                                    </button>
                                                 )}
                                             </Menu.Item>
                                         </div>

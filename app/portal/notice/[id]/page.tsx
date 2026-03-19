@@ -49,7 +49,7 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
 
                 <div className={`${PORTAL_STYLES.CARD_PADDING} space-y-8`}>
                     <div
-                        className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mb-8"
+                        className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mb-8 prose-p:my-1 prose-li:my-0.5"
                         dangerouslySetInnerHTML={{ __html: notice.content }}
                     />
 

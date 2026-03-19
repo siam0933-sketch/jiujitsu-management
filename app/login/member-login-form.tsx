@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, Search, Store } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { changeMemberPassword } from './change-password-action'
-// Let's import the search action from forgot-password actions to reuse it!
-import { searchGymsForReset } from '../portal/forgot-password/actions'
+import { searchGymsForLogin } from './actions'
 
 const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
 
@@ -49,7 +49,7 @@ export default function MemberLoginForm() {
         if (!val.trim()) return
         setSearchLoading(true)
         searchTimeout.current = setTimeout(async () => {
-            const res = await searchGymsForReset(val)
+            const res = await searchGymsForLogin(val)
             setGymResults(res.gyms || [])
             setSearchLoading(false)
         }, 350)
@@ -129,11 +129,7 @@ export default function MemberLoginForm() {
     return (
         <div className="w-full max-w-md mx-auto px-4">
             <div className="flex flex-col items-center justify-center mb-8">
-                {step === 'SEARCH' ? (
-                    <Store size={48} strokeWidth={1.5} className="text-blue-600 mb-4" />
-                ) : (
-                    <User size={48} strokeWidth={1.5} className="text-blue-600 mb-4" />
-                )}
+                <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm" />
 
                 <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-zinc-100 mb-2">
                     수강생 로그인
@@ -220,9 +216,13 @@ export default function MemberLoginForm() {
 
                     <div className="flex items-center justify-end">
                         <div className="text-sm">
-                            <Link href="/portal/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                            <button 
+                                type="button" 
+                                onClick={() => alert('비밀번호를 분실하신 경우, 소속 체육관 관장님(관리자)께 비밀번호 초기화를 문의해 주세요.')}
+                                className="font-medium text-blue-600 hover:text-blue-500"
+                            >
                                 비밀번호를 잊으셨나요?
-                            </Link>
+                            </button>
                         </div>
                     </div>
 

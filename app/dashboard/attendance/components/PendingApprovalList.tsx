@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getAttendanceLogsForDate, checkInMember } from '../actions'
+import { displayBeltName } from '../../members/constants'
 
 type Member = {
     id: string
@@ -102,7 +103,7 @@ export default function PendingApprovalList({ todayKST }: Props) {
                             <div>
                                 <p className="font-bold text-gray-800 dark:text-zinc-200">
                                     {log.gym_members.name}
-                                    <span className="text-xs text-gray-500 dark:text-zinc-400 font-normal ml-1">({log.gym_members.belt})</span>
+                                    <span className="text-xs text-gray-500 dark:text-zinc-400 font-normal ml-1">({displayBeltName(log.gym_members.belt)})</span>
                                 </p>
                                 <p className="text-xs text-red-500 mt-0.5">
                                     <span className="font-semibold text-gray-700 dark:text-zinc-300">출석:</span> {new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
