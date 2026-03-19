@@ -11,6 +11,7 @@ import { MemberStatusBadge, MemberStartDate, MemberJoinedDate, MemberPauseContro
 import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
 import PromotionHistory from '../[id]/PromotionHistory'
+import ResetPasswordButton from './ResetPasswordButton'
 
 export default function MemberModal({ member }: { member: any }) {
     const router = useRouter()
@@ -537,6 +538,8 @@ export default function MemberModal({ member }: { member: any }) {
                                             </button>
                                         )}
                                         <div className="h-4 w-[1px] bg-gray-300 mx-2"></div>
+                                        <ResetPasswordButton memberId={member.id} />
+                                        <div className="h-4 w-[1px] bg-gray-300 mx-1"></div>
                                         {!isEditingBasicInfo ? (
                                             <button onClick={startEditingBasicInfo} className="text-sm text-gray-500 dark:text-zinc-400 hover:text-blue-600 underline font-medium">편집</button>
                                         ) : (

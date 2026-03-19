@@ -31,7 +31,7 @@ export default function ResetPasswordButton({ memberId }: { memberId: string }) 
             type="button"
             onClick={handleReset}
             disabled={isLoading}
-            className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
+            className="text-sm border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors font-medium disabled:opacity-50"
         >
             {isLoading ? '처리 중...' : '비밀번호 초기화'}
         </button>
