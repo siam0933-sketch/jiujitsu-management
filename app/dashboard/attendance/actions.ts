@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendNotification } from '@/utils/notifications'
 
 export async function checkInMember(memberId: string, className?: string, date?: string) {
     const supabase = await createClient()
@@ -41,7 +42,7 @@ export async function checkInMember(memberId: string, className?: string, date?:
             // Increment count logic (Same as new check-in)
             const { data: member } = await supabase
                 .from('gym_members')
-                .select('remaining_sessions')
+                .select('remaining_sessions, name')
                 .eq('id', memberId)
                 .single()
 
@@ -64,6 +65,19 @@ export async function checkInMember(memberId: string, className?: string, date?:
 
             revalidatePath('/dashboard/attendance')
             revalidatePath('/dashboard/members')
+
+            // 출석 승인 알림 전송
+            try {
+                await sendNotification({
+                    gymId: gym.id,
+                    memberIds: [memberId],
+                    type: 'attendance',
+                    title: '✅ 출석 승인 완료',
+                    body: member ? `${member.name || '회원'}님의 출석 요청이 승인되었습니다.` : '출석 요청이 승인되었습니다.',
+                    link: '/portal/attendance',
+                })
+            } catch (e) { console.error('Notification error:', e) }
+
             return { success: true }
         }
         return { error: '이미 금일 출석 처리되었습니다.' }
@@ -107,6 +121,19 @@ export async function checkInMember(memberId: string, className?: string, date?:
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
+
+    // 수동 출석 완료 알림 전송
+    try {
+        await sendNotification({
+            gymId: gym.id,
+            memberIds: [memberId],
+            type: 'attendance',
+            title: '✅ 출석 완료',
+            body: member ? `${member.name || '회원'}님의 출석이 완료되었습니다.` : '출석이 완료되었습니다.',
+            link: '/portal/attendance',
+        })
+    } catch (e) { console.error('Notification error:', e) }
+
     return { success: true }
 }
 
@@ -151,6 +178,20 @@ export async function checkOutMember(memberId: string, date: string) {
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
+
+    // 하원 완료 알림 전송
+    try {
+        const { data: member } = await supabase.from('gym_members').select('name').eq('id', memberId).single()
+        await sendNotification({
+            gymId: gym.id,
+            memberIds: [memberId],
+            type: 'attendance',
+            title: '👋 하원 완료',
+            body: member ? `${member.name || '회원'}님의 하원이 완료되었습니다.` : '하원이 완료되었습니다.',
+            link: '/portal/attendance',
+        })
+    } catch (e) { console.error('Notification error:', e) }
+
     return { success: true }
 }
 

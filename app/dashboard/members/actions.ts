@@ -889,3 +889,35 @@ export async function getInvitationUrl() {
 
     return { success: true, url: invitationUrl, copyText }
 }
+
+export async function resetMemberPassword(memberId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: '로그인이 필요합니다.' }
+
+    const { data: member } = await supabase.from('gym_members').select('phone').eq('id', memberId).single()
+    if (!member) return { error: '회원을 찾을 수 없습니다.' }
+
+    // Use last 4 digits of phone, or '0000' if no phone or too short
+    const phoneStr = member.phone ? String(member.phone).replace(/[^0-9]/g, '') : ''
+    const defaultPassword = phoneStr.length >= 4 ? phoneStr.slice(-4) : '0000'
+
+    try {
+        const { error } = await supabase
+            .from('gym_members')
+            .update({ login_password: defaultPassword })
+            .eq('id', memberId)
+
+        if (error) {
+            console.error('Password reset error:', error)
+            return { error: '비밀번호 초기화 실패: ' + error.message }
+        }
+
+        revalidatePath('/dashboard/members')
+        revalidatePath(`/dashboard/members/${memberId}`)
+        return { success: true, password: defaultPassword }
+    } catch (e: any) {
+        return { error: e.message }
+    }
+}

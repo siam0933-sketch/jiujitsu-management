@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import PromotionHistory from './PromotionHistory'
 import { getPromotionLogs } from './actions'
 import { MemberStartDate, MemberPauseController, PaymentBillingDay } from '../components/MemberComponents'
+import ResetPasswordButton from '../components/ResetPasswordButton'
 
 export default async function MemberDetailsPage({ params }: { params: { id: string } }) {
     const { id } = await params
@@ -58,10 +59,11 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                         return <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">{schoolDisplay} | {member.gender === 'male' ? '남성' : '여성'}</p>
                     })()}
                 </div>
-                <div className="mt-4 flex md:ml-4 md:mt-0">
+                <div className="mt-4 flex md:ml-4 md:mt-0 gap-3">
+                    <ResetPasswordButton memberId={id} />
                     <button
                         type="button"
-                        className="ml-3 inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                     >
                         정보 수정
                     </button>

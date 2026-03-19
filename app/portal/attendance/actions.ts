@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { sendNotification } from '@/utils/notifications'
 
 async function getMemberSession() {
     const cookieStore = await cookies()
@@ -49,6 +50,20 @@ export async function requestAttendance() {
     if (error) return { error: error.message }
 
     revalidatePath('/portal/attendance')
+
+    // 출석 요청 알림 전송
+    try {
+        const { data: member } = await supabase.from('gym_members').select('name').eq('id', session.memberId).single()
+        await sendNotification({
+            gymId: session.gymId,
+            memberIds: [session.memberId],
+            type: 'attendance',
+            title: '⏳ 출석 요청',
+            body: member ? `${member.name || '회원'}님이 출석을 요청했습니다.` : '출석을 요청했습니다.',
+            link: '/portal/attendance',
+        })
+    } catch (e) { console.error('Notification error:', e) }
+
     return { success: true }
 }
 
@@ -93,6 +108,20 @@ export async function checkOutMemberSelf() {
     if (error) return { error: error.message }
 
     revalidatePath('/portal/attendance')
+
+    // 자율 하원 완료 알림 전송
+    try {
+        const { data: member } = await supabase.from('gym_members').select('name').eq('id', session.memberId).single()
+        await sendNotification({
+            gymId: session.gymId,
+            memberIds: [session.memberId],
+            type: 'attendance',
+            title: '👋 하원 완료',
+            body: member ? `${member.name || '회원'}님의 하원이 완료되었습니다.` : '하원이 완료되었습니다.',
+            link: '/portal/attendance',
+        })
+    } catch (e) { console.error('Notification error:', e) }
+
     return { success: true }
 }
 
