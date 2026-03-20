@@ -181,33 +181,58 @@ export default function ClassScheduleBoard({
                 </div>
             )}
 
-            {/* Weekly View GRID (unchanged structure, just conditional) */}
+            {/* Weekly View GRID */}
             {viewMode === 'weekly' && (
-                <div className="flex-1 overflow-visible bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-200 dark:border-zinc-800 p-4">
-                    <div className="grid grid-cols-7 gap-3 min-w-[1050px] h-full">
-                        {DAYS.map(day => (
-                            <div key={day.id} className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-                                <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 dark:text-zinc-300 bg-gray-50 dark:bg-zinc-800/50'} border-b border-gray-100 dark:border-zinc-800/50`}>
-                                    {day.label}
+                <div className="flex-1 overflow-x-auto bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-200 dark:border-zinc-800 p-4 custom-scrollbar">
+                    {(() => {
+                        const activeDays = DAYS.filter(day => initialSchedules.some(s => s.day_of_week === day.id))
+                        
+                        if (activeDays.length === 0) {
+                            return (
+                                <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
+                                    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 p-10 inline-block">
+                                        <p className="text-gray-400 dark:text-zinc-500 mb-2">예정된 수업이 없습니다.</p>
+                                        <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
+                                            + 첫 수업 만들기
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50 dark:bg-zinc-800/50">
-                                    {initialSchedules
-                                        .filter(s => s.day_of_week === day.id)
-                                        .map(schedule => (
-                                            <AttendanceCheck
-                                                key={schedule.id}
-                                                schedule={schedule}
-                                                allMembers={activeMembers}
-                                                mode="weekly"
-                                                targetDate={getDateForDay(day.id)}
-                                                todayKST={todayKST}
-                                            />
-                                        ))
-                                    }
-                                </div>
+                            )
+                        }
+
+                        return (
+                            <div 
+                                className="grid gap-3 h-full" 
+                                style={{ 
+                                    gridTemplateColumns: `repeat(${activeDays.length}, minmax(150px, 1fr))`,
+                                    minWidth: `${Math.max(activeDays.length * 150, 400)}px` 
+                                }}
+                            >
+                                {activeDays.map(day => (
+                                    <div key={day.id} className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+                                        <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 dark:text-zinc-300 bg-gray-50 dark:bg-zinc-800/50'} border-b border-gray-100 dark:border-zinc-800/50`}>
+                                            {day.label}
+                                        </div>
+                                        <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50 dark:bg-zinc-800/50">
+                                            {initialSchedules
+                                                .filter(s => s.day_of_week === day.id)
+                                                .map(schedule => (
+                                                    <AttendanceCheck
+                                                        key={schedule.id}
+                                                        schedule={schedule}
+                                                        allMembers={activeMembers}
+                                                        mode="weekly"
+                                                        targetDate={getDateForDay(day.id)}
+                                                        todayKST={todayKST}
+                                                    />
+                                                ))
+                                            }
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        )
+                    })()}
                 </div>
             )}
 
