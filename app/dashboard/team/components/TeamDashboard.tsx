@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Users, Bell, Clock, ShieldCheck, Settings, ChevronDown, ChevronUp, Send, LogOut, Trash2, Crown, Check, X } from 'lucide-react'
-import { handleJoinRequest, createNotice, createComment, getNoticeComments, leaveTeam, deleteTeam, delegateLeadership, updateMemberBelt, updateMemberRole } from '../actions'
+import { Users, Bell, Clock, ShieldCheck, Settings, ChevronDown, ChevronUp, LogOut, Trash2, Crown, Check, X } from 'lucide-react'
+import { handleJoinRequest, leaveTeam, deleteTeam, delegateLeadership, updateMemberBelt, updateMemberRole } from '../actions'
+import TeamNoticeBoard from './TeamNoticeBoard'
 
 const BELT_KR: Record<string, string> = {
     white: '화이트', blue: '블루', purple: '퍼플', brown: '브라운', black: '블랙'
@@ -70,17 +71,6 @@ export default function TeamDashboard({ team, membership, members, notices, join
         })
     }
 
-    const handleCreateNotice = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setMessage(null)
-        const fd = new FormData(e.currentTarget)
-        fd.set('team_id', team.id)
-        startTransition(async () => {
-            const res = await createNotice(fd)
-            if (res.error) setError(res.error)
-            else { setSuccess('공지사항 등록 완료!'); (e.target as HTMLFormElement).reset() }
-        })
-    }
 
     const tabs = [
         { id: 'members' as Tab, label: '소속 관장', icon: Users },
@@ -222,26 +212,12 @@ export default function TeamDashboard({ team, membership, members, notices, join
 
             {/* Notices Tab */}
             {activeTab === 'notices' && (
-                <div className="space-y-4">
-                    {canWriteNotice && (
-                        <form onSubmit={handleCreateNotice} className="bg-white dark:bg-zinc-900 rounded-xl border border-blue-200 dark:border-blue-800 p-5 space-y-3">
-                            <h3 className="font-bold text-sm text-blue-700 dark:text-blue-400">✏️ 공지사항 작성</h3>
-                            <input name="title" required placeholder="제목" className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <textarea name="content" required rows={3} placeholder="내용 입력..."
-                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
-                            <button type="submit" disabled={isPending} className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
-                                {isPending ? '등록 중...' : '공지 올리기'}
-                            </button>
-                        </form>
-                    )}
-                    {notices.length > 0 ? notices.map(n => (
-                        <NoticeCard key={n.id} notice={n} currentUserId={currentUserId} />
-                    )) : (
-                        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 p-10 text-center text-sm text-gray-400">
-                            아직 공지사항이 없습니다.
-                        </div>
-                    )}
-                </div>
+                <TeamNoticeBoard 
+                    teamId={team.id}
+                    notices={notices}
+                    canWriteNotice={canWriteNotice}
+                    currentUserId={currentUserId}
+                />
             )}
 
             {/* Join Requests Tab */}
@@ -453,76 +429,6 @@ function MemberCard({ member, isRepresentative, currentUserId, onRoleChange }: {
                             </div>
                         </div>
                     )}
-                </div>
-            )}
-        </div>
-    )
-}
-
-// Notice Card with expandable comments
-function NoticeCard({ notice, currentUserId }: { notice: any; currentUserId: string }) {
-    const [expanded, setExpanded] = useState(false)
-    const [comments, setComments] = useState<any[] | null>(null)
-    const [newComment, setNewComment] = useState('')
-    const [isPending, startTransition] = useTransition()
-
-    const handleExpand = async () => {
-        if (!expanded && comments === null) {
-            const data = await getNoticeComments(notice.id)
-            setComments(data)
-        }
-        setExpanded(v => !v)
-    }
-
-    const handleComment = () => {
-        if (!newComment.trim()) return
-        startTransition(async () => {
-            const res = await createComment(notice.id, newComment)
-            if (!res.error) {
-                const data = await getNoticeComments(notice.id)
-                setComments(data)
-                setNewComment('')
-            }
-        })
-    }
-
-    return (
-        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
-            <button className="w-full text-left p-5" onClick={handleExpand}>
-                <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-gray-900 dark:text-zinc-100 text-sm">{notice.title}</h3>
-                    {expanded ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />}
-                </div>
-                <div className="text-xs text-gray-400 mt-1">{new Date(notice.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-            </button>
-            {expanded && (
-                <div className="border-t border-gray-100 dark:border-zinc-800">
-                    <div className="px-5 py-4 text-sm text-gray-700 dark:text-zinc-300 whitespace-pre-wrap">{notice.content}</div>
-                    <div className="border-t border-gray-100 dark:border-zinc-800 px-5 py-3">
-                        <div className="text-xs font-bold text-gray-500 mb-3">댓글 {comments?.length ?? ''}</div>
-                        {comments && comments.map(c => (
-                            <div key={c.id} className="flex gap-2 mb-2">
-                                <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
-                                    {c.author_id === currentUserId ? '나' : '팀'}
-                                </div>
-                                <div className="flex-1 bg-gray-50 dark:bg-zinc-800 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-zinc-300">
-                                    {c.content}
-                                    <div className="text-xs text-gray-400 mt-1">{new Date(c.created_at).toLocaleDateString('ko-KR')}</div>
-                                </div>
-                            </div>
-                        ))}
-                        {comments?.length === 0 && <div className="text-xs text-gray-400 mb-3">아직 댓글이 없습니다.</div>}
-                        <div className="flex gap-2 mt-3">
-                            <input value={newComment} onChange={e => setNewComment(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleComment()}
-                                placeholder="댓글을 입력하세요..."
-                                className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none" />
-                            <button onClick={handleComment} disabled={isPending || !newComment.trim()}
-                                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                                <Send className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
                 </div>
             )}
         </div>
