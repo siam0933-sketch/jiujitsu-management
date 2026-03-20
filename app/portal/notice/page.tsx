@@ -11,7 +11,7 @@ export default async function PortalHome() {
     // 1. Fetching Notices and Rankings in parallel
     const [noticeResult, rankingResult] = await Promise.all([
         getPortalNotices(1, 5), // Only fetch top 5 for the home view
-        getPortalRanking()
+        getPortalRanking(new Date().getFullYear(), null) // Default to yearly ranking
     ]);
 
     const notices = noticeResult.notices;

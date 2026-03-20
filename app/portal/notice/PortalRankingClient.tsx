@@ -21,7 +21,7 @@ interface Props {
 }
 
 export default function PortalRankingClient({ initialRanking }: Props) {
-    const [mode, setMode] = useState<'month' | 'year'>('month')
+    const [mode, setMode] = useState<'month' | 'year'>('year')
     const [currentData, setCurrentData] = useState<RankingData>(initialRanking)
     const [isLoading, setIsLoading] = useState(false)
 
