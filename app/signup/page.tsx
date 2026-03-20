@@ -326,8 +326,8 @@ export default function SignupPage() {
                                                         placeholder={`예: ${selectedTeam.name} 강남`}
                                                     />
                                                 </div>
-                                                <div className="flex gap-3">
-                                                    <div className="flex-1">
+                                                <div className="grid grid-cols-3 gap-3">
+                                                    <div>
                                                         <label htmlFor="current_belt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                             현재 벨트 <span className="text-red-500">*</span>
                                                         </label>
@@ -345,7 +345,25 @@ export default function SignupPage() {
                                                             <option value="black">블랙</option>
                                                         </select>
                                                     </div>
-                                                    <div className="flex-1">
+                                                    <div>
+                                                        <label htmlFor="stripe" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                            그랄 <span className="text-red-500">*</span>
+                                                        </label>
+                                                        <select
+                                                            id="stripe"
+                                                            name="stripe"
+                                                            required={teamAction === 'join'}
+                                                            className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-zinc-100 dark:bg-zinc-800 ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm px-3 appearance-none bg-white"
+                                                        >
+                                                            <option value="">선택</option>
+                                                            <option value="0">0 (없음)</option>
+                                                            <option value="1">1그랄</option>
+                                                            <option value="2">2그랄</option>
+                                                            <option value="3">3그랄</option>
+                                                            <option value="4">4그랄</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
                                                         <label htmlFor="last_promotion_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                             최근 승급일 <span className="text-red-500">*</span>
                                                         </label>
@@ -358,6 +376,7 @@ export default function SignupPage() {
                                                         />
                                                     </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
