@@ -19,7 +19,7 @@ export async function getMyTeamData() {
     // Check if already a team member
     const { data: membership } = await supabase
         .from('team_members')
-        .select('team_id, role, branch_name, current_belt')
+        .select('team_id, role, branch_name, current_belt, stripe')
         .eq('user_id', userId)
         .maybeSingle()
 
@@ -37,13 +37,13 @@ export async function getMyTeamData() {
     // Get all members
     const { data: members } = await supabase
         .from('team_members')
-        .select('id, user_id, member_name, role, gym_name, branch_name, current_belt, last_promotion_date, joined_at')
+        .select('id, user_id, member_name, role, gym_name, gym_address, phone, branch_name, current_belt, stripe, last_promotion_date, joined_at')
         .eq('team_id', team.id)
         .order('role')
 
     return {
         team,
-        membership,
+        membership: { ...membership, stripe: (membership as any).stripe ?? 0 },
         members: members || [],
         isRepresentative: team.representative_id === userId,
         currentUserId: userId,
@@ -56,30 +56,28 @@ export async function createTeam(formData: FormData) {
     if (!userId) return { error: '로그인이 필요합니다.' }
 
     const supabase = await createAdminClient()
-    const fullName = String(formData.get('representative_name') || '')
     const teamName = String(formData.get('team_name') || '').trim()
+    const branchName = String(formData.get('branch_name') || '').trim()
+    const phone = String(formData.get('phone') || '').trim()
+    const gymAddress = String(formData.get('gym_address') || '').trim()
+    const gymName = String(formData.get('gym_name') || '').trim() || null
+    const currentBelt = String(formData.get('current_belt') || '').trim()
+    const stripe = parseInt(String(formData.get('stripe') || '0'), 10)
+    const lastPromoDate = String(formData.get('last_promotion_date') || '')
 
-    if (!teamName) return { error: '팀 이름을 입력해주세요.' }
+    if (!teamName || !branchName || !phone || !gymAddress || !currentBelt || !lastPromoDate) {
+        return { error: '모든 필수 항목을 입력해주세요.' }
+    }
 
-    // Check if user already belongs to a team
     const { data: existing } = await supabase
-        .from('team_members')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle()
-
+        .from('team_members').select('id').eq('user_id', userId).maybeSingle()
     if (existing) return { error: '이미 소속된 팀이 있습니다.' }
 
-    // Get user profile for the representative info
     const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', userId)
-        .single()
+        .from('profiles').select('full_name').eq('id', userId).single()
 
-    const repName = fullName || profile?.full_name || '대표'
+    const repName = profile?.full_name || '대표'
 
-    // Create the team
     const { data: newTeam, error: teamError } = await supabase
         .from('teams')
         .insert({ name: teamName, representative_name: repName, representative_id: userId })
@@ -91,18 +89,18 @@ export async function createTeam(formData: FormData) {
         return { error: '팀 생성 중 오류가 발생했습니다.' }
     }
 
-    // Add creator as representative
     await supabase.from('team_members').insert({
         team_id: newTeam.id,
         user_id: userId,
         role: 'representative',
         member_name: repName,
-        phone: '',
-        gym_address: '',
-        gym_name: null,
-        branch_name: teamName + ' 본관',
-        current_belt: 'black',
-        last_promotion_date: new Date().toISOString().split('T')[0],
+        phone,
+        gym_address: gymAddress,
+        gym_name: gymName,
+        branch_name: branchName,
+        current_belt: currentBelt,
+        stripe,
+        last_promotion_date: lastPromoDate,
     })
 
     revalidatePath('/dashboard/team')
@@ -129,48 +127,44 @@ export async function submitJoinRequest(formData: FormData) {
     const supabase = await createAdminClient()
     const teamId = String(formData.get('team_id') || '')
     const branchName = String(formData.get('branch_name') || '').trim()
+    const phone = String(formData.get('phone') || '').trim()
+    const gymAddress = String(formData.get('gym_address') || '').trim()
+    const gymName = String(formData.get('gym_name') || '').trim() || null
     const currentBelt = String(formData.get('current_belt') || '').trim()
+    const stripe = parseInt(String(formData.get('stripe') || '0'), 10)
     const lastPromoDate = String(formData.get('last_promotion_date') || '')
 
-    if (!teamId || !branchName || !currentBelt || !lastPromoDate) {
+    if (!teamId || !branchName || !phone || !gymAddress || !currentBelt || !lastPromoDate) {
         return { error: '모든 필수 항목을 입력해주세요.' }
     }
 
-    // Check for existing membership/pending request
     const { data: existing } = await supabase
         .from('team_members').select('id').eq('user_id', userId).maybeSingle()
     if (existing) return { error: '이미 소속된 팀이 있습니다.' }
 
     const { data: pending } = await supabase
         .from('team_join_requests')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('team_id', teamId)
-        .eq('status', 'pending')
-        .maybeSingle()
+        .select('id').eq('user_id', userId).eq('team_id', teamId).eq('status', 'pending').maybeSingle()
     if (pending) return { error: '이미 해당 팀에 가입 신청을 했습니다.' }
 
     const { data: profile } = await supabase
-        .from('profiles').select('full_name, phone').eq('id', userId).single()
-
-    const { data: gym } = await supabase
-        .from('gyms').select('name, address').eq('owner_id', userId).single()
+        .from('profiles').select('full_name').eq('id', userId).single()
 
     const { error } = await supabase.from('team_join_requests').insert({
         team_id: teamId,
         user_id: userId,
         status: 'pending',
         member_name: profile?.full_name || '',
-        phone: profile?.phone || '',
-        gym_address: gym?.address || '',
-        gym_name: gym?.name || null,
+        phone,
+        gym_address: gymAddress,
+        gym_name: gymName,
         branch_name: branchName,
         current_belt: currentBelt,
+        stripe,
         last_promotion_date: lastPromoDate,
     })
 
     if (error) return { error: '가입 신청 중 오류가 발생했습니다.' }
-
     revalidatePath('/dashboard/team')
     return { success: true }
 }
@@ -219,10 +213,118 @@ export async function handleJoinRequest(requestId: string, action: 'accept' | 'r
             gym_name: request.gym_name,
             branch_name: request.branch_name,
             current_belt: request.current_belt,
+            stripe: request.stripe ?? 0,
             last_promotion_date: request.last_promotion_date,
         })
     }
 
+    revalidatePath('/dashboard/team')
+    return { success: true }
+}
+
+// --- Leave Team ---
+export async function leaveTeam() {
+    const userId = await getCurrentUserId()
+    if (!userId) return { error: '로그인이 필요합니다.' }
+
+    const supabase = await createAdminClient()
+
+    const { data: me } = await supabase
+        .from('team_members').select('id, role, team_id').eq('user_id', userId).maybeSingle()
+    if (!me) return { error: '소속된 팀이 없습니다.' }
+
+    if (me.role === 'representative') {
+        // Check if other members exist
+        const { count } = await supabase
+            .from('team_members')
+            .select('id', { count: 'exact', head: true })
+            .eq('team_id', me.team_id)
+            .neq('user_id', userId)
+        if ((count ?? 0) > 0) {
+            return { error: '팀원이 있을 때는 먼저 대표를 위임한 후 탈퇴해주세요.' }
+        }
+        // No other members → delete the whole team
+        await supabase.from('teams').delete().eq('id', me.team_id)
+    } else {
+        await supabase.from('team_members').delete().eq('id', me.id)
+    }
+
+    revalidatePath('/dashboard/team')
+    return { success: true }
+}
+
+// --- Delete Team (Representative only) ---
+export async function deleteTeam() {
+    const userId = await getCurrentUserId()
+    if (!userId) return { error: '로그인이 필요합니다.' }
+
+    const supabase = await createAdminClient()
+    const { data: team } = await supabase
+        .from('teams').select('id, representative_id').eq('representative_id', userId).maybeSingle()
+    if (!team) return { error: '삭제할 팀을 찾을 수 없거나 권한이 없습니다.' }
+
+    await supabase.from('teams').delete().eq('id', team.id)
+    revalidatePath('/dashboard/team')
+    return { success: true }
+}
+
+// --- Delegate Leadership ---
+export async function delegateLeadership(newRepresentativeUserId: string) {
+    const userId = await getCurrentUserId()
+    if (!userId) return { error: '로그인이 필요합니다.' }
+
+    const supabase = await createAdminClient()
+    const { data: team } = await supabase
+        .from('teams').select('id, representative_id').eq('representative_id', userId).maybeSingle()
+    if (!team) return { error: '권한이 없습니다.' }
+
+    const { data: newRep } = await supabase
+        .from('team_members').select('id, member_name').eq('user_id', newRepresentativeUserId).eq('team_id', team.id).maybeSingle()
+    if (!newRep) return { error: '해당 팀원을 찾을 수 없습니다.' }
+
+    // Update roles
+    await supabase.from('team_members').update({ role: 'member' }).eq('user_id', userId).eq('team_id', team.id)
+    await supabase.from('team_members').update({ role: 'representative' }).eq('user_id', newRepresentativeUserId).eq('team_id', team.id)
+    await supabase.from('teams').update({ representative_id: newRepresentativeUserId, representative_name: newRep.member_name }).eq('id', team.id)
+
+    revalidatePath('/dashboard/team')
+    return { success: true }
+}
+
+// --- Update Member Belt (Representative only) ---
+export async function updateMemberBelt(memberId: string, currentBelt: string, stripe: number) {
+    const userId = await getCurrentUserId()
+    if (!userId) return { error: '로그인이 필요합니다.' }
+
+    const supabase = await createAdminClient()
+    // Verify requester is representative of the same team
+    const { data: myMembership } = await supabase
+        .from('team_members').select('team_id, role').eq('user_id', userId).maybeSingle()
+    if (!myMembership || myMembership.role !== 'representative') return { error: '대표만 벨트를 수정할 수 있습니다.' }
+
+    const { data: target } = await supabase
+        .from('team_members').select('team_id').eq('id', memberId).maybeSingle()
+    if (!target || target.team_id !== myMembership.team_id) return { error: '같은 팀 팀원만 수정할 수 있습니다.' }
+
+    const { error } = await supabase
+        .from('team_members').update({ current_belt: currentBelt, stripe }).eq('id', memberId)
+    if (error) return { error: '벨트 수정 중 오류가 발생했습니다.' }
+
+    revalidatePath('/dashboard/team')
+    return { success: true }
+}
+
+// --- Grant/Revoke Notice Write Permission (Representative only) ---
+export async function updateMemberRole(memberId: string, newRole: 'admin' | 'member') {
+    const userId = await getCurrentUserId()
+    if (!userId) return { error: '로그인이 필요합니다.' }
+
+    const supabase = await createAdminClient()
+    const { data: myMembership } = await supabase
+        .from('team_members').select('team_id, role').eq('user_id', userId).maybeSingle()
+    if (!myMembership || myMembership.role !== 'representative') return { error: '대표만 권한을 수정할 수 있습니다.' }
+
+    await supabase.from('team_members').update({ role: newRole }).eq('id', memberId).eq('team_id', myMembership.team_id)
     revalidatePath('/dashboard/team')
     return { success: true }
 }
