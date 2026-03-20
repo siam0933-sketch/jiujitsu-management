@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Users, Bell, Clock, ShieldCheck, Settings, ChevronDown, ChevronUp, Send, LogOut, Trash2, Crown, Pencil, Check, X } from 'lucide-react'
+import { Users, Bell, Clock, ShieldCheck, Settings, ChevronDown, ChevronUp, Send, LogOut, Trash2, Crown, Check, X } from 'lucide-react'
 import { handleJoinRequest, createNotice, createComment, getNoticeComments, leaveTeam, deleteTeam, delegateLeadership, updateMemberBelt, updateMemberRole } from '../actions'
 
 const BELT_KR: Record<string, string> = {
@@ -288,14 +288,15 @@ export default function TeamDashboard({ team, membership, members, notices, join
     )
 }
 
-// MemberCard with belt editing + notice permission toggle
+// MemberCard with expandable details, phone/stripe defaults, and promote button
 function MemberCard({ member, isRepresentative, currentUserId, onRoleChange }: {
     member: any
     isRepresentative: boolean
     currentUserId: string
     onRoleChange?: (role: 'admin' | 'member') => Promise<void>
 }) {
-    const [editingBelt, setEditingBelt] = useState(false)
+    const [expanded, setExpanded] = useState(false)
+    const [promoting, setPromoting] = useState(false)
     const [belt, setBelt] = useState(member.current_belt)
     const [stripe, setStripe] = useState(member.stripe ?? 0)
     const [isPending, startTransition] = useTransition()
@@ -303,84 +304,156 @@ function MemberCard({ member, isRepresentative, currentUserId, onRoleChange }: {
     const saveBelt = () => {
         startTransition(async () => {
             await updateMemberBelt(member.id, belt, stripe)
-            setEditingBelt(false)
+            setPromoting(false)
         })
     }
 
     const isMe = member.user_id === currentUserId
-    const canEdit = isRepresentative && !isMe && member.role !== 'representative'
+    const canManage = isRepresentative && !isMe && member.role !== 'representative'
+    const stripeVal = member.stripe ?? 0
 
     return (
-        <div className="p-4 flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
-                {member.member_name?.charAt(0) || '?'}
-            </div>
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-gray-900 dark:text-zinc-100 text-sm">{member.member_name}</span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${member.role === 'representative' ? 'bg-yellow-100 text-yellow-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 dark:bg-zinc-700 dark:text-zinc-400'}`}>
-                        {ROLE_LABEL[member.role]}
-                    </span>
-                    {isMe && <span className="text-xs px-1.5 py-0.5 bg-orange-100 text-orange-600 rounded font-bold">나</span>}
+        <div className="border-b border-gray-100 dark:border-zinc-800 last:border-0">
+            {/* Main Row */}
+            <div
+                className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+                onClick={() => { setExpanded(v => !v); setPromoting(false) }}
+            >
+                {/* Avatar */}
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm shrink-0">
+                    {member.member_name?.charAt(0) || '?'}
                 </div>
-                <div className="text-xs text-gray-500 mt-0.5 truncate">{member.branch_name}</div>
-                {member.gym_name && <div className="text-xs text-gray-400">{member.gym_name}</div>}
-                {member.gym_address && <div className="text-xs text-gray-400">{member.gym_address}</div>}
 
-                {/* Belt + Stripe */}
-                {editingBelt ? (
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                        <select value={belt} onChange={e => setBelt(e.target.value)}
-                            className="text-xs px-2 py-1 border border-gray-200 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100">
-                            <option value="white">화이트</option>
-                            <option value="blue">블루</option>
-                            <option value="purple">퍼플</option>
-                            <option value="brown">브라운</option>
-                            <option value="black">블랙</option>
-                        </select>
-                        <select value={stripe} onChange={e => setStripe(Number(e.target.value))}
-                            className="text-xs px-2 py-1 border border-gray-200 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100">
-                            <option value={0}>0그랄</option>
-                            <option value={1}>1그랄</option>
-                            <option value={2}>2그랄</option>
-                            <option value={3}>3그랄</option>
-                            <option value={4}>4그랄</option>
-                        </select>
-                        <button onClick={saveBelt} disabled={isPending} className="p-1 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 disabled:opacity-50">
-                            <Check className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => { setEditingBelt(false); setBelt(member.current_belt); setStripe(member.stripe ?? 0) }}
-                            className="p-1 bg-gray-200 dark:bg-zinc-700 rounded-md hover:bg-gray-300">
-                            <X className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${BELT_COLOR[member.current_belt] || 'bg-gray-100'}`}>
-                            {BELT_KR[member.current_belt] || member.current_belt}
+                {/* Main info */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-semibold text-gray-900 dark:text-zinc-100 text-sm">{member.member_name}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${member.role === 'representative' ? 'bg-yellow-100 text-yellow-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 dark:bg-zinc-700 dark:text-zinc-400'}`}>
+                            {ROLE_LABEL[member.role]}
                         </span>
-                        {(member.stripe ?? 0) > 0 && (
-                            <span className="text-xs text-yellow-600 font-bold">{'|'.repeat(member.stripe)}</span>
+                        {isMe && <span className="text-xs px-1.5 py-0.5 bg-orange-100 text-orange-600 rounded font-bold">나</span>}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span className="text-xs text-gray-500 truncate">{member.branch_name}</span>
+                        {member.phone && (
+                            <span className="text-xs text-gray-400">· 📞 {member.phone}</span>
                         )}
-                        {canEdit && (
-                            <button onClick={() => setEditingBelt(true)}
-                                className="text-xs text-gray-400 hover:text-blue-500 flex items-center gap-0.5">
-                                <Pencil className="w-3 h-3" /> 수정
+                    </div>
+                </div>
+
+                {/* Belt + Stripe badge */}
+                <div className="flex items-center gap-1 shrink-0">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${BELT_COLOR[member.current_belt] || 'bg-gray-100 text-gray-700'}`}>
+                        {BELT_KR[member.current_belt] || member.current_belt}
+                    </span>
+                    {stripeVal > 0 && (
+                        <span className="text-xs font-black text-yellow-500 tracking-tighter">{'|'.repeat(stripeVal)}</span>
+                    )}
+                </div>
+
+                {/* More button */}
+                <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setExpanded(v => !v); setPromoting(false) }}
+                    className="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                >
+                    {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+            </div>
+
+            {/* Expanded Detail Panel */}
+            {expanded && (
+                <div className="px-4 pb-4 pt-0 bg-gray-50 dark:bg-zinc-800/40 border-t border-gray-100 dark:border-zinc-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-sm">
+                        {member.gym_name && (
+                            <div className="flex gap-2">
+                                <span className="text-gray-400 text-xs w-16 shrink-0">도장이름</span>
+                                <span className="text-gray-700 dark:text-zinc-300 text-xs font-medium">{member.gym_name}</span>
+                            </div>
+                        )}
+                        {member.gym_address && (
+                            <div className="flex gap-2">
+                                <span className="text-gray-400 text-xs w-16 shrink-0">주소</span>
+                                <span className="text-gray-700 dark:text-zinc-300 text-xs font-medium">{member.gym_address}</span>
+                            </div>
+                        )}
+                        {member.phone && (
+                            <div className="flex gap-2">
+                                <span className="text-gray-400 text-xs w-16 shrink-0">전화번호</span>
+                                <span className="text-gray-700 dark:text-zinc-300 text-xs font-medium">{member.phone}</span>
+                            </div>
+                        )}
+                        {member.last_promotion_date && (
+                            <div className="flex gap-2">
+                                <span className="text-gray-400 text-xs w-16 shrink-0">최근 승급</span>
+                                <span className="text-gray-700 dark:text-zinc-300 text-xs font-medium">{new Date(member.last_promotion_date).toLocaleDateString('ko-KR')}</span>
+                            </div>
+                        )}
+                        <div className="flex gap-2">
+                            <span className="text-gray-400 text-xs w-16 shrink-0">벨트/그랄</span>
+                            <span className="text-gray-700 dark:text-zinc-300 text-xs font-medium">
+                                {BELT_KR[member.current_belt] || member.current_belt} / {stripeVal}그랄
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons Row */}
+                    <div className="flex items-center gap-2 mt-4 flex-wrap">
+                        {/* Promote button (representative only, not self, not other representative) */}
+                        {canManage && !promoting && (
+                            <button
+                                onClick={e => { e.stopPropagation(); setPromoting(true) }}
+                                className="flex items-center gap-1 text-xs px-3 py-1.5 bg-white dark:bg-zinc-900 border border-emerald-300 text-emerald-600 font-bold rounded-lg hover:bg-emerald-50 transition-colors shadow-sm"
+                            >
+                                <Crown className="w-3.5 h-3.5" /> 승급
+                            </button>
+                        )}
+
+                        {/* Notice permission toggle */}
+                        {canManage && onRoleChange && !promoting && (
+                            <button
+                                onClick={e => { e.stopPropagation(); onRoleChange(member.role === 'admin' ? 'member' : 'admin') }}
+                                className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors shadow-sm ${member.role === 'admin' ? 'bg-blue-50 border-blue-300 text-blue-600 hover:bg-blue-100' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 text-gray-500 hover:border-blue-300 hover:text-blue-500'}`}
+                            >
+                                <Bell className="w-3.5 h-3.5" />
+                                {member.role === 'admin' ? '공지권한 해제' : '공지권한 부여'}
                             </button>
                         )}
                     </div>
-                )}
-            </div>
 
-            {/* Notice permission toggle */}
-            {isRepresentative && !isMe && member.role !== 'representative' && onRoleChange && (
-                <button
-                    onClick={() => onRoleChange(member.role === 'admin' ? 'member' : 'admin')}
-                    className={`shrink-0 text-xs px-2 py-1 rounded-lg border font-medium transition-colors ${member.role === 'admin' ? 'border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100' : 'border-gray-200 dark:border-zinc-700 text-gray-400 hover:text-blue-500 hover:border-blue-300'}`}
-                    title={member.role === 'admin' ? '공지 권한 해제' : '공지 권한 부여'}
-                >
-                    {member.role === 'admin' ? '공지 ✓' : '공지 권한'}
-                </button>
+                    {/* Belt/Stripe Edit Form */}
+                    {promoting && (
+                        <div className="mt-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-emerald-200 dark:border-emerald-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2.5">🥋 승급 처리 — {member.member_name}</div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <select value={belt} onChange={e => setBelt(e.target.value)}
+                                    className="text-xs px-2.5 py-1.5 border border-gray-200 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-400 outline-none">
+                                    <option value="white">화이트</option>
+                                    <option value="blue">블루</option>
+                                    <option value="purple">퍼플</option>
+                                    <option value="brown">브라운</option>
+                                    <option value="black">블랙</option>
+                                </select>
+                                <select value={stripe} onChange={e => setStripe(Number(e.target.value))}
+                                    className="text-xs px-2.5 py-1.5 border border-gray-200 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-400 outline-none">
+                                    <option value={0}>0그랄</option>
+                                    <option value={1}>1그랄</option>
+                                    <option value={2}>2그랄</option>
+                                    <option value={3}>3그랄</option>
+                                    <option value={4}>4그랄</option>
+                                </select>
+                                <button onClick={saveBelt} disabled={isPending}
+                                    className="flex items-center gap-1 text-xs px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+                                    <Check className="w-3.5 h-3.5" /> 저장
+                                </button>
+                                <button onClick={() => { setPromoting(false); setBelt(member.current_belt); setStripe(member.stripe ?? 0) }}
+                                    className="flex items-center gap-1 text-xs px-3 py-1.5 bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <X className="w-3.5 h-3.5" /> 취소
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     )
