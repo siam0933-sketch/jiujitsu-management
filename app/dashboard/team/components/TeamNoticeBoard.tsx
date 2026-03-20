@@ -17,6 +17,7 @@ export default function TeamNoticeBoard({ teamId, notices, canWriteNotice, curre
     const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
+    const [isWriting, setIsWriting] = useState(false)
 
     const handleCreateNotice = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -39,6 +40,7 @@ export default function TeamNoticeBoard({ teamId, notices, canWriteNotice, curre
                 setMessage({ type: 'success', text: '공지사항 등록 완료!' })
                 setTitle('')
                 setContent('')
+                setIsWriting(false)
             }
         })
     }
@@ -51,11 +53,25 @@ export default function TeamNoticeBoard({ teamId, notices, canWriteNotice, curre
                 </div>
             )}
 
-            {canWriteNotice && (
+            {canWriteNotice && !isWriting && (
+                <div className="flex justify-end mb-4">
+                    <button onClick={() => setIsWriting(true)} 
+                        className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1.5">
+                        <span className="text-base leading-none">✏️</span> 공지사항 작성
+                    </button>
+                </div>
+            )}
+
+            {canWriteNotice && isWriting && (
                 <form onSubmit={handleCreateNotice} className="bg-white dark:bg-zinc-900 rounded-xl border border-blue-200 dark:border-blue-800 p-5 space-y-4 animate-in fade-in">
-                    <h3 className="font-bold text-sm text-blue-700 dark:text-blue-400 flex items-center gap-1">
-                        <span>✏️</span> 공지사항 작성
-                    </h3>
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-sm text-blue-700 dark:text-blue-400 flex items-center gap-1">
+                            <span>✏️</span> 공지사항 작성
+                        </h3>
+                        <button type="button" onClick={() => setIsWriting(false)} className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-zinc-300">
+                            취소
+                        </button>
+                    </div>
                     <input 
                         required 
                         value={title}
