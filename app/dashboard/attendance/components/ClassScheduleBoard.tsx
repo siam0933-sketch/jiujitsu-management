@@ -64,13 +64,21 @@ export default function ClassScheduleBoard({
         return targetDate.toISOString().split('T')[0];
     }
 
+    const activeDays = DAYS.filter(day => initialSchedules.some(s => s.day_of_week === day.id))
+
     useEffect(() => {
         setIsMounted(true)
-        // Use todayKST to determine initial selected Day
         const todayIndex = new Date(todayKST).getDay()
         const todayId = todayIndex === 0 ? 'Sun' : DAYS[todayIndex - 1].id
-        setSelectedDay(todayId)
-    }, [todayKST])
+        
+        if (activeDays.some(d => d.id === todayId)) {
+            setSelectedDay(todayId)
+        } else if (activeDays.length > 0) {
+            setSelectedDay(activeDays[0].id)
+        } else {
+            setSelectedDay(todayId)
+        }
+    }, [todayKST, initialSchedules])
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -132,22 +140,24 @@ export default function ClassScheduleBoard({
             {viewMode === 'daily' && (
                 <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col h-full max-h-[calc(100vh-200px)]">
                     {/* Tabs Header */}
-                    <div className="flex-none flex w-full bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800 overflow-x-auto">
-                        {DAYS.map(day => (
-                            <button
-                                key={day.id}
-                                onClick={() => setSelectedDay(day.id)}
-                                className={`
-                                    flex-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap border-r border-gray-100 dark:border-zinc-800/50 last:border-0
-                                    ${selectedDay === day.id
-                                        ? 'bg-white dark:bg-zinc-900 text-blue-600 shadow-[inset_0_2px_0_0_rgba(37,99,235,1)]'
-                                        : 'text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800'}
-                                `}
-                            >
-                                {day.label}
-                            </button>
-                        ))}
-                    </div>
+                    {activeDays.length > 0 && (
+                        <div className="flex-none flex w-full bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800 overflow-x-auto">
+                            {activeDays.map(day => (
+                                <button
+                                    key={day.id}
+                                    onClick={() => setSelectedDay(day.id)}
+                                    className={`
+                                        flex-1 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap border-r border-gray-100 dark:border-zinc-800/50 last:border-0
+                                        ${selectedDay === day.id
+                                            ? 'bg-white dark:bg-zinc-900 text-blue-600 shadow-[inset_0_2px_0_0_rgba(37,99,235,1)]'
+                                            : 'text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800'}
+                                    `}
+                                >
+                                    {day.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Content Area */}
                     <div className="flex-1 overflow-y-auto p-2 sm:p-4 custom-scrollbar bg-gray-50/30 dark:bg-zinc-800/30">
@@ -184,55 +194,47 @@ export default function ClassScheduleBoard({
             {/* Weekly View GRID */}
             {viewMode === 'weekly' && (
                 <div className="flex-1 overflow-x-auto bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-200 dark:border-zinc-800 p-4 custom-scrollbar">
-                    {(() => {
-                        const activeDays = DAYS.filter(day => initialSchedules.some(s => s.day_of_week === day.id))
-                        
-                        if (activeDays.length === 0) {
-                            return (
-                                <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
-                                    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 p-10 inline-block">
-                                        <p className="text-gray-400 dark:text-zinc-500 mb-2">예정된 수업이 없습니다.</p>
-                                        <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
-                                            + 첫 수업 만들기
-                                        </button>
+                    {activeDays.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
+                            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 p-10 inline-block">
+                                <p className="text-gray-400 dark:text-zinc-500 mb-2">예정된 수업이 없습니다.</p>
+                                <button onClick={handleCreateClassClick} className="text-blue-600 font-bold hover:underline">
+                                    + 첫 수업 만들기
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div 
+                            className="grid gap-3 h-full" 
+                            style={{ 
+                                gridTemplateColumns: `repeat(${activeDays.length}, minmax(150px, 1fr))`,
+                                minWidth: `${Math.max(activeDays.length * 150, 400)}px` 
+                            }}
+                        >
+                            {activeDays.map(day => (
+                                <div key={day.id} className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+                                    <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 dark:text-zinc-300 bg-gray-50 dark:bg-zinc-800/50'} border-b border-gray-100 dark:border-zinc-800/50`}>
+                                        {day.label}
+                                    </div>
+                                    <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50 dark:bg-zinc-800/50">
+                                        {initialSchedules
+                                            .filter(s => s.day_of_week === day.id)
+                                            .map(schedule => (
+                                                <AttendanceCheck
+                                                    key={schedule.id}
+                                                    schedule={schedule}
+                                                    allMembers={activeMembers}
+                                                    mode="weekly"
+                                                    targetDate={getDateForDay(day.id)}
+                                                    todayKST={todayKST}
+                                                />
+                                            ))
+                                        }
                                     </div>
                                 </div>
-                            )
-                        }
-
-                        return (
-                            <div 
-                                className="grid gap-3 h-full" 
-                                style={{ 
-                                    gridTemplateColumns: `repeat(${activeDays.length}, minmax(150px, 1fr))`,
-                                    minWidth: `${Math.max(activeDays.length * 150, 400)}px` 
-                                }}
-                            >
-                                {activeDays.map(day => (
-                                    <div key={day.id} className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-                                        <div className={`text-center font-bold py-2 text-sm whitespace-nowrap ${day.id === 'Sun' ? 'text-red-500 bg-red-50' : 'text-gray-700 dark:text-zinc-300 bg-gray-50 dark:bg-zinc-800/50'} border-b border-gray-100 dark:border-zinc-800/50`}>
-                                            {day.label}
-                                        </div>
-                                        <div className="flex-1 p-2 overflow-y-auto custom-scrollbar bg-gray-50/50 dark:bg-zinc-800/50">
-                                            {initialSchedules
-                                                .filter(s => s.day_of_week === day.id)
-                                                .map(schedule => (
-                                                    <AttendanceCheck
-                                                        key={schedule.id}
-                                                        schedule={schedule}
-                                                        allMembers={activeMembers}
-                                                        mode="weekly"
-                                                        targetDate={getDateForDay(day.id)}
-                                                        todayKST={todayKST}
-                                                    />
-                                                ))
-                                            }
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )
-                    })()}
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
