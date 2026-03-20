@@ -114,15 +114,20 @@ export default function MemberLoginForm() {
         if (newPw !== newPwConfirm) { setPwChangeMsg('비밀번호가 일치하지 않습니다.'); return }
 
         setPwChanging(true)
-        const result = await changeMemberPassword(weakMemberId, newPw)
-        setPwChanging(false)
-
-        if (result.error) {
-            setPwChangeMsg(result.error)
-        } else {
-            setShowPasswordModal(false)
-            router.refresh()
-            router.push('/portal')
+        try {
+            const result = await changeMemberPassword(weakMemberId, newPw)
+            
+            if (result.error) {
+                setPwChangeMsg(result.error)
+            } else {
+                setShowPasswordModal(false)
+                router.refresh()
+                router.push('/portal')
+            }
+        } catch (err: any) {
+            setPwChangeMsg('네트워크 또는 서버 오류가 발생했습니다.')
+        } finally {
+            setPwChanging(false)
         }
     }
 

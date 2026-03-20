@@ -9,15 +9,22 @@ export async function changeMemberPassword(memberId: string, newPassword: string
         return { error: '비밀번호는 영문과 숫자를 포함하여 6자리 이상이어야 합니다.' }
     }
 
-    const supabaseAdmin = await createAdminClient()
+    try {
+        const supabaseAdmin = await createAdminClient()
 
-    const hashedPassword = bcrypt.hashSync(newPassword.toLowerCase(), 10)
+        const { error } = await supabaseAdmin
+            .from('gym_members')
+            .update({ login_password: newPassword }) // case-insensitive during login, so exact case can be stored
+            .eq('id', memberId)
 
-    const { error } = await supabaseAdmin
-        .from('gym_members')
-        .update({ login_password: newPassword.toLowerCase() })
-        .eq('id', memberId)
-
-    if (error) return { error: '비밀번호 변경 중 오류가 발생했습니다.' }
-    return { success: true }
+        if (error) {
+            console.error('[changeMemberPassword] Error updating password:', error)
+            return { error: '비밀번호 변경 중 오류가 발생했습니다.' }
+        }
+        
+        return { success: true }
+    } catch (e: any) {
+        console.error('[changeMemberPassword] Unhandled server error:', e)
+        return { error: '서버 에러: 비밀번호 변경에 실패했습니다.' }
+    }
 }
