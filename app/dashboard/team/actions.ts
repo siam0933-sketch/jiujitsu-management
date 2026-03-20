@@ -19,7 +19,7 @@ export async function getMyTeamData() {
     // Check if already a team member
     const { data: membership } = await supabase
         .from('team_members')
-        .select('team_id, role, branch_name, current_belt, stripe')
+        .select('team_id, role, branch_name, current_belt')
         .eq('user_id', userId)
         .maybeSingle()
 
@@ -37,7 +37,7 @@ export async function getMyTeamData() {
     // Get all members
     const { data: members } = await supabase
         .from('team_members')
-        .select('id, user_id, member_name, role, gym_name, gym_address, phone, branch_name, current_belt, stripe, last_promotion_date, joined_at')
+        .select('*')
         .eq('team_id', team.id)
         .order('role')
 
@@ -89,7 +89,7 @@ export async function createTeam(formData: FormData) {
         return { error: '팀 생성 중 오류가 발생했습니다.' }
     }
 
-    await supabase.from('team_members').insert({
+    const memberInsertData: Record<string, any> = {
         team_id: newTeam.id,
         user_id: userId,
         role: 'representative',
@@ -99,9 +99,14 @@ export async function createTeam(formData: FormData) {
         gym_name: gymName,
         branch_name: branchName,
         current_belt: currentBelt,
-        stripe,
         last_promotion_date: lastPromoDate,
-    })
+    }
+
+    // Try with stripe first; fall back if column not yet migrated
+    const { error: insertErr } = await supabase.from('team_members').insert({ ...memberInsertData, stripe })
+    if (insertErr) {
+        await supabase.from('team_members').insert(memberInsertData)
+    }
 
     revalidatePath('/dashboard/team')
     return { success: true }
@@ -150,7 +155,7 @@ export async function submitJoinRequest(formData: FormData) {
     const { data: profile } = await supabase
         .from('profiles').select('full_name').eq('id', userId).single()
 
-    const { error } = await supabase.from('team_join_requests').insert({
+    const requestData: Record<string, any> = {
         team_id: teamId,
         user_id: userId,
         status: 'pending',
@@ -160,11 +165,15 @@ export async function submitJoinRequest(formData: FormData) {
         gym_name: gymName,
         branch_name: branchName,
         current_belt: currentBelt,
-        stripe,
         last_promotion_date: lastPromoDate,
-    })
+    }
 
-    if (error) return { error: '가입 신청 중 오류가 발생했습니다.' }
+    // Try with stripe; fall back if column not yet migrated
+    const { error } = await supabase.from('team_join_requests').insert({ ...requestData, stripe })
+    if (error) {
+        const { error: error2 } = await supabase.from('team_join_requests').insert(requestData)
+        if (error2) return { error: '가입 신청 중 오류가 발생했습니다.' }
+    }
     revalidatePath('/dashboard/team')
     return { success: true }
 }
@@ -203,7 +212,7 @@ export async function handleJoinRequest(requestId: string, action: 'accept' | 'r
     await supabase.from('team_join_requests').update({ status: action === 'accept' ? 'accepted' : 'rejected' }).eq('id', requestId)
 
     if (action === 'accept') {
-        await supabase.from('team_members').insert({
+        const acceptData: Record<string, any> = {
             team_id: request.team_id,
             user_id: request.user_id,
             role: 'member',
@@ -213,9 +222,13 @@ export async function handleJoinRequest(requestId: string, action: 'accept' | 'r
             gym_name: request.gym_name,
             branch_name: request.branch_name,
             current_belt: request.current_belt,
-            stripe: request.stripe ?? 0,
             last_promotion_date: request.last_promotion_date,
-        })
+        }
+        const stripeVal = request.stripe ?? 0
+        const { error: acceptErr } = await supabase.from('team_members').insert({ ...acceptData, stripe: stripeVal })
+        if (acceptErr) {
+            await supabase.from('team_members').insert(acceptData)
+        }
     }
 
     revalidatePath('/dashboard/team')
