@@ -5,6 +5,12 @@ import TeamDashboard from './components/TeamDashboard'
 export default async function TeamPage() {
     const teamData = await getMyTeamData()
 
+    // User has a pending join request but no membership yet
+    if (teamData && 'pendingRequest' in teamData) {
+        return <NoTeamView pendingRequest={teamData.pendingRequest} />
+    }
+
+    // User has no team at all
     if (!teamData) {
         return <NoTeamView />
     }

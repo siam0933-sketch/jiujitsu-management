@@ -23,7 +23,18 @@ export async function getMyTeamData() {
         .eq('user_id', userId)
         .maybeSingle()
 
-    if (!membership) return null
+    if (!membership) {
+        // Check for a pending join request
+        const { data: pending } = await supabase
+            .from('team_join_requests')
+            .select('id, team_id, branch_name, status, created_at, teams(name)')
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .maybeSingle()
+
+        if (pending) return { pendingRequest: pending }
+        return null
+    }
 
     // Get team data
     const { data: team } = await supabase
