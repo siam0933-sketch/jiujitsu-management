@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { extractImagePathsFromHtml, deleteImagesFromStorage } from '@/utils/storage'
 
 export async function approveGym(formData: FormData) {
     const gymId = formData.get('gymId')
@@ -112,6 +113,9 @@ export async function updateSystemNotice(id: string, title: string, content: str
 export async function deleteSystemNotice(id: string) {
     const supabase = await createAdminClient()
 
+    // Fetch content to extract images before deletion
+    const { data: notice } = await supabase.from('system_notices').select('content').eq('id', id).single()
+
     const { error } = await supabase
         .from('system_notices')
         .delete()
@@ -120,6 +124,14 @@ export async function deleteSystemNotice(id: string) {
     if (error) {
         console.error('Failed to delete notice:', error)
         return { error: '공지사항 삭제에 실패했습니다.' }
+    }
+    
+    // Clean up images from storage bucket
+    if (notice?.content) {
+        const paths = extractImagePathsFromHtml(notice.content)
+        if (paths.length > 0) {
+            await deleteImagesFromStorage(paths)
+        }
     }
 
     revalidatePath('/super-admin/notices')

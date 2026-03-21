@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendNotification } from '@/utils/notifications'
+import { extractImagePathsFromHtml, deleteImagesFromStorage } from '@/utils/storage'
 
 export async function getNotices(page = 1, limit = 10) {
     const supabase = await createClient()

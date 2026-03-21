@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { extractImagePathsFromHtml, deleteImagesFromStorage } from '@/utils/storage'
 
 export type SystemManual = {
     id: string
@@ -75,6 +76,10 @@ export async function updateManual(id: string, title: string, content: string) {
 
 export async function deleteManual(id: string) {
     const supabase = await createAdminClient()
+    
+    // Fetch content to extract images before deletion
+    const { data: manual } = await supabase.from('system_manuals').select('content').eq('id', id).single()
+
     const { error } = await supabase
         .from('system_manuals')
         .delete()
@@ -83,6 +88,14 @@ export async function deleteManual(id: string) {
     if (error) {
         console.error('Error deleting manual:', error)
         return { error: '삭제 실패: ' + error.message }
+    }
+    
+    // Clean up images from storage bucket
+    if (manual?.content) {
+        const paths = extractImagePathsFromHtml(manual.content)
+        if (paths.length > 0) {
+            await deleteImagesFromStorage(paths)
+        }
     }
     
     revalidatePath('/super-admin/manual')

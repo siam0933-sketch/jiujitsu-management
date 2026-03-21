@@ -2,6 +2,7 @@ import { createAdminClient } from '@/utils/supabase/server';
 import { Clock, Check, CheckCircle, Ban } from 'lucide-react';
 import Link from 'next/link';
 import { GymActionButtons } from './components/GymActionButtons';
+import StorageOptimizer from './components/StorageOptimizer';
 
 export default async function SuperAdminPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
     const supabase = await createAdminClient();
@@ -41,11 +42,14 @@ export default async function SuperAdminPage({ searchParams }: { searchParams: P
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">도장 전체 관리</h2>
-                <p className="text-gray-500 dark:text-zinc-400 mt-1 text-sm">
-                    플랫폼을 이용하는 전체 도장을 상태별로 조회하고 상태를 관리합니다.
-                </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">도장 전체 관리</h2>
+                    <p className="text-gray-500 dark:text-zinc-400 mt-1 text-sm">
+                        플랫폼을 이용하는 전체 도장을 상태별로 조회하고 상태를 관리합니다.
+                    </p>
+                </div>
+                <StorageOptimizer />
             </div>
 
             {/* Tabs */}
