@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { calculatePromotionStats } from './[id]/actions'
 import { redirect } from 'next/navigation'
 import { generateInitialPassword } from '@/utils/password'
 
@@ -632,6 +633,9 @@ export async function bulkPromoteMembers(memberIds: string[]) {
             continue
         }
 
+        // Calculate stats using the same logic as individual promotion
+        const stats = await calculatePromotionStats(member.id, today)
+
         // Insert promotion log
         const { error: logError } = await supabase.from('gym_promotion_logs').insert({
             gym_id: member.gym_id,
@@ -639,10 +643,10 @@ export async function bulkPromoteMembers(memberIds: string[]) {
             belt_name: nextBelt,
             stripe_level: nextStripe,
             promoted_at: today,
-            training_days: 0,
-            attendance_count: 0,
+            training_days: stats.trainingDays,
+            attendance_count: stats.attendanceCount,
             awarded_by: adminName,
-            memo: '일괄승급'
+            memo: null
         })
 
         if (logError) {
