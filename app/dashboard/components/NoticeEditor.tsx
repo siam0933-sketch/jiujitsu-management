@@ -158,6 +158,16 @@ export default function NoticeEditor({ content, onChange }: NoticeEditorProps) {
 
     const handleImageFile = async (file: File) => {
         if (!editor || isUploading) return;
+
+        // Check image count limit
+        const currentHtml = editor.getHTML();
+        const imageCount = (currentHtml.match(/<img /g) || []).length;
+        if (imageCount >= 3) {
+            alert('사진은 최대 3장까지만 첨부할 수 있습니다.');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
         setIsUploading(true);
         try {
             // 1. Compress Image
