@@ -51,9 +51,20 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
 
     return (
         <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 mb-8">
-                안녕하세요, {gym ? gym.name : '관장님'}! 👋
-            </h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-zinc-100">
+                    안녕하세요, {gym ? gym.name : '관장님'}! 👋
+                </h2>
+                <a 
+                    href="/dashboard/manual" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 font-semibold px-5 py-2.5 rounded-full shadow-sm hover:shadow-md border border-gray-200 dark:border-zinc-700 transition-all hover:bg-blue-50 dark:hover:bg-zinc-700/80"
+                >
+                    <span className="text-lg">💡</span> 
+                    <span>사용방법</span>
+                </a>
+            </div>
 
             {/* System Notices */}
             {systemNotices && systemNotices.length > 0 && (

@@ -43,6 +43,9 @@ export default async function SuperAdminLayout({
                         <Link href="/super-admin/notices" className="text-sm font-medium text-gray-700 dark:text-zinc-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                             시스템 공지사항 (Notices)
                         </Link>
+                        <Link href="/super-admin/manual" className="text-sm font-medium text-gray-700 dark:text-zinc-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                            사용설명서 (Manual)
+                        </Link>
                     </nav>
                 </div>
                 <div className="flex items-center gap-4">
