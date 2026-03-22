@@ -214,7 +214,7 @@ export default function MemberLoginForm() {
 
                 {/* 2. 로그인 정보 */}
                 <div>
-                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200 block mb-2" htmlFor="name">이름 (아이디)</label>
+                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200 block mb-2" htmlFor="name">이름</label>
                     <input
                         className="w-full rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
                         name="name" placeholder="본인 이름" required
