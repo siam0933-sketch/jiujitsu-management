@@ -261,11 +261,6 @@ export default function MemberLoginForm() {
                             * 회원가입은 관장님이 보내주신 <b>초대 링크</b>를 통해서만 가능합니다.
                         </p>
                     </div>
-                    <div>
-                        <Link href="/admin/login" className="text-sm md:text-base font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-4 transition-colors">
-                            관리자/관장 지도진 로그인으로 이동 &rarr;
-                        </Link>
-                    </div>
                 </div>
             </form>
 

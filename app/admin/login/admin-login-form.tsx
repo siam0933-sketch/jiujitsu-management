@@ -109,11 +109,6 @@ export default function LoginForm() {
                             신규 도장 가입하기
                         </Link>
                     </div>
-                    <div>
-                        <Link href="/login" className="text-sm md:text-base font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-4 transition-colors">
-                            일반 관원(수강생) 로그인으로 이동 &rarr;
-                        </Link>
-                    </div>
                 </div>
             </form>
         </div>
