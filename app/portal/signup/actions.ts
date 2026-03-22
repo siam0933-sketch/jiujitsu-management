@@ -131,6 +131,7 @@ export async function registerPortalMember(data: {
     schoolType?: string,
     gradeNumber?: number | null,
     gradeUpdatedYear?: number | null,
+    startDate?: string | null,
 }) {
     // [CRITICAL] We must use the Admin Service Key to bypass RLS and create/update members
     // before they actually log in.
@@ -183,6 +184,7 @@ export async function registerPortalMember(data: {
                     school_type: data.schoolType || '일반',
                     grade_number: data.gradeNumber ?? null,
                     grade_updated_year: data.gradeUpdatedYear ?? null,
+                    ...(data.startDate ? { start_date: new Date(data.startDate).toISOString() } : {})
                 })
                 .eq('id', existingMember.id)
 
@@ -213,7 +215,7 @@ export async function registerPortalMember(data: {
                     grade_number: data.gradeNumber ?? null,
                     grade_updated_year: data.gradeUpdatedYear ?? null,
                     joined_at: new Date().toISOString(),
-                    start_date: new Date().toISOString(),
+                    start_date: data.startDate ? new Date(data.startDate).toISOString() : new Date().toISOString(),
                     status: 'pending', // Awaiting Gym Master approval
                     belt: data.belt,
                     pending_stripe: data.stripe ?? null,

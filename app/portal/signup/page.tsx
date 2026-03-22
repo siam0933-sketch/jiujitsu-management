@@ -38,6 +38,9 @@ export default function MemberSignupPage() {
     const [belt, setBelt] = useState('White')
     const [stripe, setStripe] = useState<number>(0)
     const [promotionDate, setPromotionDate] = useState('')
+    const [startYear, setStartYear] = useState('')
+    const [startMonth, setStartMonth] = useState('')
+    const [startDay, setStartDay] = useState('')
     const [accessCode, setAccessCode] = useState('')
     const [guardianPhone, setGuardianPhone] = useState('')
     const [address, setAddress] = useState('')
@@ -156,6 +159,10 @@ export default function MemberSignupPage() {
             passwordInputRef.current?.focus()
             return
         }
+        if (!birthYear || !birthMonth || !birthDay) {
+            setErrorMsg('생년월일을 정확히 입력해주세요.')
+            return
+        }
         setIsLoading(true)
         setErrorMsg('')
         const res = await registerPortalMember({
@@ -169,7 +176,8 @@ export default function MemberSignupPage() {
             school,
             schoolType,
             gradeNumber: schoolType !== '일반' ? gradeNumber : null,
-            gradeUpdatedYear: (schoolType !== '일반' && gradeNumber) ? new Date().getFullYear() : null
+            gradeUpdatedYear: (schoolType !== '일반' && gradeNumber) ? new Date().getFullYear() : null,
+            startDate: (startYear && startMonth && startDay) ? `${startYear}-${startMonth.padStart(2, '0')}-${startDay.padStart(2, '0')}` : null,
         })
         setIsLoading(false)
         if (res.error) setErrorMsg(res.error)
@@ -275,19 +283,19 @@ export default function MemberSignupPage() {
 
                             {/* 2. 생년월일 */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">생년월일 (선택)</label>
+                                <label className="block text-sm font-medium text-gray-700">생년월일 *</label>
                                 <div className="mt-1 grid grid-cols-3 gap-2">
-                                    <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)}
+                                    <select required value={birthYear} onChange={(e) => setBirthYear(e.target.value)}
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         <option value="">년도</option>
                                         {Array.from({ length: 80 }, (_, i) => { const yr = new Date().getFullYear() - i; return <option key={yr} value={String(yr)}>{yr}</option> })}
                                     </select>
-                                    <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)}
+                                    <select required value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)}
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         <option value="">월</option>
                                         {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={String(i + 1)}>{i + 1}월</option>)}
                                     </select>
-                                    <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)}
+                                    <select required value={birthDay} onChange={(e) => setBirthDay(e.target.value)}
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         <option value="">일</option>
                                         {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1)}>{i + 1}일</option>)}
@@ -444,7 +452,7 @@ export default function MemberSignupPage() {
                                     )
                                 })()}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">현재 등급 취득일</label>
+                                    <label className="block text-sm font-medium text-gray-700">승급일</label>
                                     <div className="mt-1 grid grid-cols-3 gap-2">
                                         {(() => {
                                             const [pdYear, pdMonth, pdDay] = promotionDate ? promotionDate.split('-') : ['', '', '']
@@ -454,6 +462,15 @@ export default function MemberSignupPage() {
                                                 <select value={pdDay || ''} onChange={(e) => { const [y, m] = promotionDate ? promotionDate.split('-') : ['', '']; setPromotionDate(y ? `${y}-${m || '01'}-${e.target.value.padStart(2, '0')}` : '') }} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">일</option>{Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>)}</select>
                                             </>)
                                         })()}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">주짓수 입문일</label>
+                                    <div className="mt-1 grid grid-cols-3 gap-2">
+                                        <select value={startYear} onChange={(e) => setStartYear(e.target.value)} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">년도</option>{Array.from({ length: 40 }, (_, i) => { const yr = new Date().getFullYear() - i; return <option key={yr} value={String(yr)}>{yr}</option> })}</select>
+                                        <select value={startMonth} onChange={(e) => setStartMonth(e.target.value)} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">월</option>{Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}월</option>)}</select>
+                                        <select value={startDay} onChange={(e) => setStartDay(e.target.value)} className="block w-full px-2 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><option value="">일</option>{Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}일</option>)}</select>
                                     </div>
                                 </div>
                             </div>
