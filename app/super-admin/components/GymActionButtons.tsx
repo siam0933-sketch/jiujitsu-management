@@ -1,8 +1,8 @@
 'use client';
 
 import { useTransition } from 'react';
-import { approveGym, rejectGym } from '../actions';
-import { CheckCircle, XCircle, Ban } from 'lucide-react';
+import { approveGym, rejectGym, resetGymOwnerPassword } from '../actions';
+import { CheckCircle, XCircle, Ban, KeyRound } from 'lucide-react';
 
 export function GymActionButtons({ gymId, status }: { gymId: string, status: string }) {
     const [isPending, startTransition] = useTransition();
@@ -33,6 +33,21 @@ export function GymActionButtons({ gymId, status }: { gymId: string, status: str
         });
     }
 
+    const handleResetPassword = () => {
+        if (!process.browser) return;
+        const confirmed = window.confirm("관장님의 비밀번호를 임시 비밀번호로 초기화 하시겠습니까?");
+        if (!confirmed) return;
+
+        startTransition(async () => {
+            const res = await resetGymOwnerPassword(gymId);
+            if (res?.error) {
+                alert(res.error);
+            } else if (res?.success) {
+                alert(`비밀번호가 성공적으로 초기화되었습니다.\n초기화된 임시 비밀번호: ${res.tempPassword}`);
+            }
+        });
+    }
+
     if (status === 'pending') {
         return (
             <>
@@ -56,13 +71,22 @@ export function GymActionButtons({ gymId, status }: { gymId: string, status: str
 
     if (status === 'active') {
         return (
-            <button
-                onClick={handleReject}
-                disabled={isPending}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-900/50 text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-            >
-                <Ban size={16} /> 강제 정지
-            </button>
+            <div className="flex gap-2">
+                <button
+                    onClick={handleResetPassword}
+                    disabled={isPending}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 dark:border-blue-900/50 text-sm leading-4 font-medium rounded-md text-blue-700 dark:text-blue-400 bg-white dark:bg-zinc-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                >
+                    <KeyRound size={16} /> 비밀번호 초기화
+                </button>
+                <button
+                    onClick={handleReject}
+                    disabled={isPending}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-900/50 text-sm leading-4 font-medium rounded-md text-red-700 dark:text-red-400 bg-white dark:bg-zinc-900 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                >
+                    <Ban size={16} /> 강제 정지
+                </button>
+            </div>
         )
     }
 

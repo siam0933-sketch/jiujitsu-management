@@ -138,3 +138,51 @@ export async function deleteSystemNotice(id: string) {
     revalidatePath('/dashboard')
     return { success: true }
 }
+
+export async function resetGymOwnerPassword(gymId: string) {
+    try {
+        const supabase = await createAdminClient()
+        
+        // 1. Get owner ID and phone from gym
+        const { data: gym, error: gymErr } = await supabase
+            .from('gyms')
+            .select(`
+                owner_id,
+                owner:profiles!gyms_owner_id_fkey(
+                    id,
+                    phone
+                )
+            `)
+            .eq('id', gymId)
+            .single()
+            
+        if (gymErr) return { error: '도장 정보를 찾을 수 없습니다.' }
+        
+        const ownerId = gym.owner_id
+        // Handle case where profile join might vary
+        const phone = Array.isArray(gym.owner) ? gym.owner[0]?.phone : (gym.owner as any)?.phone || ''
+        
+        // 2. Generate temp password (last 4 digits of phone or '123456')
+        let tempPassword = '123456'
+        if (phone && phone.replace(/\D/g, '').length >= 4) {
+             tempPassword = phone.replace(/\D/g, '').slice(-4)
+             // padding to 6 chars minimum
+             tempPassword = tempPassword.padStart(6, '0')
+        }
+            
+        // 3. Force update via admin API
+        const { error: updateErr } = await supabase.auth.admin.updateUserById(
+            ownerId,
+            { password: tempPassword }
+        )
+        
+        if (updateErr) {
+            console.error('Failed to reset password via admin UI:', updateErr)
+            return { error: '비밀번호 초기화 실패: ' + updateErr.message }
+        }
+        
+        return { success: true, tempPassword }
+    } catch (err: any) {
+        return { error: '서버 에러: ' + err.message }
+    }
+}
