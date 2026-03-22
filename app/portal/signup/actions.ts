@@ -11,6 +11,7 @@ export async function searchGyms(query: string) {
     const { data, error } = await supabaseAdmin
         .from('gyms')
         .select('id, name')
+        .eq('status', 'active')
         .ilike('name', `%${query.trim()}%`)
         .order('name', { ascending: true })
         .limit(10)
@@ -26,6 +27,7 @@ export async function lookupGymById(gymId: string) {
         .from('gyms')
         .select('id, name')
         .eq('id', gymId)
+        .eq('status', 'active')
         .single()
 
     if (!gym) return { error: '도장을 찾을 수 없습니다.' }
@@ -72,6 +74,7 @@ export async function lookupGymByCode(code: string) {
         .from('gyms')
         .select('id, name')
         .eq('invitation_code', code.toUpperCase())
+        .eq('status', 'active')
         .single()
 
     if (!gym) {
