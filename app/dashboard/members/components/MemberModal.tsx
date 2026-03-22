@@ -843,7 +843,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                                             <span className="text-base text-gray-700 dark:text-zinc-300">{prod.name}</span>
                                                                         </div>
                                                                         <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
-                                                                            +{prod.price.toLocaleString()}원
+                                                                            {prod.price < 0 ? '' : '+'}{prod.price.toLocaleString()}원
                                                                         </span>
                                                                     </label>
                                                                 ))}
@@ -852,7 +852,7 @@ export default function MemberModal({ member }: { member: any }) {
                                                     )}
 
                                                     <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/50 p-4 rounded mb-2 border border-gray-100 dark:border-zinc-800/50">
-                                                        <span className="text-base font-bold text-gray-700 dark:text-zinc-300">결제 수단</span>
+                                                        <span className="text-base font-bold text-gray-700 dark:text-zinc-300">결제방법</span>
                                                         <select
                                                             value={paymentMethod}
                                                             onChange={(e) => setPaymentMethod(e.target.value)}

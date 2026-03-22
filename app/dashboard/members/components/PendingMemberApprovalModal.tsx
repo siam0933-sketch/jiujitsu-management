@@ -64,15 +64,9 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
         const loadPricing = async () => {
             try {
                 const pricing = await getPricingData()
-                const sortedPlans = (pricing.plans || []).sort((a: any, b: any) => {
-                    if (a.type === 'period' && b.type !== 'period') return -1
-                    if (a.type !== 'period' && b.type === 'period') return 1
-                    return b.price - a.price
-                })
-
-                setPlans(sortedPlans)
-                if (sortedPlans.length > 0) {
-                    setSelectedPlanId(sortedPlans[0].id)
+                setPlans(pricing.plans || [])
+                if (pricing.plans && pricing.plans.length > 0) {
+                    setSelectedPlanId(pricing.plans[0].id)
                 }
                 setOptions(pricing.options)
                 setProducts(pricing.products)
@@ -334,7 +328,8 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
                                                         <span className="text-sm font-bold text-blue-700 dark:text-blue-400">
                                                             {(() => {
                                                                 const price = selectedPlan?.type === 'period' ? opt.price * durationMonths : opt.price
-                                                                return `+${price.toLocaleString()}원`
+                                                                const isNegative = price < 0
+                                                                return `${isNegative ? '' : '+'}${price.toLocaleString()}원`
                                                             })()}
                                                         </span>
                                                     </label>
@@ -360,7 +355,7 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
                                                             <span className="text-sm font-medium text-gray-800 dark:text-zinc-200">{prod.name}</span>
                                                         </div>
                                                         <span className="text-sm font-bold text-rose-700 dark:text-rose-400">
-                                                            +{prod.price.toLocaleString()}원
+                                                            {prod.price < 0 ? '' : '+'}{prod.price.toLocaleString()}원
                                                         </span>
                                                     </label>
                                                 ))}
@@ -373,7 +368,7 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
                                             <div className="bg-gray-50 dark:bg-zinc-800/80 rounded-2xl p-5 border border-gray-200 dark:border-zinc-700 shadow-inner">
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                                                     <div className="flex-1">
-                                                        <label className="block text-sm text-gray-500 dark:text-zinc-400 font-bold mb-2">지불 수단 (결제 수단)</label>
+                                                        <label className="block text-sm text-gray-500 dark:text-zinc-400 font-bold mb-2">결제방법</label>
                                                         <div className="flex gap-2">
                                                             {['card', 'cash', 'transfer'].map(method => (
                                                                 <button
@@ -381,7 +376,6 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
                                                                     onClick={() => setPaymentMethod(method)}
                                                                     className={`flex-1 py-2.5 px-2 rounded-lg text-sm font-bold border-2 transition-all shadow-sm ${paymentMethod === method ? 'bg-white dark:bg-zinc-900 border-gray-900 dark:border-zinc-400 text-gray-900 dark:text-white shadow-md transform -translate-y-0.5' : 'bg-transparent border-gray-200 dark:border-zinc-700 text-gray-500 hover:border-gray-300'}`}
                                                                 >
-                                                                    {method === 'card' ? '💳 ' : method === 'cash' ? '💵 ' : '🏦 '}
                                                                     {method === 'card' ? '카드' : method === 'cash' ? '현금' : '계좌이체'}
                                                                 </button>
                                                             ))}
