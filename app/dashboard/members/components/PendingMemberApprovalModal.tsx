@@ -15,6 +15,15 @@ interface PendingMember {
     gender: string
     pending_stripe: number | null
     pending_promotion_date: string | null
+    birth_date?: string | null
+    address?: string | null
+    school?: string | null
+    school_type?: string | null
+    grade_number?: number | null
+    guardian_phone?: string | null
+    access_code?: string | null
+    start_date?: string | null
+    joined_at?: string | null
 }
 
 interface Props {
@@ -28,8 +37,6 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Profile Edit State
-    const [formName, setFormName] = useState(member.name || '')
-    const [formPhone, setFormPhone] = useState(member.phone || '')
     const [formBelt, setFormBelt] = useState(member.belt || 'White')
     const [formStripe, setFormStripe] = useState(member.pending_stripe ?? 0)
     const [formPromotionDate, setFormPromotionDate] = useState(member.pending_promotion_date || new Date().toISOString().split('T')[0])
@@ -188,18 +195,31 @@ export default function PendingMemberApprovalModal({ member, onClose, onSuccess 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-8 min-h-0 hidden-scrollbar">
                     
+                    {/* Section 0: 회원 가입 제출 정보 (읽기 전용) */}
+                    <section className="bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4">
+                        <h3 className="text-sm font-bold text-gray-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
+                            <span>📝 회원이 제출한 가입 정보 (비밀번호 제외)</span>
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4 text-sm mt-3">
+                            <div><span className="text-gray-500 block text-xs mb-0.5">이름/성별</span><span className="font-bold text-gray-900 dark:text-zinc-100">{member.name} <span className="text-gray-400 font-normal">({member.gender === 'male' ? '남성' : member.gender === 'female' ? '여성' : member.gender || '미입력'})</span></span></div>
+                            <div><span className="text-gray-500 block text-xs mb-0.5">연락처</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.phone || '미입력'}</span></div>
+                            <div><span className="text-gray-500 block text-xs mb-0.5">생년월일</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.birth_date || '미입력'}</span></div>
+                            
+                            <div><span className="text-gray-500 block text-xs mb-0.5">출석체크 번호</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.access_code || '미입력'}</span></div>
+                            <div><span className="text-gray-500 block text-xs mb-0.5">보호자 연락처</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.guardian_phone || '미입력'}</span></div>
+                            <div><span className="text-gray-500 block text-xs mb-0.5">학교/학년</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.school_type !== '일반' ? `${member.school || ''} ${member.school_type} ${member.grade_number ? member.grade_number+'학년' : ''}`.trim() : (member.school || '미입력')}</span></div>
+                            
+                            <div className="col-span-2 sm:col-span-3"><span className="text-gray-500 block text-xs mb-0.5">거주지 주소</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.address || '미입력'}</span></div>
+                            
+                            <div><span className="text-gray-500 block text-xs mb-0.5">주짓수 입문일</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.start_date ? member.start_date.split('T')[0] : '미입력'}</span></div>
+                            <div className="col-span-2"><span className="text-gray-500 block text-xs mb-0.5">가입 신청일</span><span className="font-medium text-gray-900 dark:text-zinc-100">{member.joined_at ? new Date(member.joined_at).toLocaleDateString() : '미입력'}</span></div>
+                        </div>
+                    </section>
+
                     {/* Section 1: Profile Info Edit */}
                     <section>
-                        <h3 className="text-sm font-bold text-gray-500 tracking-wider mb-4">회원 기본 정보 확인 & 수정</h3>
+                        <h3 className="text-sm font-bold text-gray-500 tracking-wider mb-4">현재 등급(벨트) 정보 설정</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">이름</label>
-                                <input disabled value={formName} onChange={e => setFormName(e.target.value)} className="w-full border-gray-300 dark:border-zinc-700 rounded-md shadow-sm bg-gray-50 dark:bg-zinc-900 text-gray-500" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">연락처</label>
-                                <input disabled value={formPhone} onChange={e => setFormPhone(e.target.value)} className="w-full border-gray-300 dark:border-zinc-700 rounded-md shadow-sm bg-gray-50 dark:bg-zinc-900 text-gray-500" />
-                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">벨트 등급</label>
                                 <select 

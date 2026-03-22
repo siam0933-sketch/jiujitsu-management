@@ -18,6 +18,11 @@ interface PendingMember {
     guardian_phone: string | null
     pending_stripe: number | null
     pending_promotion_date: string | null
+    school_type?: string | null
+    grade_number?: number | null
+    access_code?: string | null
+    start_date?: string | null
+    joined_at?: string | null
 }
 
 interface Props {
@@ -137,7 +142,7 @@ export default function PendingMembersList({ members, onApprove, onReject }: Pro
                                 disabled={!!loadingId}
                                 className="flex-1 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                             >
-                                가입 승인
+                                정보 확인
                             </button>
                         </div>
                     </div>
