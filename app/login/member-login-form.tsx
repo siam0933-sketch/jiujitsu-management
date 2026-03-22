@@ -140,9 +140,7 @@ export default function MemberLoginForm() {
                     수강생 로그인
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-zinc-400">
-                    {step === 'SEARCH'
-                        ? '먼저, 접속하실 도장 이름을 검색해주세요.'
-                        : `${selectedGym?.name} - 등록하신 이름과 비밀번호를 입력하세요.`}
+                    접속하실 도장을 선택하고 로그인 정보를 입력해주세요.
                 </p>
             </div>
 
@@ -152,11 +150,14 @@ export default function MemberLoginForm() {
                 </div>
             )}
 
-            {/* STEP 1: RESTAURANT (GYM) SEARCH */}
-            {step === 'SEARCH' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col w-full gap-4">
-                    <div className="relative">
-                        <label className="block text-md font-medium text-gray-800 dark:text-zinc-200 mb-2">도장 이름 검색</label>
+            <form
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col w-full gap-4 text-foreground relative"
+                onSubmit={handleSubmit}
+            >
+                {/* 1. 도장 선택 */}
+                <div>
+                    <label className="block text-md font-medium text-gray-800 dark:text-zinc-200 mb-2">도장 선택</label>
+                    {!selectedGym ? (
                         <div className="relative">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
@@ -167,105 +168,106 @@ export default function MemberLoginForm() {
                                 placeholder="예: 트라이스톤"
                                 autoFocus
                             />
+                            {/* Search results */}
+                            {(searchLoading || gymResults.length > 0) && (
+                                <div className="absolute z-10 w-full mt-2 border border-gray-200 rounded-lg shadow-xl bg-white overflow-hidden max-h-60 overflow-y-auto">
+                                    {searchLoading && (
+                                        <div className="px-4 py-3 text-sm text-gray-500 text-center">검색 중...</div>
+                                    )}
+                                    {!searchLoading && gymResults.length === 0 && gymQuery.trim() && (
+                                        <div className="px-4 py-3 text-sm text-gray-500 text-center">검색 결과가 없습니다.</div>
+                                    )}
+                                    {gymResults.map((gym) => (
+                                        <button
+                                            key={gym.id}
+                                            type="button"
+                                            onClick={() => handleSelectGym(gym)}
+                                            className="w-full text-left px-5 py-3 text-base text-gray-800 hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors font-medium"
+                                        >
+                                            {gym.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-
-                        {/* Search results */}
-                        {(searchLoading || gymResults.length > 0) && (
-                            <div className="absolute z-10 w-full mt-2 border border-gray-200 rounded-lg shadow-xl bg-white overflow-hidden max-h-60 overflow-y-auto">
-                                {searchLoading && (
-                                    <div className="px-4 py-3 text-sm text-gray-500 text-center">검색 중...</div>
-                                )}
-                                {!searchLoading && gymResults.length === 0 && gymQuery.trim() && (
-                                    <div className="px-4 py-3 text-sm text-gray-500 text-center">검색 결과가 없습니다.</div>
-                                )}
-                                {gymResults.map((gym) => (
-                                    <button
-                                        key={gym.id}
-                                        type="button"
-                                        onClick={() => handleSelectGym(gym)}
-                                        className="w-full text-left px-5 py-3 text-base text-gray-800 hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors font-medium"
-                                    >
-                                        {gym.name}
-                                    </button>
-                                ))}
+                    ) : (
+                        <div className="flex items-center justify-between p-4 border border-blue-500 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                            <div className="flex items-center gap-2">
+                                <Store className="h-5 w-5 text-blue-600" />
+                                <span className="font-bold text-blue-900 dark:text-blue-100 text-lg">{selectedGym.name}</span>
                             </div>
-                        )}
-                    </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    localStorage.removeItem('preferred_gym_id')
+                                    localStorage.removeItem('preferred_gym_name')
+                                    setSelectedGym(null)
+                                    setGymQuery('')     
+                                }}
+                                className="text-sm font-medium text-blue-600 hover:text-blue-800 px-3 py-1 bg-white dark:bg-zinc-800 rounded-md shadow-sm border border-blue-200 dark:border-blue-800"
+                            >
+                                검색 변경
+                            </button>
+                        </div>
+                    )}
+                </div>
 
+                {/* 2. 로그인 정보 */}
+                <div>
+                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200 block mb-2" htmlFor="name">이름 (아이디)</label>
+                    <input
+                        className="w-full rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
+                        name="name" placeholder="본인 이름" required
+                    />
+                </div>
+
+                <div>
+                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200 block mb-2" htmlFor="password">비밀번호</label>
+                    <input
+                        className="w-full rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
+                        type="password" name="password" placeholder="비밀번호 입력" required
+                    />
+                </div>
+
+                <div className="flex flex-col gap-4 mt-2">
+                    <button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl px-4 py-4 disabled:opacity-50 transition-all shadow-lg shadow-blue-200 text-lg"
+                        disabled={loading || !selectedGym}
+                    >
+                        {loading ? '로그인 중...' : '로그인 하기'}
+                    </button>
+                    
                     <Link
                         href="/"
-                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 mt-4 transition-all text-lg"
+                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 transition-all text-lg"
                     >
                         첫 화면으로
                     </Link>
                 </div>
-            )}
 
-            {/* STEP 2: CREDENTIALS */}
-            {step === 'LOGIN' && selectedGym && (
-                <form
-                    className="animate-in fade-in slide-in-from-right-4 duration-500 flex flex-col w-full justify-center gap-2 text-foreground relative"
-                    onSubmit={handleSubmit}
-                >
-                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="name">이름</label>
-                    <input
-                        className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-6 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
-                        name="name" placeholder="본인 이름" required autoFocus
-                    />
-
-                    <label className="text-md font-medium text-gray-800 dark:text-zinc-200" htmlFor="password">비밀번호</label>
-                    <input
-                        className="rounded-md px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 mb-8 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-black dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-lg appearance-none"
-                        type="password" name="password" placeholder="비밀번호 입력" required
-                    />
-
-                    <div className="flex items-center justify-end">
-                        <div className="text-sm">
-                            <button 
-                                type="button" 
-                                onClick={() => alert('비밀번호를 분실하신 경우, 소속 체육관 관장님(관리자)께 비밀번호 초기화를 문의해 주세요.')}
-                                className="font-medium text-blue-600 hover:text-blue-500"
-                            >
-                                비밀번호를 잊으셨나요?
-                            </button>
-                        </div>
-                    </div>
-
-                    <button
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl px-4 py-4 mb-2 disabled:opacity-50 transition-all shadow-lg shadow-blue-200 text-lg mt-2"
-                        disabled={loading}
+                <div className="flex items-center justify-center mt-2">
+                    <button 
+                        type="button" 
+                        onClick={() => alert('비밀번호를 분실하신 경우, 소속 체육관 관장님(관리자)께 비밀번호 초기화를 문의해 주세요.')}
+                        className="text-sm font-medium text-gray-500 hover:text-blue-600 pt-2"
                     >
-                        {loading ? '로그인 중...' : '로그인 하기'}
+                        비밀번호를 잊으셨나요?
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            // Clear from localStorage
-                            localStorage.removeItem('preferred_gym_id')
-                            localStorage.removeItem('preferred_gym_name')
-                            setStep('SEARCH');
-                            setSelectedGym(null);
-                        }}
-                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 mb-2 transition-all text-lg"
-                    >
-                        도장 다시 선택하기
-                    </button>
+                </div>
 
-                    <div className="text-center text-sm mt-5 flex flex-col gap-4">
-                        <div>
-                            <p className="text-gray-400 text-xs md:text-sm">
-                                * 회원가입은 관장님이 보내주신 <b>초대 링크</b>를 통해서만 가능합니다.<br />
-                                비밀번호를 분실하신 경우 관장님께 문의해주세요.
-                            </p>
-                        </div>
-                        <div>
-                            <Link href="/admin/login" className="text-sm md:text-base font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-4 transition-colors">
-                                관리자/관장 지도진 로그인으로 이동 &rarr;
-                            </Link>
-                        </div>
+                <div className="text-center text-sm mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50 flex flex-col gap-4">
+                    <div>
+                        <p className="text-gray-400 text-xs md:text-sm">
+                            * 회원가입은 관장님이 보내주신 <b>초대 링크</b>를 통해서만 가능합니다.
+                        </p>
                     </div>
-                </form>
-            )}
+                    <div>
+                        <Link href="/admin/login" className="text-sm md:text-base font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-4 transition-colors">
+                            관리자/관장 지도진 로그인으로 이동 &rarr;
+                        </Link>
+                    </div>
+                </div>
+            </form>
 
             {/* ─── 비밀번호 변경 모달 ─── */}
             {showPasswordModal && (
