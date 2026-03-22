@@ -3,8 +3,14 @@ import { redirect } from 'next/navigation'
 
 import AdminLoginForm from './admin-login-form'
 
-export default async function AdminLoginPage() {
+export default async function AdminLoginPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ next?: string }>
+}) {
     const supabase = await createClient()
+    const resolvedParams = await searchParams
+    const nextUrl = resolvedParams?.next
 
     const {
         data: { user },
@@ -17,7 +23,9 @@ export default async function AdminLoginPage() {
             .eq('id', user.id)
             .single()
 
-        if (profile?.role === 'super_admin') {
+        if (profile?.role === 'gym_master' && nextUrl && nextUrl.startsWith('/')) {
+            return redirect(nextUrl)
+        } else if (profile?.role === 'super_admin') {
             return redirect('/super-admin')
         } else if (profile?.role === 'gym_member') {
             return redirect('/portal')
@@ -29,7 +37,7 @@ export default async function AdminLoginPage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center py-2">
             <div className="flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-                <AdminLoginForm />
+                <AdminLoginForm nextUrl={nextUrl} />
             </div>
         </div>
     )

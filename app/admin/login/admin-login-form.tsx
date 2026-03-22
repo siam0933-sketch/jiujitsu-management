@@ -7,7 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { sendAdminPasswordResetEmail } from './reset-action'
 
-export default function LoginForm() {
+export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
     const router = useRouter()
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
@@ -56,6 +56,8 @@ export default function LoginForm() {
                 router.refresh()
                 if (data.redirectUrl) {
                     router.push(data.redirectUrl)
+                } else if (nextUrl && nextUrl.startsWith('/')) {
+                    router.push(nextUrl)
                 } else {
                     router.push('/dashboard')
                 }

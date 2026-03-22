@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation'
 import { getPendingAttendanceCount } from './attendance/actions'
 import MobileMenuCloser from './components/MobileMenuCloser'
 
+import { headers } from 'next/headers'
+
 export default async function DashboardLayout({
     children,
 }: {
@@ -18,7 +20,9 @@ export default async function DashboardLayout({
     } = await supabase.auth.getUser()
 
     if (!user) {
-        return redirect('/login')
+        const headersList = await headers()
+        const pathname = headersList.get('x-pathname') || '/dashboard'
+        return redirect(`/admin/login?next=${encodeURIComponent(pathname)}`)
     }
 
     // Fetch additional info for Sidebar
