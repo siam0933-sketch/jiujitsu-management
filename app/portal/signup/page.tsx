@@ -333,6 +333,13 @@ export default function MemberSignupPage() {
                                     className={inputCls} placeholder="01012345678 (숫자만)" maxLength={11} />
                             </div>
 
+                            {/* 주소 */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">거주지 주소 (선택)</label>
+                                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)}
+                                    className={inputCls} placeholder="예: 서울시 강남구 테헤란로 123 (상세주소 포함)" />
+                            </div>
+
                             {/* 6. 비밀번호 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">로그인 비밀번호 *</label>
