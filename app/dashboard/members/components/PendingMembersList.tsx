@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { displayBeltName } from '../constants'
+import PendingMemberApprovalModal from './PendingMemberApprovalModal'
 
 interface PendingMember {
     id: string
@@ -25,21 +27,14 @@ interface Props {
 }
 
 export default function PendingMembersList({ members, onApprove, onReject }: Props) {
+    const router = useRouter()
     const [loadingId, setLoadingId] = useState<string | null>(null)
+    const [approvingMember, setApprovingMember] = useState<PendingMember | null>(null)
 
     if (!members || members.length === 0) return null
 
-    const handleApprove = async (member: PendingMember) => {
-        if (!confirm(`${member.name} 회원의 가입을 승인하시겠습니까?`)) return
-        setLoadingId(member.id)
-        const res = await onApprove(
-            member.id,
-            member.belt || 'White',
-            member.pending_stripe ?? 0,
-            member.pending_promotion_date || null
-        )
-        setLoadingId(null)
-        if (res.error) alert(res.error)
+    const handleApprove = (member: PendingMember) => {
+        setApprovingMember(member)
     }
 
     const handleReject = async (member: PendingMember) => {
@@ -52,6 +47,16 @@ export default function PendingMembersList({ members, onApprove, onReject }: Pro
 
     return (
         <div className="mb-8">
+            {approvingMember && (
+                <PendingMemberApprovalModal
+                    member={approvingMember}
+                    onClose={() => setApprovingMember(null)}
+                    onSuccess={() => {
+                        setApprovingMember(null)
+                        router.refresh()
+                    }}
+                />
+            )}
             <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
                 승인 대기 중인 신규 회원
                 <span className="bg-red-100 text-red-600 text-sm py-0.5 px-2.5 rounded-full font-bold">
