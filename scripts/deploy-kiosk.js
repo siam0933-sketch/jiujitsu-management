@@ -1,0 +1,140 @@
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const { createClient } = require('@supabase/supabase-js');
+
+// 1. Get tokens
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const REPO = 'siam0933-sketch/jiujitsu-management'; // Hardcoded for this project
+const WORKFLOW_ID = 'build-android.yml';
+
+if (!GITHUB_TOKEN) {
+  console.error('Error: GITHUB_TOKEN is not set in .env.local');
+  process.exit(1);
+}
+
+// Helper for GitHub API
+async function githubReq(endpoint, options = {}) {
+  const url = `https://api.github.com/repos/${REPO}${endpoint}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github.v3+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...options.headers,
+    },
+  });
+  if (!res.ok) {
+     const text = await res.text();
+     throw new Error(`GitHub API Error (${res.status}): ${text}`);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+async function run() {
+  console.log('🚀 [1/5] GitHub 서버에 키오스크 앱(APK) 최신 빌드를 요청합니다...');
+  
+  // 1. Trigger workflow
+  await githubReq(`/actions/workflows/${WORKFLOW_ID}/dispatches`, {
+    method: 'POST',
+    body: JSON.stringify({ ref: 'main' }),
+  });
+  
+  console.log('⏳ [2/5] 빌드가 시작되었습니다. 깃허브 서버에서 완료될 때까지 대기합니다. (보통 3~5분 소요)...');
+  
+  // Wait a bit for the run to show up
+  await new Promise(r => setTimeout(r, 10000));
+  
+  // 2. Poll for the latest run
+  let runId = null;
+  const runsRes = await githubReq(`/actions/workflows/${WORKFLOW_ID}/runs?per_page=1`);
+  if (runsRes && runsRes.workflow_runs && runsRes.workflow_runs.length > 0) {
+     runId = runsRes.workflow_runs[0].id;
+  }
+  
+  if (!runId) throw new Error('방금 시작된 빌드를 찾을 수 없습니다.');
+  
+  console.log(`✅ 빌드 작업(#${runId}) 추적 시작! 주기적으로 상태를 확인합니다...`);
+  
+  // Poll until complete
+  let status = 'in_progress';
+  let conclusion = null;
+  while (status !== 'completed') {
+     await new Promise(r => setTimeout(r, 15000)); // check every 15s
+     const runDetail = await githubReq(`/actions/runs/${runId}`);
+     status = runDetail.status;
+     conclusion = runDetail.conclusion;
+     process.stdout.write('.');
+  }
+  console.log('');
+  
+  if (conclusion !== 'success') {
+      throw new Error(`빌드 실패. 깃허브(Actions)에서 원인을 확인하세요. 사유: ${conclusion}`);
+  }
+  
+  console.log('✅ [3/5] 빌드가 성공적으로 완료되었습니다! 결과물(APK)을 다운로드합니다...');
+  
+  // 3. Get artifacts
+  const artifactsRes = await githubReq(`/actions/runs/${runId}/artifacts`);
+  const artifact = artifactsRes.artifacts.find(a => a.name === 'Kiosk-APK');
+  
+  if (!artifact) throw new Error('Kiosk-APK 결과물을 찾을 수 없습니다.');
+  
+  // 4. Download artifact (Requires handling redirect)
+  const downloadUrl = artifact.archive_download_url;
+  const downloadRes = await fetch(downloadUrl, {
+    redirect: 'follow',
+    headers: {
+      Authorization: `Bearer ${GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github.v3+json',
+    }
+  });
+  
+  if (!downloadRes.ok) throw new Error('결과물 다운로드 실패');
+  
+  const buffer = await downloadRes.arrayBuffer();
+  fs.writeFileSync('kiosk-apk.zip', Buffer.from(buffer));
+  
+  console.log('📦 [4/5] 압축 해제 중...');
+  try {
+     execSync('tar -xf kiosk-apk.zip');
+  } catch (e) {
+     console.error('압축 해제 중 오류가 발생했습니다.', e);
+  }
+  
+  if (!fs.existsSync('app-debug.apk')) {
+     throw new Error('압축 속에서 app-debug.apk 파일을 찾지 못했습니다.');
+  }
+  
+  console.log('☁️ [5/5] Supabase Storage [KIOSK] 버킷에 업로드합니다...');
+  // 6. Upload to Supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  
+  const fileData = fs.readFileSync('app-debug.apk');
+  const { error: uploadError } = await supabase.storage
+      .from('KIOSK')
+      .upload('app-debug.apk', fileData, {
+          contentType: 'application/vnd.android.package-archive',
+          upsert: true // 덮어쓰기!
+      });
+      
+  if (uploadError) throw uploadError;
+  
+  console.log('🧹 임시 파일 청소 중...');
+  try {
+     fs.unlinkSync('kiosk-apk.zip');
+     fs.unlinkSync('app-debug.apk');
+  } catch (e) {}
+  
+  console.log('\n🎉 모든 작업이 성공적으로 완료되었습니다!!');
+  console.log('👉 이제 대시보드의 [키오스크 앱(.apk) 다운로드] 버튼을 누르면 가장 최신 버전이 완전히 다운로드됩니다.');
+}
+
+run().catch(e => {
+  console.error('\n❌ 작업 중 에러 발생:', e.message);
+  process.exit(1);
+});
