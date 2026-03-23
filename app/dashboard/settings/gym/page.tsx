@@ -167,7 +167,7 @@ export default function GymSettingsPage() {
                         </svg>
                         키오스크 모드 실행하기 (새 창)
                     </a>
-                    <DownloadKioskApkButton supabaseUrl={process.env.NEXT_PUBLIC_SUPABASE_URL || ''} />
+                    <DownloadKioskApkButton />
                 </div>
             </div>
         </div>
