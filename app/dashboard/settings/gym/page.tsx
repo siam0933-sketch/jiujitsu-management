@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { getGymSettings, updateGymSettings } from './actions'
 import { QrCode } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import DownloadKioskApkButton from './components/DownloadKioskApkButton'
 
 export default function GymSettingsPage() {
     const [isLoading, setIsLoading] = useState(true)
@@ -154,7 +155,7 @@ export default function GymSettingsPage() {
                 <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
                     도장 입구에 거치용 공용 PC 또는 태블릿을 설치하여, 회원 본인이 직접 뒷번호 4자리를 입력하고 출석체크할 수 있도록 돕는 전체화면 전용 모드입니다.
                 </p>
-                <div className="flex justify-start">
+                <div className="flex flex-col sm:flex-row gap-4 justify-start">
                     <a
                         href="/dashboard/attendance/kiosk"
                         target="_blank"
@@ -166,6 +167,7 @@ export default function GymSettingsPage() {
                         </svg>
                         키오스크 모드 실행하기 (새 창)
                     </a>
+                    <DownloadKioskApkButton supabaseUrl={process.env.NEXT_PUBLIC_SUPABASE_URL || ''} />
                 </div>
             </div>
         </div>

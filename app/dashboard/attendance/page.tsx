@@ -2,7 +2,6 @@
 import { getSchedules } from './actions_schedule'
 import { getActiveMembers, getPendingAttendanceCount } from './actions'
 import ClassScheduleBoard from './components/ClassScheduleBoard'
-import DownloadKioskApkButton from './components/DownloadKioskApkButton'
 
 export const dynamic = 'force-dynamic' // Ensure no caching
 
@@ -19,7 +18,7 @@ export default async function AttendancePage() {
 
     return (
         <div className="min-h-[calc(100vh-100px)] p-2 sm:p-6 max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-200">출석부</h1>
                     {pendingCount > 0 && (
@@ -27,9 +26,6 @@ export default async function AttendancePage() {
                             {pendingCount}
                         </span>
                     )}
-                </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <DownloadKioskApkButton supabaseUrl={supabaseUrl} />
                 </div>
             </div>
             <ClassScheduleBoard
