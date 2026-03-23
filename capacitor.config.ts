@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'My jiu-jitsu Kiosk',
   webDir: 'public',
   server: {
-    url: 'https://jiujitsu-management.vercel.app',
+    url: 'https://jiujitsu-management.vercel.app/kiosk/login',
     cleartext: true
   }
 };

@@ -22,6 +22,11 @@ export default async function DashboardLayout({
     if (!user) {
         const headersList = await headers()
         const pathname = headersList.get('x-pathname') || '/dashboard'
+        
+        if (pathname === '/dashboard/attendance/kiosk') {
+            return redirect('/kiosk/login')
+        }
+        
         return redirect(`/admin/login?next=${encodeURIComponent(pathname)}`)
     }
 
