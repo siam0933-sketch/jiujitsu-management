@@ -827,7 +827,8 @@ export async function sendSmsInvitation(phone: string) {
         ? 'https://jiujitsu-management.vercel.app'
         : baseUrl
 
-    const invitationUrl = `${finalBaseUrl}/portal/signup?code=${gym.invitation_code}`
+    const domain = process.env.NEXT_PUBLIC_SITE_URL || 'https://jiujitsu-management.vercel.app'
+    const invitationUrl = `${domain}/login?code=${gym.invitation_code}`
 
     // Construct the SMS message
     const message = `[${gym.name}] 체육관 초대장\n\n안녕하세요! 아래 링크를 눌러 체육관 관원 가입을 진행해주세요.\n\n▶ 가입 링크: ${invitationUrl}\n\n감사합니다.`
@@ -883,10 +884,8 @@ export async function getInvitationUrl() {
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jiujitsu-management.vercel.app'
     const finalBaseUrl = baseUrl.includes('localhost') && process.env.NODE_ENV === 'production'
-        ? 'https://jiujitsu-management.vercel.app'
-        : baseUrl
-
-    const invitationUrl = `${finalBaseUrl}/portal/signup?code=${gym.invitation_code}`
+    const domain = process.env.NEXT_PUBLIC_SITE_URL || 'https://jiujitsu-management.vercel.app'
+    const invitationUrl = `${domain}/login?code=${gym.invitation_code}`
 
     // 사용자 요청사항: 앞뒤 안내 문구는 제외하고 오직 URL(초대 링크)만 복사되도록 변경
     const copyText = invitationUrl

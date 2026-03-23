@@ -1,17 +1,22 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { User, Search, Store } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { changeMemberPassword } from './change-password-action'
 import { searchGymsForLogin } from './actions'
+import { lookupGymByCode, lookupGymById } from '../portal/signup/actions'
 
 const PASSWORD_POLICY = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}/
 
 export default function MemberLoginForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const codeParam = searchParams?.get('code') || ''
+    const gymIdParam = searchParams?.get('gym_id') || ''
+
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [step, setStep] = useState<'SEARCH' | 'LOGIN'>('SEARCH')
@@ -23,15 +28,33 @@ export default function MemberLoginForm() {
     const [selectedGym, setSelectedGym] = useState<{ id: string, name: string } | null>(null)
     const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
-    // Check localStorage on mount for cached gym
+    // Check localStorage and searchParams on mount
     useEffect(() => {
-        const cachedId = localStorage.getItem('preferred_gym_id')
-        const cachedName = localStorage.getItem('preferred_gym_name')
-        if (cachedId && cachedName) {
-            setSelectedGym({ id: cachedId, name: cachedName })
-            setStep('LOGIN')
+        const initGymFromParams = async () => {
+            if (codeParam) {
+                const res = await lookupGymByCode(codeParam)
+                if (res.gym) {
+                    handleSelectGym({ id: res.gym.id, name: res.gym.name })
+                    return
+                }
+            } else if (gymIdParam) {
+                const res = await lookupGymById(gymIdParam)
+                if (res.gym) {
+                    handleSelectGym({ id: res.gym.id, name: res.gym.name })
+                    return
+                }
+            }
+            
+            // Fallback to local storage if no params or invalid params
+            const cachedId = localStorage.getItem('preferred_gym_id')
+            const cachedName = localStorage.getItem('preferred_gym_name')
+            if (cachedId && cachedName) {
+                setSelectedGym({ id: cachedId, name: cachedName })
+                setStep('LOGIN')
+            }
         }
-    }, [])
+        initGymFromParams()
+    }, [codeParam, gymIdParam])
 
     // Weak-password modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -256,11 +279,12 @@ export default function MemberLoginForm() {
                 </div>
 
                 <div className="text-center text-sm mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50 flex flex-col gap-4">
-                    <div>
-                        <p className="text-gray-400 text-xs md:text-sm">
-                            * 회원가입은 관장님이 보내주신 <b>초대 링크</b>를 통해서만 가능합니다.
-                        </p>
-                    </div>
+                    <Link
+                        href={codeParam ? `/portal/signup?code=${codeParam}` : (gymIdParam ? `/portal/signup?gym_id=${gymIdParam}` : '/portal/signup')}
+                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-blue-600 dark:text-blue-400 font-bold rounded-xl px-4 py-4 transition-all text-lg border border-blue-100 dark:border-blue-900/30"
+                    >
+                        신규 회원(관원) 가입하기
+                    </Link>
                 </div>
             </form>
 

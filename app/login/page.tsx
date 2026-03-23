@@ -4,6 +4,10 @@ import { redirect } from 'next/navigation'
 
 import MemberLoginForm from './member-login-form'
 
+import { Suspense } from 'react'
+
+export const dynamic = 'force-dynamic'
+
 export default async function LoginPage() {
     const supabase = await createClient()
 
@@ -30,7 +34,9 @@ export default async function LoginPage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center py-2">
             <div className="flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-                <MemberLoginForm />
+                <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                    <MemberLoginForm />
+                </Suspense>
             </div>
         </div>
     )
