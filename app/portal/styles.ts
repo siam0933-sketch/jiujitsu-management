@@ -1,6 +1,6 @@
 export const PORTAL_STYLES = {
     // Layout & Container
-    PAGE_WRAPPER: "flex flex-col min-h-screen bg-gray-50 dark:bg-black pb-20", // pb-20 for bottom nav
+    PAGE_WRAPPER: "flex flex-col min-h-screen bg-gray-50 dark:bg-black pb-[calc(5rem+env(safe-area-inset-bottom))] ", // pb accounts for bottom nav + safe area
     CONTAINER: "w-full max-w-md mx-auto px-4 pt-6",
 
     // Text Styles
@@ -17,7 +17,7 @@ export const PORTAL_STYLES = {
     BUTTON_SECONDARY: "w-full py-3 px-4 bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-xl border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors active:scale-95",
 
     // Navigation
-    NAV_BAR: "fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 px-6 py-2 flex justify-between items-center z-50 safe-area-bottom",
+    NAV_BAR: "fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 px-6 pt-3 pb-[max(1.2rem,env(safe-area-inset-bottom))] flex justify-between items-center z-50",
     NAV_ITEM: "flex flex-col items-center justify-center p-2 rounded-lg transition-colors",
     NAV_ITEM_ACTIVE: "text-primary",
     NAV_ITEM_INACTIVE: "text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300",
