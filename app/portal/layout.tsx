@@ -25,12 +25,16 @@ async function getPortalContext() {
             .eq('id', session.gymId)
             .single()
 
-        // Fetch Member Payment Info
+        // Fetch Member Info
         const { data: member } = await supabase
             .from('gym_members')
-            .select('payment_end_date, payment_due_day')
+            .select('payment_end_date, payment_due_day, status')
             .eq('id', session.memberId)
             .single()
+
+        if (!member || (member.status !== 'active' && member.status !== 'paused')) {
+            return { error: 'invalid_session' }
+        }
 
         let hasUnpaidDues = false
         if (member) {
@@ -69,11 +73,15 @@ export default async function PortalLayout({
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('member_session')
 
-    if (!sessionCookie && !isPublicUrl) {
+    if (!sessionCookie && !isPublicUrl && currentPath !== '/portal/force-logout') {
         redirect('/login')
     }
 
     const context = await getPortalContext()
+
+    if (context && 'error' in context && context.error === 'invalid_session' && !isPublicUrl) {
+        redirect('/portal/force-logout')
+    }
 
     return (
         <div className={PORTAL_STYLES.PAGE_WRAPPER}>
