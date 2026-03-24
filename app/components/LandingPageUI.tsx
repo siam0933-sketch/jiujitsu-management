@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Instagram, Mail } from 'lucide-react'
+import DownloadMemberApkButton from './DownloadMemberApkButton'
 
 export default function LandingPageUI() {
   const [isOpen, setIsOpen] = useState(false)
@@ -54,10 +55,18 @@ export default function LandingPageUI() {
       <div className="w-full border-b border-white/20 absolute top-[88px] left-0 z-40"></div>
 
       {/* Main App Description - visible when menu is closed */}
-      <main className={`flex-1 flex items-center justify-center transition-opacity duration-500 delay-100 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        <h1 className="text-4xl md:text-6xl font-light tracking-widest animate-in fade-in zoom-in duration-1000">
-          앱 설 명
-        </h1>
+      <main className={`flex-1 flex flex-col items-center justify-center px-6 transition-opacity duration-500 delay-100 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div className="flex flex-col items-center max-w-4xl text-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-snug text-white drop-shadow-md">
+            주짓수 도장 전용 시스템으로<br className="hidden md:block"/> 완벽한 도장운영.
+          </h1>
+
+          <div className="pt-6 flex flex-wrap justify-center gap-4 text-lg md:text-2xl font-bold text-white drop-shadow-md">
+            <span className="py-3 px-6 border-2 border-white/30 rounded-full bg-white/10 hover:bg-white/20 transition-colors">#승급관리</span>
+            <span className="py-3 px-6 border-2 border-white/30 rounded-full bg-white/10 hover:bg-white/20 transition-colors">#키오스크 출석</span>
+            <span className="py-3 px-6 border-2 border-white/30 rounded-full bg-white/10 hover:bg-white/20 transition-colors">#회원전용앱</span>
+          </div>
+        </div>
       </main>
 
       {/* Full Screen Overlay Menu */}
@@ -78,8 +87,8 @@ export default function LandingPageUI() {
             <div className={`flex flex-col gap-6 w-full max-w-[200px] text-center md:text-left transition-all duration-500 delay-200 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               <h2 className="text-4xl md:text-5xl font-medium mb-6 tracking-wide">관장</h2>
               <ul className="flex flex-col gap-5">
-                <li><Link href="/signup" onClick={() => setIsOpen(false)} className="text-xl md:text-2xl font-light text-white/50 hover:text-white transition-colors">회원가입</Link></li>
-                <li><Link href="/admin/login" onClick={() => setIsOpen(false)} className="text-xl md:text-2xl font-light text-white/50 hover:text-white transition-colors">로 그 인</Link></li>
+                <li><Link href="/signup" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">회원가입</Link></li>
+                <li><Link href="/admin/login" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">로 그 인</Link></li>
               </ul>
             </div>
 
@@ -87,9 +96,15 @@ export default function LandingPageUI() {
             <div className={`flex flex-col gap-6 w-full max-w-[200px] text-center md:text-left transition-all duration-500 delay-300 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               <h2 className="text-4xl md:text-5xl font-medium mb-6 tracking-wide">수련생</h2>
               <ul className="flex flex-col gap-5">
-                <li><Link href="/portal/signup" onClick={() => setIsOpen(false)} className="text-xl md:text-2xl font-light text-white/50 hover:text-white transition-colors">회원가입</Link></li>
-                <li><Link href="/login" onClick={() => setIsOpen(false)} className="text-xl md:text-2xl font-light text-white/50 hover:text-white transition-colors">로 그 인</Link></li>
-                <li><Link href="/member-app" onClick={() => setIsOpen(false)} className="text-xl md:text-2xl font-light text-white/50 hover:text-white transition-colors">앱 다운로드</Link></li>
+                <li><Link href="/portal/signup" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">회원가입</Link></li>
+                <li><Link href="/login" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">로 그 인</Link></li>
+                <li>
+                  <DownloadMemberApkButton 
+                    buttonText="앱 다운로드"
+                    className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300"
+                    onDownloadStart={() => setIsOpen(false)}
+                  />
+                </li>
               </ul>
             </div>
 

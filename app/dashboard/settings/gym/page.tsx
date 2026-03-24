@@ -5,6 +5,7 @@ import { getGymSettings, updateGymSettings } from './actions'
 import { QrCode } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import DownloadKioskApkButton from './components/DownloadKioskApkButton'
+import DownloadMemberApkButton from '@/app/components/DownloadMemberApkButton'
 
 export default function GymSettingsPage() {
     const [isLoading, setIsLoading] = useState(true)
@@ -172,6 +173,24 @@ export default function GymSettingsPage() {
                         키오스크 모드 실행하기 (새 창)
                     </a>
                     <DownloadKioskApkButton />
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-zinc-900 shadow rounded-lg p-6 border border-gray-200 dark:border-zinc-800 mt-8">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    수강생 전용 스마트폰 앱 (APK)
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
+                    수강생들이 개인 스마트폰에 직접 설치하여 언제든 출석과 회비 결제 현황을 확인할 수 있는 전용 안드로이드 앱입니다. 아래 버튼을 통해 앱 설치 파일(.apk)을 다운로드할 수 있습니다.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-start">
+                    <DownloadMemberApkButton 
+                        buttonText="수강생용 앱(.apk) 다운로드"
+                        className="flex justify-center items-center gap-2 px-6 py-3 bg-emerald-600 font-medium text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                    />
                 </div>
             </div>
         </div>

@@ -16,10 +16,12 @@ export default function MemberLoginForm() {
     const searchParams = useSearchParams()
     const codeParam = searchParams?.get('code') || ''
     const gymIdParam = searchParams?.get('gym_id') || ''
+    const appParam = searchParams?.get('app') === 'true'
 
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [step, setStep] = useState<'SEARCH' | 'LOGIN'>('SEARCH')
+    const [isAppMode, setIsAppMode] = useState(false)
 
     // Step 1: Search Gym State
     const [gymQuery, setGymQuery] = useState('')
@@ -54,7 +56,15 @@ export default function MemberLoginForm() {
             }
         }
         initGymFromParams()
-    }, [codeParam, gymIdParam])
+
+        // Check app mode
+        if (appParam) {
+            setIsAppMode(true)
+            localStorage.setItem('is_app_mode', 'true')
+        } else if (localStorage.getItem('is_app_mode') === 'true') {
+            setIsAppMode(true)
+        }
+    }, [codeParam, gymIdParam, appParam])
 
     // Weak-password modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -157,9 +167,15 @@ export default function MemberLoginForm() {
     return (
         <div className="w-full max-w-md mx-auto px-4">
             <div className="flex flex-col items-center justify-center mb-8">
-                <Link href="/" className="hover:opacity-80 transition-opacity">
-                    <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm hover:scale-105 transition-transform" />
-                </Link>
+                {isAppMode ? (
+                    <div className="hover:opacity-80 transition-opacity select-none pointer-events-none">
+                        <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm" priority />
+                    </div>
+                ) : (
+                    <Link href="/" className="hover:opacity-80 transition-opacity">
+                        <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm hover:scale-105 transition-transform" priority />
+                    </Link>
+                )}
 
                 <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-zinc-100 mb-2">
                     수강생 로그인
