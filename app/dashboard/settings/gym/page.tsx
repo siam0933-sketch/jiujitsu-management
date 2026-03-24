@@ -30,9 +30,9 @@ export default function GymSettingsPage() {
             setAdminName(data.adminName)
             const origin = window.location.origin
             if (data.invitationCode) {
-                setInvitationUrl(`${origin}/login?code=${data.invitationCode}`)
+                setInvitationUrl(`${origin}/portal/signup?code=${data.invitationCode}`)
             } else if (data.gymId) {
-                setInvitationUrl(`${origin}/login?gym_id=${data.gymId}`)
+                setInvitationUrl(`${origin}/portal/signup?gym_id=${data.gymId}`)
             }
         }
         setIsLoading(false)
