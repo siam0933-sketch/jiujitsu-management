@@ -23,7 +23,7 @@ export default function LandingPageUI() {
     <div className="min-h-screen bg-[#0E0E12] text-white flex flex-col font-sans relative overflow-hidden">
       
       {/* Top Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 bg-transparent">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 bg-[#0E0E12]">
         <Link 
           href="/" 
           onClick={() => setIsOpen(false)}
