@@ -56,7 +56,7 @@ export default function LandingPageUI() {
       <div className="w-full border-b border-white/20 absolute top-[88px] left-0 z-40"></div>
 
       {/* Main App Description - visible when menu is closed */}
-      <main className={`flex-1 flex flex-col items-center justify-center px-6 transition-opacity duration-500 delay-100 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <main className={`flex-1 flex flex-col items-center justify-center px-6 pt-[88px] transition-opacity duration-500 delay-100 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex flex-col items-center max-w-4xl text-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-snug text-white drop-shadow-md">
             주짓수 도장 전용 시스템으로<br className="hidden md:block"/> 완벽한 도장운영.
