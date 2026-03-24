@@ -17,9 +17,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { subscription } = await req.json()
-        if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
-            return NextResponse.json({ error: 'Invalid subscription' }, { status: 400 })
+        const { subscription, nativeToken } = await req.json()
+        
+        if (!subscription?.endpoint && !nativeToken) {
+            return NextResponse.json({ error: 'Invalid subscription data' }, { status: 400 })
         }
 
         const supabase = await createAdminClient()
@@ -30,16 +31,38 @@ export async function POST(req: NextRequest) {
             .upsert(
                 {
                     member_id: memberId,
-                    endpoint: subscription.endpoint,
-                    p256dh: subscription.keys.p256dh,
-                    auth: subscription.keys.auth,
+                    endpoint: nativeToken || subscription.endpoint,
+                    p256dh: subscription?.keys?.p256dh || null,
+                    auth: subscription?.keys?.auth || null,
                 },
                 { onConflict: 'endpoint' }
             )
 
         return NextResponse.json({ success: true })
     } catch (err) {
-        console.error('[push/subscribe]', err)
+        console.error('[push/subscribe] POST error', err)
+        return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { endpoint, nativeToken } = await req.json()
+        const targetEndpoint = nativeToken || endpoint
+
+        if (!targetEndpoint) {
+            return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 })
+        }
+
+        const supabase = await createAdminClient()
+        await supabase
+            .from('member_push_subscriptions')
+            .delete()
+            .eq('endpoint', targetEndpoint)
+
+        return NextResponse.json({ success: true })
+    } catch (err) {
+        console.error('[push/subscribe] DELETE error', err)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 }

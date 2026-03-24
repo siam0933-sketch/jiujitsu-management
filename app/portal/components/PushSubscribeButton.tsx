@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Bell, BellOff, BellRing } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { PushNotifications } from '@capacitor/push-notifications'
 
 export default function PushSubscribeButton() {
     const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>('default')
@@ -9,13 +11,47 @@ export default function PushSubscribeButton() {
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
+        if (Capacitor.isNativePlatform()) {
+            PushNotifications.checkPermissions().then(result => {
+                let state = result.receive as string
+                if (state === 'prompt' || state === 'prompt-with-rationale') state = 'default'
+                setPermission(state as NotificationPermission)
+                const savedFCM = localStorage.getItem('fcm_token')
+                setIsSubscribed(!!savedFCM)
+            })
+
+            const regListener = PushNotifications.addListener('registration', async (token) => {
+                localStorage.setItem('fcm_token', token.value)
+                try {
+                    await fetch('/api/push/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nativeToken: token.value }),
+                    })
+                    setIsSubscribed(true)
+                } finally {
+                    setIsLoading(false)
+                }
+            })
+
+            const errListener = PushNotifications.addListener('registrationError', (error) => {
+                console.error('FCM Registration Error:', error)
+                setIsLoading(false)
+            })
+
+            return () => {
+                regListener.then(l => l.remove())
+                errListener.then(l => l.remove())
+            }
+        }
+
+        // --- WEB PUSH ---
         if (!('Notification' in window) || !('serviceWorker' in navigator)) {
             setPermission('unsupported')
             return
         }
         setPermission(Notification.permission)
         
-        // Check if currently subscribed
         navigator.serviceWorker.ready.then(reg => {
             reg.pushManager.getSubscription().then(sub => {
                 setIsSubscribed(!!sub)
@@ -28,19 +64,41 @@ export default function PushSubscribeButton() {
         setIsLoading(true)
 
         try {
-            // 1. Service Worker 등록
+            if (Capacitor.isNativePlatform()) {
+                let permStatus = await PushNotifications.checkPermissions()
+                
+                if (permStatus.receive === 'prompt' || permStatus.receive === 'prompt-with-rationale') {
+                    permStatus = await PushNotifications.requestPermissions()
+                }
+                
+                let state = permStatus.receive as string
+                if (state === 'prompt' || state === 'prompt-with-rationale') state = 'default'
+                setPermission(state as NotificationPermission)
+                
+                if (state !== 'granted') {
+                    setIsLoading(false)
+                    return
+                }
+                
+                await PushNotifications.register()
+                return // isLoading will be set to false by the listener
+            }
+
+            // --- WEB PUSH ---
             const reg = await navigator.serviceWorker.register('/sw.js')
             await navigator.serviceWorker.ready
 
-            // 2. 알림 권한 요청
             const perm = await Notification.requestPermission()
             setPermission(perm)
-            if (perm !== 'granted') return
+            if (perm !== 'granted') {
+                setIsLoading(false)
+                return
+            }
 
-            // 3. Push 구독 생성
             const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
             if (!vapidKey) {
                 alert('Push 설정 오류: VAPID 키가 없습니다.')
+                setIsLoading(false)
                 return
             }
 
@@ -49,7 +107,6 @@ export default function PushSubscribeButton() {
                 applicationServerKey: urlBase64ToUint8Array(vapidKey) as any,
             })
 
-            // 4. 서버에 구독 정보 전송
             await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -57,9 +114,9 @@ export default function PushSubscribeButton() {
             })
             
             setIsSubscribed(true)
+            setIsLoading(false)
         } catch (err) {
             console.error('[PushSubscribe] error:', err)
-        } finally {
             setIsLoading(false)
         }
     }
@@ -68,18 +125,31 @@ export default function PushSubscribeButton() {
         if (isLoading) return
         setIsLoading(true)
         try {
-            const reg = await navigator.serviceWorker.ready
-            const sub = await reg.pushManager.getSubscription()
-            if (sub) {
-                await sub.unsubscribe()
-                // You could optionally send a request to your server to delete the subscription record
-                await fetch('/api/push/subscribe', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ endpoint: sub.endpoint }),
-                })
+            if (Capacitor.isNativePlatform()) {
+                const token = localStorage.getItem('fcm_token')
+                if (token) {
+                    await fetch('/api/push/subscribe', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nativeToken: token }),
+                    })
+                    localStorage.removeItem('fcm_token')
+                    setIsSubscribed(false)
+                }
+            } else {
+                // --- WEB PUSH ---
+                const reg = await navigator.serviceWorker.ready
+                const sub = await reg.pushManager.getSubscription()
+                if (sub) {
+                    await sub.unsubscribe()
+                    await fetch('/api/push/subscribe', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ endpoint: sub.endpoint }),
+                    })
+                }
+                setIsSubscribed(false)
             }
-            setIsSubscribed(false)
         } catch (err) {
             console.error('[PushUnsubscribe] error:', err)
         } finally {

@@ -6,6 +6,7 @@ import { QrCode } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import DownloadKioskApkButton from './components/DownloadKioskApkButton'
 import DownloadMemberApkButton from '@/app/components/DownloadMemberApkButton'
+import PushSubscribeButton from '@/app/portal/components/PushSubscribeButton'
 
 export default function GymSettingsPage() {
     const [isLoading, setIsLoading] = useState(true)
@@ -191,6 +192,21 @@ export default function GymSettingsPage() {
                         buttonText="수강생용 앱(.apk) 다운로드"
                         className="flex justify-center items-center gap-2 px-6 py-3 bg-emerald-600 font-medium text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
                     />
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-zinc-900 shadow rounded-lg p-6 border border-gray-200 dark:border-zinc-800 mt-8">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    기기 알림 설정 (관리자용)
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
+                    새로운 회원이 가입하거나 중요한 이벤트가 발생할 때 이 기기로 푸시 알림을 수신합니다. (안드로이드 관장용 앱에서도 지원)
+                </p>
+                <div className="max-w-sm">
+                    <PushSubscribeButton />
                 </div>
             </div>
         </div>

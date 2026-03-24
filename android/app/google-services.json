@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009977933338",
+    "project_id": "my-jiujitsu",
+    "storage_bucket": "my-jiujitsu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009977933338:android:329bfbd9efb6e861a4dba3",
+        "android_client_info": {
+          "package_name": "com.myjiujitsu.member"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8MAji2pRd3Jmzs7UI0Nc4cYpkYc-o5NQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
