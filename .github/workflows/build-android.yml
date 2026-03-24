@@ -42,6 +42,10 @@ jobs:
           };
           export default config;
           EOF
+          
+          # Replace Android strings to match Member app
+          sed -i 's/My jiu-jitsu Kiosk/My jiu-jitsu Member/g' android/app/src/main/res/values/strings.xml
+          sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.member/g' android/app/src/main/res/values/strings.xml
           else
             cat <<EOF > capacitor.config.ts
           import type { CapacitorConfig } from '@capacitor/cli';
@@ -56,6 +60,9 @@ jobs:
           };
           export default config;
           EOF
+
+          # Ensure Android strings match Kiosk app
+          git checkout android/app/src/main/res/values/strings.xml || true
           fi
           npx cap sync android
 
