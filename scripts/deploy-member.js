@@ -34,12 +34,12 @@ async function githubReq(endpoint, options = {}) {
 }
 
 async function run() {
-  console.log('🚀 [1/5] GitHub 서버에 키오스크 앱(APK) 최신 빌드를 요청합니다...');
+  console.log('🚀 [1/5] GitHub 서버에 수강생 전용 앱(member-APK) 최신 빌드를 요청합니다...');
   
-  // 1. Trigger workflow
+  // 1. Trigger workflow for member app
   await githubReq(`/actions/workflows/${WORKFLOW_ID}/dispatches`, {
     method: 'POST',
-    body: JSON.stringify({ ref: 'main', inputs: { app_type: 'kiosk' } }),
+    body: JSON.stringify({ ref: 'main', inputs: { app_type: 'member' } }),
   });
   
   console.log('⏳ [2/5] 빌드가 시작되었습니다. 깃허브 서버에서 완료될 때까지 대기합니다. (보통 3~5분 소요)...');
@@ -78,9 +78,9 @@ async function run() {
   
   // 3. Get artifacts
   const artifactsRes = await githubReq(`/actions/runs/${runId}/artifacts`);
-  const artifact = artifactsRes.artifacts.find(a => a.name === 'Kiosk-APK');
+  const artifact = artifactsRes.artifacts.find(a => a.name === 'member-APK');
   
-  if (!artifact) throw new Error('Kiosk-APK 결과물을 찾을 수 없습니다.');
+  if (!artifact) throw new Error('member-APK 결과물을 찾을 수 없습니다.');
   
   // 4. Download artifact (Requires handling redirect)
   const downloadUrl = artifact.archive_download_url;
@@ -95,11 +95,11 @@ async function run() {
   if (!downloadRes.ok) throw new Error('결과물 다운로드 실패');
   
   const buffer = await downloadRes.arrayBuffer();
-  fs.writeFileSync('kiosk-apk.zip', Buffer.from(buffer));
+  fs.writeFileSync('member-apk.zip', Buffer.from(buffer));
   
   console.log('📦 [4/5] 압축 해제 중...');
   try {
-     execSync('tar -xf kiosk-apk.zip');
+     execSync('tar -xf member-apk.zip');
   } catch (e) {
      console.error('압축 해제 중 오류가 발생했습니다.', e);
   }
@@ -109,7 +109,7 @@ async function run() {
   }
   
   console.log('☁️ [5/5] Supabase Storage [KIOSK] 버킷에 업로드합니다...');
-  // 6. Upload to Supabase
+  // 6. Upload to Supabase as member-app.apk
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -117,7 +117,7 @@ async function run() {
   const fileData = fs.readFileSync('app-debug.apk');
   const { error: uploadError } = await supabase.storage
       .from('KIOSK')
-      .upload('app-debug.apk', fileData, {
+      .upload('member-app.apk', fileData, {
           contentType: 'application/vnd.android.package-archive',
           upsert: true // 덮어쓰기!
       });
@@ -126,12 +126,12 @@ async function run() {
   
   console.log('🧹 임시 파일 청소 중...');
   try {
-     fs.unlinkSync('kiosk-apk.zip');
+     fs.unlinkSync('member-apk.zip');
      fs.unlinkSync('app-debug.apk');
   } catch (e) {}
   
-  console.log('\n🎉 모든 작업이 성공적으로 완료되었습니다!!');
-  console.log('👉 이제 대시보드의 [키오스크 앱(.apk) 다운로드] 버튼을 누르면 가장 최신 버전이 완전히 다운로드됩니다.');
+  console.log('\n🎉 수강생 전용 앱 작업이 성공적으로 완료되었습니다!!');
+  console.log('👉 메인 화면이나 대시보드의 앱 다운로드 버튼이 정상 동작합니다.');
 }
 
 run().catch(e => {

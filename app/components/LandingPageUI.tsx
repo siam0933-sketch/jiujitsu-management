@@ -81,7 +81,7 @@ export default function LandingPageUI() {
         <div className="flex-1 flex flex-col pt-32 px-10 pb-10 max-w-5xl mx-auto w-full h-full overflow-y-auto">
           
           {/* Menu Links */}
-          <div className="flex flex-col md:flex-row gap-16 md:gap-48 w-full justify-center md:items-start items-center mt-12 md:mt-24 flex-grow">
+          <div className="flex flex-col md:flex-row gap-16 md:gap-48 w-full justify-center md:items-start items-center mt-12 md:mt-24 mb-16">
             
             {/* Admin Column (관장) */}
             <div className={`flex flex-col gap-6 w-full max-w-[200px] text-center md:text-left transition-all duration-500 delay-200 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
@@ -111,7 +111,7 @@ export default function LandingPageUI() {
           </div>
 
           {/* Social Icons Footer */}
-          <div className={`flex gap-6 justify-center md:justify-start pb-8 w-full transition-all duration-500 delay-500 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+          <div className={`mt-auto flex gap-6 justify-center md:justify-start pb-8 pt-8 w-full transition-all duration-500 delay-500 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
             <a href="#" className="p-3 border-2 border-white rounded-xl hover:bg-white hover:text-black transition-all">
               <Instagram size={24} strokeWidth={2} />
             </a>
