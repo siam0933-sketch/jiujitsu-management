@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/server'
 import bcrypt from 'bcryptjs'
+import { sendAdminNotification } from '@/utils/notifications'
 
 // 0a. Search gyms by partial name (for signup search UI)
 export async function searchGyms(query: string) {
@@ -233,6 +234,20 @@ export async function registerPortalMember(data: {
                 }
                 throw new Error('가입 중 오류가 발생했습니다: ' + insertError.message)
             }
+        }
+
+        try {
+            const { data: gymDoc } = await supabaseAdmin.from('gyms').select('owner_id, name').eq('id', data.gymId).single()
+            if (gymDoc) {
+                await sendAdminNotification({
+                    adminId: gymDoc.owner_id,
+                    title: '📢 새로운 수련생 가입 신청',
+                    body: `${data.name} 님이 체육관에 가입을 신청했습니다. 승인 대기 중입니다.`,
+                    link: '/dashboard/members',
+                })
+            }
+        } catch (pushErr) {
+            console.error('Failed to notify Admin:', pushErr)
         }
 
         return { success: true }

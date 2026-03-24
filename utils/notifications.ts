@@ -1,5 +1,5 @@
-import webpush from 'web-push'
 import { createAdminClient } from '@/utils/supabase/server'
+import { sendPushNotification } from './push'
 
 export type NotificationType = 'notice' | 'attendance' | 'payment'
 
@@ -47,16 +47,6 @@ export async function sendNotification({
         console.error('[sendNotification] DB insert error:', insertError)
     }
 
-    // 2. Web Push 전송 (구독 정보가 있는 회원만)
-    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
-    const vapidSubject = process.env.VAPID_SUBJECT
-
-    if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) {
-        // VAPID 키가 없으면 인앱 알림만 동작
-        return
-    }
-
     // 2.5. 방해 금지 시간(Quiet Hours) 체크 (한국 시간 밤 10시 ~ 아침 8시 이전)
     const nowKst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }))
     const currentHour = nowKst.getHours()
@@ -65,8 +55,6 @@ export async function sendNotification({
         return
     }
 
-    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey)
-
     const { data: subscriptions } = await supabase
         .from('member_push_subscriptions')
         .select('endpoint, p256dh, auth')
@@ -74,24 +62,56 @@ export async function sendNotification({
 
     if (!subscriptions || subscriptions.length === 0) return
 
-    const payload = JSON.stringify({ title, body, link: link || '/portal/notifications' })
+    const pushResults = subscriptions.map((sub) =>
+        sendPushNotification(
+            sub.endpoint,
+            sub.p256dh,
+            sub.auth,
+            title,
+            body || '',
+            link || '/portal/notifications'
+        ).then(isSuccess => {
+            if (!isSuccess) {
+                // If it chronically fails we could delete the subscription from DB.
+                // Not doing it automatically yet.
+            }
+        })
+    )
+
+    await Promise.allSettled(pushResults)
+}
+
+interface SendAdminNotificationParams {
+    adminId: string
+    title: string
+    body?: string
+    link?: string
+}
+
+export async function sendAdminNotification({
+    adminId,
+    title,
+    body,
+    link,
+}: SendAdminNotificationParams) {
+    const supabase = await createAdminClient()
+
+    const { data: subscriptions } = await supabase
+        .from('admin_push_subscriptions')
+        .select('endpoint, p256dh, auth')
+        .eq('admin_id', adminId)
+
+    if (!subscriptions || subscriptions.length === 0) return
 
     const pushResults = subscriptions.map((sub) =>
-        webpush
-            .sendNotification(
-                { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-                payload
-            )
-            .catch((err: any) => {
-                // 410 Gone = 구독이 만료됨 → DB에서 삭제
-                if (err.statusCode === 410) {
-                    return supabase
-                        .from('member_push_subscriptions')
-                        .delete()
-                        .eq('endpoint', sub.endpoint)
-                }
-                console.error('[sendNotification] Push send error:', err.message)
-            })
+        sendPushNotification(
+            sub.endpoint,
+            sub.p256dh,
+            sub.auth,
+            title,
+            body || '',
+            link || '/dashboard'
+        )
     )
 
     await Promise.allSettled(pushResults)
