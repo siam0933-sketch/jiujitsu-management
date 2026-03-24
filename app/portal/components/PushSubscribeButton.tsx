@@ -5,6 +5,7 @@ import { Bell, BellOff, BellRing } from 'lucide-react'
 
 export default function PushSubscribeButton() {
     const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>('default')
+    const [isSubscribed, setIsSubscribed] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
@@ -13,6 +14,13 @@ export default function PushSubscribeButton() {
             return
         }
         setPermission(Notification.permission)
+        
+        // Check if currently subscribed
+        navigator.serviceWorker.ready.then(reg => {
+            reg.pushManager.getSubscription().then(sub => {
+                setIsSubscribed(!!sub)
+            })
+        })
     }, [])
 
     const subscribe = async () => {
@@ -47,6 +55,8 @@ export default function PushSubscribeButton() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subscription: sub }),
             })
+            
+            setIsSubscribed(true)
         } catch (err) {
             console.error('[PushSubscribe] error:', err)
         } finally {
@@ -54,35 +64,79 @@ export default function PushSubscribeButton() {
         }
     }
 
-    if (permission === 'unsupported') return null
-
-    if (permission === 'granted') {
-        return (
-            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
-                <BellRing className="w-4 h-4" />
-                알림 허용됨
-            </div>
-        )
+    const unsubscribe = async () => {
+        if (isLoading) return
+        setIsLoading(true)
+        try {
+            const reg = await navigator.serviceWorker.ready
+            const sub = await reg.pushManager.getSubscription()
+            if (sub) {
+                await sub.unsubscribe()
+                // You could optionally send a request to your server to delete the subscription record
+                await fetch('/api/push/subscribe', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ endpoint: sub.endpoint }),
+                })
+            }
+            setIsSubscribed(false)
+        } catch (err) {
+            console.error('[PushUnsubscribe] error:', err)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    if (permission === 'denied') {
+    const handleToggle = () => {
+        if (isSubscribed) {
+            unsubscribe()
+        } else {
+            subscribe()
+        }
+    }
+
+    if (permission === 'unsupported') {
         return (
-            <div className="flex items-center gap-2 text-sm text-zinc-400">
-                <BellOff className="w-4 h-4" />
-                알림이 차단됨 (브라우저 설정에서 변경)
+            <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <BellOff className="w-5 h-5 opacity-50" />
+                이 기기는 푸시 알림을 지원하지 않습니다.
             </div>
         )
     }
 
     return (
-        <button
-            onClick={subscribe}
-            disabled={isLoading}
-            className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-3 py-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
-        >
-            <Bell className="w-4 h-4" />
-            {isLoading ? '처리 중...' : '알림 허용하기'}
-        </button>
+        <div className="flex items-center justify-between p-1">
+            <div className="flex flex-col gap-1">
+                <span className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <Bell className={`w-4 h-4 ${isSubscribed ? 'text-blue-500' : 'text-gray-400'}`} />
+                    푸시 알림 수신
+                </span>
+                {permission === 'denied' && (
+                    <span className="text-xs text-red-500 tracking-tight">
+                        브라우저 설정에서 알림이 차단되어 있습니다.
+                    </span>
+                )}
+            </div>
+            
+            <button
+                type="button"
+                role="switch"
+                aria-checked={isSubscribed}
+                disabled={isLoading || permission === 'denied'}
+                onClick={handleToggle}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                    isSubscribed ? 'bg-blue-600' : 'bg-gray-200 dark:bg-zinc-700'
+                } ${isLoading || permission === 'denied' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+                <span className="sr-only">푸시 알림 설정</span>
+                <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        isSubscribed ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                />
+            </button>
+        </div>
     )
 }
 

@@ -47,12 +47,17 @@ export default async function ProfilePage() {
                             </span>
                         </li>
                     </ul>
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-500">기기 알림 설정</span>
-                            <PushSubscribeButton />
-                        </div>
-                    </div>
+                </div>
+            </div>
+
+            {/* Device Notification Settings Card */}
+            <div className={`${PORTAL_STYLES.CARD} mb-6`}>
+                <div className={PORTAL_STYLES.CARD_PADDING}>
+                    <h2 className={PORTAL_STYLES.HEADING_MD}>기기 알림 설정</h2>
+                    <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                        새로운 공지사항이나 출석, 승급 정보 등에 대한 푸시 알림을 받을 수 있습니다.
+                    </p>
+                    <PushSubscribeButton />
                 </div>
             </div>
 
