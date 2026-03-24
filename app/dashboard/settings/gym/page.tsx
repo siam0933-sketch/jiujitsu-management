@@ -115,8 +115,12 @@ export default function GymSettingsPage() {
                 </h2>
                 <div className="flex flex-col items-center space-y-4">
                     {/* New Member Invitation Link */}
-                    <div className="p-4 bg-white dark:bg-zinc-900 border-2 border-blue-100 dark:border-blue-900/30 rounded-xl shadow-sm">
-                        {invitationUrl && <QRCodeSVG value={invitationUrl} size={180} fgColor="#2563eb" />}
+                    <div className="p-4 bg-white border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm inline-block">
+                        {invitationUrl ? (
+                            <QRCodeSVG value={invitationUrl} size={180} fgColor="#000000" bgColor="#ffffff" />
+                        ) : (
+                            <div className="w-[180px] h-[180px] flex items-center justify-center text-sm text-gray-400">Loading...</div>
+                        )}
                     </div>
                     <div className="text-center w-full max-w-[300px]">
                         <label className="block text-sm font-bold text-blue-700 dark:text-blue-400 mb-1">신규 회원 가입 초대 링크</label>

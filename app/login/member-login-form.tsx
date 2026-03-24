@@ -157,7 +157,9 @@ export default function MemberLoginForm() {
     return (
         <div className="w-full max-w-md mx-auto px-4">
             <div className="flex flex-col items-center justify-center mb-8">
-                <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm" />
+                <Link href="/" className="hover:opacity-80 transition-opacity">
+                    <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={48} height={48} className="mb-4 rounded-xl shadow-sm hover:scale-105 transition-transform" />
+                </Link>
 
                 <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-zinc-100 mb-2">
                     수강생 로그인
@@ -259,13 +261,6 @@ export default function MemberLoginForm() {
                     >
                         {loading ? '로그인 중...' : '로그인 하기'}
                     </button>
-                    
-                    <Link
-                        href="/"
-                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 transition-all text-lg"
-                    >
-                        첫 화면으로
-                    </Link>
                 </div>
 
                 <div className="flex items-center justify-center mt-2">
