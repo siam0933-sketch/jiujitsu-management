@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "deploy:kiosk": "node --env-file=.env.local scripts/deploy-kiosk.js",
-    "deploy:member": "node --env-file=.env.local scripts/deploy-member.js"
+    "deploy:member": "node --env-file=.env.local scripts/deploy-member.js",
+    "deploy:admin": "node --env-file=.env.local scripts/deploy-admin.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",

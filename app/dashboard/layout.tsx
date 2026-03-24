@@ -48,7 +48,7 @@ export default async function DashboardLayout({
     return (
         <div className="flex flex-col md:flex-row h-screen bg-gray-100 dark:bg-black overflow-hidden">
             {/* Mobile Header */}
-            <div className="md:hidden flex items-center justify-between bg-white dark:bg-zinc-900 px-5 py-3 border-b border-gray-200 dark:border-zinc-800 shadow-sm shrink-0 z-40">
+            <div className="md:hidden flex items-center justify-between bg-white dark:bg-zinc-900 px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 border-b border-gray-200 dark:border-zinc-800 shadow-sm shrink-0 z-40">
                 <div className="flex items-center gap-2">
                     <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={32} height={32} className="rounded-md" />
                     <h1 className="text-xl font-extrabold text-gray-800 dark:text-zinc-100 tracking-tight">My jiu-jitsu</h1>
@@ -78,7 +78,7 @@ export default async function DashboardLayout({
                 <MobileMenuCloser />
 
                 {/* Sidebar */}
-                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800">
+                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800 pb-[env(safe-area-inset-bottom)]">
                     <div className="p-6 md:block flex justify-between items-center">
                         <div className="flex items-center gap-3">
                             <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={40} height={40} className="rounded-xl shadow-sm" />
@@ -192,7 +192,7 @@ export default async function DashboardLayout({
             </div>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-auto p-4 sm:p-8 bg-gray-100 dark:bg-black">
+            <main className="flex-1 overflow-auto p-4 sm:p-8 pb-[calc(1.5rem+env(safe-area-inset-bottom))] bg-gray-100 dark:bg-black">
                 <div className="w-full mx-auto h-full">
                     {children}
                 </div>

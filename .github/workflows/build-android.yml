@@ -46,6 +46,24 @@ jobs:
           # Replace Android strings to match Member app
           sed -i 's/My jiu-jitsu Kiosk/My jiu-jitsu Member/g' android/app/src/main/res/values/strings.xml
           sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.member/g' android/app/src/main/res/values/strings.xml
+          elif [ "${{ github.event.inputs.app_type }}" = "admin" ]; then
+            cat <<EOF > capacitor.config.ts
+          import type { CapacitorConfig } from '@capacitor/cli';
+          const config: CapacitorConfig = {
+            appId: 'com.myjiujitsu.admin',
+            appName: 'My jiu-jitsu Admin',
+            webDir: 'public',
+            server: {
+              url: 'https://jiujitsu-management.vercel.app/admin-app',
+              cleartext: true
+            }
+          };
+          export default config;
+          EOF
+
+          # Replace Android strings to match Admin app
+          sed -i 's/My jiu-jitsu Kiosk/My jiu-jitsu Admin/g' android/app/src/main/res/values/strings.xml
+          sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.admin/g' android/app/src/main/res/values/strings.xml
           else
             cat <<EOF > capacitor.config.ts
           import type { CapacitorConfig } from '@capacitor/cli';

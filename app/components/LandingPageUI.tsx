@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Instagram, Mail } from 'lucide-react'
 import DownloadMemberApkButton from './DownloadMemberApkButton'
+import DownloadAdminApkButton from './DownloadAdminApkButton'
 
 export default function LandingPageUI() {
   const [isOpen, setIsOpen] = useState(false)
@@ -89,6 +90,14 @@ export default function LandingPageUI() {
               <ul className="flex flex-col gap-5">
                 <li><Link href="/signup" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">회원가입</Link></li>
                 <li><Link href="/admin/login" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">로 그 인</Link></li>
+                <li className="flex flex-col items-center md:items-start group">
+                  <DownloadAdminApkButton 
+                    buttonText="앱 다운로드"
+                    className="inline-block text-xl md:text-2xl font-normal text-white/80 group-hover:text-white group-hover:translate-x-2 group-hover:scale-105 origin-left transition-all duration-300"
+                    onDownloadStart={() => setIsOpen(false)}
+                  />
+                  <span className="text-[11px] text-white/40 mt-1 md:ml-1 group-hover:translate-x-2 transition-all duration-300">안드로이드 전용</span>
+                </li>
               </ul>
             </div>
 
@@ -98,12 +107,13 @@ export default function LandingPageUI() {
               <ul className="flex flex-col gap-5">
                 <li><Link href="/portal/signup" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">회원가입</Link></li>
                 <li><Link href="/login" onClick={() => setIsOpen(false)} className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300">로 그 인</Link></li>
-                <li>
+                <li className="flex flex-col items-center md:items-start group">
                   <DownloadMemberApkButton 
                     buttonText="앱 다운로드"
-                    className="inline-block text-xl md:text-2xl font-normal text-white/80 hover:text-white hover:translate-x-2 hover:scale-105 origin-left transition-all duration-300"
+                    className="inline-block text-xl md:text-2xl font-normal text-white/80 group-hover:text-white group-hover:translate-x-2 group-hover:scale-105 origin-left transition-all duration-300"
                     onDownloadStart={() => setIsOpen(false)}
                   />
+                  <span className="text-[11px] text-white/40 mt-1 md:ml-1 group-hover:translate-x-2 transition-all duration-300">안드로이드 전용</span>
                 </li>
               </ul>
             </div>

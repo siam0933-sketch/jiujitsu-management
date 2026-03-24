@@ -22,3 +22,22 @@ export async function getMemberApkDownloadUrl() {
         return { error: '서버 오류가 발생했습니다.' }
     }
 }
+
+export async function getAdminApkDownloadUrl() {
+    try {
+        const supabase = await createAdminClient()
+        const { data, error } = await supabase.storage
+            .from('KIOSK')
+            .createSignedUrl('admin-app.apk', 60, {
+                download: 'My_jiujitsu_Admin.apk'
+            })
+
+        if (error || !data) {
+            console.error('getAdminApkDownloadUrl Error:', error)
+            return { error: 'APK 파일을 찾을 수 없습니다. (앱 빌드 및 업로드가 필요합니다.)' }
+        }
+        return { url: data.signedUrl }
+    } catch (e) {
+        return { error: '서버 오류가 발생했습니다.' }
+    }
+}
