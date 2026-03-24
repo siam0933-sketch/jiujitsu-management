@@ -125,7 +125,7 @@ export default async function ProfilePage() {
             <div className={PORTAL_STYLES.CARD}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
                     <h2 className={PORTAL_STYLES.HEADING_MD}>계정 로그아웃</h2>
-                    <form action="/auth/sign-out" method="post">
+                    <form action="/auth/sign-out?redirect_to=%2Flogin%3Fapp%3Dtrue" method="post">
                         <button
                             type="submit"
                             className="w-full py-3 px-4 bg-red-50 text-red-600 font-medium rounded-xl border border-red-100 hover:bg-red-100 transition-colors active:scale-95 flex items-center justify-center gap-2"

@@ -26,8 +26,11 @@ export async function POST(request: NextRequest) {
         await supabase.auth.signOut()
     }
 
-    // Unify redirect path to the main gateway '/'
-    return NextResponse.redirect(`${requestUrl.origin}/`, {
+    const redirectTo = requestUrl.searchParams.get('redirect_to')
+    const finalRedirectPath = redirectTo || '/'
+
+    // Unify redirect path to the main gateway '/' or a requested path
+    return NextResponse.redirect(`${requestUrl.origin}${finalRedirectPath}`, {
         status: 301,
     })
 }

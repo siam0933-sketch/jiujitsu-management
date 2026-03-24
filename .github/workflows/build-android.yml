@@ -49,7 +49,7 @@ jobs:
           sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.member/g' android/app/src/main/res/values/strings.xml
           
           # Replace build.gradle package name
-          sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.member/g' android/app/build.gradle
+          sed -i 's/applicationId "com.myjiujitsu.kiosk"/applicationId "com.myjiujitsu.member"/g' android/app/build.gradle
           
           elif [ "${{ github.event.inputs.app_type }}" = "admin" ]; then
             cat <<EOF > capacitor.config.ts
@@ -71,7 +71,7 @@ jobs:
           sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.admin/g' android/app/src/main/res/values/strings.xml
           
           # Replace build.gradle package name
-          sed -i 's/com.myjiujitsu.kiosk/com.myjiujitsu.admin/g' android/app/build.gradle
+          sed -i 's/applicationId "com.myjiujitsu.kiosk"/applicationId "com.myjiujitsu.admin"/g' android/app/build.gradle
           
           else
             cat <<EOF > capacitor.config.ts
