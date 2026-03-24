@@ -86,7 +86,7 @@ export default async function PortalLayout({
     return (
         <div className={PORTAL_STYLES.PAGE_WRAPPER}>
             {!isPublicUrl && <PortalHeader dojoName={context?.gymName || '체육관'} unreadCount={context?.unreadCount || 0} />}
-            <main className={`flex-1 ${!isPublicUrl ? 'pt-14' : ''}`}> {/* pt-14 matches header height */}
+            <main className={`flex-1 ${!isPublicUrl ? 'pt-[calc(3.5rem+env(safe-area-inset-top))]' : ''}`}> {/* matches dynamic header height */}
                 {children}
             </main>
             {!isPublicUrl && <BottomNav hasUnpaidDues={context?.hasUnpaidDues || false} />}
