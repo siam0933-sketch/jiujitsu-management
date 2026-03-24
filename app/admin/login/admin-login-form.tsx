@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ShieldCheck, Mail, HeadphonesIcon } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,6 +9,8 @@ import { sendAdminPasswordResetEmail } from './reset-action'
 
 export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const isAppMode = searchParams.get('app') === 'true'
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
 
@@ -55,11 +57,12 @@ export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
             if (data.success) {
                 router.refresh()
                 if (data.redirectUrl) {
-                    router.push(data.redirectUrl)
+                    const dest = isAppMode ? `${data.redirectUrl}${data.redirectUrl.includes('?') ? '&' : '?'}app=true` : data.redirectUrl
+                    router.push(dest)
                 } else if (nextUrl && nextUrl.startsWith('/')) {
-                    router.push(nextUrl)
+                    router.push(isAppMode ? `${nextUrl}${nextUrl.includes('?') ? '&' : '?'}app=true` : nextUrl)
                 } else {
-                    router.push('/dashboard')
+                    router.push(isAppMode ? '/dashboard?app=true' : '/dashboard')
                 }
             } else {
                 setMessage(data.message)
@@ -121,12 +124,14 @@ export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
                 >
                     {loading ? '로그인 중...' : '로그인 하기'}
                 </button>
-                <Link
-                    href="/"
-                    className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 mb-2 transition-all text-lg"
-                >
-                    첫 화면으로
-                </Link>
+                {!isAppMode && (
+                    <Link
+                        href="/"
+                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-bold rounded-xl px-4 py-4 mb-2 transition-all text-lg"
+                    >
+                        첫 화면으로
+                    </Link>
+                )}
 
                 <div className="flex items-center justify-center mt-2">
                     <button 
@@ -144,12 +149,14 @@ export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
                 </div>
 
                 <div className="text-center text-sm mt-5 flex flex-col gap-4">
-                    <div className="text-sm md:text-base">
-                        <span className="text-gray-500">계정이 없으신가요? </span>
-                        <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
-                            신규 도장 가입하기
-                        </Link>
-                    </div>
+                    {!isAppMode && (
+                        <div className="text-sm md:text-base">
+                            <span className="text-gray-500">계정이 없으신가요? </span>
+                            <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
+                                신규 도장 가입하기
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </form>
 

@@ -5,6 +5,8 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getPendingAttendanceCount } from './attendance/actions'
 import MobileMenuCloser from './components/MobileMenuCloser'
+import AppModeInit from './components/AppModeInit'
+import AppModeLogoutButton from './components/AppModeLogoutButton'
 
 import { headers } from 'next/headers'
 
@@ -30,6 +32,19 @@ export default async function DashboardLayout({
         return redirect(`/admin/login?next=${encodeURIComponent(pathname)}`)
     }
 
+    // Verify the logged-in user is a gym_master
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, full_name')
+        .eq('id', user.id)
+        .single()
+
+    if (profile?.role !== 'gym_master' && profile?.role !== 'super_admin') {
+        const headersList = await headers()
+        const pathname = headersList.get('x-pathname') || '/dashboard'
+        return redirect(`/admin/login?next=${encodeURIComponent(pathname)}`)
+    }
+
     // Fetch additional info for Sidebar
     const { data: gym } = await supabase
         .from('gyms')
@@ -37,16 +52,14 @@ export default async function DashboardLayout({
         .eq('owner_id', user.id)
         .single()
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single()
+    const adminProfile = profile
 
     const pendingCount = await getPendingAttendanceCount()
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-gray-100 dark:bg-black overflow-hidden">
+            {/* Persist app mode to localStorage */}
+            <AppModeInit />
             {/* Mobile Header */}
             <div className="md:hidden flex items-center justify-between bg-white dark:bg-zinc-900 px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 border-b border-gray-200 dark:border-zinc-800 shadow-sm shrink-0 z-40">
                 <div className="flex items-center gap-2">
@@ -174,19 +187,12 @@ export default async function DashboardLayout({
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 group-hover:text-blue-700 dark:group-hover:text-blue-400">{gym?.name || '도장 이름 없음'}</p>
-                                    <p className="text-xs text-gray-500 dark:text-zinc-400 dark:text-zinc-500 group-hover:text-gray-700 dark:text-zinc-300 dark:group-hover:text-zinc-300">{profile?.full_name || '관리자'}</p>
+                                    <p className="text-xs text-gray-500 dark:text-zinc-400 dark:text-zinc-500 group-hover:text-gray-700 dark:text-zinc-300 dark:group-hover:text-zinc-300">{adminProfile?.full_name || '관리자'}</p>
                                 </div>
                             </div>
                         </Link>
 
-                        <form action="/auth/sign-out" method="post">
-                            <button className="flex items-center gap-3 w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors text-sm">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                로그아웃
-                            </button>
-                        </form>
+                        <AppModeLogoutButton />
                     </div>
                 </aside>
             </div>
