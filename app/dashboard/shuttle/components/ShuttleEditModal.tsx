@@ -54,6 +54,14 @@ export default function ShuttleEditModal({
             alert('시간과 정류장 이름을 입력해주세요.')
             return
         }
+
+        // 입력칸에 텍스트가 남아있으면(안 더하고 바로 저장 누른 경우) 자동으로 포함
+        let finalPassengers = [...passengers]
+        if (newPassenger.trim()) {
+            finalPassengers.push(newPassenger.trim())
+            // 상태 업데이트는 onClose 호출로 모달이 닫히므로 생략해도 됨
+        }
+
         setIsSaving(true)
         try {
             await saveShuttleRoute(
@@ -61,7 +69,7 @@ export default function ShuttleEditModal({
                 selectedDays,
                 time,
                 stopName,
-                passengers,
+                finalPassengers,
                 initialData ? initialData.id : undefined
             )
             onClose()
