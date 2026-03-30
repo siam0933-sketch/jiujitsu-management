@@ -105,17 +105,17 @@ export default function ShuttleEditModal({
 
                 <div className="p-6 overflow-y-auto space-y-6">
                     {/* Time & Stop Name */}
-                    <div className="flex gap-4">
-                        <div className="flex-1 shrink-0 max-w-[120px]">
+                    <div className="flex gap-3 sm:gap-4">
+                        <div className="w-[140px] shrink-0">
                             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">시간</label>
                             <input 
                                 type="time" 
                                 value={time}
                                 onChange={e => setTime(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-2 sm:px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                             <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">정류장</label>
                             <input 
                                 type="text" 
