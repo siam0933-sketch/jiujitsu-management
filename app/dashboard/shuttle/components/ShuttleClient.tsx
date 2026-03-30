@@ -90,9 +90,9 @@ export default function ShuttleClient({
                                                 {r.stop_name}
                                             </div>
                                             {(r.passengers && r.passengers.length > 0) && (
-                                                <div className="mt-1 flex flex-wrap gap-2">
+                                                <div className="mt-2 flex flex-wrap gap-2">
                                                     {r.passengers.map(p => (
-                                                        <span key={p.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                        <span key={p.id} className="inline-flex items-center px-3 py-1 rounded-md text-lg font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
                                                             {p.passenger_name}
                                                         </span>
                                                     ))}
