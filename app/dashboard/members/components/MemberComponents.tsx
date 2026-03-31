@@ -325,7 +325,7 @@ export function PaymentBillingDay({ memberId, billingDay, joinedDay }: PaymentBi
                 </>
             ) : (
                 <>
-                    <span className="text-sm font-bold text-gray-800 dark:text-zinc-100">{currentDay}일</span>
+                    <span className="text-2xl font-bold text-gray-800 dark:text-zinc-100">{currentDay}일</span>
                     <button
                         onClick={() => { setInputVal(String(currentDay)); setIsEditing(true) }}
                         className="text-gray-400 dark:text-zinc-500 hover:text-indigo-600 transition-colors"

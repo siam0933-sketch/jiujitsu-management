@@ -254,20 +254,13 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
     }
 
     const handleGenericCheckIn = async (memberId: string, date: string) => {
-        // Toggle logic for calendar
+        // Toggle logic for calendar - no confirm dialog to allow multi-date selection
         const currentDates = manualAttendanceDates[memberId] || []
         const isAttended = currentDates.includes(date)
 
         if (isAttended) {
-            // Cancel
-            if (!confirm('이 날짜의 출석을 취소하시겠습니까?')) return
-            const res = await cancelAttendance(memberId, date) // Generic cancel (no class name needed? or context?)
-            // Assuming geneic or "Manual" for calendar unless we want to link to THIS class.
-            // Requirement: "달력안에서 날짜 선택후 출석버튼을 누르면 출석이되"
-            // Let's use current class context if possible, or generic. 
-            // Ideally calendar attendance is generic manual attendance unless specified.
-            // But we are in a Class Card. Let's use class_name context if valid.
-
+            // Cancel attendance (toggle off)
+            const res = await cancelAttendance(memberId, date)
             if (res?.error) alert(res.error)
             else {
                 setManualAttendanceDates(prev => ({
@@ -276,14 +269,13 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                 }))
             }
         } else {
-            // Check-in
-            if (!confirm(`${date}에 출석 처리하시겠습니까?`)) return
+            // Check-in (toggle on)
             const res = await checkInMember(memberId, schedule.class_name, date)
             if (res?.error) alert(res.error)
             else {
                 setManualAttendanceDates(prev => ({
                     ...prev,
-                    [memberId]: [...prev[memberId], date]
+                    [memberId]: [...(prev[memberId] || []), date]
                 }))
             }
         }
@@ -693,13 +685,17 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
 
             {/* Calendar Modal */}
             {isCalendarOpen && selectedMemberForCalendar && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setIsCalendarOpen(false)}>
-                    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-sm p-4 animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-lg">{calendarMonth.getFullYear()}년 {calendarMonth.getMonth() + 1}월</h3>
-                            <div className="flex gap-1">
-                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.setMonth(calendarMonth.getMonth() - 1)))} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800 rounded">◀</button>
-                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.setMonth(calendarMonth.getMonth() + 1)))} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800 rounded">▶</button>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-sm p-4 animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 className="font-bold text-lg">{calendarMonth.getFullYear()}년 {calendarMonth.getMonth() + 1}월</h3>
+                                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">날짜를 눌러 출석을 토글하세요</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <button onClick={() => setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded">◀</button>
+                                <button onClick={() => setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded">▶</button>
+                                <button onClick={() => setIsCalendarOpen(false)} className="ml-1 p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:text-zinc-300 text-lg leading-none">✕</button>
                             </div>
                         </div>
 
@@ -725,12 +721,12 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                                     days.push(
                                         <button
                                             key={d}
-                                            onClick={() => handleGenericCheckIn(selectedMemberForCalendar, dateStr)}
+                                            onClick={(e) => { e.stopPropagation(); handleGenericCheckIn(selectedMemberForCalendar, dateStr) }}
                                             className={`
                                                 h-8 w-8 rounded-full text-sm flex items-center justify-center transition-colors
                                                 ${attended
                                                     ? 'bg-green-500 text-white font-bold shadow-sm'
-                                                    : 'hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300'}
+                                                    : 'hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300'}
                                             `}
                                         >
                                             {d}
@@ -741,8 +737,11 @@ export default function AttendanceCheck({ schedule, allMembers, mode, targetDate
                             })()}
                         </div>
 
-                        <div className="mt-4 flex justify-end">
-                            <button onClick={() => setIsCalendarOpen(false)} className="text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:text-zinc-200 underline">닫기</button>
+                        <div className="mt-4 flex justify-between items-center">
+                            <span className="text-xs text-gray-400 dark:text-zinc-500">
+                                {(manualAttendanceDates[selectedMemberForCalendar] || []).filter(d => d.startsWith(`${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}`)).length}일 출석
+                            </span>
+                            <button onClick={() => setIsCalendarOpen(false)} className="px-4 py-1.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">완료</button>
                         </div>
                     </div>
                 </div>

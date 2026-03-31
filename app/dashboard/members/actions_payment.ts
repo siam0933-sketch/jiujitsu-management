@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { grantAutoPoints } from '@/utils/grantAutoPoints'
 
 /**
  * Fetch payment history for a specific member.
@@ -137,6 +138,10 @@ export async function createPayment(formData: FormData) {
         if (memberError) throw memberError
 
         revalidatePath('/dashboard/members')
+
+        // 포인트 자동 적립 (auto_payment)
+        await grantAutoPoints(gym.id, memberId, 'auto_payment')
+
         return { success: true }
 
     } catch (e: any) {

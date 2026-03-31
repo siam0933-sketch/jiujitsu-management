@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Bell } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface PortalHeaderProps {
@@ -46,9 +46,9 @@ export default function PortalHeader({ dojoName, unreadCount = 0 }: PortalHeader
                     {dojoName || '무짐(MUGYM)'}
                 </h1>
 
-                {/* Right: Bell Icon with unread badge */}
-                <Link href="/portal/notifications" className="relative text-gray-600 hover:text-gray-900 transition-colors p-1">
-                    <Bell size={24} />
+                {/* Right: Message Icon with unread badge */}
+                <Link href="/portal/messages" className="relative text-gray-600 hover:text-indigo-600 transition-colors p-1">
+                    <MessageCircle size={24} />
                     {unreadCount > 0 && (
                         <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 border-2 border-white">
                             {unreadCount > 99 ? '99+' : unreadCount}

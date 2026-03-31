@@ -1,10 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
-// import MemberActions from './MemberActions' // Deprecated
 import PromotionHistory from './PromotionHistory'
 import { getPromotionLogs } from './actions'
 import { MemberStartDate, MemberPauseController, PaymentBillingDay } from '../components/MemberComponents'
 import ResetPasswordButton from '../components/ResetPasswordButton'
+import PointsPanel from './PointsPanel'
+import { getPointLogs, getManualPointSettings } from './point-actions'
+import { createAdminClient } from '@/utils/supabase/server'
+import MessagePanel from './MessagePanel'
 
 export default async function MemberDetailsPage({ params }: { params: { id: string } }) {
     const { id } = await params
@@ -34,6 +37,12 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
     // 3. Fetch Promotion Logs
     const promotionLogs = await getPromotionLogs(id)
 
+    // 4. Fetch Point Logs and Manual Settings
+    const pointLogs = await getPointLogs(id)
+    const supabaseAdmin = await createAdminClient()
+    const { data: memberForGym } = await supabaseAdmin.from('gym_members').select('gym_id').eq('id', id).single()
+    const manualSettings = memberForGym ? await getManualPointSettings(memberForGym.gym_id) : []
+
     const calculateAge = (birthDateString: string | null) => {
         if (!birthDateString) return '-'
         const birthDate = new Date(birthDateString)
@@ -59,7 +68,8 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                         return <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">{schoolDisplay} | {member.gender === 'male' ? '남성' : '여성'}</p>
                     })()}
                 </div>
-                <div className="mt-4 flex md:ml-4 md:mt-0 gap-3">
+                <div className="mt-4 flex md:ml-4 md:mt-0 gap-3 items-center">
+                    <MessagePanel memberId={id} memberName={member.name} />
                     <ResetPasswordButton memberId={id} />
                     <button
                         type="button"
@@ -224,6 +234,15 @@ export default async function MemberDetailsPage({ params }: { params: { id: stri
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Points Panel */}
+            <div className="mt-8">
+                <PointsPanel
+                    memberId={id}
+                    initialLogs={pointLogs}
+                    manualSettings={manualSettings}
+                />
             </div>
         </div>
     )

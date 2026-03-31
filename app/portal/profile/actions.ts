@@ -88,3 +88,27 @@ export async function getMemberProfileData() {
         payments: payments || []
     }
 }
+export async function getMemberPointLogs() {
+    const session = await getMemberSession()
+    if (!session || !session.memberId) return []
+
+    const supabase = await createAdminClient()
+    const { data } = await supabase
+        .from('gym_point_logs')
+        .select('id, name, points, created_at')
+        .eq('member_id', session.memberId)
+        .order('created_at', { ascending: false })
+    return data ?? []
+}
+
+export async function getMemberPointSettings() {
+    const session = await getMemberSession()
+    if (!session || !session.gymId) return []
+
+    const supabase = await createAdminClient()
+    const { data } = await supabase
+        .from('gym_point_settings')
+        .select('name, icon')
+        .eq('gym_id', session.gymId)
+    return data ?? []
+}

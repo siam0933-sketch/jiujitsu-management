@@ -11,6 +11,7 @@ export default function SettingsTabs() {
         { name: '이용권/결제 설정', href: '/dashboard/settings/pricing' },
         { name: '승급 기준 설정', href: '/dashboard/settings/promotion' },
         { name: '약관 설정', href: '/dashboard/settings/terms' },
+        { name: '포인트 설정', href: '/dashboard/settings/points' },
     ]
 
     return (

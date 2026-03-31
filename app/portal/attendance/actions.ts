@@ -49,6 +49,9 @@ export async function requestAttendance() {
 
     if (error) return { error: error.message }
 
+    // 포인트는 관장 승인(pending → present) 시에만 적립됩니다.
+    // (중복 적립 방지: 여기서 적립하면 승인 시 또 적립될 수 있음)
+
     revalidatePath('/portal/attendance')
 
     // 출석 요청 알림 전송

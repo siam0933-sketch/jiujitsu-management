@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendNotification } from '@/utils/notifications'
+import { grantAutoPoints } from '@/utils/grantAutoPoints'
 
 export type KioskMember = {
     id: string
@@ -180,7 +181,7 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
     }
 
     // Insert Log
-    const { error: insertError } = await supabase
+    const { data: newKioskLog, error: insertError } = await supabase
         .from('gym_attendance_logs')
         .insert({
             gym_id: gymId,
@@ -190,6 +191,8 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
             class_name: '자율 수련', // Default or calculate from time
             status: 'present'
         })
+        .select('id')
+        .single()
 
     if (insertError) {
         console.error('Check-in error:', insertError)
@@ -216,6 +219,19 @@ async function processCheckIn(supabase: any, gymId: string, member: any): Promis
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
+
+    // 포인트 자동 적립 (auto_kiosk) 후 point_log_id 저장
+    try {
+        if (newKioskLog?.id) {
+            const pointLogId = await grantAutoPoints(gymId, member.id, 'auto_kiosk')
+            if (pointLogId) {
+                await supabase
+                    .from('gym_attendance_logs')
+                    .update({ point_log_id: pointLogId })
+                    .eq('id', newKioskLog.id)
+            }
+        }
+    } catch (e) { /* 포인트 오류가 출석 처리에 영향 없도록 */ }
 
     // 출석 알림
     try {

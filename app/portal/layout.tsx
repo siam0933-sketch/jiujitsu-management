@@ -5,7 +5,7 @@ import BottomNav from './components/BottomNav';
 import PortalHeader from './components/PortalHeader';
 import { PORTAL_STYLES } from './styles';
 import { getPaymentStatus } from '@/utils/payment';
-import { getUnreadCount } from './notifications/actions';
+import { getUnreadMessageCount } from './messages/actions';
 
 async function getPortalContext() {
     const cookieStore = await cookies()
@@ -44,7 +44,7 @@ async function getPortalContext() {
             }
         }
 
-        const unreadCount = await getUnreadCount()
+        const unreadCount = await getUnreadMessageCount()
 
         return {
             gymName: gym?.name || '체육관',

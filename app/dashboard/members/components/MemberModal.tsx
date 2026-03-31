@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { getPricingData } from '../../settings/pricing/actions'
 import { createPayment, getPaymentHistory, updatePayment, deletePayment } from '../actions_payment'
 import { updateMember, pauseMember, resumeMember, getMemberAttendanceLogs, generateMemberPassword, updateMemberPaymentEndDate, updatePaymentBillingDay } from '../actions'
@@ -12,6 +12,8 @@ import { BELT_OPTIONS_DATA, displayBeltName } from '../constants'
 import AttendanceHistory from '../[id]/AttendanceHistory'
 import PromotionHistory from '../[id]/PromotionHistory'
 import ResetPasswordButton from './ResetPasswordButton'
+import { addManualPoint, deductPoint, addCustomPoint } from '../[id]/point-actions'
+import { Star, Plus, Minus } from 'lucide-react'
 
 export default function MemberModal({ member }: { member: any }) {
     const router = useRouter()
@@ -79,6 +81,18 @@ export default function MemberModal({ member }: { member: any }) {
     const [popoverDay, setPopoverDay] = useState<string | null>(null) // [NEW] Current day for class enrollment popover
     const [promotionLogs, setPromotionLogs] = useState<any[]>([])
 
+    // Points State
+    const [pointLogs, setPointLogs] = useState<any[]>([])
+    const [manualPointSettings, setManualPointSettings] = useState<any[]>([])
+    const [showPointAdd, setShowPointAdd] = useState(false)
+    const [showPointDeduct, setShowPointDeduct] = useState(false)
+    const [pointDeductAmount, setPointDeductAmount] = useState('')
+    const [pointDeductReason, setPointDeductReason] = useState('')
+    const [pointError, setPointError] = useState('')
+    const [isPointPending, startPointTransition] = useTransition()
+    const [customPointName, setCustomPointName] = useState('')
+    const [customPointAmount, setCustomPointAmount] = useState('')
+
     // Pause Modal State
     const [isPauseModalOpen, setIsPauseModalOpen] = useState(false)
     const [pauseStartDate, setPauseStartDate] = useState(new Date().toISOString().split('T')[0])
@@ -89,13 +103,15 @@ export default function MemberModal({ member }: { member: any }) {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [pricing, history, attLogs, promos, enrolls, schedules] = await Promise.all([
+                const [pricing, history, attLogs, promos, enrolls, schedules, pLogs, pSettings] = await Promise.all([
                     getPricingData(),
                     getPaymentHistory(member.id),
                     getMemberAttendanceLogs(member.id),
                     supabase.from('gym_promotion_logs').select('*').eq('member_id', member.id).order('promoted_at', { ascending: false }),
                     supabase.from('gym_class_enrollments').select('*, gym_schedules(*)').eq('member_id', member.id),
-                    supabase.from('gym_schedules').select('*').eq('gym_id', member.gym_id).order('start_time') // Fetch all classes
+                    supabase.from('gym_schedules').select('*').eq('gym_id', member.gym_id).order('start_time'),
+                    supabase.from('gym_point_logs').select('id, name, points, created_at').eq('member_id', member.id).order('created_at', { ascending: false }),
+                    supabase.from('gym_point_settings').select('id, name, points').eq('gym_id', member.gym_id).eq('type', 'manual').eq('is_active', true)
                 ])
 
                 // Sort plans: Period tickets first, then by price descending
@@ -120,6 +136,8 @@ export default function MemberModal({ member }: { member: any }) {
                 setPayments(history)
                 setAttendanceLogs(attLogs)
                 if (promos.data) setPromotionLogs(promos.data)
+                if (pLogs.data) setPointLogs(pLogs.data)
+                if (pSettings.data) setManualPointSettings(pSettings.data)
 
                 // Format enrollments
                 if (enrolls.data) {
@@ -726,7 +744,6 @@ export default function MemberModal({ member }: { member: any }) {
                                         </div>
                                         {/* 결제 기준일 */}
                                         <div className="text-right">
-                                            <p className="text-xs text-gray-400 dark:text-zinc-500 mb-1">수납 청구일</p>
                                             <PaymentBillingDay
                                                 memberId={member.id}
                                                 billingDay={member.payment_due_day ?? null}
@@ -1062,6 +1079,199 @@ export default function MemberModal({ member }: { member: any }) {
                                         joinedAt={member.joined_at}
                                         startDate={member.start_date}
                                     />
+
+                                    <hr className="border-gray-100 dark:border-zinc-800/50" />
+
+                                    {/* Points Section */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h5 className="text-sm font-bold text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
+                                                <Star size={14} className="text-yellow-400" />
+                                                포인트
+                                                <span className="ml-1 font-bold text-indigo-600 dark:text-indigo-400">
+                                                    {pointLogs.reduce((sum, l) => sum + l.points, 0).toLocaleString()}점
+                                                </span>
+                                            </h5>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => { setShowPointAdd(true); setPointError('') }}
+                                                    disabled={false}
+                                                    title="포인트 추가"
+                                                    className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 transition-colors"
+                                                >
+                                                    <Plus size={12} /> 추가
+                                                </button>
+                                                <button
+                                                    onClick={() => { setShowPointDeduct(true); setPointError('') }}
+                                                    className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 transition-colors"
+                                                >
+                                                    <Minus size={12} /> 차감
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {pointError && <p className="text-xs text-red-500 mb-2">{pointError}</p>}
+
+                                        {pointLogs.length === 0 ? (
+                                            <p className="text-xs text-center text-gray-400 dark:text-zinc-500 py-4">포인트 내역이 없습니다.</p>
+                                        ) : (
+                                            <ul className="divide-y divide-gray-100 dark:divide-zinc-800 max-h-48 overflow-y-auto rounded-lg border border-gray-100 dark:border-zinc-800">
+                                                {pointLogs.map(log => (
+                                                    <li key={log.id} className="flex items-center justify-between px-3 py-2">
+                                                        <div>
+                                                            <p className="text-xs font-medium text-gray-800 dark:text-zinc-200 flex items-center gap-1">
+                                                                {manualPointSettings.find(s => s.name === log.name)?.icon && (
+                                                                    <span>{manualPointSettings.find(s => s.name === log.name)?.icon}</span>
+                                                                )}
+                                                                {log.name}
+                                                            </p>
+                                                            <p className="text-[11px] text-gray-400 dark:text-zinc-500">{new Date(log.created_at).toLocaleDateString('ko-KR')}</p>
+                                                        </div>
+                                                        <span className={`text-xs font-bold ${log.points >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                                                            {log.points >= 0 ? `+${log.points}` : log.points}점
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+
+                                        {/* Add Modal */}
+                                        {showPointAdd && (
+                                            <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+                                                <div className="absolute inset-0 bg-black/50" onClick={() => setShowPointAdd(false)} />
+                                                <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-sm p-5 z-10">
+                                                    <h3 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-4">포인트 추가</h3>
+
+                                                    {/* 즉석 입력 폼 */}
+                                                    <div className="mb-4">
+                                                        <p className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-2">직접 입력</p>
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={customPointName}
+                                                                onChange={e => setCustomPointName(e.target.value)}
+                                                                placeholder="항목 이름"
+                                                                className="flex-1 rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm dark:bg-zinc-800 dark:text-zinc-100"
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                min={1}
+                                                                value={customPointAmount}
+                                                                onChange={e => setCustomPointAmount(e.target.value)}
+                                                                placeholder="점수"
+                                                                className="w-20 rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm dark:bg-zinc-800 dark:text-zinc-100"
+                                                            />
+                                                            <button
+                                                                disabled={isPointPending}
+                                                                onClick={() => {
+                                                                    const amt = parseInt(customPointAmount)
+                                                                    if (!customPointName.trim()) { setPointError('항목 이름을 입력해주세요.'); return }
+                                                                    if (!amt || amt <= 0) { setPointError('점수를 올바르게 입력해주세요.'); return }
+                                                                    setShowPointAdd(false)
+                                                                    const optimistic = { id: `temp-${Date.now()}`, name: customPointName.trim(), points: amt, created_at: new Date().toISOString() }
+                                                                    setPointLogs(prev => [optimistic, ...prev])
+                                                                    startPointTransition(async () => {
+                                                                        const res = await addCustomPoint(member.id, customPointName.trim(), amt)
+                                                                        if (res?.error) {
+                                                                            setPointLogs(prev => prev.filter(l => l.id !== optimistic.id))
+                                                                            setPointError(res.error)
+                                                                        }
+                                                                    })
+                                                                    setCustomPointName('')
+                                                                    setCustomPointAmount('')
+                                                                }}
+                                                                className="px-3 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 shrink-0"
+                                                            >추가</button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 수동 항목 목록 */}
+                                                    {manualPointSettings.length > 0 && (
+                                                        <>
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
+                                                                <p className="text-xs text-gray-400 dark:text-zinc-500 shrink-0">설정된 항목</p>
+                                                                <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
+                                                            </div>
+                                                            <ul className="space-y-2 max-h-48 overflow-y-auto">
+                                                                {manualPointSettings.map(s => (
+                                                                    <li key={s.id}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setShowPointAdd(false)
+                                                                                const optimistic = { id: `temp-${Date.now()}`, name: s.name, points: s.points, created_at: new Date().toISOString() }
+                                                                                setPointLogs(prev => [optimistic, ...prev])
+                                                                                startPointTransition(async () => {
+                                                                                    const res = await addManualPoint(member.id, s.id)
+                                                                                    if (res?.error) {
+                                                                                        setPointLogs(prev => prev.filter(l => l.id !== optimistic.id))
+                                                                                        setPointError(res.error)
+                                                                                    }
+                                                                                })
+                                                                            }}
+                                                                            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                                                        >
+                                                                            <span className="text-sm font-medium text-gray-900 dark:text-zinc-100 flex items-center gap-1">
+                                                                                {s.icon && <span>{s.icon}</span>}
+                                                                                {s.name}
+                                                                            </span>
+                                                                            <span className="text-indigo-600 font-bold text-sm">+{s.points}점</span>
+                                                                        </button>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </>
+                                                    )}
+
+                                                    <button onClick={() => { setShowPointAdd(false) }} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">취소</button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Deduct Modal */}
+                                        {showPointDeduct && (
+                                            <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+                                                <div className="absolute inset-0 bg-black/50" onClick={() => setShowPointDeduct(false)} />
+                                                <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-xs p-5 z-10">
+                                                    <h3 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-3">포인트 차감</h3>
+                                                    <div className="space-y-3">
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">사유 (선택)</label>
+                                                            <input type="text" value={pointDeductReason} onChange={e => setPointDeductReason(e.target.value)} placeholder="예: 상품 교환" className="w-full rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm dark:bg-zinc-800 dark:text-zinc-100" />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1">차감 점수</label>
+                                                            <input type="number" min={1} value={pointDeductAmount} onChange={e => setPointDeductAmount(e.target.value)} placeholder="0" className="w-full rounded-lg border border-gray-300 dark:border-zinc-700 px-3 py-2 text-sm dark:bg-zinc-800 dark:text-zinc-100" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2 mt-4">
+                                                        <button onClick={() => setShowPointDeduct(false)} className="flex-1 py-2 text-sm text-gray-500 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50">취소</button>
+                                                        <button
+                                                            disabled={isPointPending}
+                                                            onClick={() => {
+                                                                const amt = parseInt(pointDeductAmount)
+                                                                if (!amt || amt <= 0) { setPointError('차감 점수를 올바르게 입력해주세요.'); return }
+                                                                setShowPointDeduct(false)
+                                                                const label = pointDeductReason.trim() || '관장 차감'
+                                                                const optimistic = { id: `temp-${Date.now()}`, name: label, points: -amt, created_at: new Date().toISOString() }
+                                                                setPointLogs(prev => [optimistic, ...prev])
+                                                                startPointTransition(async () => {
+                                                                    const res = await deductPoint(member.id, amt, label)
+                                                                    if (res?.error) {
+                                                                        setPointLogs(prev => prev.filter(l => l.id !== optimistic.id))
+                                                                        setPointError(res.error)
+                                                                    }
+                                                                })
+                                                                setPointDeductAmount('')
+                                                                setPointDeductReason('')
+                                                            }}
+                                                            className="flex-1 py-2 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50"
+                                                        >차감하기</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </section>
 

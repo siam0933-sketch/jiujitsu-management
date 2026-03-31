@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendNotification } from '@/utils/notifications'
+import { grantAutoPoints, revokeAutoPoints } from '@/utils/grantAutoPoints'
 
 export async function checkInMember(memberId: string, className?: string, date?: string) {
     const supabase = await createClient()
@@ -23,7 +24,7 @@ export async function checkInMember(memberId: string, className?: string, date?:
     // Check if checks exist for today
     const { data: existing } = await supabase
         .from('gym_attendance_logs')
-        .select('id, checked_out_at, status')
+        .select('id, checked_out_at, status, point_log_id')
         .eq('gym_id', gym.id)
         .eq('member_id', memberId)
         .eq('date', today)
@@ -34,7 +35,7 @@ export async function checkInMember(memberId: string, className?: string, date?:
         if (existing.status === 'pending') {
             const { error: updateError } = await supabase
                 .from('gym_attendance_logs')
-                .update({ status: 'present', method: className ? 'class' : 'manual', class_name: className || null }) // Update method/class if needed, or keep request? Let's override.
+                .update({ status: 'present', method: className ? 'class' : 'manual', class_name: className || null })
                 .eq('id', existing.id)
 
             if (updateError) return { error: updateError.message }
@@ -66,6 +67,18 @@ export async function checkInMember(memberId: string, className?: string, date?:
             revalidatePath('/dashboard/attendance')
             revalidatePath('/dashboard/members')
 
+            // 포인트 자동 적립: pending은 회원앱 요청이므로 auto_portal 사용
+            // point_log_id가 없을 때만 적립 (중복 방지)
+            if (!existing.point_log_id) {
+                const pointLogId = await grantAutoPoints(gym.id, memberId, 'auto_portal')
+                if (pointLogId) {
+                    await supabase
+                        .from('gym_attendance_logs')
+                        .update({ point_log_id: pointLogId })
+                        .eq('id', existing.id)
+                }
+            }
+
             // 출석 승인 알림 전송
             try {
                 await sendNotification({
@@ -84,21 +97,25 @@ export async function checkInMember(memberId: string, className?: string, date?:
     }
 
     // 2. Log Attendance
-    const { error: logError } = await supabase.from('gym_attendance_logs').insert({
-        gym_id: gym.id,
-        member_id: memberId,
-        date: today,
-        method: className ? 'class' : 'manual',
-        class_name: className || null,
-        status: 'present'
-    })
+    const { data: newLog, error: logError } = await supabase
+        .from('gym_attendance_logs')
+        .insert({
+            gym_id: gym.id,
+            member_id: memberId,
+            date: today,
+            method: className ? 'class' : 'manual',
+            class_name: className || null,
+            status: 'present'
+        })
+        .select('id')
+        .single()
 
     if (logError) return { error: logError.message }
 
     // 3. Increment Member Attendance Count
     const { data: member } = await supabase
         .from('gym_members')
-        .select('remaining_sessions')
+        .select('remaining_sessions, name')
         .eq('id', memberId)
         .single()
 
@@ -121,6 +138,17 @@ export async function checkInMember(memberId: string, className?: string, date?:
 
     revalidatePath('/dashboard/attendance')
     revalidatePath('/dashboard/members')
+
+    // 포인트 자동 적립 (auto_kiosk) 후 point_log_id 저장
+    if (newLog?.id) {
+        const pointLogId = await grantAutoPoints(gym.id, memberId, 'auto_kiosk')
+        if (pointLogId) {
+            await supabase
+                .from('gym_attendance_logs')
+                .update({ point_log_id: pointLogId })
+                .eq('id', newLog.id)
+        }
+    }
 
     // 수동 출석 완료 알림 전송
     try {
@@ -203,8 +231,22 @@ export async function cancelAttendance(memberId: string, date: string, className
     const { data: gym } = await supabase.from('gyms').select('id').eq('owner_id', user.id).single()
     if (!gym) return { error: 'Gym not found' }
 
-    // 1. Find the log to delete
-    let query = supabase
+    // 1. 삭제 전 point_log_id 조회 (포인트 롤백용)
+    let selectQuery = supabase
+        .from('gym_attendance_logs')
+        .select('id, point_log_id')
+        .eq('gym_id', gym.id)
+        .eq('member_id', memberId)
+        .eq('date', date)
+
+    if (className) {
+        selectQuery = selectQuery.eq('class_name', className)
+    }
+
+    const { data: logToDelete } = await selectQuery.maybeSingle()
+
+    // 2. 출석 로그 삭제
+    let deleteQuery = supabase
         .from('gym_attendance_logs')
         .delete()
         .eq('gym_id', gym.id)
@@ -212,14 +254,19 @@ export async function cancelAttendance(memberId: string, date: string, className
         .eq('date', date)
 
     if (className) {
-        query = query.eq('class_name', className)
+        deleteQuery = deleteQuery.eq('class_name', className)
     }
 
-    const { error } = await query
+    const { error } = await deleteQuery
 
     if (error) return { error: '출석 취소 실패: ' + error.message }
 
-    // 2. Decrement Member Attendance Count
+    // 3. 포인트 롤백 (point_log_id가 있을 경우)
+    if (logToDelete?.point_log_id) {
+        await revokeAutoPoints(logToDelete.point_log_id)
+    }
+
+    // 4. Decrement Member Attendance Count
     const { data: member } = await supabase
         .from('gym_members')
         .select('remaining_sessions')

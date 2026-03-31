@@ -1,7 +1,7 @@
-import { LogOut, AlertCircle } from 'lucide-react';
+import { LogOut, AlertCircle, Star } from 'lucide-react';
 import { PORTAL_STYLES } from '../styles';
 import ChangePasswordForm from './ChangePasswordForm';
-import { getMemberProfileData } from './actions';
+import { getMemberProfileData, getMemberPointLogs, getMemberPointSettings } from './actions';
 import { displayBeltName } from '@/app/dashboard/members/constants';
 import { getPaymentStatus } from '@/utils/payment';
 import PushSubscribeButton from '../components/PushSubscribeButton';
@@ -13,6 +13,9 @@ export default async function ProfilePage() {
     const { member, payments } = data;
     const paymentInfo = getPaymentStatus(member);
     const isUnpaid = paymentInfo.status === 'unpaid';
+    const pointLogs = await getMemberPointLogs();
+    const pointSettings = await getMemberPointSettings();
+    const totalPoints = pointLogs.reduce((sum: number, l: any) => sum + l.points, 0);
 
     return (
         <div className={PORTAL_STYLES.CONTAINER}>
@@ -121,6 +124,40 @@ export default async function ProfilePage() {
             </div>
 
             <ChangePasswordForm />
+
+            {/* Points History */}
+            <div className={`${PORTAL_STYLES.CARD} mb-6`}>
+                <div className={PORTAL_STYLES.CARD_PADDING}>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className={PORTAL_STYLES.HEADING_MD} style={{marginBottom: 0}}>내 포인트</h2>
+                        <span className="flex items-center gap-1 text-lg font-bold text-indigo-600">
+                            <Star size={16} className="text-yellow-400" />{totalPoints.toLocaleString()}점
+                        </span>
+                    </div>
+                    {pointLogs.length === 0 ? (
+                        <p className="text-sm text-center text-gray-400 py-4">포인트 내역이 없습니다.</p>
+                    ) : (
+                        <ul className="divide-y divide-gray-100 mt-3">
+                            {pointLogs.map((log: any) => (
+                                <li key={log.id} className="flex justify-between items-center py-2.5">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800 flex items-center gap-1">
+                                            {pointSettings.find((s: any) => s.name === log.name)?.icon && (
+                                                <span>{pointSettings.find((s: any) => s.name === log.name)?.icon}</span>
+                                            )}
+                                            {log.name}
+                                        </p>
+                                        <p className="text-xs text-gray-400">{new Date(log.created_at).toLocaleDateString('ko-KR')}</p>
+                                    </div>
+                                    <span className={`text-sm font-bold ${log.points >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                        {log.points >= 0 ? `+${log.points}` : log.points}점
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </div>
 
             <div className={PORTAL_STYLES.CARD}>
                 <div className={PORTAL_STYLES.CARD_PADDING}>
