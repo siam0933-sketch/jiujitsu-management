@@ -187,27 +187,34 @@ export default function ShuttleClient({
                 </div>
             )}
 
-            <div className="flex-1 overflow-hidden px-4 md:px-6 pb-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-6">
                 {/* Mobile View: Single Day */}
                 <div className="h-full md:hidden flex flex-col">
                     {renderDaySchedule(selectedDay)}
                 </div>
 
                 {/* PC View: All active days (Grid) */}
-                <div className="hidden md:flex h-full gap-6 overflow-x-auto pb-4 snap-x">
+                <div className="hidden md:flex overflow-x-auto pb-4">
                     {activeDays.length === 0 ? (
-                        <div className="w-full flex items-center justify-center text-gray-500">등록된 노선 및 일정이 없습니다. 편집을 눌러 새 노선을 추가하세요.</div>
+                        <div className="w-full flex items-center justify-center text-gray-500 py-10">등록된 노선 및 일정이 없습니다. 편집을 눌러 새 노선을 추가하세요.</div>
                     ) : (
-                        activeDays.map(dayIdx => (
-                            <div key={dayIdx} className="w-80 shrink-0 flex flex-col bg-gray-50 dark:bg-zinc-800/30 border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden snap-start">
-                                <div className="p-4 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 text-center sticky top-0 z-10">
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">{dayNames[dayIdx]}</h2>
+                        <div className="flex w-max border border-gray-200 dark:border-zinc-800 rounded-xl bg-gray-50 dark:bg-zinc-800/30 overflow-hidden shadow-sm">
+                            {activeDays.map((dayIdx, idx) => (
+                                <div 
+                                    key={dayIdx} 
+                                    className={`w-80 shrink-0 flex flex-col ${
+                                        idx !== activeDays.length - 1 ? 'border-r border-gray-200 dark:border-zinc-800' : ''
+                                    }`}
+                                >
+                                    <div className="p-4 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 text-center sticky top-0 z-10">
+                                        <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">{dayNames[dayIdx]}</h2>
+                                    </div>
+                                    <div className="p-4 flex flex-col h-full">
+                                        {renderDaySchedule(dayIdx)}
+                                    </div>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-4 flex flex-col">
-                                    {renderDaySchedule(dayIdx)}
-                                </div>
-                            </div>
-                        ))
+                            ))}
+                        </div>
                     )}
                 </div>
             </div>
