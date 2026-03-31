@@ -3,23 +3,33 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export type ShuttleRoute = {
+export interface ShuttlePassenger {
     id: string
-    gym_id: string
+    stop_id: string
+    passenger_name: string
+}
+
+export interface ShuttleStop {
+    id: string
+    route_id: string
     day_of_week: number
     time: string
     stop_name: string
     passengers: ShuttlePassenger[]
 }
 
-export type ShuttlePassenger = {
+export interface ShuttleRoute {
     id: string
-    route_id: string
-    passenger_name: string
+    gym_id: string
+    name: string
+    days: number[]
+    stops: ShuttleStop[]
 }
 
-// 1. Fetch Routes & Passengers
-export async function getShuttleData(gymId: string) {
+// ==========================================
+// 1. DATA FETCHING
+// ==========================================
+export async function getShuttleData(gymId: string): Promise<ShuttleRoute[]> {
     const supabase = await createClient()
 
     // Fetch Routes
@@ -27,103 +37,159 @@ export async function getShuttleData(gymId: string) {
         .from('gym_shuttle_routes')
         .select('*')
         .eq('gym_id', gymId)
-        .order('time', { ascending: true })
+        .order('created_at', { ascending: true })
 
     if (routesError) {
         console.error('Error fetching routes:', routesError)
         return []
     }
-
     if (!routes || routes.length === 0) return []
 
     const routeIds = routes.map((r: any) => r.id)
 
-    // Fetch Passengers
-    const { data: passengers, error: passengersError } = await supabase
-        .from('gym_shuttle_passengers')
+    // Fetch Stops
+    const { data: stops, error: stopsError } = await supabase
+        .from('gym_shuttle_stops')
         .select('*')
         .in('route_id', routeIds)
-        .order('created_at', { ascending: true })
+        .order('time', { ascending: true })
 
-    if (passengersError) {
-        console.error('Error fetching passengers:', passengersError)
+    if (stopsError) {
+        console.error('Error fetching stops:', stopsError)
         return []
     }
 
+    const stopIds = (stops || []).map((s: any) => s.id)
+
+    // Fetch Passengers
+    let passengers: any[] = []
+    if (stopIds.length > 0) {
+        const { data: pData, error: pError } = await supabase
+            .from('gym_shuttle_passengers')
+            .select('*')
+            .in('stop_id', stopIds)
+            .order('created_at', { ascending: true })
+        if (!pError && pData) {
+            passengers = pData
+        }
+    }
+
     // Combine
-    const combined: ShuttleRoute[] = routes.map((r: any) => ({
-        ...r,
-        // Remove seconds from time string for cleaner UI if present (e.g. 15:30:00 -> 15:30)
-        time: r.time.slice(0, 5),
-        passengers: (passengers || []).filter((p: any) => p.route_id === r.id)
+    const combinedRoutes: ShuttleRoute[] = routes.map((r: any) => ({
+        id: r.id,
+        gym_id: r.gym_id,
+        name: r.name,
+        days: r.days || [],
+        stops: (stops || [])
+            .filter((s: any) => s.route_id === r.id)
+            .map((s: any) => ({
+                id: s.id,
+                route_id: s.route_id,
+                day_of_week: s.day_of_week,
+                time: s.time.slice(0, 5), // '15:30:00' -> '15:30'
+                stop_name: s.stop_name,
+                passengers: passengers.filter(p => p.stop_id === s.id)
+            }))
     }))
 
-    return combined
+    return combinedRoutes
 }
 
-// 2. Save Route (Insert or Update)
-export async function saveShuttleRoute(
+// ==========================================
+// 2. ROUTE ACTIONS (노선 CRUD)
+// ==========================================
+export async function saveShuttleRouteMaster(
     gymId: string,
-    days: number[], // Array of day_of_week
-    time: string,   // "HH:mm"
-    stopName: string,
-    passengers: string[], // Array of passenger names
-    existingRouteIdToUpdate?: string
+    name: string,
+    days: number[],
+    existingRouteId?: string
 ) {
     const supabase = await createClient()
 
-    // Ensure seconds are included for TIME column format
+    if (existingRouteId) {
+        // Update
+        const { error } = await supabase
+            .from('gym_shuttle_routes')
+            .update({ name, days })
+            .eq('id', existingRouteId)
+            .eq('gym_id', gymId)
+        if (error) throw error
+    } else {
+        // Insert
+        const { error } = await supabase
+            .from('gym_shuttle_routes')
+            .insert({ gym_id: gymId, name, days })
+        if (error) throw error
+    }
+
+    revalidatePath('/dashboard/shuttle')
+    return { success: true }
+}
+
+export async function deleteShuttleRouteMaster(routeId: string) {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('gym_shuttle_routes')
+        .delete()
+        .eq('id', routeId)
+
+    if (error) throw error
+    revalidatePath('/dashboard/shuttle')
+    return { success: true }
+}
+
+
+// ==========================================
+// 3. STOP ACTIONS (정류장 및 탑승객 CRUD)
+// ==========================================
+export async function saveShuttleStopDetailed(
+    routeId: string,
+    days: number[],
+    time: string,
+    stopName: string,
+    passengers: string[],
+    existingStopIdToUpdate?: string
+) {
+    const supabase = await createClient()
     const timeFormatted = time.length === 5 ? `${time}:00` : time
 
-    if (existingRouteIdToUpdate && days.length === 1) {
-        // Update Single Existing Route
+    if (existingStopIdToUpdate) {
+        // 단일 요일 수정의 경우
         const { error: updateError } = await supabase
-            .from('gym_shuttle_routes')
+            .from('gym_shuttle_stops')
             .update({
-                day_of_week: days[0],
+                route_id: routeId,
                 time: timeFormatted,
                 stop_name: stopName
             })
-            .eq('id', existingRouteIdToUpdate)
-            .eq('gym_id', gymId)
+            .eq('id', existingStopIdToUpdate)
 
         if (updateError) throw updateError
 
-        // Delete old passengers
-        const { error: deletePassError } = await supabase
+        // 1) Delete old passengers
+        await supabase
             .from('gym_shuttle_passengers')
             .delete()
-            .eq('route_id', existingRouteIdToUpdate)
+            .eq('stop_id', existingStopIdToUpdate)
 
-        if (deletePassError) throw deletePassError
-
-        // Insert new passengers
+        // 2) Insert new passengers
         if (passengers.length > 0) {
             const passInserts = passengers.map(name => ({
-                route_id: existingRouteIdToUpdate,
+                stop_id: existingStopIdToUpdate,
                 passenger_name: name
             }))
-            const { error: insError } = await supabase
+            const { error: passErr } = await supabase
                 .from('gym_shuttle_passengers')
                 .insert(passInserts)
-            if (insError) throw insError
+            if (passErr) throw passErr
         }
-
     } else {
-        // Insert Multiple Routes (one for each checked day)
-        // If it was an edit with multiple days checked, we shouldn't necessarily delete the 'other' days automatically, 
-        // but if we are editing an existing route AND checked multiple days, we can update the original day and insert the new days.
-        // For simplicity, if editing and multiple days are checked, we delete the original and recreate it.
-        
-        if (existingRouteIdToUpdate) {
-            await deleteShuttleRoute(existingRouteIdToUpdate)
-        }
-
+        // 새 정류장 생성 (선택된 여러 요일에 복사)
         for (const day of days) {
-            const { data: newRoute, error: insertError } = await supabase
-                .from('gym_shuttle_routes')
+            const { data: newStop, error: insertError } = await supabase
+                .from('gym_shuttle_stops')
                 .insert({
-                    gym_id: gymId,
+                    route_id: routeId,
                     day_of_week: day,
                     time: timeFormatted,
                     stop_name: stopName
@@ -131,11 +197,11 @@ export async function saveShuttleRoute(
                 .select()
                 .single()
 
-            if (insertError || !newRoute) throw insertError || new Error("Failed to insert route")
+            if (insertError || !newStop) throw insertError || new Error("Failed to insert stop")
 
             if (passengers.length > 0) {
                 const passInserts = passengers.map(name => ({
-                    route_id: newRoute.id,
+                    stop_id: newStop.id,
                     passenger_name: name
                 }))
                 const { error: passErr } = await supabase
@@ -147,16 +213,17 @@ export async function saveShuttleRoute(
     }
 
     revalidatePath('/dashboard/shuttle')
+    return { success: true }
 }
 
-// 3. Delete Route
-export async function deleteShuttleRoute(routeId: string) {
+export async function deleteShuttleStop(stopId: string) {
     const supabase = await createClient()
     const { error } = await supabase
-        .from('gym_shuttle_routes')
+        .from('gym_shuttle_stops')
         .delete()
-        .eq('id', routeId)
-    
+        .eq('id', stopId)
+
     if (error) throw error
     revalidatePath('/dashboard/shuttle')
+    return { success: true }
 }
