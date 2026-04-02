@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarCheck, TrendingUp, User, Home } from 'lucide-react';
+import { CalendarCheck, TrendingUp, User, Home, Trophy } from 'lucide-react';
 import { PORTAL_STYLES } from '../styles';
 import { cn } from '@/utils/cn'; // Assuming utils/cn exists, if not I'll use template literals but cn is safer for existing project
 
 const NAV_ITEMS = [
     {
-        label: '홈',
+        label: '도장',
         href: '/portal/notice',
         icon: Home,
     },
@@ -21,6 +21,11 @@ const NAV_ITEMS = [
         label: '승급',
         href: '/portal/promotion',
         icon: TrendingUp,
+    },
+    {
+        label: '랭킹',
+        href: '/portal/ranking',
+        icon: Trophy,
     },
     {
         label: '내 정보',
