@@ -3,12 +3,19 @@
 import { createAdminClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 
+export interface PortalShuttlePassenger {
+    id: string
+    stop_id: string
+    passenger_name: string
+}
+
 export interface PortalShuttleStop {
     id: string
     route_id: string
     day_of_week: number
     time: string
     stop_name: string
+    passengers: PortalShuttlePassenger[]
 }
 
 export interface PortalShuttleRoute {
@@ -43,7 +50,7 @@ export async function getPortalShuttleData(): Promise<PortalShuttleRoute[]> {
 
     const routeIds = routes.map((r: any) => r.id)
 
-    // 2. Fetch Stops (Do not fetch passengers for privacy)
+    // 2. Fetch Stops
     const { data: stops, error: stopsError } = await supabase
         .from('gym_shuttle_stops')
         .select('id, route_id, day_of_week, time, stop_name')
@@ -52,7 +59,22 @@ export async function getPortalShuttleData(): Promise<PortalShuttleRoute[]> {
 
     if (stopsError) return []
 
-    // 3. Combine
+    const stopIds = (stops || []).map((s: any) => s.id)
+
+    // 3. Fetch Passengers
+    let passengers: any[] = []
+    if (stopIds.length > 0) {
+        const { data: pData } = await supabase
+            .from('gym_shuttle_passengers')
+            .select('id, stop_id, passenger_name')
+            .in('stop_id', stopIds)
+        
+        if (pData) {
+            passengers = pData
+        }
+    }
+
+    // 4. Combine
     const combinedRoutes: PortalShuttleRoute[] = routes.map((r: any) => ({
         id: r.id,
         gym_id: r.gym_id,
@@ -65,7 +87,8 @@ export async function getPortalShuttleData(): Promise<PortalShuttleRoute[]> {
                 route_id: s.route_id,
                 day_of_week: s.day_of_week,
                 time: s.time.slice(0, 5), // '15:30:00' -> '15:30'
-                stop_name: s.stop_name
+                stop_name: s.stop_name,
+                passengers: passengers.filter(p => p.stop_id === s.id)
             }))
     }))
 
