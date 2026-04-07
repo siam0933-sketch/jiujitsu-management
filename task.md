@@ -1,56 +1,12 @@
-# Project Roadmap: Jiu-Jitsu Gym Management SaaS
+# Member Points System
 
-- [x] 프로젝트 기획 및 명세 <!-- id: 0 -->
-    - [x] 사용자 역할 및 핵심 기능 정의 <!-- id: 1 -->
-    - [x] 기술 스택 선정 <!-- id: 2 -->
-    - [x] 데이터베이스 스키마 설계 <!-- id: 3 -->
-- [x] 프로젝트 설정 <!-- id: 4 -->
-    - [x] 저장소(Repository) 초기화 <!-- id: 5 -->
-    - [x] 개발 환경 설정 (Next.js, Database) - Node.js 설치 완료 <!-- id: 6 -->
-- [/] 개발 1단계: 핵심 기반 구축 <!-- id: 7 -->
-    - [x] 인증 시스템 (다중 역할: 관리자, 관장, 회원) <!-- id: 8 -->
-        - [x] 회원가입 전용 페이지 및 폼 구현 (상세 정보 입력) <!-- id: 8-1 -->
-        - [x] DB 스키마 업데이트 (휴대폰, 사업자번호 등) <!-- id: 8-2 -->
-    - [x] 데이터베이스 설정 (테넌트/도장 격리) <!-- id: 9 -->
-- [/] 개발 2단계: 관장(도장 운영자) 기능 <!-- id: 10 -->
-    - [ ] 개발 4단계: 회원 관리 고도화 <!-- id: member-management -->
-    - [x] UI 개선 (나이, 등급, 결제일 칼럼 및 상태 표시) <!-- id: member-ui-enhance -->
-    - [/] 공지사항 관리 시스템 <!-- id: notice -->
-    - [/] 출석 및 승급 관리 시스템 (New) <!-- id: 13 -->
-        - [x] DB 스키마 (승급 기준, 출석 로그, 멤버 필드 추가) <!-- id: 13-1 -->
-        - [x] 승급 기준 설정 페이지 구현 <!-- id: 13-2 -->
-        - [x] 승급 기준 시스템 개편 (V2) <!-- id: promotion-v2 -->
-        - [x] 승급 이력(History) 관리 기능 <!-- id: promotion-history -->
-            - [x] DB 스키마 (gym_promotion_logs) <!-- id: history-db -->
-            - [x] 서버 액션 (로그 추가/수정, 통계 계산) <!-- id: history-actions -->
-            - [x] UI 구현 (회원 상세 -> 승급 기록 탭/모달) <!-- id: history-ui -->
-        - [x] 회원 관리 고도화 (입문일/휴관) <!-- id: member-advanced -->
-            - [x] DB 스키마 (start_date, gym_membership_pauses) <!-- id: member-db -->
-            - [x] 서버 액션 (휴관/복귀 처리, 결제일 연장 로직) <!-- id: member-actions -->
-            - [x] UI 구현 (입문일 수정, 휴관 버튼, 타임라인 통합) <!-- id: member-ui -->
-        - [x] 출석 체크 기능 (관리자 수동 체크) <!-- id: 13-3 -->
-            - [x] 수업 등록 시 회원 목록 로딩 오류 수정 (DB 스키마/조인 이슈 해결)
-        - [x] 승급 알림 및 처리 로직 구현 <!-- id: 13-4 -->
-- [x] 개발 3단계: 가격 책정 및 결제 시스템 <!-- id: pricing -->
-    - [x] DB 스키마 추가 (가격표, 옵션, 결제내역) <!-- id: pricing-db -->
-    - [x] 설정 페이지 구현 (가격/옵션 관리) <!-- id: pricing-settings -->
-        - [x] 옵션 그룹화 및 순서 변경 UI 개선 <!-- id: pricing-group-reorder -->
-            - [x] DB 마이그레이션 (옵션 순서 컬럼)
-            - [x] 그룹 순서 변경 기능 구현
-    - [x] 회원 상세 결제 계산 로직 구현 <!-- id: pricing-logic -->
-- [/] 승급 기준 시스템 개편 (V2) <!-- id: promotion-v2 -->
-    - [x] DB 스키마 설계 (성인/유소년 분리, 그랄, 순서) <!-- id: promotion-v2-db -->
-    - [x] UI 프로토타입 (Playground) 구현 <!-- id: promotion-v2-ui -->
-    - [x] 실제 데이터 연동 (API/UI 연결) <!-- id: promotion-v2-integration -->
-- [/] 배포 및 운영 <!-- id: deployment -->
-    - [x] GitHub 연동 및 업로드 <!-- id: deploy-git -->
-    - [-] Cloudtype 배포 (중단 - 리소스 부족) <!-- id: deploy-cloudtype -->
-    - [x] Vercel 배포 (성공) <!-- id: deploy-vercel -->
-- [ ] 개발 4단계: 회원(수강생) 기능 <!-- id: 14 -->
-    - [ ] 모바일 최적화 회원 포털 <!-- id: 15 -->
-    - [ ] 출석 체크 시스템 (QR/버튼 등) <!-- id: 16 -->
-    - [ ] 공지사항 확인 및 피드백 <!-- id: 17 -->
-- [ ] 개발 4단계: 비즈니스 로직 (슈퍼 관리자) <!-- id: 18 -->
-    - [ ] 도장 구독/결제 관리 <!-- id: 19 -->
-    - [ ] 전체 시스템 관리 대시보드 <!-- id: 20 -->
-- [ ] 검증 및 테스트 <!-- id: 21 -->
+- [x] SQL schema script (db_points_schema.sql)
+- [x] `app/dashboard/settings/points/` page + actions + client
+- [x] Add `포인트 설정` tab to SettingsTabs
+- [x] Auto-accumulate on attendance (auto_kiosk) — kiosk/actions.ts
+- [x] Auto-accumulate on portal self check-in (auto_portal) — portal/attendance/actions.ts
+- [x] Auto-accumulate on payment (auto_payment) — actions_payment.ts
+- [x] `utils/grantAutoPoints.ts` shared utility
+- [x] `members/[id]/PointsPanel.tsx` + server actions (point-actions.ts)
+- [x] Add PointsPanel to member detail page (members/[id]/page.tsx)
+- [x] Portal profile — member's own point history (portal/profile/page.tsx)

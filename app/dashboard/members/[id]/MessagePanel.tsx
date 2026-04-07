@@ -109,7 +109,7 @@ export default function MessagePanel({ memberId, memberName }: MessagePanelProps
 
             {/* Drawer Overlay */}
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex" onClick={() => setIsOpen(false)}>
+                <div className="fixed inset-0 z-[70] flex" onClick={() => setIsOpen(false)}>
                     {/* Backdrop */}
                     <div className="flex-1 bg-black/40 backdrop-blur-sm" />
 

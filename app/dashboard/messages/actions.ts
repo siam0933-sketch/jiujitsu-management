@@ -125,3 +125,56 @@ export async function getTotalUnreadAdminMessages(): Promise<number> {
 
     return count ?? 0
 }
+
+export type InboxConversation = {
+    memberId: string
+    memberName: string
+    lastMessageDate: string
+    lastMessageBody: string
+    unreadCount: number
+}
+
+export async function getInboxConversations(): Promise<InboxConversation[]> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data: gym } = await supabase
+        .from('gyms').select('id').eq('owner_id', user.id).single()
+    if (!gym) return []
+
+    const supabaseAdmin = await createAdminClient()
+
+    const { data: messages } = await supabaseAdmin
+        .from('gym_messages')
+        .select('id, member_id, body, created_at, sender, is_read_by_admin, gym_members(name)')
+        .eq('gym_id', gym.id)
+        .order('created_at', { ascending: false })
+        .limit(5000)
+
+    if (!messages) return []
+
+    const convoMap = new Map<string, InboxConversation>()
+
+    for (const msg of messages) {
+        const mId = msg.member_id
+        const isUnread = msg.sender === 'member' && !msg.is_read_by_admin
+        
+        if (!convoMap.has(mId)) {
+            convoMap.set(mId, {
+                memberId: mId,
+                memberName: (msg.gym_members as any)?.name || '알 수 없음',
+                lastMessageDate: msg.created_at,
+                lastMessageBody: msg.body,
+                unreadCount: isUnread ? 1 : 0
+            })
+        } else {
+            const existing = convoMap.get(mId)!
+            if (isUnread) {
+                existing.unreadCount += 1
+            }
+        }
+    }
+
+    return Array.from(convoMap.values())
+}

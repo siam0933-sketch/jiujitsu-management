@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getPendingAttendanceCount } from './attendance/actions'
+import { getTotalUnreadAdminMessages } from './messages/actions'
 import MobileMenuCloser from './components/MobileMenuCloser'
 import AppModeInit from './components/AppModeInit'
 import AppModeLogoutButton from './components/AppModeLogoutButton'
@@ -55,6 +56,7 @@ export default async function DashboardLayout({
     const adminProfile = profile
 
     const pendingCount = await getPendingAttendanceCount()
+    const unreadMessagesCount = await getTotalUnreadAdminMessages()
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-gray-100 dark:bg-black overflow-hidden">
@@ -121,6 +123,20 @@ export default async function DashboardLayout({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             회원 관리
+                        </Link>
+                        <Link
+                            href="/dashboard/messages"
+                            className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                            쪽지함
+                            {unreadMessagesCount > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                    {unreadMessagesCount}
+                                </span>
+                            )}
                         </Link>
                         <Link
                             href="/dashboard/attendance"

@@ -14,6 +14,7 @@ import PromotionHistory from '../[id]/PromotionHistory'
 import ResetPasswordButton from './ResetPasswordButton'
 import { addManualPoint, deductPoint, addCustomPoint } from '../[id]/point-actions'
 import { Star, Plus, Minus } from 'lucide-react'
+import MessagePanel from '../[id]/MessagePanel'
 
 export default function MemberModal({ member }: { member: any }) {
     const router = useRouter()
@@ -452,15 +453,17 @@ export default function MemberModal({ member }: { member: any }) {
                     <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl" onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
-                        <div className="bg-white dark:bg-zinc-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 dark:border-zinc-800/50 flex justify-between items-start">
+                        <div className="bg-white dark:bg-zinc-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b border-gray-100 dark:border-zinc-800/50 flex justify-between items-start gap-4">
                             <div className="flex-1">
                                 <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-1">회원 상세 정보</p>
-                                {/* Header content removed as per request */}
                             </div>
-                            <button onClick={closeModal} className="text-gray-400 dark:text-zinc-500 hover:text-gray-500 dark:text-zinc-400">
-                                <span className="sr-only">Close</span>
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <MessagePanel memberId={member.id} memberName={member.name} />
+                                <button onClick={closeModal} className="text-gray-400 dark:text-zinc-500 hover:text-gray-500 dark:text-zinc-400 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+                                    <span className="sr-only">Close</span>
+                                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Simplified Pause Modal */}
