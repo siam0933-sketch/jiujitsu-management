@@ -83,7 +83,7 @@ export default async function DashboardLayout({
                 {/* Mobile Backdrop Overlay */}
                 <label
                     htmlFor="mobile-menu"
-                    className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300 peer-checked:opacity-100 peer-checked:pointer-events-auto md:hidden"
+                    className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300 peer-checked:opacity-100 peer-checked:pointer-events-auto md:hidden cursor-pointer"
                 />
 
                 {/* Invisible trigger area for mobile/small screens (keep for mouse edge-cases) */}
