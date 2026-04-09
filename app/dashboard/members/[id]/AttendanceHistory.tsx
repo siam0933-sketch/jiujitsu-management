@@ -178,21 +178,26 @@ export default function AttendanceHistory({ logs, memberId, onUpdate }: Props) {
                             {logs.map((log) => {
                                 const checkInTime = new Date(log.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
                                 const checkOutTime = log.checked_out_at ? new Date(log.checked_out_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) : null
+                                const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토']
+                                const dayName = daysOfWeek[new Date(log.date).getDay()]
 
                                 return (
-                                    <li key={log.id} className="py-3 mt-0">
-                                        <div className="flex min-w-0 flex-1 justify-between space-x-4">
-                                            <div>
-                                                <p className="text-sm text-gray-500 dark:text-zinc-400">
-                                                    <span className="font-medium text-gray-900 dark:text-zinc-100">{log.class_name || '자율수련'}</span>
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-0.5">
-                                                    {checkInTime} 출석 {checkOutTime ? `/ ${checkOutTime} 하원` : ''}
-                                                </p>
+                                    <li key={log.id} className="py-2.5">
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <div className="text-gray-500 dark:text-zinc-400 shrink-0 whitespace-nowrap text-xs sm:text-sm">
+                                                {log.date} ({dayName})
                                             </div>
-                                            <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-zinc-400">
-                                                <time dateTime={log.date}>{log.date}</time>
+                                            <div className="text-gray-600 dark:text-zinc-400 font-mono text-xs shrink-0 bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+                                                {checkInTime}
                                             </div>
+                                            <div className="font-bold text-gray-900 dark:text-zinc-100 truncate flex-1">
+                                                {log.class_name || '자율수련'}
+                                            </div>
+                                            {checkOutTime && (
+                                                <div className="text-[11px] text-red-500 shrink-0 bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">
+                                                    {checkOutTime} 하원
+                                                </div>
+                                            )}
                                         </div>
                                     </li>
                                 )
