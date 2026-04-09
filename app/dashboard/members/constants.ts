@@ -7,17 +7,17 @@ export type BeltOption = {
 // Ordered List: Adults -> Kids
 export const BELT_OPTIONS_DATA: BeltOption[] = [
     // Adult Belts
-    { name: '화이트 (성인)', colorClass: 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800' },
+    { name: '화이트 (성인)', colorClass: 'bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-600 text-gray-900 dark:text-zinc-100' },
     { name: '블루', colorClass: 'bg-blue-600 text-white' },
     { name: '퍼플', colorClass: 'bg-purple-600 text-white' },
     { name: '브라운', colorClass: 'bg-yellow-800 text-white' },
-    { name: '블랙', colorClass: 'bg-gray-900 text-white' },
+    { name: '블랙', colorClass: 'bg-gray-900 text-white dark:border dark:border-gray-500' },
 
     // Kids Belts
-    { name: '화이트 (유소년)', colorClass: 'bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800' },
-    { name: '그레이-화이트', colorClass: 'border border-gray-300 dark:border-zinc-700', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #ffffff 35%, #ffffff 65%, #9ca3af 65%)' } },
-    { name: '그레이', colorClass: 'bg-gray-400 text-white border border-gray-400' },
-    { name: '그레이-블랙', colorClass: 'border border-gray-400', style: { background: 'linear-gradient(180deg, #9ca3af 35%, #1f2937 35%, #1f2937 65%, #9ca3af 65%)' } },
+    { name: '화이트 (유소년)', colorClass: 'bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-600 text-gray-900 dark:text-zinc-100' },
+    { name: '그레이-화이트', colorClass: 'border border-gray-300 text-gray-900 font-medium', style: { background: 'linear-gradient(180deg, #d1d5db 35%, #ffffff 35%, #ffffff 65%, #d1d5db 65%)' } },
+    { name: '그레이', colorClass: 'bg-gray-300 text-gray-900 font-medium border border-gray-300' },
+    { name: '그레이-블랙', colorClass: 'border border-gray-400 text-white font-medium', style: { background: 'linear-gradient(180deg, #d1d5db 35%, #1f2937 35%, #1f2937 65%, #d1d5db 65%)' } },
     { name: '옐로우-화이트', colorClass: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #ffffff 35%, #ffffff 65%, #facc15 65%)' } },
     { name: '옐로우', colorClass: 'bg-yellow-400 text-yellow-900 border border-yellow-400' },
     { name: '옐로우-블랙', colorClass: 'border border-yellow-400', style: { background: 'linear-gradient(180deg, #facc15 35%, #1f2937 35%, #1f2937 65%, #facc15 65%)' } },

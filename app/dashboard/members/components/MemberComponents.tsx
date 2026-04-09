@@ -288,8 +288,9 @@ export function PaymentBillingDay({ memberId, billingDay, joinedDay }: PaymentBi
     }
 
     return (
-        <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-500 dark:text-zinc-400 whitespace-nowrap">결제 기준일:</span>
+        <div className="flex flex-col items-end">
+            <div className="text-sm font-bold text-gray-500 dark:text-zinc-400 mb-1 leading-none h-5 flex items-center">결제 기준일</div>
+            <div className="flex items-center gap-1">
             {isEditing ? (
                 <>
                     <input
@@ -325,7 +326,7 @@ export function PaymentBillingDay({ memberId, billingDay, joinedDay }: PaymentBi
                 </>
             ) : (
                 <>
-                    <span className="text-2xl font-bold text-gray-800 dark:text-zinc-100">{currentDay}일</span>
+                    <span className="text-xl font-bold text-gray-900 dark:text-zinc-100">{currentDay}일</span>
                     <button
                         onClick={() => { setInputVal(String(currentDay)); setIsEditing(true) }}
                         className="text-gray-400 dark:text-zinc-500 hover:text-indigo-600 transition-colors"
@@ -337,6 +338,7 @@ export function PaymentBillingDay({ memberId, billingDay, joinedDay }: PaymentBi
                     </button>
                 </>
             )}
+            </div>
         </div>
     )
 }

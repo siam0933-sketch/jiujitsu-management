@@ -723,25 +723,31 @@ export default function MemberModal({ member }: { member: any }) {
                                     {/* Status */}
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <p className="text-gray-500 dark:text-zinc-400 text-sm font-bold">만료일</p>
+                                            <div className="flex items-center gap-2 mb-1 h-5">
+                                                <p className="text-gray-500 dark:text-zinc-400 text-sm font-bold leading-none">만료일</p>
                                                 {!isEditingExpiryDate ? (
-                                                    <button onClick={() => setIsEditingExpiryDate(true)} className="text-xs text-blue-500 hover:text-blue-700 underline px-1 py-0.5 rounded focus:outline-none focus:bg-blue-50">수정</button>
+                                                    <button onClick={() => setIsEditingExpiryDate(true)} title="만료일 수정" className="text-gray-400 dark:text-zinc-500 hover:text-indigo-600 transition-colors focus:outline-none">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                    </button>
                                                 ) : (
                                                     <div className="flex gap-1 ml-2">
-                                                        <button onClick={handleSaveExpiryDate} disabled={isSubmitting} className="text-xs text-white bg-blue-600 px-2 py-1 rounded shadow-sm hover:bg-blue-700 transition">저장</button>
-                                                        <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-xs text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded border border-gray-300 dark:border-zinc-700 shadow-sm hover:bg-gray-200 transition">취소</button>
+                                                        <button onClick={handleSaveExpiryDate} disabled={isSubmitting} className="text-blue-600 hover:text-blue-800 disabled:opacity-50" title="저장">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                                                        </button>
+                                                        <button onClick={() => { setIsEditingExpiryDate(false); setTempExpiryDate(member.payment_end_date ? new Date(member.payment_end_date).toISOString().split('T')[0] : '') }} disabled={isSubmitting} className="text-gray-400 hover:text-gray-600" title="취소">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </button>
                                                     </div>
                                                 )}
                                             </div>
                                             {!isEditingExpiryDate ? (
-                                                <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
+                                                <p className="text-xl font-bold text-gray-900 dark:text-zinc-100">{member.payment_end_date ? new Date(member.payment_end_date).toLocaleDateString() : '미등록'}</p>
                                             ) : (
                                                 <input
                                                     type="date"
                                                     value={tempExpiryDate}
                                                     onChange={e => setTempExpiryDate(e.target.value)}
-                                                    className="block w-full text-xl font-bold border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                                                    className="block w-full text-lg font-bold border-gray-300 dark:border-zinc-700 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1 px-2"
                                                 />
                                             )}
                                         </div>
