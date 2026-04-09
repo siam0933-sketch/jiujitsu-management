@@ -580,7 +580,7 @@ export default function MembersTable({ initialMembers, count, status, attendance
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <button
-                                                        onClick={() => window.open(`/portal/signup?gym_id=${gymId}`, '_blank')}
+                                                        onClick={() => router.push(`/portal/signup?gym_id=${gymId}`)}
                                                         className={`${active ? 'bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex w-full items-center px-4 py-2 text-sm text-left`}
                                                     >
                                                         <UserPlusIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
