@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { lookupGymByCode, lookupGymById, registerPortalMember, searchGyms } from './actions'
-import { AlertCircle, CheckCircle2, Search } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Search, X } from 'lucide-react'
 
 export default function MemberSignupPage() {
     const router = useRouter()
@@ -181,14 +181,21 @@ export default function MemberSignupPage() {
         })
         setIsLoading(false)
         if (res.error) setErrorMsg(res.error)
-        else { setStep('SUCCESS'); setTimeout(() => router.push('/login'), 3000) }
+        else { setStep('SUCCESS'); setTimeout(() => router.push('/login'), 5000) }
     }
 
     const inputCls = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+            <button 
+                onClick={() => router.back()} 
+                className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 bg-white rounded-full shadow border border-gray-200 transition-all z-10 flex items-center justify-center"
+                aria-label="닫기"
+            >
+                <X className="w-6 h-6" />
+            </button>
+            <div className="sm:mx-auto sm:w-full sm:max-w-md mt-4">
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                     {gymInfo?.name ? `${gymInfo.name} 회원 가입` : '체육관 회원 가입'}
                 </h2>
@@ -513,9 +520,9 @@ export default function MemberSignupPage() {
                     {step === 'SUCCESS' && (
                         <div className="text-center py-8">
                             <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">가입 완료!</h3>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">가입 신청 완료!</h3>
                             <p className="text-sm text-gray-600 mb-6">
-                                성공적으로 가입(또는 연동)되었습니다.<br />잠시 후 로그인 페이지로 이동합니다.
+                                관장님의 승인 후 로그인 할 수 있습니다.<br />5초 후 메인 페이지로 이동합니다.
                             </p>
                             <button onClick={() => router.push('/login')}
                                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
