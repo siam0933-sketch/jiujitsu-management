@@ -68,7 +68,7 @@ export default async function DashboardLayout({
                     <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={32} height={32} className="rounded-md" />
                     <h1 className="text-xl font-extrabold text-gray-800 dark:text-zinc-100 tracking-tight">My jiu-jitsu</h1>
                 </div>
-                <label htmlFor="mobile-menu" className="p-2 -mr-2 text-gray-600 dark:text-zinc-400 cursor-pointer rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors active:bg-gray-200 dark:active:bg-zinc-700">
+                <label id="header-menu-toggle" htmlFor="mobile-menu" className="p-2 -mr-2 text-gray-600 dark:text-zinc-400 cursor-pointer rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors active:bg-gray-200 dark:active:bg-zinc-700">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -83,7 +83,7 @@ export default async function DashboardLayout({
                 {/* Mobile Backdrop Overlay */}
                 <label
                     htmlFor="mobile-menu"
-                    className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300 peer-checked:opacity-100 peer-checked:pointer-events-auto md:hidden cursor-pointer"
+                    className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-150 peer-checked:opacity-100 peer-checked:pointer-events-auto md:hidden cursor-pointer"
                 />
 
                 {/* Invisible trigger area for mobile/small screens (keep for mouse edge-cases) */}
@@ -93,7 +93,7 @@ export default async function DashboardLayout({
                 <MobileMenuCloser />
 
                 {/* Sidebar */}
-                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-300 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800 pb-[env(safe-area-inset-bottom)]">
+                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-100 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800 pb-[env(safe-area-inset-bottom)]">
                     <div className="p-6 md:block flex justify-between items-center">
                         <div className="flex items-center gap-3">
                             <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={40} height={40} className="rounded-xl shadow-sm" />

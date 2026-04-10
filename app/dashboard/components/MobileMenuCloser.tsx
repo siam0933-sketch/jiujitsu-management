@@ -14,38 +14,31 @@ export default function MobileMenuCloser() {
         }
     }, [pathname])
 
-    // nav 링크 클릭 또는 바탕화면 클릭 시 즉시 닫힘
+    // 클릭 시 무조건 닫기 (메뉴 밖이든 안이든 아무데나)
     useEffect(() => {
-        const closeMenu = () => {
-            const checkbox = document.getElementById('mobile-menu') as HTMLInputElement
-            if (checkbox && checkbox.checked) {
-                checkbox.checked = false
-            }
-        }
-
-        const handleInteraction = (e: MouseEvent | TouchEvent) => {
+        const handleInteraction = (e: MouseEvent) => {
             const target = e.target as HTMLElement
             if (!target) return
 
-            // 1. 링크(a 태그) 클릭 시 닫기 (메뉴 안에서)
-            if (target.closest('a')) {
-                closeMenu()
+            // 헤더의 메뉴 열기 버튼을 누른 경우는 예외 (클릭 시 열려야 하므로 닫으면 무효화됨)
+            if (target.closest('#header-menu-toggle')) {
+                return
             }
-            
-            // 2. 바탕화면(오버레이 라벨) 클릭 시 명시적으로 닫기
-            // label의 htmlFor 기본 동작이 모바일에서 불완전할 수 있으므로 보완
-            if (target.tagName.toLowerCase() === 'label' && target.getAttribute('for') === 'mobile-menu') {
-                closeMenu()
+
+            const checkbox = document.getElementById('mobile-menu') as HTMLInputElement
+            if (checkbox && checkbox.checked) {
+                // 클릭 이벤트가 다른 작업을 방해하지 않도록 약간의 딜레이 후 닫기
+                setTimeout(() => {
+                    checkbox.checked = false
+                }, 10)
             }
         }
 
-        document.addEventListener('click', handleInteraction)
-        // 모바일에서의 더 빠른 반응을 위해 touchend 이벤트도 감지 (touchstart는 스크롤과 겹칠 수 있음)
-        document.addEventListener('touchend', handleInteraction, { passive: true })
+        // 터치 기기에서도 click 이벤트가 가장 빠르고 부작용(스크롤 중 닫힘 등)이 없음
+        document.addEventListener('click', handleInteraction, { capture: true })
 
         return () => {
-            document.removeEventListener('click', handleInteraction)
-            document.removeEventListener('touchend', handleInteraction)
+            document.removeEventListener('click', handleInteraction, { capture: true })
         }
     }, [])
 
