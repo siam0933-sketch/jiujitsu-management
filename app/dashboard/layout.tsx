@@ -82,6 +82,7 @@ export default async function DashboardLayout({
 
                 {/* Mobile Backdrop Overlay */}
                 <label
+                    id="sidebar-backdrop"
                     htmlFor="mobile-menu"
                     className="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-150 peer-checked:opacity-100 peer-checked:pointer-events-auto md:hidden cursor-pointer"
                 />
@@ -93,7 +94,7 @@ export default async function DashboardLayout({
                 <MobileMenuCloser />
 
                 {/* Sidebar */}
-                <aside className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-100 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800 pb-[env(safe-area-inset-bottom)]">
+                <aside id="sidebar-menu" className="pointer-events-auto absolute left-0 top-0 h-full w-64 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transition-transform duration-100 -translate-x-full peer-checked:translate-x-0 group-hover:translate-x-0 md:static md:translate-x-0 md:shadow-md dark:border-r dark:border-zinc-800 pb-[env(safe-area-inset-bottom)]">
                     <div className="p-6 md:block flex justify-between items-center">
                         <div className="flex items-center gap-3">
                             <Image src="/mj-logo.png" alt="My jiu-jitsu logo" width={40} height={40} className="rounded-xl shadow-sm" />

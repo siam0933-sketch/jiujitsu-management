@@ -14,31 +14,27 @@ export default function MobileMenuCloser() {
         }
     }, [pathname])
 
-    // 클릭 시 무조건 닫기 (메뉴 밖이든 안이든 아무데나)
+    // 사이드바 또는 바탕화면 클릭 시 닫기
     useEffect(() => {
-        const handleInteraction = (e: MouseEvent) => {
-            const target = e.target as HTMLElement
-            if (!target) return
-
-            // 헤더의 메뉴 열기 버튼을 누른 경우는 예외 (클릭 시 열려야 하므로 닫으면 무효화됨)
-            if (target.closest('#header-menu-toggle')) {
-                return
-            }
-
-            const checkbox = document.getElementById('mobile-menu') as HTMLInputElement
-            if (checkbox && checkbox.checked) {
-                // 클릭 이벤트가 다른 작업을 방해하지 않도록 약간의 딜레이 후 닫기
-                setTimeout(() => {
-                    checkbox.checked = false
-                }, 10)
-            }
+        const handleClose = () => {
+             const checkbox = document.getElementById('mobile-menu') as HTMLInputElement
+             // 약간의 딜레이를 주어 Link 네비게이션 동작을 방해하지 않게 함
+             if (checkbox && checkbox.checked) {
+                 setTimeout(() => {
+                     checkbox.checked = false
+                 }, 10)
+             }
         }
-
-        // 터치 기기에서도 click 이벤트가 가장 빠르고 부작용(스크롤 중 닫힘 등)이 없음
-        document.addEventListener('click', handleInteraction, { capture: true })
-
+        
+        const aside = document.getElementById('sidebar-menu')
+        const backdrop = document.getElementById('sidebar-backdrop')
+        
+        if (aside) aside.addEventListener('click', handleClose)
+        if (backdrop) backdrop.addEventListener('click', handleClose)
+        
         return () => {
-            document.removeEventListener('click', handleInteraction, { capture: true })
+            if (aside) aside.removeEventListener('click', handleClose)
+            if (backdrop) backdrop.removeEventListener('click', handleClose)
         }
     }, [])
 
