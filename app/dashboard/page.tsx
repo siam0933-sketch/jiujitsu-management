@@ -4,6 +4,7 @@ import { getTodayAttendanceLogs } from './attendance/actions'
 import PromotionWidget from './components/PromotionWidget'
 import AttendanceStatsWidget from './components/AttendanceStatsWidget'
 import SystemNoticeWidget from './components/SystemNoticeWidget'
+import SalesWidget from './components/SalesWidget'
 
 export default async function DashboardPage(props: { searchParams: Promise<{ statsMonth?: string }> }) {
     const searchParamsObj = await props.searchParams
@@ -200,8 +201,15 @@ export default async function DashboardPage(props: { searchParams: Promise<{ sta
                 </div>
             </div>
 
+            {/* Sales & Payment Statistics */}
+            <div className="mt-8">
+                <SalesWidget />
+            </div>
+
             {/* Attendance Statistics */}
-            <AttendanceStatsWidget monthStr={searchParamsObj?.statsMonth} />
+            <div className="mt-8">
+                <AttendanceStatsWidget monthStr={searchParamsObj?.statsMonth} />
+            </div>
         </div>
     )
 }
