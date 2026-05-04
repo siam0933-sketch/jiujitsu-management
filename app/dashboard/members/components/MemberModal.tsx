@@ -309,14 +309,16 @@ export default function MemberModal({ member }: { member: any }) {
 
     // Calculate Total
     const calculateTotal = () => {
-        if (!selectedPlan) return 0
-        let total = selectedPlan.price
-        if (selectedPlan.type === 'period') {
-            total = selectedPlan.price * durationMonths
-            selectedOptionIds.forEach(id => {
-                const opt = options.find(o => o.id === id)
-                if (opt) total += opt.price * durationMonths
-            })
+        let total = 0
+        if (selectedPlan) {
+            total = selectedPlan.price
+            if (selectedPlan.type === 'period') {
+                total = selectedPlan.price * durationMonths
+                selectedOptionIds.forEach(id => {
+                    const opt = options.find(o => o.id === id)
+                    if (opt) total += opt.price * durationMonths
+                })
+            }
         }
 
         // Add Products Price (Independent of duration)
@@ -331,7 +333,7 @@ export default function MemberModal({ member }: { member: any }) {
     const finalAmount = manualAmount !== null ? manualAmount : currentTotal
 
     const handleSubmitPayment = async () => {
-        if (!selectedPlanId) return alert('이용권을 선택해주세요.')
+        if (!selectedPlanId && selectedProductIds.size === 0) return alert('이용권 또는 상품을 선택해주세요.')
         if (!confirm(`${finalAmount.toLocaleString()}원 결제를 진행하시겠습니까?`)) return
 
         setIsSubmitting(true)

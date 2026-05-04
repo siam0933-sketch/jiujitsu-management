@@ -79,63 +79,65 @@ export async function createPayment(formData: FormData) {
         if (payError) throw payError
 
         // 2. Update Member Status
-        const { data: member } = await supabase
-            .from('gym_members')
-            .select('payment_end_date, remaining_sessions')
-            .eq('id', memberId)
-            .single()
+        if (planId) {
+            const { data: member } = await supabase
+                .from('gym_members')
+                .select('payment_end_date, remaining_sessions')
+                .eq('id', memberId)
+                .single()
 
-        let updateData: any = {
-            current_plan_id: planId,
-            payment_start_date: start_date, // Last payment start
-        }
-
-        if (type === 'period') {
-            // Calculate New End Date
-            // If explicit date provided (user override), use it.
-            const explicitEndDate = String(formData.get('new_payment_end_date') || '')
-
-            if (explicitEndDate) {
-                updateData.payment_end_date = explicitEndDate
-            } else {
-                // If current end date is in future, add to it. Else start from today(startDate).
-                const currentEnd = member?.payment_end_date ? new Date(member.payment_end_date) : null
-                const start = new Date(start_date)
-
-                let baseDate = start
-                // Add Months logic...
-                const newEnd = new Date(baseDate)
-                newEnd.setMonth(newEnd.getMonth() + durationMonths)
-                updateData.payment_end_date = newEnd.toISOString().split('T')[0]
+            let updateData: any = {
+                current_plan_id: planId,
+                payment_start_date: start_date, // Last payment start
             }
-        } else if (type === 'session') {
-            // Add Sessions
-            const currentSessions = member?.remaining_sessions || 0
-            updateData.remaining_sessions = currentSessions + sessionCount
 
-            // Optional: Update end date if session has validity? 
-            // For now, let's assume period updates end date, session updates count.
-            // If session also has duration (e.g. 10 sessions 3 months), we might want to extend validity too?
-            // User requirement: "횟수권은 사용기간과... 정할수있고" -> Yes.
-            const durationDays = Number(formData.get('duration_days') || 0)
-            if (durationDays > 0) {
-                const currentEnd = member?.payment_end_date ? new Date(member.payment_end_date) : null
-                const start = new Date(start_date)
-                let baseDate = start
-                if (currentEnd && currentEnd > new Date()) baseDate = currentEnd
+            if (type === 'period') {
+                // Calculate New End Date
+                // If explicit date provided (user override), use it.
+                const explicitEndDate = String(formData.get('new_payment_end_date') || '')
 
-                const newEnd = new Date(baseDate)
-                newEnd.setDate(newEnd.getDate() + durationDays)
-                updateData.payment_end_date = newEnd.toISOString().split('T')[0]
+                if (explicitEndDate) {
+                    updateData.payment_end_date = explicitEndDate
+                } else {
+                    // If current end date is in future, add to it. Else start from today(startDate).
+                    const currentEnd = member?.payment_end_date ? new Date(member.payment_end_date) : null
+                    const start = new Date(start_date)
+
+                    let baseDate = start
+                    // Add Months logic...
+                    const newEnd = new Date(baseDate)
+                    newEnd.setMonth(newEnd.getMonth() + durationMonths)
+                    updateData.payment_end_date = newEnd.toISOString().split('T')[0]
+                }
+            } else if (type === 'session') {
+                // Add Sessions
+                const currentSessions = member?.remaining_sessions || 0
+                updateData.remaining_sessions = currentSessions + sessionCount
+
+                // Optional: Update end date if session has validity? 
+                // For now, let's assume period updates end date, session updates count.
+                // If session also has duration (e.g. 10 sessions 3 months), we might want to extend validity too?
+                // User requirement: "횟수권은 사용기간과... 정할수있고" -> Yes.
+                const durationDays = Number(formData.get('duration_days') || 0)
+                if (durationDays > 0) {
+                    const currentEnd = member?.payment_end_date ? new Date(member.payment_end_date) : null
+                    const start = new Date(start_date)
+                    let baseDate = start
+                    if (currentEnd && currentEnd > new Date()) baseDate = currentEnd
+
+                    const newEnd = new Date(baseDate)
+                    newEnd.setDate(newEnd.getDate() + durationDays)
+                    updateData.payment_end_date = newEnd.toISOString().split('T')[0]
+                }
             }
+
+            const { error: memberError } = await supabase
+                .from('gym_members')
+                .update(updateData)
+                .eq('id', memberId)
+
+            if (memberError) throw memberError
         }
-
-        const { error: memberError } = await supabase
-            .from('gym_members')
-            .update(updateData)
-            .eq('id', memberId)
-
-        if (memberError) throw memberError
 
         revalidatePath('/dashboard/members')
 

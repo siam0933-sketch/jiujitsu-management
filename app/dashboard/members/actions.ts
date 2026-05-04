@@ -321,6 +321,17 @@ export async function pauseMember(memberId: string, startDate: string, endDate?:
     // 4. Remove enrollments
     await supabase.from('gym_class_enrollments').delete().eq('member_id', memberId)
 
+    // 5. Add Attendance Log for Pause
+    const todayStrSeoul = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+    await supabase.from('gym_attendance_logs').insert({
+        gym_id: member.gym_id,
+        member_id: memberId,
+        date: todayStrSeoul,
+        method: 'manual',
+        class_name: '휴관 처리',
+        status: 'present'
+    })
+
     revalidatePath('/dashboard/members')
     revalidatePath(`/dashboard/members/${memberId}`)
     return { success: true }
@@ -330,6 +341,9 @@ export async function resumeMember(memberId: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
+
+    const { data: member } = await supabase.from('gym_members').select('gym_id').eq('id', memberId).single()
+    if (!member) return { error: 'Member not found' }
 
     // 1. Find Open Pause
     const { data: pause } = await supabase
@@ -341,8 +355,20 @@ export async function resumeMember(memberId: string) {
         .limit(1)
         .single()
 
+    const todayStrSeoul = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+
     if (!pause) {
         await supabase.from('gym_members').update({ status: 'active' }).eq('id', memberId)
+        
+        await supabase.from('gym_attendance_logs').insert({
+            gym_id: member.gym_id,
+            member_id: memberId,
+            date: todayStrSeoul,
+            method: 'manual',
+            class_name: '수련중 (복귀) 처리',
+            status: 'present'
+        })
+
         revalidatePath('/dashboard/members')
         revalidatePath(`/dashboard/members/${memberId}`)
         return { success: true }
@@ -387,6 +413,15 @@ export async function resumeMember(memberId: string) {
         // Definite -> Just Active
         await supabase.from('gym_members').update({ status: 'active' }).eq('id', memberId)
     }
+
+    await supabase.from('gym_attendance_logs').insert({
+        gym_id: member.gym_id,
+        member_id: memberId,
+        date: todayStrSeoul,
+        method: 'manual',
+        class_name: '수련중 (복귀) 처리',
+        status: 'present'
+    })
 
     revalidatePath('/dashboard/members')
     revalidatePath(`/dashboard/members/${memberId}`)
