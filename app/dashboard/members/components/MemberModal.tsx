@@ -65,7 +65,7 @@ export default function MemberModal({ member }: { member: any }) {
     const [products, setProducts] = useState<any[]>([]) // [NEW] Products
     const [durationMonths, setDurationMonths] = useState(1)
     const [selectedOptionIds, setSelectedOptionIds] = useState<Set<string>>(new Set())
-    const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set()) // [NEW] Selected Products
+    const [productQuantities, setProductQuantities] = useState<Record<string, number>>({}) // [NEW] Product Quantities
     const [newExpiryDate, setNewExpiryDate] = useState('') // New state for expiry preview
 
     // Payments List
@@ -267,11 +267,14 @@ export default function MemberModal({ member }: { member: any }) {
         setManualAmount(null) // Reset manual override
     }
 
-    const handleToggleProduct = (prodId: string) => {
-        const next = new Set(selectedProductIds)
-        if (next.has(prodId)) next.delete(prodId)
-        else next.add(prodId)
-        setSelectedProductIds(next)
+    const handleQuantityChange = (prodId: string, delta: number) => {
+        setProductQuantities(prev => {
+            const current = prev[prodId] || 0
+            const next = Math.max(0, current + delta)
+            const newQuantities = { ...prev, [prodId]: next }
+            if (next === 0) delete newQuantities[prodId]
+            return newQuantities
+        })
         setManualAmount(null)
     }
 
@@ -322,9 +325,9 @@ export default function MemberModal({ member }: { member: any }) {
         }
 
         // Add Products Price (Independent of duration)
-        selectedProductIds.forEach(id => {
+        Object.entries(productQuantities).forEach(([id, qty]) => {
             const prod = products.find(p => p.id === id)
-            if (prod) total += prod.price
+            if (prod && qty > 0) total += prod.price * qty
         })
 
         return total
@@ -333,7 +336,7 @@ export default function MemberModal({ member }: { member: any }) {
     const finalAmount = manualAmount !== null ? manualAmount : currentTotal
 
     const handleSubmitPayment = async () => {
-        if (!selectedPlanId && selectedProductIds.size === 0) return alert('이용권 또는 상품을 선택해주세요.')
+        if (!selectedPlanId && Object.keys(productQuantities).length === 0) return alert('이용권 또는 상품을 선택해주세요.')
         if (!confirm(`${finalAmount.toLocaleString()}원 결제를 진행하시겠습니까?`)) return
 
         setIsSubmitting(true)
@@ -348,11 +351,17 @@ export default function MemberModal({ member }: { member: any }) {
         formData.append('plan_name', selectedPlan?.name || '')
         formData.append('type', selectedPlan?.type || '')
         formData.append('option_ids', JSON.stringify(Array.from(selectedOptionIds)))
-        formData.append('product_ids', JSON.stringify(Array.from(selectedProductIds))) // [NEW]
+        
+        const productIds = Object.keys(productQuantities)
+        formData.append('product_ids', JSON.stringify(productIds)) // Keep for backward compat
+        formData.append('product_quantities', JSON.stringify(productQuantities)) // New format
 
         // Generate options summary text
         const selectedOptionNames = Array.from(selectedOptionIds).map(id => options.find(o => o.id === id)?.name).filter(Boolean)
-        const selectedProductNames = Array.from(selectedProductIds).map(id => products.find(p => p.id === id)?.name).filter(Boolean) // [NEW]
+        const selectedProductNames = Object.entries(productQuantities).map(([id, qty]) => {
+            const prod = products.find(p => p.id === id)
+            return prod ? `${prod.name}(${qty}개)` : null
+        }).filter(Boolean)
 
         const allSummary = [...selectedOptionNames, ...selectedProductNames].join(', ')
         formData.append('options_summary', allSummary)
@@ -859,22 +868,32 @@ export default function MemberModal({ member }: { member: any }) {
                                                         <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50">
                                                             <div className="space-y-2">
                                                                 <p className="text-sm text-gray-500 dark:text-zinc-400 font-bold">상품 (일회성 구매)</p>
-                                                                {products.map((prod: any) => (
-                                                                    <label key={prod.id} className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={selectedProductIds.has(prod.id)}
-                                                                                onChange={() => handleToggleProduct(prod.id)}
-                                                                                className="rounded border-gray-300 dark:border-zinc-700 text-blue-600 w-5 h-5"
-                                                                            />
-                                                                            <span className="text-base text-gray-700 dark:text-zinc-300">{prod.name}</span>
+                                                                {products.map((prod: any) => {
+                                                                    const qty = productQuantities[prod.id] || 0;
+                                                                    return (
+                                                                        <div key={prod.id} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50 dark:hover:bg-zinc-800/50 dark:bg-zinc-800/50">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <span className="text-base text-gray-700 dark:text-zinc-300">{prod.name}</span>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-4">
+                                                                                <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
+                                                                                    {prod.price < 0 ? '' : '+'}{(prod.price * (qty > 0 ? qty : 1)).toLocaleString()}원
+                                                                                </span>
+                                                                                <div className="flex items-center bg-gray-100 dark:bg-zinc-800 rounded-lg p-1">
+                                                                                    <button 
+                                                                                        onClick={(e) => { e.preventDefault(); handleQuantityChange(prod.id, -1); }}
+                                                                                        className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-zinc-300 bg-white dark:bg-zinc-700 rounded shadow-sm hover:bg-gray-50 transition-colors font-bold"
+                                                                                    >-</button>
+                                                                                    <span className="w-8 text-center font-bold text-gray-900 dark:text-zinc-100">{qty}</span>
+                                                                                    <button 
+                                                                                        onClick={(e) => { e.preventDefault(); handleQuantityChange(prod.id, 1); }}
+                                                                                        className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-zinc-300 bg-white dark:bg-zinc-700 rounded shadow-sm hover:bg-gray-50 transition-colors font-bold"
+                                                                                    >+</button>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                        <span className="text-base font-medium text-gray-900 dark:text-zinc-100">
-                                                                            {prod.price < 0 ? '' : '+'}{prod.price.toLocaleString()}원
-                                                                        </span>
-                                                                    </label>
-                                                                ))}
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
                                                     )}

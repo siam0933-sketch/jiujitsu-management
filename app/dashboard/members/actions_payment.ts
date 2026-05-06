@@ -61,6 +61,7 @@ export async function createPayment(formData: FormData) {
         session_count: sessionCount,
         option_ids: JSON.parse(String(formData.get('option_ids') || '[]')),
         product_ids: JSON.parse(String(formData.get('product_ids') || '[]')),
+        product_quantities: JSON.parse(String(formData.get('product_quantities') || '{}')),
         options_summary: String(formData.get('options_summary') || '')
     }
 
